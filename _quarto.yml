@@ -1,0 +1,66 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - "*.qmd"
+    - "!course-materials/quizzes/*"
+
+website:
+  title: "EDS 222: Statistics for Environmental Data Science"
+  favicon: images/bren-hex.png
+  navbar:
+    right:
+      - href: index.qmd
+        text: home
+      - text: syllabus
+        href: /eds-222-f26-syllabus.pdf
+        target: _blank
+      - text: course materials
+        menu:
+          - text: week 1 (9/29-10/3)
+            href: course-materials/week1.qmd
+          - text: week 2 (10/6-10/10)
+            href: course-materials/week2.qmd
+          - text: week 3 (10/13-10/17)
+            href: course-materials/week3.qmd
+          - text: week 4 (10/20-10/24)
+            href: course-materials/week4.qmd
+          - text: week 5 (10/27-10/31)
+            href: course-materials/week5.qmd
+          - text: week 6 (11/3-11/7)
+            href: course-materials/week6.qmd
+          - text: week 7 (11/10-11/14)
+            href: course-materials/week7.qmd
+          - text: week 8 (11/17-11/21)
+            href: course-materials/week8.qmd
+          - text: week 9 (11/24-11/28)
+            href: course-materials/week9.qmd
+          - text: week 10 (12/1-12/5)
+            href: course-materials/week10.qmd
+      - text: homework
+        href: homework.qmd
+      - text: final project
+        href: final-project.qmd
+      - icon: github
+        menu:
+          - text: Source Code
+            url: https://github.com/eds-222-stats-f26/eds-222-stats-f26.github.io/
+          - text: Report a Bug
+            url: https://github.com/eds-222-stats-f26/eds-222-stats-f26.github.io/issues
+  page-footer:
+    background: dark
+    right: This website is built with [{{< fa brands github title="the github octocat logo" >}}](https://github.com/eds-222-stats-f26/eds-222-stats-f26.github.io/) and [Quarto](https://quarto.org/)
+    left: This work is licensed under CC-BY
+
+format:
+  html:
+    theme: meds-website-styles.scss
+    page-layout: full
+    toc: true
+    title-block-banner: true
+
+resources:
+  - course-materials/labs/
+
+
+

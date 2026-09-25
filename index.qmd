@@ -1,0 +1,64 @@
+---
+title: "Statistics for Environmental Data Science"
+subtitle: "Master of Environmental Data Science (MEDS)"
+description: "Fall 2026"
+title-block-banner: false
+toc: false
+---
+
+::: {.center-text}
+![](images/butterfly-net-sampling.png){width="80%"}
+:::
+
+::: {.center-text .gray-text}
+*Artwork by [Allison Payne](https://allisonpayne.github.io/)* 
+:::
+
+## Course Description
+
+Statistics is the science of collecting, manipulating, and analyzing empirical data. In this class, we will learn the statistical fundamentals that will enable us to draw conclusions about the environment and its interaction with social and economic systems. We will cover fundamental statistical concepts and tools, and then apply and expand upon those tools to learn some temporal and spatial statistical methods that are particularly helpful in environmental data science. Welcome!
+
+### Learning objectives
+
+The goal of this course is to enable MEDS students to confidently and competently apply statistical tools to socio-environmental datasets. Essential skills and concepts are:
+
+* **Summarize data** numerically and graphically
+* **Interpret** random variables
+* **Simulate data** to test assumptions
+* **Describe models** using statistical notation
+* **Draw DAGs** to clarify causal relationships
+* **Quantify uncertainty** to perform inference
+
+
+## Teaching Team
+
+<br>
+
+
+::: {.columns}
+
+::: {.column}
+
+**Instructor**
+
+![](images/max%20circle.png){height="250px"}
+
+[**Max Czapanskiy**]{.teal-text}  
+
+**Email:** [maxczap@ucsb.edu](mailto::maxczap@ucsb.edu)   
+
+:::
+
+::: {.column}
+
+**Teaching Assistant**
+
+![](images/bren-hex.png){height="250px"}
+
+[**Sloane Stephenson**]{.teal-text}  
+
+**Email:** [gstephenson@ucsb.edu](mailto::gstephenson@ucsb.edu)   
+
+:::
+
+:::

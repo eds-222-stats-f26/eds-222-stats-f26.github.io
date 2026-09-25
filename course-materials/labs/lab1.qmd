@@ -1,0 +1,218 @@
+---
+title: "Lab 1"
+subtitle: "Exploratory data analysis"
+toc: true
+editor: visual
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab1.qmd
+---
+
+## Learning objectives
+
+In today's lab you will...
+
+1.  Numerically and graphically explore **categorical** data
+2.  Numerically and graphically explore **continuous** data
+3.  Explore a real world dataset
+
+## Setup
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+theme_set(theme_bw(18))
+
+```
+
+We'll use the `penguins` dataset for today's lab. Refresh your memory of what it looks like with `glimpse()`.
+
+```{r}
+glimpse(penguins)
+
+```
+
+## Categorical data
+
+Categorical data fall into discrete categories. Examples include:
+
+-   Land cover type (e.g., forest, wetland, urban)
+
+-   Energy source (e.g., solar, wind, natural gas, coal)
+
+-   Air pollutant (e.g., common, hazardous, particulate matter)
+
+We usually summarize categorical data using counts and proportions. Here we'll explore how to do so with tables and figures.
+
+### Contingency tables
+
+Contingency tables summarize *combinations* of variables by frequency. Create one using the base R function `table()`. The table below reveals an important pattern not apparent using `glimpse()`: not all species of penguins were observed at all islands.
+
+```{r}
+table(penguins$species, penguins$island)
+
+```
+
+The tidyverse `count()` function will give you a contingency table in long format.
+
+```{r}
+penguins %>% 
+  count(species, island)
+
+```
+
+**Q1** How would you pivot it to look like the contingency table above?
+
+```{r}
+#| label: q1
+
+
+
+```
+
+We often modify contingency tables in two ways.
+
+First, we often add *marginal* totals, i.e., the total of each row and column. The `addmargins()` function does that for us.
+
+```{r}
+species_island_table <- table(penguins$species, penguins$island)
+addmargins(species_island_table)
+
+```
+
+These marginal totals demonstrate how counts can be difficult to compare, if they come from rows or columns with different totals. For example, more Adélie penguins were observed at Dream than Torgersen, but they represent a smaller fraction of the observations. Normalizing by *proportion* helps clarify that. You can calculate proportions either by row or column, for which we can use `prop.table()`.
+
+```{r}
+# Row proportions
+prop.table(species_island_table, margin = 1)
+# Column proportions
+prop.table(species_island_table, margin = 2)
+
+```
+
+**Q2** How would you use `count()`, `group_by()`, `mutate()`, and pivoting to create row- and column-wise proportion tables?
+
+```{r}
+#| label: q2
+
+
+
+```
+
+### Bar plots
+
+Bar plots are effective for visualizing counts and proportions of one or more categories.
+
+This bar plot visualizes the counts of each species.
+
+```{r}
+ggplot(penguins, aes(species)) +
+  geom_bar()
+
+```
+
+**Q3 How would you use another aesthetic to show the composition of each species by island?**
+
+```{r}
+#| label: q3
+
+
+
+```
+
+**Q4** **Contrast the bar plot from Q3 with the contingency table from the beginning of the lab - how do they convey information differently?**
+
+## Continuous data
+
+Continuous data can take any value within their bounds. Examples include:
+
+-   Unbounded data (e.g., temperature[^1])
+
+-   Bounded on one side (e.g., time-to-failure can only be positive)
+
+-   Bounded on two sides (e.g., fractional cover of an invasive plant in a quadrat)
+
+[^1]: Yes, absolute zero does exist, but practically for our purposes temperature is unbounded
+
+We can graphically depict continuous data as one variable (i.e., its distribution) or the relationship between two variables.
+
+### Histograms and shape
+
+Histograms show the frequency of observations within bins, revealing the shape of the variable's distribution.
+
+```{r}
+penguins %>% 
+  ggplot(aes(body_mass_g)) +
+  geom_histogram()
+
+```
+
+**Q5 What's the difference between a histogram and a bar plot?**
+
+### Mean and standard deviation
+
+Recall that parameters and statistics are numerical summaries of populations and samples, respectively. Mean and standard deviation are useful summaries, but be careful as they can hide important differences.
+
+The mean is a measure of *central tendency* i.e., the expected or center value of an observation in the sample. The standard deviation is a measure of *variation* i.e., how spread out the sample is.
+
+As a rule of thumb, about 68% of a sample's data will fall within one standard deviation of the mean, and about 95% will fall within two standard deviations. The more "normally" distributed the data is (more on that tomorrow) the better these rules of thumb hold. Highly skewed data or data with a lot of outliers will deviate more from the rule of thumb.
+
+**Q6 What percentage of penguin body masses fall within one standard deviation of the mean? Within two?**
+
+```{r}
+#| label: q6
+
+
+
+```
+
+### Scatterplots for paired data
+
+Scatter plots depict relationships between variables.
+
+```{r}
+penguins %>% 
+  ggplot(aes(bill_length_mm, bill_depth_mm)) +
+  geom_point() 
+
+```
+
+The scatterplot above suggests little relationship between bill length and depth, or perhaps a slightly negative correlation. That means longer bills are not associated with deeper bills. However, if you ask a penguin anatomist, they'll tell you the opposite is true: longer bills tend to be deeper, too. How can we reconcile these contrasting statements?
+
+This is an example of *Simpson's paradox*, which is when between-group correlations of one kind mask within-group correlations of another kind. Unmask the paradox by color-coding the points by species.
+
+**Q7: Modify the scatterplot above to color-code the points by species. Then describe the correlations between bill depth, bill length, and species. How do the correlations across species mask the correlations within?**
+
+```{r}
+#| label: q7
+
+
+
+```
+
+## Where to find data
+
+The Yale University Library provides a [useful guide](https://guides.library.yale.edu/c.php?g=296375&p=7352744) for where to find environmental data. The categories include:
+
+-   General Environmental Data
+
+-   Energy Data
+
+-   Climate & Atmospheric Data
+
+-   Agricultural, Forestry, and Ecology Data
+
+-   Health Related Data
+
+Find a dataset containing multiple categorical and continuous variables. You'll have an easier time if you limit your search to tabular data. Explore the data using each of the following tools.
+
+1.  Contingency table
+2.  Bar plot
+3.  Histogram
+4.  Scatterplot
+
+## Finished?
+
+If you wrap up before lab is over, head over to the final project page on the course website and look at the section [Model and response options](https://eds-222-stats-f25.github.io/final-project.html#model-and-response-options). Your final project will require you to choose a question and data to investigate using a model *we won't teach you in class*. The defining characteristic for these models are the **response variable** they can handle. Start thinking up a question and looking for data where the response variable has characteristics listed in the [Model and response options](https://eds-222-stats-f25.github.io/final-project.html#model-and-response-options) table. Keep in mind that transformations and merging datasets are both options, so even if the raw data you find don't match one of the eligible models, you may be able to derive something that does. Happy hunting!

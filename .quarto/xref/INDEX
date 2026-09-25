@@ -1,0 +1,83 @@
+{
+  "homework.qmd": {
+    "homework.html": "6fa89dc4"
+  },
+  "course-materials/discussion-materials/week1-discussion-slides.qmd": {
+    "week1-discussion-slides.html": "5653fa06"
+  },
+  "course-materials/week1.qmd": {
+    "week1.html": "c10dd758"
+  },
+  "course-materials/week10.qmd": {
+    "week10.html": "526fe1f9"
+  },
+  "course-materials/week2.qmd": {
+    "week2.html": "99880575"
+  },
+  "course-materials/week3.qmd": {
+    "week3.html": "8c623133"
+  },
+  "course-materials/week4.qmd": {
+    "week4.html": "e7686cad"
+  },
+  "course-materials/week5.qmd": {
+    "week5.html": "0040f5c7"
+  },
+  "course-materials/week6.qmd": {
+    "week6.html": "a5f24657"
+  },
+  "course-materials/week7.qmd": {
+    "week7.html": "dc3a11e2"
+  },
+  "course-materials/week8.qmd": {
+    "week8.html": "1b150cac"
+  },
+  "course-materials/week9.qmd": {
+    "week9.html": "3de6d0ae"
+  },
+  "final-project.qmd": {
+    "final-project.html": "39062f86"
+  },
+  "index.qmd": {
+    "index.html": "5e6cd832"
+  },
+  "course-materials/keys/key1.1.qmd": {
+    "key1.1.html": "c833ea07"
+  },
+  "course-materials/lecture-slides/pre-lecture7-1.qmd": {
+    "pre-lecture7-1.html": "fe2ffbac"
+  },
+  "course-materials/lecture-slides/scratch/week4/boot-perm.qmd": {
+    "boot-perm.tex": "cedf1c60"
+  },
+  "course-materials/labs/lab8.qmd": {
+    "lab8.html": "344067f0"
+  },
+  "course-materials/lecture-slides/scratch/week2/rain_flooding.qmd": {
+    "rain_flooding.html": "fe81da28"
+  },
+  "course-materials/labs/lab5-key.qmd": {
+    "lab5-key.html": "21b5e914"
+  },
+  "course-materials/labs/lab5.qmd": {
+    "lab5.html": "a1dd62ff"
+  },
+  "course-materials/labs/lab1.qmd": {
+    "lab1.html": "7ce01373"
+  },
+  "course-materials/labs/lab7.qmd": {
+    "lab7.html": "0e01f617"
+  },
+  "course-materials/labs/lab7-key.qmd": {
+    "lab7-key.html": "4f8ed90e"
+  },
+  "course-materials/labs/lab4-key.qmd": {
+    "lab4-key.html": "689ae169"
+  },
+  "course-materials/labs/lab4.qmd": {
+    "lab4.html": "fca30855"
+  },
+  "course-materials/labs/lab2.qmd": {
+    "lab2.html": "26c04b4e"
+  }
+}

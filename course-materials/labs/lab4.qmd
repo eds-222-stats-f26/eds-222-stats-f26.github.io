@@ -1,0 +1,286 @@
+---
+title: "Lab 4"
+subtitle: "Permutation and bootstrapping in R"
+toc: true
+editor: visual
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab4.qmd
+      - text: Eel Grass Restoration Data
+        href: data/eelgrass.csv
+editor_options: 
+  chunk_output_type: console
+---
+
+## Learning objectives
+
+In today's lab you will...
+
+1.  Run a **permutation test** to answer a "yes/no?" question
+2.  **Bootstrap a confidence interval** to answer a "how much?" question
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+library(tidyverse)
+theme_set(theme_classic(14))
+set.seed(123)
+
+```
+
+## Eel grass restoration
+
+Recall the eel grass restoration example from yesterday's lecture. The data recorded whether attempts to restore eel grass were successful based on the method used (garden staple or popsicle stick) [@fig-eelgrass-data].
+
+```{r}
+#| label: read-eelgrass-data
+
+restoration <- read_csv("data/eelgrass.csv",
+                        show_col_types = FALSE)
+glimpse(restoration)
+
+```
+
+```{r}
+#| label: fig-eelgrass-data
+#| fig-cap: "Success of eelgrass restoration plots by restoration method."
+
+ggplot(restoration, aes(treatment, fill = success_fct)) +
+  geom_bar() +
+  scale_fill_manual(values = c("firebrick", "cornflowerblue")) +
+  labs(x = "Restoration method",
+       y = "Sites",
+       fill = "Outcome") +
+  theme(legend.position = "inside",
+        legend.position.inside = c(1, 1),
+        legend.justification = c(1, 1))
+
+```
+
+## Permutation test
+
+We want to know if the popsicle stick method works better for restoration than garden staples. This is a *"yes/no?"* question, so we'll use a permutation test for our hypothesis. Recall the steps for hypothesis testing:
+
+1.  Identify the TEST STATISTIC
+2.  State your NULL and ALTERNATIVE hypotheses
+3.  Calculate the OBSERVED test statistic
+4.  Estimate the NULL DISTRIBUTION
+5.  Calculate P-VALUE
+6.  Compare p-value to CRITICAL THRESHOLD
+
+### Identify the test statistic
+
+**Q1: What is the appropriate test statistic for this question?**
+
+### State your null and alternative hypotheses
+
+**Q2: What are your null and alternative hypotheses?**
+
+H0:
+
+HA:
+
+### Calculate the observed test statistic
+
+**Q3: How would you calculate the test statistic *for the sample*?**
+
+```{r}
+#| label: q3
+
+
+
+```
+
+### Estimate the null distribution
+
+This is the key part of a permutation test! Remember, our goal is to estimate the distribution of possible outcomes *under the null hypothesis*. To do that, we have to break the association between treatment and outcome.
+
+**Q4: What column should we shuffle to break the association between treatment and outcome?**
+
+**Q5: Fill in the following code to perform one permutation and calculate the test statistic.**
+
+```{r}
+#| label: q5
+#| eval: false
+
+one_permutation <- ??? %>% 
+  mutate(??? = sample(???, 
+                      size = length(???), 
+                      replace = FALSE))
+
+permutation_props <- one_permutation %>% 
+  group_by(???) %>% 
+  summarize(???)
+
+permutation_diff_props <- permutation_props$???[2] - permutation_props$???[1]
+
+permutation_diff_props
+
+```
+
+That gives us the value of the test statistic for just one permutation. To get a distribution, we have to repeat the process many times. Let's do it 1,000 times.
+
+**Q6: Fill in the following code to perform 1,000 permutations and estimate the null distribution**
+
+```{r}
+#| label: q6
+#| eval: false
+
+permute <- function(i) {
+  ???
+}
+
+null_distribution <- map_dbl(???, ???)
+
+```
+
+**Q7: Visualize the null distribution using a histogram and show where the observed test statistic falls**
+
+```{r}
+#| label: q7
+
+
+
+```
+
+### Calculate the p-value
+
+The p-value is *the probability of a test statistic [at least]{.underline} as extreme as the observed, given the null hypothesis*. In other words, what proportion of the null distribution exceeds the observed?
+
+**Q8: Calculate the p-value using the null distribution and observed test statistic**
+
+```{r}
+#| label: q8
+#| eval: false
+
+p_val <- ???
+
+p_val
+
+```
+
+### Interpret the p-value
+
+When interpreting the p-value, we compare it to a *critical threshold*, usually denoted with $\alpha$. By convention, we usually set $\alpha$ to 0.05.
+
+**Q10:** **Given** $p \gt \alpha$**,** **which of the following statements is a correct interpretation and why?**
+
+-   Our evidence is consistent with the hypothesis that restoration method does not influence restoration outcome
+
+-   We cannot reject the hypothesis that restoration method does not influence restoration outcome
+
+## Bootstrap confidence interval
+
+Now let's answer a "how much?" question. We want to estimate an interval that we think contains the population parameter. For that, we use bootstrapping.
+
+Recall the steps for bootstrapping:
+
+1.  Identify the TEST STATISTIC
+2.  Substitute sample for population and draw BOOTSTRAP SAMPLES
+3.  Estimate the BOOTSTRAP DISTRIBUTION of the test statistic
+4.  Calculate the CONFIDENCE INTERVAL
+
+### Identify the test statistic
+
+**Q11: What is the appropriate test statistic for this question?**
+
+### Draw bootstrap samples
+
+This is the key part of bootstrapping! Remember, our goal is to estimate the variation of our population's parameter due to sampling. To do that, we simulate the process of re-doing our experiment, using the original sample as a substitute for the population. To "re-do" our experiment, we have to keep the association between treatment and outcome.
+
+**Q12: Fill in the following code to draw one bootstrap sample.**
+
+```{r}
+#| label: q12
+#| eval: false
+
+one_bootstrap <- ??? %>% 
+  ??? %>% 
+  mutate(??? = sample(???,
+                      size = length(???),
+                      replace = ???)) %>% 
+  ungroup()
+
+```
+
+**Q13: Fill in the following code to draw 1,000 bootstrap samples.**
+
+::: callout-tip
+`list_rbind()` will take a list of data frames and bind them row-wise into one data frame.
+:::
+
+```{r}
+#| label: q13
+#| eval: false
+
+bootstrap <- function(i) {
+  ??? %>% 
+    mutate(trial = i)
+}
+
+bootstrap_samples <- map(???, ???) %>% 
+  ???
+
+```
+
+### Estimate the bootstrap distribution of the test statistic
+
+**Q14: Fill in the following code to calculate the test statistic for each bootstrap sample.**
+
+```{r}
+#| label: q14
+
+
+
+```
+
+**Q15: Visualize the bootstrapped distribution of the test statistic.**
+
+```{r}
+#| label: q15
+
+
+
+```
+
+### Calculate the confidence interval
+
+A confidence interval (CI) is a range we are confident contains the population parameter. The bootstrapped distribution of the test statistic describes where we expect the population parameter to fall. So a 95% confidence interval, for example, spans the range from the 2.5% quantile of the bootstrap distribution to the 97.5% quantile.
+
+**Q16: Find the bounds of the 95% CI.**
+
+::: callout-tip
+The `quantile()` function finds quantiles. It's vectorized over the parameter `probs`, so you can find multiple quantiles at once
+:::
+
+```{r}
+#| label: q16
+#| eval: false
+
+restoration_ci <- ???
+restoration_ci
+
+```
+
+**Q17: Update your visual from Q15 to include the observed test statistic with a solid line and the confidence interval represented with dotted lines.**
+
+```{r}
+#| label: q17
+
+
+
+```
+
+## Permutation vs bootstrap
+
+The visualization you created for Q7 shows the null distribution of the test statistic. The visualization you created for Q17 shows the bootstrapped distribution of the test statistic.
+
+**Q18: What did you do to make the null distribution center on zero? Specifically, what code?**
+
+**Q19: What did you do to make the bootstrap distribution center on the observed test statistic? Specifically, what code?**
+
+**Q20: What would happen to your bootstrap distribution if you sampled without replacement?**

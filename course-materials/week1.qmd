@@ -1,0 +1,18 @@
+---
+title: "Random Variables"
+subtitle: "Week 1 (September 29 - October 3)"
+description: "Theme: Exploring Uncertainty"
+---
+
+## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Lecture Materials {#lecture-materials}
+
+| Session | Topic  | Reading |
+|---------|--------|---------|
+| Lecture 1 | [Populations, samples, and parameters](lecture-slides/lecture1-1.pdf){target="_blank"} | [IMS Ch 1-2](https://openintrostat.github.io/ims/data-hello.html){target="_blank"} |
+| Lab | [Exploratory data analysis](labs/lab1.qmd) | [IMS Ch 4-5](https://openintrostat.github.io/ims/explore-categorical.html){target="_blank"} |
+| Lecture 2 | [Random variables and distribution functions](lecture-slides/lecture1-2.pdf){target="_blank"} | *None* |
+: {.hover .bordered tbl-colwidths="[25,50,25]"} 
+
+## {{< fa pencil title="pencil" >}} Assignment Reminders {#assignment-reminders}
+
+Nothing due in week 1. In week 2, you'll submit your choice of data and question for the final project. That can more time than you might expect, so it's a good idea to start this week!

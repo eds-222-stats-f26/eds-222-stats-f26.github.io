@@ -1,0 +1,22 @@
+---
+title: "Regression continued"
+subtitle: "Week 3 (October 13 - 17)"
+description: "Theme: Exploring Uncertainty"
+---
+
+## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Lecture Materials {#lecture-materials}
+
+| Session | Topic  | Reading |
+|---------|--------|---------|
+| Lecture 1 | [Interactions](lecture-slides/lecture3-1.pdf){target="_blank"} | *None* |
+| Lab | Midterm review ([Theme 1 Quizzes](quizzes/theme1-quizzes.pdf){target="_blank"}) | *None* |
+| Lecture 2 | Midterm 1 | *None* |
+: {.hover .bordered tbl-colwidths="[25,50,25]"} 
+
+## {{< fa pencil title="pencil" >}} Assignment Reminders {#assignment-reminders}
+
+| Assignment Type | Note                      |
+|-----------------|---------------------------|
+| Homework        | Homework 1 due            |
+: {.hover .bordered tbl-colwidths="[20,30,20,30]"} 
+

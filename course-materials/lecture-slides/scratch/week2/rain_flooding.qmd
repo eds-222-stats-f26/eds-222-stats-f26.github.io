@@ -1,0 +1,241 @@
+---
+title: "rain_flooding"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(lubridate)
+library(tidyverse)
+set.seed(1234)
+theme_set(theme_classic(18))
+
+```
+
+Gage height
+
+```{r}
+# https://waterdata.usgs.gov/monitoring-location/USGS-11092450/#dataTypeId=continuous-00065--695467286&showFieldMeasurements=true&startDT=2010-01-01&endDT=2025-10-01
+gage_colnames <- c("agency_cd", "site_no", "datetime", "tz_cd", "gage_ht", "qualtiy_code")
+gage_ht <- read_tsv("~/Downloads/sepulveda_dam_2010_2025.tsv", skip = 29, col_names = gage_colnames)
+max_winter_ht <- gage_ht %>% 
+  mutate(yr = year(datetime),
+         mo = month(datetime)) %>% 
+  filter(mo %in% 1:2) %>% 
+  group_by(yr) %>% 
+  filter(gage_ht == max(gage_ht)) %>% 
+  slice_tail(n = 1) %>% 
+  ungroup()
+
+```
+
+Precipitation
+
+```{r}
+precip <- read_csv("~/Downloads/data.csv", skip = 1) %>% 
+  mutate(yr = year(Date),
+         mo = month(Date)) %>% 
+  filter(mo %in% c(12, 1, 2), yr %in% 2009:2025) %>% 
+  select(Date, precip_in = `PRCP (Inches)`)
+  
+```
+
+Merge
+
+```{r}
+weekly_precip <- function(stormdatetime) {
+  precip %>% 
+    filter(between(Date, stormdatetime - weeks(1), stormdatetime)) %>% 
+    pull(precip_in) %>% 
+    sum(na.rm = TRUE)
+}
+storm_data <- max_winter_ht %>% 
+  mutate(precip_wk_in = map_dbl(datetime, weekly_precip)) %>% 
+  select(yr, datetime, gage_ht, precip_wk_in)
+
+```
+
+Plot
+
+```{r}
+storm_data %>% 
+  filter(precip_wk_in < 5) %>% 
+  ggplot(aes(precip_wk_in, gage_ht)) +
+  geom_point(shape = 21, color = "firebrick", stroke = 2) +
+  ylim(0, NA) +
+  labs(x = "Total precip. prev. week (in)",
+       y = "Gage height (ft)")
+
+```
+
+With two lines, which is better?
+
+```{r}
+storm_data %>% 
+  filter(precip_wk_in < 5) %>% 
+  ggplot(aes(precip_wk_in, gage_ht)) +
+  geom_point(shape = 21, color = "firebrick", stroke = 2) +
+  geom_abline(intercept = 2, slope = 3, color = "cornflowerblue", linewidth = 2, linetype = "dotted") +
+  geom_abline(intercept = 4, slope = 2, color = "cornflowerblue", linewidth = 2, linetype = "dashed") +
+  ylim(0, NA) +
+  labs(x = "Total precip. prev. week (in)",
+       y = "Gage height (ft)")
+```
+
+Residuals
+
+```{r}
+storm_data %>% 
+  filter(precip_wk_in < 5) %>% 
+  mutate(resid1 = gage_ht - (2 + 3 * precip_wk_in),
+         resid2 = gage_ht - (4 + 2 * precip_wk_in)) %>% 
+  summarize(ssr1 = sum(resid1^2),
+            ssr2 = sum(resid2^2))
+```
+
+Residual map
+
+```{r}
+resid_map <- expand_grid(b = seq(2, 5, length.out = 20),
+            m = seq(1, 4, length.out = 20)) %>% 
+  mutate(ssr = map2_dbl(b, m, \(.b, .m) {
+    storm_data %>% 
+      filter(precip_wk_in < 5) %>% 
+      mutate(r = gage_ht - (.b + .m * precip_wk_in)) %>% 
+      summarize(ssr = sum(r^2)) %>% 
+      pull(ssr)
+  }))
+ggplot(resid_map, aes(b, m, fill = ssr)) +
+  geom_tile() +
+  geom_point(data = arrange(resid_map, ssr) %>% slice(1),
+             color = "gold") +
+  scale_fill_distiller(palette = "Spectral") +
+  theme(aspect.ratio = 1)
+
+# remove the highest precip points
+storm_data <- filter(storm_data, precip_wk_in < 5)
+```
+
+```{r}
+
+storm_mod <- lm(gage_ht ~ precip_wk_in, data = storm_data)
+summary(storm_mod)
+
+```
+
+Variation of the response
+
+```{r}
+
+gage_mean <- mean(storm_data$gage_ht)
+gage_sd <- sd(storm_data$gage_ht)
+ggplot(storm_data, aes(gage_ht)) +
+  geom_histogram(bins = 6, fill = "cornflowerblue") +
+  geom_vline(xintercept = gage_mean,
+             color = "firebrick",
+             linewidth = 2) +
+  geom_segment(x = gage_mean - gage_sd,
+               xend = gage_mean + gage_sd,
+               y = 4, 
+               yend = 4, 
+               color = "firebrick",
+               linewidth = 2,
+               linetype = "dotted") +
+  labs(x = "Gage height (ft)")
+
+```
+
+Variation of the residuals
+
+```{r}
+
+residual_segments <- storm_data %>% 
+  mutate(x = precip_wk_in,
+         xend = precip_wk_in,
+         y = gage_ht,
+         yend = predict(storm_mod))
+ggplot(storm_data, aes(precip_wk_in, gage_ht)) +
+  geom_segment(aes(x = x, xend = xend, y = y , yend = yend),
+               residual_segments,
+               color = "gold",
+               linewidth = 1.5) +
+  geom_point(shape = 21, color = "firebrick", stroke = 2) +
+  geom_abline(intercept = coef(storm_mod)[1],
+              slope = coef(storm_mod)[2],
+              color = "cornflowerblue",
+              linewidth = 2) +
+  ylim(0, NA) +
+  labs(x = "Total precip. prev. week (in)",
+       y = "Gage height (ft)")
+
+gage_resid <- tibble(residual = resid(storm_mod))
+resid_mean <- mean(gage_resid$residual)
+resid_sd <- sd(gage_resid$residual)
+ggplot(gage_resid, aes(residual)) +
+  geom_histogram(bins = 6, fill = "gold") +
+  geom_vline(xintercept = resid_mean,
+             color = "firebrick",
+             linewidth = 2) +
+  geom_segment(x = resid_mean - resid_sd,
+               xend = resid_mean + resid_sd,
+               y = 4, 
+               yend = 4, 
+               color = "firebrick",
+               linewidth = 2,
+               linetype = "dotted") +
+  labs(x = "Residual (ft)")
+```
+
+$$
+\begin{align}
+SST &= \text{Total Sum of Squares} \\
+SST &= \sum_i{(y_i - \bar{y})^2} \\
+SSE &= \text{Total Sum of Errors} \\
+SST &= \sum_i{(y_i - \hat{y})^2} \\
+R^2 &= \frac{SST - SSE}{SST}
+\end{align}
+$$
+
+Caution!
+
+```{r}
+set.seed(123)
+sin_dat <- tibble(
+  x = runif(20, 0, 300),
+  y = sin(x * pi / 180) + rnorm(20, 0, 0.15)
+)
+sin_mod <- lm(y ~ x, sin_dat)
+summary(sin_mod)
+
+ggplot(sin_dat, aes(x, y)) +
+  geom_point(shape = 21, color = "firebrick", stroke = 2) +
+  geom_abline(intercept = coef(sin_mod)[1],
+              slope = coef(sin_mod)[2],
+              color = "cornflowerblue",
+              linewidth = 2) +
+  theme_classic(18)
+
+sin_dat %>% 
+  mutate(residual = resid(sin_mod)) %>% 
+  ggplot(aes(x, residual)) +
+  geom_hline(yintercept = 0, color = "cornflowerblue", linewidth = 2) +
+  geom_point(shape = 21, color = "firebrick", stroke = 2) +
+  theme_classic(18)
+```
+
+Sliding normal variable
+
+```{r}
+storm_data %>% 
+  filter(precip_wk_in < 5) %>% 
+  ggplot(aes(precip_wk_in, gage_ht)) +
+  geom_point(shape = 21, color = "firebrick", stroke = 2) +
+  geom_abline(intercept = coef(storm_mod)[1],
+              slope = coef(storm_mod)[2],
+              color = "cornflowerblue",
+              linewidth = 2) +
+  ylim(0, NA) +
+  labs(x = "Total precip. prev. week (in)",
+       y = "Gage height (ft)")
+```

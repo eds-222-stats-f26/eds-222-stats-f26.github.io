@@ -1,0 +1,78 @@
+---
+title: "Final Project"
+subtitle: "The final project is a technical blog post demonstrating how to use a statistical model to answer an environmental data science question"
+toc: true
+format:
+  html:
+    markdown: +grid_tables
+editor: source
+---
+
+In your career as an environmental data scientist, you will often have to learn new analytic approaches to solve problems. The process of learning an unfamiliar statistical model is an important skill on its own. In this final project, you will use the skills you've developed in class to teach yourself a statistical model and apply it to an environmental dataset.
+
+## Timeline
+
+We're going to build up to the final project gradually over the whole quarter. These assignments are ungraded. Their purpose is to give you structure and get you instructor feedback early and often.
+
+| Week | Assignment |
+|----|----|
+| 2 | Choose data and question |
+| 4 | Exploratory analysis |
+| 7 | Describe hypotheses with text and visuals |
+| 8 | Describe model in statistical notation and fit model to simulated data |
+| 9 | Fit model to real world data |
+| 10 | First draft of blog post due **Monday 12/1** |
+| Exam | Final draft of blog post due **Thursday 12/11** |
+
+## Model and response options
+
+The following list of models are suggestions for your final project together with the response characteristics they're designed for. You are allowed to choose a model not on this list if you're motivated to do so, but make sure to clear it with the instructors. The models are categorized by complexity level so you can choose a model aligned with your learning curve. You're encouraged to discuss options with the instructors!
+
++---------------------+-------------------+--------------------------+----------------------------+
+| Complexity level    | Model name        | Response characteristics | Example                    |
++=====================+===================+==========================+============================+
+|                     | Gamma             | Positive continuous      | Pollution concentrations   |
+|                     +-------------------+--------------------------+----------------------------+
+| Familiar            | Negative binomial | Counts                   | Water quality violations   |
+|                     +-------------------+--------------------------+----------------------------+
+|                     | Beta              | Proportions              | Algae coverage on a reef   |
++---------------------+-------------------+--------------------------+----------------------------+
+|                     | Hurdle            | Inflated zeroes          | Occurrence of rare species |
+|                     +-------------------+--------------------------+----------------------------+
+| More complex        | Segmented         | Breakpoint               | Policy intervention        |
+|                     +-------------------+--------------------------+----------------------------+
+|                     | Multinomial       | Unordered categories     | Land cover types           |
++---------------------+-------------------+--------------------------+----------------------------+
+|                     | Ordinal           | Ordered categories       | Likert-scale surveys       |
+|                     +-------------------+--------------------------+----------------------------+
+| Most complex        | State-space       | Time series              | Salmon returns             |
+|                     +-------------------+--------------------------+----------------------------+
+|                     | Spatial error     | Spatially autocorrelated | Energy costs in counties   |
++---------------------+-------------------+--------------------------+----------------------------+
+
+## Specifications
+
+### Question and data
+
+* The blog post provides context and background for the question
+* The data are explained using text and figures
+* The relationships and causal relationships are described with a DAG
+
+### Statistical model
+
+* The statistical model is explained conceptually and using formal statistical notation
+* The blog post demonstrates how to simulate data according to model assumptions 
+* The blog post demonstrates that a model fit to the simulated data recovers the parameters
+
+### Inference
+
+* Hypotheses are stated in plain language and with visualizations
+* Model estimates are presented with appropriate uncertainty (e.g., confidence intervals)
+* A hypothesis is tested and the evidence is interpreted
+
+### Professionalism
+
+* The overall appearance of the blog post (e.g., figures, code outputs) is portfolio-quality
+* The writing is comprehensible to a technical audience
+* The code is well-organized and appropriately documented
+

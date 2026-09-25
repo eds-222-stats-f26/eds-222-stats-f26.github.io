@@ -1,0 +1,214 @@
+---
+title: "Foundations of inference"
+format: 
+  pdf:
+    fig-height: 3
+    fig-width: 4
+execute: 
+  echo: false
+  warning: false
+editor: visual
+---
+
+<!-- Reduce the white space after the title -->
+
+```{=latex}
+\vspace{-2.5cm}
+```
+
+Shade-grown coffee has biodiversity benefits relative to traditional coffee agriculture, but it has added costs. A neotropical bird conservation organization is piloting a new podcast ad extolling the virtues of shade-grown coffee and they want to know if consumers who listen to the ad are more willing to pay the premium.
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(ggpattern)
+theme_set(theme_classic(10))
+set.seed(123)
+
+```
+
+The organization conducted an experiment by recruiting 400 participants and randomly assigning them to control ("No ad") and treatment ("Watched ad") groups. Each group was presented with the option to buy shade-grown coffee, at a higher price than other coffee. Here's a preview of the data they collected.
+
+```{r}
+#| label: simulate
+
+coffee_n <- 400
+coffee <- tibble(
+  participant_id = 1:coffee_n,
+  treatment = sample(c("Watched ad", "No ad"), 
+                     size = coffee_n, 
+                     replace = TRUE,
+                     prob = c(0.5, 0.5)),
+  pay_more = rbinom(coffee_n, 
+                    size = 1, 
+                    p = ifelse(treatment == "Watched ad", 0.65, 0.5)),
+  pay_more_fct = factor(pay_more, labels = c("Declined", "Paid more"))
+)
+glimpse(coffee)
+
+```
+
+The results of the experiment are presented in @fig-coffee.
+
+```{r}
+#| label: fig-coffee
+
+ggplot(coffee, aes(treatment, pattern = pay_more_fct)) +
+  geom_bar_pattern(fill = "white",
+                   color = "black",
+                   pattern_fill = "black",
+                   pattern_color = "black",
+                   pattern_spacing = 0.05) +
+  scale_pattern_manual(values = c("stripe", "circle")) +
+  labs(x = "Watched ad?",
+       y = "Consumers",
+       fill = "Paid more?") +
+  theme(legend.position = "top", 
+        legend.title = element_blank(),
+        legend.key.size = unit(1, "cm"))
+
+```
+
+## Does the ad promote buying shade-grown coffee?
+
+Recall the steps for hypothesis testing.
+
+1.  Identify the TEST STATISTIC
+
+2.  State your NULL and ALTERNATIVE hypotheses
+
+3.  Calculate the OBSERVED test statistic
+
+4.  Estimate the NULL DISTRIBUTION
+
+5.  Calculate the P-VALUE
+
+6.  Compare the p-value to CRITICAL THRESHOLD
+
+**Q1: What test statistic applies to this question?\
+\
+**
+
+**Q2: What are the null and alternative hypotheses?**
+
+**H~0~:\
+\
+**
+
+**H~A~:\
+\
+**
+
+@fig-coffee-null-obs shows the distribution of the test statistic under the null hypothesis and the observed test statistic.
+
+**Q3: Approximately, what is the observed test statistic?\
+\
+**
+
+**Q4: What column in the experiment data do you need to shuffle to generate the null distribution?\
+\
+**
+
+```{r}
+#| label: fig-coffee-null-obs
+
+coffee_shuffle <- map(1:1e4, \(t) {
+  coffee %>% 
+    mutate(treatment = sample(treatment, size = nrow(.)),
+           trial = t)
+}) %>% 
+  list_rbind()
+coffee_null <- coffee_shuffle %>% 
+  group_by(trial, treatment) %>% 
+  summarize(prop_pay_more = mean(pay_more), .groups = "drop_last") %>% 
+  summarize(diff_prop = prop_pay_more[2] - prop_pay_more[1])
+coffee_observed <- coffee %>% 
+  group_by(treatment) %>% 
+  summarize(prop_pay_more = mean(pay_more), .groups = "drop") %>% 
+  summarize(diff_prop = prop_pay_more[2] - prop_pay_more[1]) %>% 
+  pull(diff_prop)
+coffee_p <- mean(coffee_null$diff_prop > coffee_observed)
+ggplot(coffee_null, aes(diff_prop)) +
+  geom_histogram(binwidth = 0.025, 
+                 fill = "grey90", 
+                 color = "grey10") +
+  geom_vline(xintercept = coffee_observed, 
+             linetype = "dotted", 
+             linewidth = 2) +
+  scale_x_continuous(breaks = seq(-0.2, 0.2, by = 0.05)) +
+  labs(x = "Test statistic",
+       y = "Count trials")
+
+```
+
+**Q5: The p-value is 0.0064. What part of @fig-coffee-null-obs does that correspond to?\
+\
+**
+
+**Q6: How would you interpret the p-value, assuming a critical threshold of 0.05?\
+\
+**
+
+## How much more likely is an ad watcher to buy shade-grown coffee?
+
+Recall the steps for creating a confidence interval.
+
+1.  Identify the TEST STATISTIC
+
+2.  Substitute sample for population and draw BOOTSTRAP SAMPLES
+
+3.  Estimate the BOOTSTRAP DISTRIBUTION
+
+4.  Calculate CONFIDENCE INTERVAL
+
+**Q7: When drawing bootstrap samples, what variable should you group by?\
+\
+**
+
+@fig-boot shows the bootstrap distribution of the test statistic and the confidence interval.
+
+**Q8: What is the bootstrap distribution of the test statistic centered on? How is that different than the permutation test?\
+\
+**
+
+**Q9: Interpret the confidence interval.\
+\
+**
+
+```{r}
+#| label: fig-boot
+
+coffee_boot <- map(1:1000, \(t) {
+  coffee %>% 
+    group_by(treatment) %>% 
+    mutate(participant_id = sample(participant_id, replace = TRUE),
+           pay_more = map_int(participant_id, 
+                              \(id) coffee$pay_more[coffee$participant_id == id]),
+           pay_more_fct = factor(pay_more, labels = c("Declined", "Paid more"))) %>% 
+    ungroup() %>% 
+    mutate(trial = t)
+}) %>% 
+  list_rbind()
+
+diff_coffee_boot <- coffee_boot %>% 
+  group_by(trial, treatment) %>% 
+  summarize(prop_pay_more = mean(pay_more),
+            .groups = "drop_last") %>% 
+  summarize(diff_pay_more = prop_pay_more[2] - prop_pay_more[1])
+ggplot(diff_coffee_boot, aes(diff_pay_more)) +
+  geom_histogram(binwidth = 0.02, 
+                 boundary = 0,
+                 fill = "grey90", 
+                 color = "grey10") +
+  geom_vline(xintercept = coffee_observed, 
+             linewidth = 2) +
+  geom_vline(xintercept = quantile(diff_coffee_boot$diff_pay_more, c(0.025, 0.975)), 
+             linewidth = 2,
+             linetype = "dotted") +
+  scale_x_continuous(breaks = seq(-0.04, 0.3, by = 0.04)) +
+  labs(x = "Test statistic",
+       y = "Count trials")
+
+```
