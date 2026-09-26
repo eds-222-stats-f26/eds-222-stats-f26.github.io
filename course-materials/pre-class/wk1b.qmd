@@ -1,0 +1,52 @@
+---
+title: "Week 1 Wednesday pre-class"
+subtitle: "Statistical claims"
+---
+
+So far this week, you've learned about: 
+
+**The three challenges of statistics**
+
+- Generalize from sample to population
+- Generalize from observed to underlying construct
+- Generalize from treatment to control
+
+**Measurements and data**
+
+- Validity
+- Reliability
+- Sampling
+
+In class on Wednesday, we'll discuss these concepts in the context of statistical claims on topics you're interested in.
+
+## Instructions
+
+Before class, **_find a statistical claim_**. Search the areas of environmental science you're passionate and knowledgeable about. This could be in a news article, a YouTube video, a documentary, etc. It's important that you find a claim that is presented as having statistical support.
+
+Respond to the prompts in this [Google Form](https://forms.gle/6WdEKFiFJSqwiz958) about your claim.
+
+## Example
+
+**Describe the claim**
+
+Corals growing near islands with healthy seabird colonies grow more than twice as fast as corals near islands where invasive rats have wiped out the seabirds.
+
+**Where did you find it?**
+
+_Audubon Magazine_ [The Remarkable Healing Power of Seabird Poop for Climate-Stressed Coral Reefs](https://www.audubon.org/magazine/remarkable-healing-power-of-seabird-poop-climate-stressed-coral-reefs)
+
+**What challenge of statistics does it fall under?**
+
+_Generalize from treatment to control_. The "treatment" is the presence of invasive rats (which extirpate seabirds), the "control" is islands without rats.
+
+**Pick the most salient variable in the data. In what ways does it accurately represent what its meant to, and in what ways might it be different? (I.e., assess its validity.)**
+
+Coral growth rate. This was measured using the _area_ of corals from photographs^[This information isn't directly in the magazine article, but I'm familiar with the methods. This is why it's important to pick a statistical claim in a scientific field you're knowledgeable about!]. The claim about growth rate is really more about mass or volume, however area is a reasonably valid proxy because previous research has established area and mass are highly correlated.
+
+**Continuing with the same variable, what are the limitations on its reliability?**
+
+Estimates of area from photographs are sensitive to the angle of the photo and the judgement of the researcher who traces the photo. Although those factors can affect reliability, the study used photos from divers, which are more reliable than photos taken by aircraft or satellites.
+
+**Continuing with the same variable, how was the sample collected? Were there obstacles to selecting a representative sample?**
+
+The sample came from twelve islands in the Chagos Archipelago (six had rats, six didn't). There is potential selection bias because this was an observational study, so the researchers couldn't randomize which islands got rats and which didn't. Also, the study only looked at one species of coral. It's possible other corals are more or less affected by seabird abundance.

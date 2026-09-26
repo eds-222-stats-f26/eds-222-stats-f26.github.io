@@ -303,21 +303,21 @@
   {
     "objectID": "course-materials/week1.html",
     "href": "course-materials/week1.html",
-    "title": "Random Variables",
+    "title": "Exploring data",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nPopulations, samples, and parameters\nIMS Ch 1-2\n\n\nLab\nExploratory data analysis\nIMS Ch 4-5\n\n\nLecture 2\nRandom variables and distribution functions\nNone"
+    "text": "Session\nSlides\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability\nNone\n\n\nLecture 2\nSampling\nLink 1  Link 2  ROS 1-1.4, 2-2.2  IMS 1-2  Statistical claims"
   },
   {
     "objectID": "course-materials/week1.html#lecture-materials",
     "href": "course-materials/week1.html#lecture-materials",
-    "title": "Random Variables",
+    "title": "Exploring data",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nPopulations, samples, and parameters\nIMS Ch 1-2\n\n\nLab\nExploratory data analysis\nIMS Ch 4-5\n\n\nLecture 2\nRandom variables and distribution functions\nNone"
+    "text": "Session\nSlides\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability\nNone\n\n\nLecture 2\nSampling\nLink 1  Link 2  ROS 1-1.4, 2-2.2  IMS 1-2  Statistical claims"
   },
   {
     "objectID": "course-materials/week1.html#assignment-reminders",
     "href": "course-materials/week1.html#assignment-reminders",
-    "title": "Random Variables",
+    "title": "Exploring data",
     "section": " Assignment Reminders",
     "text": "Assignment Reminders\nNothing due in week 1. In week 2, you’ll submit your choice of data and question for the final project. That can more time than you might expect, so it’s a good idea to start this week!"
   },
@@ -698,5 +698,278 @@
     "title": "Lab 4",
     "section": "Permutation vs bootstrap",
     "text": "Permutation vs bootstrap\nThe visualization you created for Q7 shows the null distribution of the test statistic. The visualization you created for Q17 shows the bootstrapped distribution of the test statistic.\nQ18: What did you do to make the null distribution center on zero? Specifically, what code?\nQ19: What did you do to make the bootstrap distribution center on the observed test statistic? Specifically, what code?\nQ20: What would happen to your bootstrap distribution if you sampled without replacement?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#statistics-for-environmental-data-science",
+    "href": "course-materials/lecture-slides/wk1a.html#statistics-for-environmental-data-science",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Statistics for Environmental Data Science",
+    "text": "Statistics for Environmental Data Science\nInstructional team: Max Czapanskiy and Sloane Stephenson"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#todays-goals",
+    "href": "course-materials/lecture-slides/wk1a.html#todays-goals",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s goals",
+    "text": "Today’s goals\n\nDescribe the challenges of statistical inference and identify them in an Environmental Justice (EJ) case study\nDefine validity, reliability, and sampling in the context of measurements and data\nPrepare for success in this course"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#navigating-uncertainty",
+    "href": "course-materials/lecture-slides/wk1a.html#navigating-uncertainty",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Navigating uncertainty",
+    "text": "Navigating uncertainty\n\nIf we could directly observe everything without error, we wouldn’t need statistics\nIn practice, we only get a glimpse through a window at what we care about\nStatistics is the practice of interpreting data to understand the whole from the limited part we can see"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#challenges-of-statistical-inference-1",
+    "href": "course-materials/lecture-slides/wk1a.html#challenges-of-statistical-inference-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Challenges of statistical inference",
+    "text": "Challenges of statistical inference\n\nGeneralizing from sample to population\nGeneralizing from treatment to control group\nGeneralizing from observed measurements to underlying constructs of interest\n\n(Gelman, Hill, and Vehtari 2021)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#neither-math-nor-magic",
+    "href": "course-materials/lecture-slides/wk1a.html#neither-math-nor-magic",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Neither math nor magic",
+    "text": "Neither math nor magic\nStatistics uses math (just like any other field of science) but it’s not a type of math\n\nSure, calculus and linear algebra can be useful, but we’ll mostly bypass them\nInstead, we will instead use simulation to develop (and test) conceptual models"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#neither-math-nor-magic-1",
+    "href": "course-materials/lecture-slides/wk1a.html#neither-math-nor-magic-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Neither math nor magic",
+    "text": "Neither math nor magic\nTo perform a statistical analysis responsibly you need to understand the assumptions and risks\n\nMany applications of statistics … invoke statistical terms and procedures as incantations, with scant understanding of the assumptions or relevance of the calculations, or even the meaning of the terminology. This demotes statistics from a way of thinking about evidence and avoiding self-deception to a formal “blessing” of claims.\n\n(Stark and Saltelli 2018)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#a-way-of-thinking",
+    "href": "course-materials/lecture-slides/wk1a.html#a-way-of-thinking",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "A way of thinking",
+    "text": "A way of thinking\n\nIn this class you will learn statistical thinking for assessing and interpreting evidence\nWe will avoid formulaic flowcharts for picking tests and models\nThe decisions and choices made by statistics practitioners have real world consequences"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#are-my-children-safe",
+    "href": "course-materials/lecture-slides/wk1a.html#are-my-children-safe",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Are my children safe?",
+    "text": "Are my children safe?\n\nCrystal Garcia, 26, is concerned about the safety of her children – Melonie, 4, left, and Jesse, 3 – since elevated levels of lead have been found in the soil around her neighbors’ homes in Boyle Heights, near the Exide Technologies plant in Vernon. (Al Seib / Los Angeles Times)March 13, 2014 in the Los Angeles Times"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#exide-battery-recycling-plant",
+    "href": "course-materials/lecture-slides/wk1a.html#exide-battery-recycling-plant",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Exide battery recycling plant",
+    "text": "Exide battery recycling plant\n\nThe 15-acre battery recycling plant is about five miles southeast of downtown Los Angeles. (Irfan Khan / Los Angeles Times)March 23, 2013 in the Los Angeles Times"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#a-history-in-three-parts",
+    "href": "course-materials/lecture-slides/wk1a.html#a-history-in-three-parts",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "A history in three parts",
+    "text": "A history in three parts\n1922 - 2012: A century of pollution\n2013 - 2015: Shut it down\n2016 - present: Is it safe now?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#lead-smelting-operations-begin-in-1922",
+    "href": "course-materials/lecture-slides/wk1a.html#lead-smelting-operations-begin-in-1922",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Lead smelting operations begin in 1922",
+    "text": "Lead smelting operations begin in 1922\n\n\n\nPlant opened in 1922 in Vernon, CA - an industrial city 5 miles from Downtown LA\n1 of 2 lead battery recycling plants west of the Rockies\nEmitted lead, arsenic, and other pollutants for 90 years\n\n\n\n\n\nThe plant operated in the industrial city of Vernon since 1922, spewing toxic air pollution over decades. (Brian van der Brug / Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#lead-from-emissions-gas-and-paint",
+    "href": "course-materials/lecture-slides/wk1a.html#lead-from-emissions-gas-and-paint",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Lead from emissions, gas, and paint",
+    "text": "Lead from emissions, gas, and paint\n\nCCAT Exide Presentation 05.08.24"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#wind-carried-lead-to-nearby-communities",
+    "href": "course-materials/lecture-slides/wk1a.html#wind-carried-lead-to-nearby-communities",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Wind carried lead to nearby communities",
+    "text": "Wind carried lead to nearby communities\n\nCCAT Exide Presentation 05.08.24"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#how-much-lead-is-there",
+    "href": "course-materials/lecture-slides/wk1a.html#how-much-lead-is-there",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "How much lead is there?",
+    "text": "How much lead is there?\nWhat is the lead (Pb) soil concentration on this property? (1 #)\nHow valid is that number? I.e., how well does it represent what you’re trying to measure?\n\n\n\n\nBack yard Front yard Drip line\n\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.1     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.3     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#validity-of-a-measurement",
+    "href": "course-materials/lecture-slides/wk1a.html#validity-of-a-measurement",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Validity of a measurement",
+    "text": "Validity of a measurement\n\nA measure is valid to the degree that it represents what you are trying to measure\n\n(Gelman, Hill, and Vehtari 2021, 24)\nIf the thing we care about is risk of lead poisoning, how valid are the following measurements?\n\nMean soil Pb concentration in the front and back yard of a property\nMean soil Pb concentration within 500 yards of a property\nMaximum soil Pb concentration on a property"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#generalize-from-sample-to-population",
+    "href": "course-materials/lecture-slides/wk1a.html#generalize-from-sample-to-population",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Generalize from sample to population",
+    "text": "Generalize from sample to population\nGiven limited information about a sample, what can we say about the population?\n\n\nPopulation: the entire entity we’re interested in\n\nThe soil Pb contamination on a property\nThe soil Pb contamination in a radius around a pollution source\n\n\n\n\nSample: the subset of the population we have data for\n\nTen soil cores from a property\n“Representative” soil Pb values for 100 residential properties"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#where-is-the-lead",
+    "href": "course-materials/lecture-slides/wk1a.html#where-is-the-lead",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Where is the lead?",
+    "text": "Where is the lead?\n\n\n\nOver 10k homes within 2 km of the Exide plant\nInitial sampling from 244 homes\nGeneralize from sample to population\n\n\n\n\n\nMap of property-average soil lead concentration, interpolated by kriging. Sampling locations are shown as white circles\n\n\n(Small and Rose 2015)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#community-organizations-protest",
+    "href": "course-materials/lecture-slides/wk1a.html#community-organizations-protest",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Community organizations protest",
+    "text": "Community organizations protest\n\n\nProtests intensify in response to increasing violations and dangerous soil samples.\n\n\n\nmark! Lopez in front of the Exide plant. (Photo: Goldman Environmental Prize)\n\n\n\n\nI’m the third generation of my family to fight the Exide smelter. My grandparents started back in the 1990s, and it took three generations of our communities to shut it down.\n\nSierra Club"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#exide-argues-its-not-responsible",
+    "href": "course-materials/lecture-slides/wk1a.html#exide-argues-its-not-responsible",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Exide argues it’s not responsible",
+    "text": "Exide argues it’s not responsible\n\n\nOther sources of lead include:\n\nLeaded gas phased out 1973 (proximity to highways)\nLeaded paint banned in 1978 (age of home)\n\n\n\n\n\nBoxplots comparing year of construction of homes (left), distance to the closest freeway (center), and distance to the closest arterial road (right) for each property"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#whats-the-ambient",
+    "href": "course-materials/lecture-slides/wk1a.html#whats-the-ambient",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What’s the ambient?",
+    "text": "What’s the ambient?\n\n\n\n\n\nSoil lead concentration as a function of distance from the Exide facility.\n\n\n\n\nExide report estimated the mean ambient soil Pb level at 218 ppm.\nCA and EPA screen soil Pb for 80 ppm and 200 ppm, respectively.\nMedian soil Pb in LA is 81 ppm (Wu et al. 2010)."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#whats-the-radius",
+    "href": "course-materials/lecture-slides/wk1a.html#whats-the-radius",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What’s the radius?",
+    "text": "What’s the radius?\n\n\n\n\n\nDistances to reach ambient background concentrations using the linear regression for directional subsets.\n\n\n\n\nExide estimated its radius of effect between 0.2 and 0.75 miles, depending on wind direction.\nDTSC disputed the ambient soil Pb; estimated radius between 1.3 and 1.7 miles"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#reliability-of-a-measurement",
+    "href": "course-materials/lecture-slides/wk1a.html#reliability-of-a-measurement",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Reliability of a measurement",
+    "text": "Reliability of a measurement\n\nA reliable measure is one that is precise and stable.\n\n(Gelman, Hill, and Vehtari 2021, 25)\n\n\nExide’s argument attacked the reliability of soil Pb measurements.\n\nCollect duplicate samples\nCalculate difference of measurements\nEstimate an error “buffer”\n\n\n\npb_mu &lt;- 129.2\npb_sigma &lt;- 100\npb_mu_log &lt;- log(pb_mu / sqrt(1 + pb_sigma^2 / pb_mu^2))\npb_sigma_log &lt;- log(1 + pb_sigma^2 / pb_mu^2)\n\nr_cov &lt;- 0.136\n# cov = sqrt(exp(sigma^2) - 1)\n# cov^2 = exp(sigma^2) - 1\n# cov^2 + 1 = exp(sigma^2)\n# log(cov^2 + 1) = sigma^2\n# sigma = sqrt(log(cov^2 + 1))\nr_sigma &lt;- sqrt(log(r_cov^2 + 1))\ntibble(\n  pb_t = rlnorm(25, meanlog = pb_mu_log, sdlog = pb_sigma_log),\n  r1_log = rnorm(25, mean = 0, sd = r_sigma),\n  r2_log = rnorm(25, mean = 0, sd = r_sigma),\n  pb_1 = pb_t * exp(r1_log),\n  pb_2 = pb_t * exp(r2_log),\n  d = pb_2 - pb_1\n) |&gt;\n  ggplot(aes(d)) +\n  geom_dotplot(method = \"histodot\", binwidth = 10) +\n  geom_vline(xintercept = c(-1, 1) * 35.14, color = \"cornflowerblue\") +\n  labs(x = \"Difference in duplicates (ppm)\") +\n  scale_y_continuous(NULL, breaks = NULL) +\n  theme_bw(18)\n\n\n\n\n\n\n\n\nExide’s claim: Any contribution &lt;35 ppm is indistinguishable from measurement error"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#generalizing-from-observed-to-underlying-construct",
+    "href": "course-materials/lecture-slides/wk1a.html#generalizing-from-observed-to-underlying-construct",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Generalizing from observed to underlying construct",
+    "text": "Generalizing from observed to underlying construct\nExide’s radius of effect is not directly measurable\nSame data, two different conclusions.\n\n\n\n\n\nExide’s estimate (Small and Rose 2015)\n\n\n\n\n\n\nDTSC’s estimate (Department of Toxic Substances Control 2015)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#exide-plant-closes",
+    "href": "course-materials/lecture-slides/wk1a.html#exide-plant-closes",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Exide plant closes",
+    "text": "Exide plant closes\nMarch 11, 2015 Exide closes Vernon plant to avoid criminal prosecution\n\nStephanie Yonekura, acting United States Attorney, announces an agreement to permanently close the Exide lead-acid battery recycling plant in Vernon. (Bob Chamberlin / Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#homes-approved-for-cleanup",
+    "href": "course-materials/lecture-slides/wk1a.html#homes-approved-for-cleanup",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "2,500 homes approved for cleanup",
+    "text": "2,500 homes approved for cleanup\n\n\nJuly 6, 2017\n\n\n~10k homes exposed to Pb emissions\nState tested Pb soil in 8.2k homes\n2.5k homes with soil Pb &gt;400 ppm scheduled for cleanup\n\n\n\n\n\nAn environmental health specialist collects a soil sample. (Mel Melcon / Los Angeles Times)\n\n\nThousands of L.A. County homes tainted with lead"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#cleanup-progresses-slowly",
+    "href": "course-materials/lecture-slides/wk1a.html#cleanup-progresses-slowly",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Cleanup progresses slowly",
+    "text": "Cleanup progresses slowly\n\n\n\n\nThe Exide plant in Vernon closed 3 years ago. The vast majority of lead-contaminated properties remain uncleaned."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#community-academy-collaboration",
+    "href": "course-materials/lecture-slides/wk1a.html#community-academy-collaboration",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Community-academy collaboration",
+    "text": "Community-academy collaboration\n\n\n\n\n\nSteve Zylius / UC Irvine\n\n\nEYCEJ partnered with Prof Jill Johnston to investigate the cleanup (Johnston et al. 2026)\n\n\nGet The Lead Out Study is a community-academic research collaboration with East Yard Communities for Environmental Justice\n\n\nWe collected 1128 samples from 373 properties, of which ∼40% were cleaned by the state"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#study-questions-removal-action-plan",
+    "href": "course-materials/lecture-slides/wk1a.html#study-questions-removal-action-plan",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Study questions Removal Action Plan",
+    "text": "Study questions Removal Action Plan\n\n\n\nSoil Pb &gt;80 ppm in 39% of samples at cleaned properties\nOutside PIA, soil Pb dropped 24 ppm per 1000 m from Exide plant"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#has-the-cleanup-been-effective",
+    "href": "course-materials/lecture-slides/wk1a.html#has-the-cleanup-been-effective",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Has the cleanup been effective?",
+    "text": "Has the cleanup been effective?\n\n\n\n\n\nDistributions of residential soil Pb sampling results from homes outside the PIA (in adjacent neighborhoods) and those inside the PIA that received a state-sponsored soil remediation.\n\n\n\nAmong cleaned homes:\n\nMean soil Pb in samples was not significantly &gt;80 ppm\n39% of samples &gt;80 ppm\n73% of homes had 1+ sample &gt;80 ppm\n19% of samples &gt;200 ppm\n\nHas the cleanup been effective?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#generalizing-from-treatment-to-control",
+    "href": "course-materials/lecture-slides/wk1a.html#generalizing-from-treatment-to-control",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Generalizing from treatment to control",
+    "text": "Generalizing from treatment to control\nGiven samples from treatment and control, what can we say about the treatment’s effect?\n\n\nTreatment: a change or intervention\n\nRemediating soil on a property\nOperating an industrial facility in a neighborhood\n\n\nControl: a comparable group that has not received the treatment\n\nA property pre-remediation\nNearby neighborhoods outside the facility’s effect radius"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#a-century-of-pollution-1",
+    "href": "course-materials/lecture-slides/wk1a.html#a-century-of-pollution-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "1922 - 2012: A century of pollution",
+    "text": "1922 - 2012: A century of pollution\nFrom 1922 to 2015, the Exide plant emitted lead and polluted nearby communities\n\nThe plant operated in the industrial city of Vernon since 1922, spewing toxic air pollution over decades. (Brian van der Brug / Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#shut-it-down-1",
+    "href": "course-materials/lecture-slides/wk1a.html#shut-it-down-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "2013 - 2015: Shut it down",
+    "text": "2013 - 2015: Shut it down\nCommunity protests and government investigations led to the plant’s closure\n\nCommunity members in March 2014 again sought the Exide plant’s shutdown in March 2014, during a community meeting at Resurrection Catholic Church in Boyle Heights on the results of lead testing. (Lawrence K. Ho / Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#present-is-it-safe-now-1",
+    "href": "course-materials/lecture-slides/wk1a.html#present-is-it-safe-now-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "2016 - present: Is it safe now?",
+    "text": "2016 - present: Is it safe now?\nThe largest residential cleanup in California state history, with mixed results\n\nA worker with East Yard Communities for Environmental Justice collects soil samples from the community garden in Boyle Heights, inside the area contaminated by the former Exide battery recycling facility, in September 2022. (Dania Maxwell/Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#challenges-of-statistics",
+    "href": "course-materials/lecture-slides/wk1a.html#challenges-of-statistics",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Challenges of statistics",
+    "text": "Challenges of statistics\n\n\nGeneralize from sample to population\n\n\nGeneralize from obs. measurements to underlying construct\n\n\nGeneralize from treatment to control"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#course-structure",
+    "href": "course-materials/lecture-slides/wk1a.html#course-structure",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Course structure",
+    "text": "Course structure\n\n\nWhere and when do we meet?\n\nLecture\n\nMW 1424 9:30-10:45\n\nLab\n\nT 3022A 12:30-1:50\n\nStudent hours\n\nT 3022A 2-3\nTh 3022A 3-4\n\n\n\nWhat will I be graded on?\n\n3 homeworks\n1 midterm\n1 final project"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#course-structure-1",
+    "href": "course-materials/lecture-slides/wk1a.html#course-structure-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Course structure",
+    "text": "Course structure\n\n\nWhat do I do before class?\n\nReadings\nPre-recorded lectures\nPre-class “parking lot”\n\n\nWhat do I do in class?\n\nPay attention\nParticipate in activities\nConnect statistics to your experiences and interests"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#community-agreements",
+    "href": "course-materials/lecture-slides/wk1a.html#community-agreements",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Community agreements",
+    "text": "Community agreements\nThere are two posters at the back of the room\n\n\n“How can I support myself in this class?”\n\n“How can I support my peers in this class?”\n\n\nReflect on these prompts and put at least one sticky note on each poster"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html#optimal-stress",
+    "href": "course-materials/lecture-slides/wk1a.html#optimal-stress",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Optimal stress",
+    "text": "Optimal stress\nRemember, there is an optimal level of stress for learning.\nIf you’re outside the optimal, please come to your instructors!\n\nYerkes-Dodson Curve"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/wk1a.html",
+    "href": "course-materials/lecture-slides/wk1a.html",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "",
+    "text": "Instructional team: Max Czapanskiy and Sloane Stephenson\n\n\n\n\nDescribe the challenges of statistical inference and identify them in an Environmental Justice (EJ) case study\nDefine validity, reliability, and sampling in the context of measurements and data\nPrepare for success in this course"
   }
 ]

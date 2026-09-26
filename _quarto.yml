@@ -15,6 +15,8 @@ website:
       - text: syllabus
         href: /eds-222-f26-syllabus.pdf
         target: _blank
+      - text: parking lot
+        href: https://docs.google.com/document/d/1c8yN5MZVJcl4TnE2rSxoyAoS0TixxlVIHWmWPsTwQ8c/edit?usp=sharing
       - text: course materials
         menu:
           - text: week 1 (9/28-10/2)
