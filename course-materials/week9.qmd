@@ -1,23 +1,6 @@
 ---
-title: "Spatial and temporal methods"
-subtitle: "Week 9 (November 24 - 28)"
-description: "Theme: Non-normal Data"
+title: "Spatio-temporal methods"
+subtitle: "Week 9 (November 23 - 27)"
 ---
 
-## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Lecture Materials {#lecture-materials}
-
-| Session | Topic  | Reading |
-|---------|--------|---------|
-| Lecture 1 | Midterm review | *None* |
-| Lab | Midterm 3 | *None* |
-| Lecture 2 | ARIMA and kriging | *None* |
-: {.hover .bordered tbl-colwidths="[25,50,25]"} 
-
-## {{< fa pencil title="pencil" >}} Assignment Reminders {#assignment-reminders}
-
-| Assignment Type | Note                      |
-|-----------------|---------------------------|
-| Homework        | Homework 3 due            |
-| Final project   | Fit model to real world data |
-: {.hover .bordered tbl-colwidths="[20,30]"} 
-
+**_Under construction_**

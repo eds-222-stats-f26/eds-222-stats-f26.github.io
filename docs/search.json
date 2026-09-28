@@ -345,9 +345,9 @@
   {
     "objectID": "course-materials/week8.html",
     "href": "course-materials/week8.html",
-    "title": "GLMs and autocorrelation",
+    "title": "Generalized linear models",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nPoisson regression\nNone\n\n\nLab\nCalifornia wildfire occurrence\nNone\n\n\nLecture 2\nSpatial and temporal autocorrelation\nNone"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week8.html#lecture-materials",
@@ -366,9 +366,9 @@
   {
     "objectID": "course-materials/week6.html",
     "href": "course-materials/week6.html",
-    "title": "Connections in inference",
+    "title": "t-test, ANOVA, F-test",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nForks, pipes, and colliders\nNone\n\n\nLab\nMidterm review\nNone\n\n\nLecture 2\nMidterm 2\nNone"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week6.html#lecture-materials",
@@ -387,9 +387,9 @@
   {
     "objectID": "course-materials/week4.html",
     "href": "course-materials/week4.html",
-    "title": "Introduction to Inference",
+    "title": "Multiple regression",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nPermutation and bootstrapping\nIMS Ch 11-12\n\n\nLab\nPermutation and bootstrapping in R (key)\nNone\n\n\nLecture 2\nInference with mathematical models\nIMS Ch 13, 16-17"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week4.html#lecture-materials",
@@ -508,7 +508,7 @@
     "href": "homework.html",
     "title": "Homework",
     "section": "",
-    "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nCourse Theme\nDate Posted\nDate Due\nRe-assessment Deadline\n\n\n\n\nExploring uncertainty\n10/8\n10/17\n10/31\n\n\nConducting inference\n10/29\n11/7\n11/21\n\n\nNon-normal data\n11/12\n11/26\n12/5"
+    "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nAssignment\nDate Posted\nDate Due\nRevisions Deadline\n\n\n\n\nHomework 1\n10/1\n10/11\n10/25\n\n\nHomework 2\n10/22\n11/1\n11/15\n\n\nHomework 3\n11/19\n11/29\n12/9"
   },
   {
     "objectID": "course-materials/pre-class/week1_statistical_claims.html",
@@ -541,9 +541,9 @@
   {
     "objectID": "course-materials/week10.html",
     "href": "course-materials/week10.html",
-    "title": "Wrapping up",
+    "title": "Statistics in action!",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nGuest research talk\nNone\n\n\nLab\nFinal project peer feedback\nNone\n\n\nLecture 2\nFinal project co-working time\nNone"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week10.html#lecture-materials",
@@ -569,9 +569,9 @@
   {
     "objectID": "course-materials/week5.html",
     "href": "course-materials/week5.html",
-    "title": "Mechanics of Inference",
+    "title": "Linear model inference",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nAdventures in inference\nIMS Ch 18-21\n\n\nLab\nMathematical inference in R (key)\nNone\n\n\nLecture 2\nLinear regression inference\nIMS Ch 24-25"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week5.html#lecture-materials",
@@ -592,7 +592,7 @@
     "href": "course-materials/week7.html",
     "title": "Logistic regression",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nLogistic regression\nPre-class exercise\n\n\nLab\nNo class\nNone\n\n\nLecture 2\nColor of drinking water\nIMS Ch 9, 26"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week7.html#lecture-materials",
@@ -611,9 +611,9 @@
   {
     "objectID": "course-materials/week9.html",
     "href": "course-materials/week9.html",
-    "title": "Spatial and temporal methods",
+    "title": "Spatio-temporal methods",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nMidterm review\nNone\n\n\nLab\nMidterm 3\nNone\n\n\nLecture 2\nARIMA and kriging\nNone"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week9.html#lecture-materials",

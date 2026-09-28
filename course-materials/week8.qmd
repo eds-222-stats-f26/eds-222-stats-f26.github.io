@@ -1,22 +1,6 @@
 ---
-title: "GLMs and autocorrelation"
-subtitle: "Week 8 (November 17 - 21)"
-description: "Theme: Non-normal Data"
+title: "Generalized linear models"
+subtitle: "Week 8 (November 16 - 20)"
 ---
 
-## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Lecture Materials {#lecture-materials}
-
-| Session | Topic  | Reading |
-|---------|--------|---------|
-| Lecture 1 | [Poisson regression](lecture-slides/lecture8-1.pdf){target="_blank"} | *None* |
-| Lab | [California wildfire occurrence](labs/lab8.qmd) | *None* |
-| Lecture 2 | [Spatial and temporal autocorrelation](lecture-slides/lecture8-2.pdf){target="_blank"} | *None* |
-: {.hover .bordered tbl-colwidths="[25,50,25]"} 
-
-## {{< fa pencil title="pencil" >}} Assignment Reminders {#assignment-reminders}
-
-| Assignment Type | Note                      |
-|-----------------|---------------------------|
-| Final project   | Describe model in statistical notation and fit model to simulated data |
-: {.hover .bordered tbl-colwidths="[20,30]"} 
-
+**_Under construction_**

@@ -1,22 +1,6 @@
 ---
-title: "Connections in inference"
-subtitle: "Week 6 (November 3 - 7)"
-description: "Theme: Conducting Inference"
+title: "t-test, ANOVA, F-test"
+subtitle: "Week 6 (November 2 - 6)"
 ---
 
-## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Lecture Materials {#lecture-materials}
-
-| Session | Topic  | Reading |
-|---------|--------|---------|
-| Lecture 1 | [Forks, pipes, and colliders](lecture-slides/lecture6-1.pdf){target="_blank"} | *None* |
-| Lab | Midterm review | *None* |
-| Lecture 2 | Midterm 2 | *None* |
-: {.hover .bordered tbl-colwidths="[25,50,25]"} 
-
-## {{< fa pencil title="pencil" >}} Assignment Reminders {#assignment-reminders}
-
-| Assignment Type | Note                      |
-|-----------------|---------------------------|
-| Homework        | Homework 2 due            |
-: {.hover .bordered tbl-colwidths="[20,30,20,30]"} 
-
+**_Under construction_**

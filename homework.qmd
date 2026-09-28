@@ -1,7 +1,5 @@
  ---
 title: "Homework"
-subtitle: "Homework links will become available in the tables below on the dates that they are assigned"
-toc: true
 ---
 
 ::: {.callout-important}
@@ -9,8 +7,8 @@ toc: true
 All assignments are due at 11:59 PM on the dates listed in the table, below. 
 :::
  
-| Course Theme           | Date Posted  | Date Due  | Re-assessment Deadline |
-|------------------------|--------------|-----------|------------------------|
-| [Exploring uncertainty](https://classroom.github.com/a/CJ_vQ8h7)  | 10/8         | 10/17     | 10/31                  |
-| [Conducting inference](https://classroom.github.com/a/DE-aHQzy)   | 10/29        | 11/7      | 11/21                  |
-| [Non-normal data](https://classroom.github.com/a/rpZMdg1E)        | 11/12        | 11/26     | 12/5                   |   
+| Assignment | Date Posted  | Date Due  | Revisions Deadline |
+|------------|--------------|-----------|--------------------|
+| Homework 1 | 10/1         | 10/11     | 10/25              |
+| Homework 2 | 10/22        | 11/1      | 11/15              |
+| Homework 3 | 11/19        | 11/29     | 12/9               |   

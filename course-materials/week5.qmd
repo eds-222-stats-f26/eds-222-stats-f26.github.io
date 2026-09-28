@@ -1,30 +1,6 @@
 ---
-title: "Mechanics of Inference"
-subtitle: "Week 5 (October 27 - 31)"
-description: "Theme: Conducting Inference"
+title: "Linear model inference"
+subtitle: "Week 5 (October 26 - 30)"
 ---
 
-## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Lecture Materials {#lecture-materials}
-
-| Session | Topic  | Reading |
-|---------|--------|---------|
-| Lecture 1 | [Adventures in inference](lecture-slides/lecture5-1.pdf){target="_blank"} | [IMS Ch 18-21](https://openintrostat.github.io/ims/inference-tables.html){target="_blank"} |
-| Lab | [Mathematical inference in R](labs/lab5.qmd) ([key](labs/lab5-key.qmd)) | *None* |
-| Lecture 2 | [Linear regression inference](lecture-slides/lecture5-2.pdf){target="_blank"} | [IMS Ch 24-25](https://openintrostat.github.io/ims/inf-model-slr.html){target="_blank"} |
-: {.hover .bordered tbl-colwidths="[25,50,25]"} 
-
-## {{< fa pencil title="pencil" >}} Assignment Reminders {#assignment-reminders}
-
-+-----------------+-------------------------------------+
-| Assignment Type | Note                                |
-+=================+=====================================+
-| Homework        | Homework 2 posted                   |
-|                 |                                     |
-|                 | Homework 1 re-assessment due        |
-|                 |                                     |
-|                 | Midterm 1 re-assessment due         |
-+-----------------+-------------------------------------+
-| Final project   | Exploratory analysis due            |
-+-----------------+-------------------------------------+
-: {.hover .bordered tbl-colwidths="[20,30,20,30]"} 
-
+**_Under construction_**

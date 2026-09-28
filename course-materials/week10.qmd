@@ -1,22 +1,6 @@
 ---
-title: "Wrapping up"
-subtitle: "Week 10 (December 1 - 5)"
+title: "Statistics in action!"
+subtitle: "Week 10 (November 30 - December 4)"
 ---
 
-## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Lecture Materials {#lecture-materials}
-
-| Session | Topic  | Reading |
-|---------|--------|---------|
-| Lecture 1 | Guest research talk | *None* |
-| Lab | Final project peer feedback | *None* |
-| Lecture 2 | Final project co-working time | *None* |
-: {.hover .bordered tbl-colwidths="[25,50,25]"} 
-
-## {{< fa pencil title="pencil" >}} Assignment Reminders {#assignment-reminders}
-
-| Assignment Type | Note                         |
-|-----------------|------------------------------|
-| Homework        | Homework 3 re-assessment due |
-| Final project   | First draft of blog post due **Thursday 12/4** |
-: {.hover .bordered tbl-colwidths="[20,30]"} 
-
+**_Under construction_**
