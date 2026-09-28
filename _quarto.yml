@@ -3,7 +3,7 @@ project:
   output-dir: docs
   render:
     - "*.qmd"
-    - "!course-materials/quizzes/*"
+    - "!course-materials/live-coding/"
 
 website:
   title: "EDS 222: Statistics for Environmental Data Science"

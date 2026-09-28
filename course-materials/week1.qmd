@@ -7,7 +7,17 @@ subtitle: "Week 1 (September 28 - October 2)"
 
 | Session | Slides | Pre-class |
 |---------|--------|---------|
-| Lecture 1 | [Welcome to 222!](lecture-slides/wk1a.qmd){target="_blank"} | _None_ |
+| Lecture 1 | [Welcome to 222!](lecture-slides/week1_monday.qmd){target="_blank"} | _None_ |
 | Lab | Validity and Reliability | _None_ |
-| Lecture 2 | [Sampling](lecture-slides/wk1b.qmd){target="_blank"} | Link 1 <br/> Link 2 <br/> ROS 1-1.4, 2-2.2 <br/> IMS 1-2 <br/> [Statistical claims](pre-class/wk1b.qmd) |
+| Lecture 2 | [Sampling](lecture-slides/week1_wednesday.qmd){target="_blank"} | ROS 1-1.4, 2-2.2 <br/> IMS 1-2 <br/> [Sampling](https://youtu.be/nA27fUbtPXM){target="_blank"} <br/> [Sampling in R](https://youtu.be/NYf0ihOLM6s){target="_blank"} <br/> [Statistical claims](pre-class/week1_statistical_claims.qmd) |
 : {.hover .bordered tbl-colwidths="[30,30,40]"} 
+
+## Additional materials
+
+Philip B. Stark, Andrea Saltelli, Cargo-cult Statistics and Scientific Crisis, _Significance_, Volume 15, Issue 4, August 2018, Pages 40–43, [https://doi.org/10.1111/j.1740-9713.2018.01174.x](https://doi.org/10.1111/j.1740-9713.2018.01174.x)
+
+[Sierra Club interview with mark! Lopez](https://www.sierraclub.org/planet/2017/04/right-mark)
+
+[What we know about California’s largest toxic cleanup: Thousands of L.A. County homes tainted with lead](https://www.latimes.com/local/california/la-me-ln-exide-what-we-know-20170806-htmlstory.html)
+
+Jill E. Johnston, Mark Lopez, Stephanie Prieto, Elizabeth Kamai, Bhavna Shamasunder; Get the Lead Out: A Community-Driven Approach to Characterize Urban Soil Lead Levels near a Battery Smelter. _Environ. Sci. Technol._ 14 April 2026; 60 (14): 11002–11012. [https://doi.org/10.1021/acs.est.5c14197](https://doi.org/10.1021/acs.est.5c14197)

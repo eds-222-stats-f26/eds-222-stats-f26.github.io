@@ -1,199 +1,325 @@
 [
   {
-    "objectID": "course-materials/labs/lab2.html",
-    "href": "course-materials/labs/lab2.html",
-    "title": "Lab 2",
+    "objectID": "course-materials/labs/lab1.html",
+    "href": "course-materials/labs/lab1.html",
+    "title": "Lab 1",
     "section": "",
-    "text": "In today’s lab you will…\n\nFit a linear model to real world data\nInterpret model coefficients\nSimulate data according to model assumptions and recover parameters\n\n\nlibrary(tidyverse)\ntheme_set(theme_bw(18))"
+    "text": "In today’s lab you will…\n\nNumerically and graphically explore categorical data\nNumerically and graphically explore continuous data\nExplore a real world dataset"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#learning-objectives",
-    "href": "course-materials/labs/lab2.html#learning-objectives",
-    "title": "Lab 2",
+    "objectID": "course-materials/labs/lab1.html#learning-objectives",
+    "href": "course-materials/labs/lab1.html#learning-objectives",
+    "title": "Lab 1",
     "section": "",
-    "text": "In today’s lab you will…\n\nFit a linear model to real world data\nInterpret model coefficients\nSimulate data according to model assumptions and recover parameters\n\n\nlibrary(tidyverse)\ntheme_set(theme_bw(18))"
+    "text": "In today’s lab you will…\n\nNumerically and graphically explore categorical data\nNumerically and graphically explore continuous data\nExplore a real world dataset"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#storms-and-floods",
-    "href": "course-materials/labs/lab2.html#storms-and-floods",
-    "title": "Lab 2",
-    "section": "Storms and floods",
-    "text": "Storms and floods\nWe’ll begin with an example of the relationship between precipitation and flooding during storms in LA. Save the LA Storm Data CSV to your data/ folder and use it to fill in the following code chunk. Each row in the CSV file contains data from a storm in LA during the last fifteen years. gage_ht is the height of the Los Angeles River at the Sepulveda Dam (in feet) and precip_wk_in is the total precipitation measured during the previous week at the Hollywood Burbank Airport. You can find data like these through USGS and NCEI, respectively.\n\n# Read the CSV file into a data frame\n\n# Create a plot of the gage height and precipitation data\n\nQ1: Which variables did you choose for the x- and y-axis? What does this imply about the data generating process?\nIn Quarto documents, we can add statistical notation using LaTeX. We’ll fill in the equation below to describe the model.\n\\[\n\\begin{align}\n??? &\\sim Normal(???, ???) \\\\\n??? &= ??? + ???\n\\end{align}\n\\]\n\nFit model\nThe lm() function fits a linear regression model to data. It has two important parameters: the formula defining the model, and the data frame containing the data.\nOnce you’ve fit the model, use summary() to see the details, including the coefficients and \\(R^2\\) value. \\(\\hat \\sigma\\) is in there too, but doesn’t print by default. Assign the result of summary() to a variable called storm_summ and try to find the standard deviation from there (hint: it’s an element in that variable).\nQ2: What are the estimates for \\(\\hat \\beta_0, \\hat \\beta_1, \\hat \\sigma\\) ?\n\n\nInterpret model\nQ3: In plain language, describe how you’d interpret \\(\\beta_0\\) and \\(\\beta_1\\). What do they represent?\nLet’s also interpret \\(R^2\\), the measure of model fit. Recall \\(R^2\\) describes the amount of variance explained by the model. In other words, how much variance did we “explain away” using the model’s prediction line. In equations, it looks like this.\n\\[\n\\begin{align}\nSST &= \\sum_i (y_i - \\bar y)^2 \\\\\nSSE &= \\sum_i (y_i - \\hat y_i)^2 \\\\\nR^2 &= \\frac{SST-SSE}{SST}\n\\end{align}\n\\]\nWe can get \\(R^2\\) directly from the model summary in R, but it’s helpful for your learning to do it a couple times directly, too. Calculate \\(SST\\), \\(SSE\\), and \\(R^2\\) arithmetically in the code chunk below. You can use the coef() function to get the model coefficient estimates, but don’t use residuals().\n\ny_bar &lt;- ???\ny_hat &lt;- ???\nSST &lt;- ???\nSSE &lt;- ???\nR2 &lt;- ???\n\nQ4: What’s the difference between \\(y\\), \\(\\bar y\\), and \\(\\hat y\\)?\nQ5: What does the \\(R^2\\) value tell you about the quality of the model (in plain language)?\nRecall that the purpose of a model is to explain variance.\nQ6: What’s the estimated value of \\(\\hat \\sigma\\) for the model? What’s the value of \\(\\sigma\\) for the response variable itself? Say you needed to predict Los Angeles River gage height following a storm - what does the relationship between these two numbers say about your ability to make that prediction accurately?"
+    "objectID": "course-materials/labs/lab1.html#setup",
+    "href": "course-materials/labs/lab1.html#setup",
+    "title": "Lab 1",
+    "section": "Setup",
+    "text": "Setup\n\nlibrary(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.1     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.3     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(palmerpenguins)\n\n\nAttaching package: 'palmerpenguins'\n\nThe following objects are masked from 'package:datasets':\n\n    penguins, penguins_raw\n\ntheme_set(theme_bw(18))\n\nWe’ll use the penguins dataset for today’s lab. Refresh your memory of what it looks like with glimpse().\n\nglimpse(penguins)\n\nRows: 344\nColumns: 8\n$ species           &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adel…\n$ island            &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgerse…\n$ bill_length_mm    &lt;dbl&gt; 39.1, 39.5, 40.3, NA, 36.7, 39.3, 38.9, 39.2, 34.1, …\n$ bill_depth_mm     &lt;dbl&gt; 18.7, 17.4, 18.0, NA, 19.3, 20.6, 17.8, 19.6, 18.1, …\n$ flipper_length_mm &lt;int&gt; 181, 186, 195, NA, 193, 190, 181, 195, 193, 190, 186…\n$ body_mass_g       &lt;int&gt; 3750, 3800, 3250, NA, 3450, 3650, 3625, 4675, 3475, …\n$ sex               &lt;fct&gt; male, female, female, NA, female, male, female, male…\n$ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007…"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#simulating-data-from-a-model",
-    "href": "course-materials/labs/lab2.html#simulating-data-from-a-model",
-    "title": "Lab 2",
-    "section": "Simulating data from a model",
-    "text": "Simulating data from a model\nSimulating data from a model is a super power for your learning! This is a great tool for unambiguously testing your understanding. Here’s the basic process:\n\nRead the model description in statistical notation\nChoose a set of parameters and predictor variable(s) for your simulation\nUse a random variable to generate a response, based on your parameters and predictor(s)\nFit a model to your simulated data\nCheck if your model’s parameter estimates match what you chose\n\nMastering this process will give you a massive boost in learning new statistical tools!\nLet’s do it for linear regression.\n\n1. Read the model description\nHere’s the description of a linear regression model in statistical notation.\n\\[\n\\begin{align}\ny &\\sim Normal(\\mu, \\sigma) \\\\\n\\mu &= \\beta_0 + \\beta_1 x\n\\end{align}\n\\]\n\n\n2. Choose parameters, predictor(s)\nWe have three parameters in our model: \\(\\beta_0\\), \\(\\beta_1\\), and \\(\\sigma\\). You can choose any valid value for them.\n\nbeta_0 &lt;- ???\nbeta_1 &lt;- ???\nsigma &lt;- ???\n\nChoose any valid value for x, too. In linear regression, the predictor can take any real value. Let’s choose 100 numbers evenly spaced between 0 and 10. You could generate these randomly, too, but you don’t have to.\n\nx &lt;- ???\n\n\n\n3. Generate response\nCheck out our model description - it tells us what to do next. \\(\\mu\\) is calculated directly from \\(\\beta_0\\), \\(\\beta_1\\), and \\(x\\), which we just chose. \\(y\\) is distributed as a normal variable with mean \\(\\mu\\) (which we calculate) and standard deviation \\(\\sigma\\) (which we chose). Is distributed as is our clue we need to create a random variable.\n\nmu &lt;- ???\ny &lt;- rnorm(n = ???, mean = ???, sd = ???)\n\n\n\n4. Fit the model\nAs we did above.\n\nsim_dat &lt;- tibble(???)\nsim_mod &lt;- lm(??? ~ ???, data = sim_dat)\n\n\n\n5. Check your model\nDo the model parameter estimates match our chosen simulation parameters?\n\nmod_summ &lt;- summary(???)\nbeta_0_hat &lt;- ???\nbeta_1_hat &lt;- ???\nsigma_hat &lt;- ???\n\nTry changing your chosen parameters for your model and see if you can recover them. As long as you keep your simulated data large enough (n &gt; 100) you should get good results.\nAs we start to use more complicated models, this procedure will become invaluable. The key thing about it is you can check your work: if you’re consistently getting the wrong estimates for your parameters then you know you have an error in your understanding. That’s what office hours are for!"
+    "objectID": "course-materials/labs/lab1.html#categorical-data",
+    "href": "course-materials/labs/lab1.html#categorical-data",
+    "title": "Lab 1",
+    "section": "Categorical data",
+    "text": "Categorical data\nCategorical data fall into discrete categories. Examples include:\n\nLand cover type (e.g., forest, wetland, urban)\nEnergy source (e.g., solar, wind, natural gas, coal)\nAir pollutant (e.g., common, hazardous, particulate matter)\n\nWe usually summarize categorical data using counts and proportions. Here we’ll explore how to do so with tables and figures.\n\nContingency tables\nContingency tables summarize combinations of variables by frequency. Create one using the base R function table(). The table below reveals an important pattern not apparent using glimpse(): not all species of penguins were observed at all islands.\n\ntable(penguins$species, penguins$island)\n\n           \n            Biscoe Dream Torgersen\n  Adelie        44    56        52\n  Chinstrap      0    68         0\n  Gentoo       124     0         0\n\n\nThe tidyverse count() function will give you a contingency table in long format.\n\npenguins %&gt;% \n  count(species, island)\n\n# A tibble: 5 × 3\n  species   island        n\n  &lt;fct&gt;     &lt;fct&gt;     &lt;int&gt;\n1 Adelie    Biscoe       44\n2 Adelie    Dream        56\n3 Adelie    Torgersen    52\n4 Chinstrap Dream        68\n5 Gentoo    Biscoe      124\n\n\nQ1 How would you pivot it to look like the contingency table above?\nWe often modify contingency tables in two ways.\nFirst, we often add marginal totals, i.e., the total of each row and column. The addmargins() function does that for us.\n\nspecies_island_table &lt;- table(penguins$species, penguins$island)\naddmargins(species_island_table)\n\n           \n            Biscoe Dream Torgersen Sum\n  Adelie        44    56        52 152\n  Chinstrap      0    68         0  68\n  Gentoo       124     0         0 124\n  Sum          168   124        52 344\n\n\nThese marginal totals demonstrate how counts can be difficult to compare, if they come from rows or columns with different totals. For example, more Adélie penguins were observed at Dream than Torgersen, but they represent a smaller fraction of the observations. Normalizing by proportion helps clarify that. You can calculate proportions either by row or column, for which we can use prop.table().\n\n# Row proportions\nprop.table(species_island_table, margin = 1)\n\n           \n               Biscoe     Dream Torgersen\n  Adelie    0.2894737 0.3684211 0.3421053\n  Chinstrap 0.0000000 1.0000000 0.0000000\n  Gentoo    1.0000000 0.0000000 0.0000000\n\n# Column proportions\nprop.table(species_island_table, margin = 2)\n\n           \n               Biscoe     Dream Torgersen\n  Adelie    0.2619048 0.4516129 1.0000000\n  Chinstrap 0.0000000 0.5483871 0.0000000\n  Gentoo    0.7380952 0.0000000 0.0000000\n\n\nQ2 How would you use count(), group_by(), mutate(), and pivoting to create row- and column-wise proportion tables?\n\n\nBar plots\nBar plots are effective for visualizing counts and proportions of one or more categories.\nThis bar plot visualizes the counts of each species.\n\nggplot(penguins, aes(species)) +\n  geom_bar()\n\n\n\n\n\n\n\n\nQ3 How would you use another aesthetic to show the composition of each species by island?\nQ4 Contrast the bar plot from Q3 with the contingency table from the beginning of the lab - how do they convey information differently?"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#rockfish-survey-gaps",
-    "href": "course-materials/labs/lab2.html#rockfish-survey-gaps",
-    "title": "Lab 2",
-    "section": "Rockfish survey gaps",
-    "text": "Rockfish survey gaps\nIn the rest of this lab, you’ll apply what you learned in the previous examples to fill gaps in a marine ecosystem survey.\nThe Rockfish Recruitment and Ecosystem Assessment Survey (RREAS) is a long-running survey of juvenile rockfish, their physical environment, and their predators along the US west coast. The survey is vitally important for understanding the population dynamics of economically and culturally important species, such as bocaccio. RREAS data inform fishery management decisions to protect threatened populations while supporting California’s coastal economy. For more information about RREAS, see their Story Map.\n\n\n\nThe US West Coast Groundfish Fishery harvested 1 million pounds of bocaccio in 2023, valued at $650k. Source: NOAA Fisheries\n\n\nThe RREAS has run almost every spring for over 40 years. The “almost” qualifier is necessary because the COVID-19 pandemic greatly reduced survey effort in 2020. NOAA scientists used linear regression to fill the gap in their dataset with a proxy measurement: diets of common murres.\n\n\n\nA conceptual model of the dynamics governing murres, their prey, and the environment.\n\n\nThe common murre is a seabird that breeds in large numbers off the coast of California. In spring, pairs of murres raise one chick by bringing it juvenile fish, including rockfish, anchovy, and salmon. The composition of common murre diets on the Farallon Islands (~30 miles west of San Francisco) has been recorded by biologists with Point Blue Conservation since the 1970s.\n\nExplore the data\nRead the data from the rreas.csv file and create a scatter plot relating fish abundance indices to common murre diet.\n\nrreas_murres &lt;- read_csv(\"data/rreas.csv\")\n\nQ6: Which variables did you choose for the x- and y-axis? What does this mean for the purpose of your model?\n\n\nFit the model\nFit a model that predicts the RREAS rockfish abundance index from the fraction of rockfish in common murre diets.\n\n\nInterpret the model\nFind the \\(R^2\\) value for your model.\nQ7: What does the R2 value tell you about the utility of your model for filling in the survey gap?\nExtract the estimated coefficients (\\(\\hat \\beta_0, \\hat \\beta_1\\)) and standard deviation (\\(\\hat \\sigma\\)) from the model.\nQ8: In plain language, what do the coefficients and standard deviation of the model represent?\nSay it’s 2020 and the RREAS has largely been canceled. You ask Point Blue to share their common murre diet data with you and they say it was 32.8% juvenile rockfish. Estimate the predicted value of the juvenile rockfish abundance index.\nQ9: What did you predict the juvenile rockfish abundance index was in 2020?\nQ10: Your prediction is the most likely outcome, but the actual index won’t take that value exactly. How would you estimate an interval that you could confidently say probably contains the actual index?"
+    "objectID": "course-materials/labs/lab1.html#continuous-data",
+    "href": "course-materials/labs/lab1.html#continuous-data",
+    "title": "Lab 1",
+    "section": "Continuous data",
+    "text": "Continuous data\nContinuous data can take any value within their bounds. Examples include:\n\nUnbounded data (e.g., temperature1)\nBounded on one side (e.g., time-to-failure can only be positive)\nBounded on two sides (e.g., fractional cover of an invasive plant in a quadrat)\n\nWe can graphically depict continuous data as one variable (i.e., its distribution) or the relationship between two variables.\n\nHistograms and shape\nHistograms show the frequency of observations within bins, revealing the shape of the variable’s distribution.\n\npenguins %&gt;% \n  ggplot(aes(body_mass_g)) +\n  geom_histogram()\n\n`stat_bin()` using `bins = 30`. Pick better value `binwidth`.\n\n\nWarning: Removed 2 rows containing non-finite outside the scale range\n(`stat_bin()`).\n\n\n\n\n\n\n\n\n\nQ5 What’s the difference between a histogram and a bar plot?\n\n\nMean and standard deviation\nRecall that parameters and statistics are numerical summaries of populations and samples, respectively. Mean and standard deviation are useful summaries, but be careful as they can hide important differences.\nThe mean is a measure of central tendency i.e., the expected or center value of an observation in the sample. The standard deviation is a measure of variation i.e., how spread out the sample is.\nAs a rule of thumb, about 68% of a sample’s data will fall within one standard deviation of the mean, and about 95% will fall within two standard deviations. The more “normally” distributed the data is (more on that tomorrow) the better these rules of thumb hold. Highly skewed data or data with a lot of outliers will deviate more from the rule of thumb.\nQ6 What percentage of penguin body masses fall within one standard deviation of the mean? Within two?\n\n\nScatterplots for paired data\nScatter plots depict relationships between variables.\n\npenguins %&gt;% \n  ggplot(aes(bill_length_mm, bill_depth_mm)) +\n  geom_point() \n\nWarning: Removed 2 rows containing missing values or values outside the scale range\n(`geom_point()`).\n\n\n\n\n\n\n\n\n\nThe scatterplot above suggests little relationship between bill length and depth, or perhaps a slightly negative correlation. That means longer bills are not associated with deeper bills. However, if you ask a penguin anatomist, they’ll tell you the opposite is true: longer bills tend to be deeper, too. How can we reconcile these contrasting statements?\nThis is an example of Simpson’s paradox, which is when between-group correlations of one kind mask within-group correlations of another kind. Unmask the paradox by color-coding the points by species.\nQ7: Modify the scatterplot above to color-code the points by species. Then describe the correlations between bill depth, bill length, and species. How do the correlations across species mask the correlations within?"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#recap",
-    "href": "course-materials/labs/lab2.html#recap",
-    "title": "Lab 2",
-    "section": "Recap",
-    "text": "Recap\nIn this lab, you fit linear regression models to one predictor and one response variable. You used statistical notation to describe the model, which makes two things unambiguous.\n\nIt shows the relationship between the predictor, model coefficients, and the expected value of the response for a given value of the predictor.\nIt says the observed response values are normally distributed around the expected value, with a standard deviation of \\(\\sigma\\).\n\nIn future weeks, we’ll build on this foundation to make more complicated models. You’ll add additional predictors, transform parameters to introduce non-linearity, and use non-normal random variables to model other types of responses."
+    "objectID": "course-materials/labs/lab1.html#where-to-find-data",
+    "href": "course-materials/labs/lab1.html#where-to-find-data",
+    "title": "Lab 1",
+    "section": "Where to find data",
+    "text": "Where to find data\nThe Yale University Library provides a useful guide for where to find environmental data. The categories include:\n\nGeneral Environmental Data\nEnergy Data\nClimate & Atmospheric Data\nAgricultural, Forestry, and Ecology Data\nHealth Related Data\n\nFind a dataset containing multiple categorical and continuous variables. You’ll have an easier time if you limit your search to tabular data. Explore the data using each of the following tools.\n\nContingency table\nBar plot\nHistogram\nScatterplot"
   },
   {
-    "objectID": "course-materials/labs/lab4-key.html",
-    "href": "course-materials/labs/lab4-key.html",
-    "title": "Lab 4 (key)",
-    "section": "",
-    "text": "In today’s lab you will…\n\nRun a permutation test to answer a “yes/no?” question\nBootstrap a confidence interval to answer a “how much?” question\n\n\nlibrary(tidyverse)\ntheme_set(theme_classic(14))\nset.seed(123)"
+    "objectID": "course-materials/labs/lab1.html#finished",
+    "href": "course-materials/labs/lab1.html#finished",
+    "title": "Lab 1",
+    "section": "Finished?",
+    "text": "Finished?\nIf you wrap up before lab is over, head over to the final project page on the course website and look at the section Model and response options. Your final project will require you to choose a question and data to investigate using a model we won’t teach you in class. The defining characteristic for these models are the response variable they can handle. Start thinking up a question and looking for data where the response variable has characteristics listed in the Model and response options table. Keep in mind that transformations and merging datasets are both options, so even if the raw data you find don’t match one of the eligible models, you may be able to derive something that does. Happy hunting!"
   },
   {
-    "objectID": "course-materials/labs/lab4-key.html#learning-objectives",
-    "href": "course-materials/labs/lab4-key.html#learning-objectives",
-    "title": "Lab 4 (key)",
-    "section": "",
-    "text": "In today’s lab you will…\n\nRun a permutation test to answer a “yes/no?” question\nBootstrap a confidence interval to answer a “how much?” question\n\n\nlibrary(tidyverse)\ntheme_set(theme_classic(14))\nset.seed(123)"
+    "objectID": "course-materials/labs/lab1.html#footnotes",
+    "href": "course-materials/labs/lab1.html#footnotes",
+    "title": "Lab 1",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nYes, absolute zero does exist, but practically for our purposes temperature is unbounded↩︎"
   },
   {
-    "objectID": "course-materials/labs/lab4-key.html#eel-grass-restoration",
-    "href": "course-materials/labs/lab4-key.html#eel-grass-restoration",
-    "title": "Lab 4 (key)",
-    "section": "Eel grass restoration",
-    "text": "Eel grass restoration\nRecall the eel grass restoration example from yesterday’s lecture. The data recorded whether attempts to restore eel grass were successful based on the method used (garden staple or popsicle stick) Figure 1.\n\nrestoration &lt;- read_csv(\"data/eelgrass.csv\",\n                        show_col_types = FALSE)\nglimpse(restoration)\n\nRows: 100\nColumns: 5\n$ plot_id          &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16…\n$ treatment        &lt;chr&gt; \"Garden staple\", \"Popsicle stick\", \"Garden staple\", \"…\n$ success          &lt;dbl&gt; 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1,…\n$ shoot_density_m2 &lt;dbl&gt; 45.94241, 91.60585, 120.92760, 67.86314, 88.09977, 87…\n$ success_fct      &lt;chr&gt; \"Succeed\", \"Succeed\", \"Fail\", \"Fail\", \"Succeed\", \"Suc…\n\n\n\nggplot(restoration, aes(treatment, fill = success_fct)) +\n  geom_bar() +\n  scale_fill_manual(values = c(\"firebrick\", \"cornflowerblue\")) +\n  labs(x = \"Restoration method\",\n       y = \"Sites\",\n       fill = \"Outcome\") +\n  theme(legend.position = \"inside\",\n        legend.position.inside = c(1, 1),\n        legend.justification = c(1, 1))\n\n\n\n\n\n\n\nFigure 1: Success of eelgrass restoration plots by restoration method."
+    "objectID": "course-materials/lecture-slides/week1_monday.html#statistics-for-environmental-data-science",
+    "href": "course-materials/lecture-slides/week1_monday.html#statistics-for-environmental-data-science",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Statistics for Environmental Data Science",
+    "text": "Statistics for Environmental Data Science\nInstructional team: Max Czapanskiy and Sloane Stephenson"
   },
   {
-    "objectID": "course-materials/labs/lab4-key.html#permutation-test",
-    "href": "course-materials/labs/lab4-key.html#permutation-test",
-    "title": "Lab 4 (key)",
-    "section": "Permutation test",
-    "text": "Permutation test\nWe want to know if the popsicle stick method works better for restoration than garden staples. This is a “yes/no?” question, so we’ll use a permutation test for our hypothesis. Recall the steps for hypothesis testing:\n\nIdentify the TEST STATISTIC\nState your NULL and ALTERNATIVE hypotheses\nCalculate the OBSERVED test statistic\nEstimate the NULL DISTRIBUTION\nCalculate P-VALUE\nCompare p-value to CRITICAL THRESHOLD\n\n\nIdentify the test statistic\nQ1: What is the appropriate test statistic for this question?\nDifference in proportions\n\n\nState your null and alternative hypotheses\nQ2: What are your null and alternative hypotheses?\nH0: There’s no difference in outcome between garden staple and popsicle stick methods.\nHA: The popsicle stick method is more likely to succeed than the garden staple method.\n\n\nCalculate the observed test statistic\nQ3: How would you calculate the test statistic for the sample?\n\nsuccess_props &lt;- restoration %&gt;% \n  group_by(treatment) %&gt;% \n  summarize(prop_success = mean(success))\n\ndiff_props &lt;- success_props$prop_success[2] - success_props$prop_success[1]\n\ndiff_props\n\n[1] 0.1416667\n\n\n\n\nEstimate the null distribution\nThis is the key part of a permutation test! Remember, our goal is to estimate the distribution of possible outcomes under the null hypothesis. To do that, we have to break the association between treatment and outcome.\nQ4: What column should we shuffle to break the association between treatment and outcome?\ntreatment\nQ5: Fill in the following code to perform one permutation and calculate the test statistic.\n\none_permutation &lt;- restoration %&gt;% \n  mutate(treatment = sample(treatment, \n                            size = length(treatment), \n                            replace = FALSE))\n\npermutation_props &lt;- one_permutation %&gt;% \n  group_by(treatment) %&gt;% \n  summarize(prop_success = mean(success))\n\npermutation_diff_props &lt;- permutation_props$prop_success[2] - permutation_props$prop_success[1]\n\npermutation_diff_props\n\n[1] -0.06666667\n\n\nThat gives us the value of the test statistic for just one permutation. To get a distribution, we have to repeat the process many times. Let’s do it 1,000 times.\nQ6: Fill in the following code to perform 1,000 permutations and estimate the null distribution\n\npermute &lt;- function(i) {\n  one_permutation &lt;- restoration %&gt;% \n    mutate(treatment = sample(treatment, \n                              size = length(treatment), \n                              replace = FALSE))\n  \n  permutation_props &lt;- one_permutation %&gt;% \n    group_by(treatment) %&gt;% \n    summarize(prop_success = mean(success))\n  \n  permutation_diff_props &lt;- permutation_props$prop_success[2] - permutation_props$prop_success[1]\n  \n  permutation_diff_props\n}\n\nnull_distribution &lt;- map_dbl(1:1000, permute)\n\nQ7: Visualize the null distribution using a histogram and show where the observed test statistic falls\n\nnull_distribution_df &lt;- tibble(null_distribution)\nggplot(null_distribution_df, aes(null_distribution)) +\n  geom_histogram(binwidth = 0.05) +\n  geom_vline(xintercept = diff_props, \n             color = \"firebrick\",\n             linewidth = 1.5)\n\n\n\n\n\n\n\n\n\n\nCalculate the p-value\nThe p-value is the probability of a test statistic at least as extreme as the observed, given the null hypothesis. In other words, what proportion of the null distribution exceeds the observed?\nQ8: Calculate the p-value using the null distribution and observed test statistic\n\np_val &lt;- mean(null_distribution &gt; diff_props)\n\np_val\n\n[1] 0.059\n\n# Note: the in-class p-value was 0.045. This p-value is 0.059. That's due to variation in the permutation sampling, a difference of ~1%.\n\n\n\nInterpret the p-value\nWhen interpreting the p-value, we compare it to a critical threshold, usually denoted with \\(\\alpha\\). By convention, we usually set \\(\\alpha\\) to 0.05.\nQ10: Given \\(p \\gt \\alpha\\), which of the following statements is a correct interpretation and why?\n\nOur evidence is consistent with the hypothesis that restoration method does not influence restoration outcome\nWe cannot reject the hypothesis that restoration method does not influence restoration outcome\n\nThe second interpretation is correct, because it simply fails to reject the null hypothesis. The first interpretation is incorrect because it implies we found evidence to support the null hypothesis, which is too strong of a statement given the results."
+    "objectID": "course-materials/lecture-slides/week1_monday.html#todays-goals",
+    "href": "course-materials/lecture-slides/week1_monday.html#todays-goals",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s goals",
+    "text": "Today’s goals\n\nDescribe the challenges of statistical inference and identify them in an Environmental Justice (EJ) case study\nDefine validity, reliability, and sampling in the context of measurements and data\nPrepare for success in this course"
   },
   {
-    "objectID": "course-materials/labs/lab4-key.html#bootstrap-confidence-interval",
-    "href": "course-materials/labs/lab4-key.html#bootstrap-confidence-interval",
-    "title": "Lab 4 (key)",
-    "section": "Bootstrap confidence interval",
-    "text": "Bootstrap confidence interval\nNow let’s answer a “how much?” question. We want to estimate an interval that we think contains the population parameter. For that, we use bootstrapping.\nRecall the steps for bootstrapping:\n\nIdentify the TEST STATISTIC\nSubstitute sample for population and draw BOOTSTRAP SAMPLES\nEstimate the BOOTSTRAP DISTRIBUTION of the test statistic\nCalculate the CONFIDENCE INTERVAL\n\n\nIdentify the test statistic\nQ11: What is the appropriate test statistic for this question?\nDifference in proportions\n\n\nDraw bootstrap samples\nThis is the key part of bootstrapping! Remember, our goal is to estimate the variation of our population’s parameter due to sampling. To do that, we simulate the process of re-doing our experiment, using the original sample as a substitute for the population.\nQ12: Fill in the following code to draw one bootstrap sample.\n\none_bootstrap &lt;- restoration %&gt;% \n  group_by(treatment) %&gt;% \n  mutate(success = sample(success,\n                          size = length(success),\n                          replace = TRUE)) %&gt;% \n  ungroup()\n\nQ13: Fill in the following code to draw 1,000 bootstrap samples.\n\n\n\n\n\n\nTip\n\n\n\nlist_rbind() will take a list of data frames and bind them row-wise into one data frame.\n\n\n\nbootstrap &lt;- function(i) {\n  one_bootstrap &lt;- restoration %&gt;% \n    group_by(treatment) %&gt;% \n    mutate(success = sample(success,\n                            size = length(success),\n                            replace = TRUE)) %&gt;% \n    ungroup() %&gt;% \n    mutate(trial = i)\n}\n\nbootstrap_samples &lt;- map(1:1000, bootstrap) %&gt;% \n  list_rbind()\n\n\n\nEstimate the bootstrap distribution of the test statistic\nQ14: Fill in the following code to alculate the test statistic for each bootstrap sample.\n\nboot_diff_prop &lt;- bootstrap_samples %&gt;% \n  group_by(trial, treatment) %&gt;% \n  summarize(prop_success = mean(success),\n            .groups = \"drop_last\") %&gt;% \n  summarize(diff_prop = prop_success[2] - prop_success[1])\n\nQ15: Visualize the bootstrapped distribution of the test statistic.\n\nggplot(boot_diff_prop, aes(diff_prop)) +\n  geom_histogram()\n\n`stat_bin()` using `bins = 30`. Pick better value `binwidth`.\n\n\n\n\n\n\n\n\n\n\n\nCalculate the confidence interval\nA confidence interval (CI) is a range we are confident contains the population parameter. The bootstrapped distribution of the test statistic describes where we expect the population parameter to fall. So a 95% confidence interval, for example, spans the range from the 2.5% quantile of the bootstrap distribution to the 97.5% quantile.\nQ16: Find the bounds of the 95% CI.\n\n\n\n\n\n\nTip\n\n\n\nThe quantile() function finds quantiles. It’s vectorized over the parameter probs, so you can find multiple quantiles at once\n\n\n\nrestoration_ci &lt;- quantile(boot_diff_prop$diff_prop, c(0.025, 0.975))\nrestoration_ci\n\n       2.5%       97.5% \n-0.05020833  0.34166667 \n\n\nQ17: Update your visual from Q15 to include the observed test statistic with a solid line and the confidence interval represented with dotted lines.\n\nggplot(boot_diff_prop, aes(diff_prop)) +\n  geom_histogram() +\n  geom_vline(xintercept = diff_props, \n             color = \"firebrick\",\n             linewidth = 1.5) +\n  geom_vline(xintercept = restoration_ci, \n             color = \"firebrick\",\n             linetype = \"dotted\",\n             linewidth = 1.5)\n\n`stat_bin()` using `bins = 30`. Pick better value `binwidth`."
+    "objectID": "course-materials/lecture-slides/week1_monday.html#navigating-uncertainty",
+    "href": "course-materials/lecture-slides/week1_monday.html#navigating-uncertainty",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Navigating uncertainty",
+    "text": "Navigating uncertainty\n\nIf we could directly observe everything without error, we wouldn’t need statistics\nIn practice, we only get a glimpse through a window at what we care about\nStatistics is the practice of interpreting data to understand the whole from the limited part we can see"
   },
   {
-    "objectID": "course-materials/labs/lab4-key.html#permutation-vs-bootstrap",
-    "href": "course-materials/labs/lab4-key.html#permutation-vs-bootstrap",
-    "title": "Lab 4 (key)",
-    "section": "Permutation vs bootstrap",
-    "text": "Permutation vs bootstrap\nThe visualization you created for Q7 shows the null distribution of the test statistic. The visualization you created for Q17 shows the bootstrapped distribution of the test statistic.\nQ18: What did you do to make the null distribution center on zero? Specifically, what code?\nBroke the association between treatment and outcome. Sampled treatment without replacement.\nQ19: What did you do to make the bootstrap distribution center on the observed test statistic? Specifically, what code?\nRetained the association between treatment and outcome. Grouped by treatment, then sampled with replacement.\nQ20: What would happen to your bootstrap distribution if you sampled without replacement?\nSampling without replacement is just shuffling. Since we sampled within treatments, the bootstrap samples would always match the observed sample. So there would be no variation in the bootstrap distribution of the test statistic."
+    "objectID": "course-materials/lecture-slides/week1_monday.html#challenges-of-statistical-inference-1",
+    "href": "course-materials/lecture-slides/week1_monday.html#challenges-of-statistical-inference-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Challenges of statistical inference",
+    "text": "Challenges of statistical inference\n\nGeneralizing from sample to population\nGeneralizing from treatment to control group\nGeneralizing from observed measurements to underlying constructs of interest\n\n(Gelman, Hill, and Vehtari 2021)"
   },
   {
-    "objectID": "course-materials/labs/lab7.html",
-    "href": "course-materials/labs/lab7.html",
-    "title": "Lab 7",
-    "section": "",
-    "text": "In today’s lab you will…\n\nFit logistic regression models to binary (0/1, no/yes) outcomes\nInterpret coefficients\nVisualize predictions\n\nComplete sections Logistic model notation and R code and Read and explore the data before class.\n\nlibrary(tidyverse)\ntheme_set(theme_classic(12))\nset.seed(123)"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#neither-math-nor-magic",
+    "href": "course-materials/lecture-slides/week1_monday.html#neither-math-nor-magic",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Neither math nor magic",
+    "text": "Neither math nor magic\nStatistics uses math (just like any other field of science) but it’s not a type of math\n\nSure, calculus and linear algebra can be useful, but we’ll mostly bypass them\nInstead, we will instead use simulation to develop (and test) conceptual models"
   },
   {
-    "objectID": "course-materials/labs/lab7.html#learning-objectives",
-    "href": "course-materials/labs/lab7.html#learning-objectives",
-    "title": "Lab 7",
-    "section": "",
-    "text": "In today’s lab you will…\n\nFit logistic regression models to binary (0/1, no/yes) outcomes\nInterpret coefficients\nVisualize predictions\n\nComplete sections Logistic model notation and R code and Read and explore the data before class.\n\nlibrary(tidyverse)\ntheme_set(theme_classic(12))\nset.seed(123)"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#neither-math-nor-magic-1",
+    "href": "course-materials/lecture-slides/week1_monday.html#neither-math-nor-magic-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Neither math nor magic",
+    "text": "Neither math nor magic\nTo perform a statistical analysis responsibly you need to understand the assumptions and risks\n\nMany applications of statistics … invoke statistical terms and procedures as incantations, with scant understanding of the assumptions or relevance of the calculations, or even the meaning of the terminology. This demotes statistics from a way of thinking about evidence and avoiding self-deception to a formal “blessing” of claims.\n\n(Stark and Saltelli 2018)"
   },
   {
-    "objectID": "course-materials/labs/lab7.html#logistic-model-notation-and-r-code",
-    "href": "course-materials/labs/lab7.html#logistic-model-notation-and-r-code",
-    "title": "Lab 7",
-    "section": "Logistic model notation and R code",
-    "text": "Logistic model notation and R code\nIn statistical notation, logistic models take the form:\n\\[\n\\begin{align}\n\\text{BinaryOutcome} &\\sim Binomial(1, p) \\\\\nlogit(p) &= \\beta_0 + \\beta_1 \\text{Predictor}\n\\end{align}\n\\]\nIn R, you can fit a logistic model like this:\nlogistic_model &lt;- glm(binary_outcome ~ predictor,\n                      data = my_data,\n                      family = binomial(link = \"logit\"))\nIn both the notation and code above, identify the:\n\nResponse family\nLink function\nResponse\nPredictor"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#a-way-of-thinking",
+    "href": "course-materials/lecture-slides/week1_monday.html#a-way-of-thinking",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "A way of thinking",
+    "text": "A way of thinking\n\nIn this class you will learn statistical thinking for assessing and interpreting evidence\nWe will avoid formulaic flowcharts for picking tests and models\nThe decisions and choices made by statistics practitioners have real world consequences"
   },
   {
-    "objectID": "course-materials/labs/lab7.html#read-and-explore-the-data",
-    "href": "course-materials/labs/lab7.html#read-and-explore-the-data",
-    "title": "Lab 7",
-    "section": "Read and explore the data",
-    "text": "Read and explore the data\nRead the dataset in drinking_water.csv.\nDescribe what you think each of the columns represents.\n\n\n\nColumn\nMeaning\n\n\n\n\npwsid\n\n\n\npwsname\n\n\n\npctpov\n\n\n\npcthisp\n\n\n\nhealth\n\n\n\nmedianincomehouse\n\n\n\nviolation\n\n\n\npcthisp_bin\n\n\n\npctpov_bin\n\n\n\n\nCreate three figures summarizing the relationships between race, class, and SDWA violations.\nFigure 1: A scatter plot showing the proportion of districts with SDWA violations in each percent Hispanic bin.\nFigure 2: A scatter plot showing the proportion of districts with SDWA violations in each percent below-poverty bin.\nFigure 3: A scatter plot showing the correlation between percent Hispanic and percent below-poverty at the district level."
+    "objectID": "course-materials/lecture-slides/week1_monday.html#are-my-children-safe",
+    "href": "course-materials/lecture-slides/week1_monday.html#are-my-children-safe",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Are my children safe?",
+    "text": "Are my children safe?\n\nCrystal Garcia, 26, is concerned about the safety of her children – Melonie, 4, left, and Jesse, 3 – since elevated levels of lead have been found in the soil around her neighbors’ homes in Boyle Heights, near the Exide Technologies plant in Vernon. (Al Seib / Los Angeles Times)March 13, 2014 in the Los Angeles Times"
   },
   {
-    "objectID": "course-materials/labs/lab7.html#fit-and-interpret-model",
-    "href": "course-materials/labs/lab7.html#fit-and-interpret-model",
-    "title": "Lab 7",
-    "section": "Fit and interpret model",
-    "text": "Fit and interpret model\nOur question is:\nHow are SDWA violations distributed among communities by class and race?\nLet’s begin by investigating class in isolation. Fit a logistic model to see how violation responds to pctpov.\nJust as we did with linear regression, you can inspect coefficient estimates, p-values, and confidence intervals using summary() and confint().\nWhat is the best estimate for the % Below Poverty coefficient?\nIs the coefficient significantly different than 0? Assume critical threshold of 0.05.\nWhat is the 95% CI for the coefficient?\nBased on the sign, what is the relationship between class and SDWA violations?"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#exide-battery-recycling-plant",
+    "href": "course-materials/lecture-slides/week1_monday.html#exide-battery-recycling-plant",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Exide battery recycling plant",
+    "text": "Exide battery recycling plant\n\nThe 15-acre battery recycling plant is about five miles southeast of downtown Los Angeles. (Irfan Khan / Los Angeles Times)March 23, 2013 in the Los Angeles Times"
   },
   {
-    "objectID": "course-materials/labs/lab7.html#make-predictions",
-    "href": "course-materials/labs/lab7.html#make-predictions",
-    "title": "Lab 7",
-    "section": "Make predictions",
-    "text": "Make predictions\nInterpreting the coefficients directly is pretty difficult with logistic regression! What is the difference between a coefficient of 0.1 and 0.2? Rather than interpreting the coefficient directly, it’s often easier to compare predictions.\nOnce you have a model, you can make predictions using predict(). When calling predict(), the following parameters are important:\n\nobject The model you want to generate predictions from\nnewdata A data frame of predictors your want predictions for\ntype Do you want predictions on the link or response scale? By default, predict() shows the value of \\(logit(p) = \\beta_0 + \\beta_1 x\\) (i.e., link-scale). To get the predicted probability (i.e., response-scale) set type to “response”.\nse.fit If se.fit is TRUE, predict() will calculate the confidence interval of the response on the link scale. You can use that to get the confidence interval of \\(p\\). That will make a ribbon, similar to the confidence interval of \\(\\mu\\) you saw in linear regression.\n\nHere’s how to generate predictions (with CI) for a single predictor.\n\n\n\n\n\n\nTip\n\n\n\nI use expand_grid() instead of tibble() when making the data frame of predictors because it gives you every combination of the values in the columns. That will be important when you have more than one predictor!\n\n\nThat was just the best estimate. The following code adds the 95% CI for \\(p\\). It uses the inverse link function to go from link-scale to response-scale.\n\n\n\n\n\n\nCaution\n\n\n\nWhen constructing the 95% CI for \\(p\\), one thing remains the same and one thing has changed from constructing the 95% CI for \\(\\mu\\).\nWhat remains the same: the sampling distribution is normal, so once you have the standard error you can use qnorm() to get the 2.5% and 97.5% quantiles.\nWhat’s different: the sampling distribution exists on the link scale. In other words, the standard error is \\(SE(logit(p))\\) rather than \\(SE(p)\\). So you have to get the best estimate and standard error on the link scale, then invert the link function to get back to \\(p\\).\n\n\nAnd here’s the fit with the 95% CI presented as the familiar ribbon.\nWhat is the probability of a SDWA violation in a district where 5% of households are below the poverty line? When 50% are? Show the best estimate and 95% CI."
+    "objectID": "course-materials/lecture-slides/week1_monday.html#a-history-in-three-parts",
+    "href": "course-materials/lecture-slides/week1_monday.html#a-history-in-three-parts",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "A history in three parts",
+    "text": "A history in three parts\n1922 - 2012: A century of pollution\n2013 - 2015: Shut it down\n2016 - present: Is it safe now?"
   },
   {
-    "objectID": "course-materials/labs/lab7.html#your-turn",
-    "href": "course-materials/labs/lab7.html#your-turn",
-    "title": "Lab 7",
-    "section": "Your turn",
-    "text": "Your turn\nSwitzer and Teodoro demonstrated that the interaction between race and class is important for understanding the environmental justice dimensions of drinking water. You’ll investigate that here through the following steps.\n\nCreate a new model with an interaction term between pctpov and pcthisp.\nUse the summary and confidence intervals to answer the following questions:\nWhat is the 95% CI for the % Hispanic coefficient?\nIs the interaction between class and race significantly different than 0?\nCreate a new predictor data frame with combinations of both predictors.\nGenerate predictions, including both the best estimate and 95% CI.\nPlot the predictions. In your plot, put pcthisp on the x-axis and probability of SDWA violations on the y-axis. Indicate pctpov using color and fill. To make this work, you’ll have to filter your predictions to a few levels of pctpov (e.g., 0, 25, 50, and 75).\n\nThe coefficient for an interaction term in a logistic regression model is very difficult to interpret on its own! But that value has important consequences for the lives of millions of people. Predictions are usually more straightforward to interpret than coefficients. Use your figure and the outputs of summary() and confint() to reflect on the following prompt. Reply to the corresponding thread on Slack with your reflection to get 1 token.\nIn plain language, what is the relationship between race, class, and SDWA violations? Which communities face the greatest risks associated with drinking water? How would you use the statistical outputs (model summary, prediction figure) to describe that risk quantitatively? How could those statistical outputs be misinterpreted?"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#lead-smelting-operations-begin-in-1922",
+    "href": "course-materials/lecture-slides/week1_monday.html#lead-smelting-operations-begin-in-1922",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Lead smelting operations begin in 1922",
+    "text": "Lead smelting operations begin in 1922\n\n\n\nPlant opened in 1922 in Vernon, CA - an industrial city 5 miles from Downtown LA\n1 of 2 lead battery recycling plants west of the Rockies\nEmitted lead, arsenic, and other pollutants for 90 years\n\n\n\n\n\nThe plant operated in the industrial city of Vernon since 1922, spewing toxic air pollution over decades. (Brian van der Brug / Los Angeles Times)"
   },
   {
-    "objectID": "course-materials/labs/lab5.html",
-    "href": "course-materials/labs/lab5.html",
-    "title": "Lab 5",
-    "section": "",
-    "text": "In today’s lab you will…\n\nUse mathematical models to test hypotheses\nUse mathematical models to construct confidence intervals\nCompare mathematical and randomization approaches to inference\n\n\nlibrary(tidyverse)\ntheme_set(theme_classic(14))\nset.seed(123)"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#lead-from-emissions-gas-and-paint",
+    "href": "course-materials/lecture-slides/week1_monday.html#lead-from-emissions-gas-and-paint",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Lead from emissions, gas, and paint",
+    "text": "Lead from emissions, gas, and paint\n\nCCAT Exide Presentation 05.08.24"
   },
   {
-    "objectID": "course-materials/labs/lab5.html#learning-objectives",
-    "href": "course-materials/labs/lab5.html#learning-objectives",
-    "title": "Lab 5",
-    "section": "",
-    "text": "In today’s lab you will…\n\nUse mathematical models to test hypotheses\nUse mathematical models to construct confidence intervals\nCompare mathematical and randomization approaches to inference\n\n\nlibrary(tidyverse)\ntheme_set(theme_classic(14))\nset.seed(123)"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#wind-carried-lead-to-nearby-communities",
+    "href": "course-materials/lecture-slides/week1_monday.html#wind-carried-lead-to-nearby-communities",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Wind carried lead to nearby communities",
+    "text": "Wind carried lead to nearby communities\n\nCCAT Exide Presentation 05.08.24"
   },
   {
-    "objectID": "course-materials/labs/lab5.html#mathematical-models",
-    "href": "course-materials/labs/lab5.html#mathematical-models",
-    "title": "Lab 5",
-    "section": "Mathematical models",
-    "text": "Mathematical models\nThis lab will repeat the inferences you conducted in last week’s lab, using mathematical models instead of randomization. Let’s recall our data from last week. You’ll need to copy the data file to your week5/data directory.\n\nrestoration &lt;- read_csv(\"data/eelgrass.csv\",\n                        show_col_types = FALSE)\nggplot(restoration, aes(treatment, fill = success_fct)) +\n  geom_bar() +\n  scale_fill_manual(values = c(\"firebrick\", \"cornflowerblue\")) +\n  labs(x = \"Restoration method\",\n       y = \"Sites\",\n       fill = \"Outcome\") +\n  theme(legend.position = \"inside\",\n        legend.position.inside = c(1, 1),\n        legend.justification = c(1, 1))\n\n\n\n\n\n\n\nFigure 1: Success of eelgrass restoration plots by restoration method.\n\n\n\n\n\n\nHypothesis test\nOnce again, we want to know if the popsicle stick method works better for restoration than garden staples. This is a “yes/no?” question, so we’re conducting a hypothesis test. Instead of using permutation to estimate our sampling distribution, we will assume the sampling distribution is normally distributed. Under the null hypothesis (i.e., no difference in proportions), we make this assumption:\n\\[\n\\begin{align}\n\\hat{p_2} - \\hat{p_1} &\\sim Normal(0, SE(\\hat{p})) \\\\\n\\hat{p} &= \\frac{x_1 + x_2}{n_1 + n_2} \\\\\nSE(\\hat{p_2} - \\hat{p_1}) &= \\sqrt{\\hat{p} (1 - \\hat{p}) (\\frac{1}{n_1} + \\frac{1}{n_2})} \\\\\n\\end{align}\n\\]\n\n\n\n\n\n\nNote\n\n\n\nThis math describes the assumptions of the null hypothesis for a difference in proportions. The key points are:\n\nThe distribution of the statistic (\\(\\hat{p_2} - \\hat{p_1}\\)) follows a normal distribution (i.e., the shape of the sampling distribution).\nWe assume the mean of the sampling distribution is 0, because this is the null hypothesis.\nThe standard error of the sampling distribution is based on the POOLED proportion because we’re assuming no difference between the proportions.\n\n\n\nThis is how you would have tested your hypothesis using permutation:\n\nIdentify the STATISTIC\nState your NULL and ALTERNATIVE hypotheses\nCalculate the OBSERVED statistic\nEstimate the NULL DISTRIBUTION\nCalculate P-VALUE\nCompare p-value to CRITICAL THRESHOLD\n\nUsing a mathematical model, you modify step 4. Instead of using randomization to estimate the null distribution, you use a normal variable. The following questions walk you through the steps. Note: many of these steps are exactly the same as last week’s lab.\n\nIdentify the statistic\nQ1: What is the appropriate statistic for this question?\n\n\nState your null and alternative hypotheses\nQ2: What are your null and alternative hypotheses?\nH0:\nHA:\n\n\nCalculate the sample statistic\nQ3: How would you calculate the statistic for the sample?\nCall the variable diff_props.\n\nsuccess_props &lt;- restoration %&gt;% \n  group_by(???) %&gt;% \n  summarize(prop_success = ???)\n\ndiff_props &lt;- ??? - ???\n\ndiff_props\n\n\n\nEstimate the null distribution\nQ4: What’s the standard error of the sample’s statistic?\n\n# p_hat is the POOLED proportion, i.e. the overall proportion of success\np_hat &lt;- ???\n\n# n's are the number of observations in each treatment\n# n1: number of garden staple observations\n# n2: number of popsicle stick observations\nn1 &lt;- ???\nn2 &lt;- ???\n\nse_p_hat &lt;- ???\n\nIf you calculated se_p_hat correctly, the following figure should depict the PDF of the null distribution. It should be a normal variable with mean equal to 0 and standard deviation equal to the standard error of \\(\\hat p\\).\n\nnull_dist &lt;- tibble(\n  diff_prop = seq(-0.4, 0.4, length.out = 1000),\n  density = dnorm(diff_prop, mean = 0, sd = se_p_hat)\n)\n \nggplot(null_dist, aes(diff_prop, density)) +\n  geom_line(color = \"cornflowerblue\", linewidth = 2) +\n  geom_vline(xintercept = diff_props, color = \"firebrick\", linewidth = 2)\n\n\n\nCalculate the p-value\nUse the pnorm() function to get the area under the curve of a normal distribution.\n\n\n\n\n\n\nTip\n\n\n\nBy default, pnorm() will tell you the area under the curve to the left of a value. Since we want the area to the right of the observed statistic, set lower.tail to FALSE.\n\n\nQ5: Fill in the blanks to calculate the p-value\n\np_val &lt;- pnorm(???, mean = ???, sd = ???, ???)\np_val\n\n\n\nCompare p-value to critical threshold\nQ6: How does your p-value compare to a critical threshold \\(\\alpha=0.05\\)? How would you interpret that?\n\n\n\nConfidence interval\nNow we want to estimate how differently the popsicle stick and garden staple methods perform. This is a “how much?” question, so we’re constructing a confidence interval. Instead of using bootstrapping to estimate our sampling distribution, we will assume the sampling distribution is normally distributed. We make this assumption:\n\\[\n\\begin{align}\n\\hat{p_2} - \\hat{p_1} &\\sim Normal(p_2 - p_1, SE(\\hat{p_2} - \\hat{p_1})) \\\\\nSE(\\hat{p_2} - \\hat{p_1}) &= \\sqrt{\\frac{\\hat{p_1}(1 - \\hat{p_1})}{n_1} + \\frac{\\hat{p_2}(1 - \\hat{p_2})}{n_2}} \\\\\n\\end{align}\n\\]\n\n\n\n\n\n\nNote\n\n\n\nThis math describes the assumptions of constructing a confidence interval for a difference in proportions. The key points are:\n\nThe distribution of the statistic (\\(\\hat{p_2} - \\hat{p_1}\\)) follows a normal distribution (i.e., the shape of the sampling distribution).\nWe assume the mean of the sampling distribution is the population parameter (\\(p_2 - p_1\\)).\nThe standard error of the sampling distribution is based on the two samples’ proportions, rather than pooling them, because we’re assuming there’s a difference between the proportions.\n\n\n\nThis is how you would have built a confidence interval using bootstrapping:\n\nIdentify the STATISTIC\nSubstitute sample for population and draw BOOTSTRAP SAMPLES\nEstimate the BOOTSTRAP DISTRIBUTION of the statistic\nConstruct the CONFIDENCE INTERVAL\n\nUsing a mathematical model changes how steps 2 and 3 work, with the same goal of estimating the sampling distribution. Instead of using randomization to draw bootstrap samples, you use a normal variable. The procedure works like this:\n\nIdentify the STATISTIC\nCalculate the STANDARD ERROR of the statistic\nConstruct the CONFIDENCE INTERVAL using a normal variable\n\nThe following questions walk you through the steps.\n\nIdentify the statistic\nQ7: What is the appropriate test statistic for this question?\n\n\nCalculate the standard error\nQ8: Fill in the blanks below to calculate the standard error of the statistic\n\n\n\n\n\n\nNote\n\n\n\nRemember that the standard error is going to differ between hypothesis testing and confidence intervals. Hypothesis testing begins by assuming the null hypothesis is true, so the standard error describes a scenario where there are no differences (\\(p_2=p_1\\)). Confidence intervals assume the difference is real, so the standard error comes from a different scenario (\\(p_2 &gt; p_1\\)). Hence the difference in equations.\n\n\n\n# Calculate the proportions of the two treatments\n# Let treatment 1 be \"Garden staple\"\np_hat1 &lt;- ???\n# Let treatment 2 be \"Popsicle stick\"\np_hat2 &lt;- ???\n\n# n1 and n2 remain the same from before\n\n# Calculate standard error\nse_diff_props &lt;- ???\nse_diff_props\n\nIf you calculated se_diff_props correctly, the following figure should depict the PDF of the sampling distribution. It should be a normal variable with mean equal to the observed statistic in the sample and standard deviation equal to the standard error.\n\nsampling_dist &lt;- tibble(\n  diff_prop = seq(-0.2, 0.5, length.out = 1000),\n  density = dnorm(diff_prop, mean = diff_props, sd = se_diff_props)\n)\n \nggplot(sampling_dist, aes(diff_prop, density)) +\n  geom_line(color = \"cornflowerblue\", linewidth = 2) +\n  geom_vline(xintercept = diff_props, color = \"firebrick\", linewidth = 2)\n\n\n\nConstruct the confidence interval\nUsing bootstrapping, you constructed the confidence interval using the 2.5% and 97.5% quantiles of the bootstrapped sampling distribution. Using the mathematical model, you use the function qnorm(). Whereas pnorm() returns the area under the curve, qnorm() tells you what value corresponds to a given area. In other words, they’re inverses of each other.\nIf you wanted to shade in the middle 95% of the area in the figure above, qnorm() would tell you the left and right boundaries.\nQ9: Fill in the blanks to use qnorm() in constructing the confidence interval.\n\ndiff_props_ci &lt;- qnorm(???, mean = ???, sd = ???)\ndiff_props_ci\n\nQ10: How would you interpret this confidence interval"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#how-much-lead-is-there",
+    "href": "course-materials/lecture-slides/week1_monday.html#how-much-lead-is-there",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "How much lead is there?",
+    "text": "How much lead is there?\nWhat is the lead (Pb) soil concentration on this property? (1 #)\nHow valid is that number? I.e., how well does it represent what you’re trying to measure?\n\n\n\n\nBack yard Front yard Drip line"
   },
   {
-    "objectID": "course-materials/labs/lab5.html#comparing-mathematical-and-randomization-approaches",
-    "href": "course-materials/labs/lab5.html#comparing-mathematical-and-randomization-approaches",
-    "title": "Lab 5",
-    "section": "Comparing mathematical and randomization approaches",
-    "text": "Comparing mathematical and randomization approaches\nQ11: What are permutation tests and mathematical models both trying to estimate for hypothesis tests?\nQ12: What are bootstrapping and mathematical models both trying to estimate for confidence intervals?\nQ13: What area under the curve is relevant to hypothesis tests? What R function calculates it for a mathematical model?\nQ14: What area under the curve is relevant to confidence intervals? What R function calculates it for a mathematical model?"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#validity-of-a-measurement",
+    "href": "course-materials/lecture-slides/week1_monday.html#validity-of-a-measurement",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Validity of a measurement",
+    "text": "Validity of a measurement\n\nA measure is valid to the degree that it represents what you are trying to measure\n\n(Gelman, Hill, and Vehtari 2021, 24)\nIf the thing we care about is risk of lead poisoning, how valid are the following measurements?\n\nMean soil Pb concentration in the front and back yard of a property\nMean soil Pb concentration within 500 yards of a property\nMaximum soil Pb concentration on a property"
   },
   {
-    "objectID": "course-materials/labs/lab5.html#go-further",
-    "href": "course-materials/labs/lab5.html#go-further",
-    "title": "Lab 5",
-    "section": "Go further",
-    "text": "Go further\nThe restoration data frame contains data about the eelgrass shoot density of the plot post-restoration (shoot_density_m2). Use this data to do the following.\n\nConstruct the 95% CI of mean shoot density following restoration (ignoring the restoration method). Use a mathematical model. Recall the standard error of a mean is:\n\n\\[\nSE(\\bar x) = \\frac{s}{\\sqrt{n}}\n\\]\n\nEstimate the p-value of the difference in mean shoot density between the two restoration methods. Use a mathematical model. Recall the standard error of a difference in means, under the null hypothesis, is:\n\n\\[\nSE(\\bar{x_2}-\\bar{x_1}) = \\sqrt{\\frac{s_1^2}{n_1} + \\frac{s_2^2}{n_2}}\n\\]\n\nRepeat constructing the 95% CI of mean shoot density following restoration, but use bootstrapping instead of a mathematical model.\nRepeat estimating the p-value of the difference in mean shoot density between the two restoration methods, but use a permutation test instead of a mathematical model."
+    "objectID": "course-materials/lecture-slides/week1_monday.html#generalize-from-sample-to-population",
+    "href": "course-materials/lecture-slides/week1_monday.html#generalize-from-sample-to-population",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Generalize from sample to population",
+    "text": "Generalize from sample to population\nGiven limited information about a sample, what can we say about the population?\n\n\nPopulation: the entire entity we’re interested in\n\nThe soil Pb contamination on a property\nThe soil Pb contamination in a radius around a pollution source\n\n\n\n\nSample: the subset of the population we have data for\n\nTen soil cores from a property\n“Representative” soil Pb values for 100 residential properties"
   },
   {
-    "objectID": "course-materials/lecture-slides/scratch/week2/rain_flooding.html",
-    "href": "course-materials/lecture-slides/scratch/week2/rain_flooding.html",
-    "title": "rain_flooding",
-    "section": "",
-    "text": "library(lubridate)\n\n\nAttaching package: 'lubridate'\n\n\nThe following objects are masked from 'package:base':\n\n    date, intersect, setdiff, union\n\nlibrary(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr   1.2.1     ✔ readr   2.2.0\n✔ forcats 1.0.1     ✔ stringr 1.6.0\n✔ ggplot2 4.0.3     ✔ tibble  3.3.1\n✔ purrr   1.2.2     ✔ tidyr   1.3.2\n\n\n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nset.seed(1234)\ntheme_set(theme_classic(18))\n\nGage height\n\n# https://waterdata.usgs.gov/monitoring-location/USGS-11092450/#dataTypeId=continuous-00065--695467286&showFieldMeasurements=true&startDT=2010-01-01&endDT=2025-10-01\ngage_colnames &lt;- c(\"agency_cd\", \"site_no\", \"datetime\", \"tz_cd\", \"gage_ht\", \"qualtiy_code\")\ngage_ht &lt;- read_tsv(\"~/Downloads/sepulveda_dam_2010_2025.tsv\", skip = 29, col_names = gage_colnames)\n\nRows: 549696 Columns: 6\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \"\\t\"\nchr  (3): agency_cd, tz_cd, qualtiy_code\ndbl  (2): site_no, gage_ht\ndttm (1): datetime\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\nmax_winter_ht &lt;- gage_ht %&gt;% \n  mutate(yr = year(datetime),\n         mo = month(datetime)) %&gt;% \n  filter(mo %in% 1:2) %&gt;% \n  group_by(yr) %&gt;% \n  filter(gage_ht == max(gage_ht)) %&gt;% \n  slice_tail(n = 1) %&gt;% \n  ungroup()\n\nPrecipitation\n\nprecip &lt;- read_csv(\"~/Downloads/data.csv\", skip = 1) %&gt;% \n  mutate(yr = year(Date),\n         mo = month(Date)) %&gt;% \n  filter(mo %in% c(12, 1, 2), yr %in% 2009:2025) %&gt;% \n  select(Date, precip_in = `PRCP (Inches)`)\n\nRows: 9991 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\ndbl  (6): TAVG (Degrees Fahrenheit), TMAX (Degrees Fahrenheit), TMIN (Degree...\ndate (1): Date\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\n\nMerge\n\nweekly_precip &lt;- function(stormdatetime) {\n  precip %&gt;% \n    filter(between(Date, stormdatetime - weeks(1), stormdatetime)) %&gt;% \n    pull(precip_in) %&gt;% \n    sum(na.rm = TRUE)\n}\nstorm_data &lt;- max_winter_ht %&gt;% \n  mutate(precip_wk_in = map_dbl(datetime, weekly_precip)) %&gt;% \n  select(yr, datetime, gage_ht, precip_wk_in)\n\nPlot\n\nstorm_data %&gt;% \n  filter(precip_wk_in &lt; 5) %&gt;% \n  ggplot(aes(precip_wk_in, gage_ht)) +\n  geom_point(shape = 21, color = \"firebrick\", stroke = 2) +\n  ylim(0, NA) +\n  labs(x = \"Total precip. prev. week (in)\",\n       y = \"Gage height (ft)\")\n\n\n\n\n\n\n\n\nWith two lines, which is better?\n\nstorm_data %&gt;% \n  filter(precip_wk_in &lt; 5) %&gt;% \n  ggplot(aes(precip_wk_in, gage_ht)) +\n  geom_point(shape = 21, color = \"firebrick\", stroke = 2) +\n  geom_abline(intercept = 2, slope = 3, color = \"cornflowerblue\", linewidth = 2, linetype = \"dotted\") +\n  geom_abline(intercept = 4, slope = 2, color = \"cornflowerblue\", linewidth = 2, linetype = \"dashed\") +\n  ylim(0, NA) +\n  labs(x = \"Total precip. prev. week (in)\",\n       y = \"Gage height (ft)\")\n\n\n\n\n\n\n\n\nResiduals\n\nstorm_data %&gt;% \n  filter(precip_wk_in &lt; 5) %&gt;% \n  mutate(resid1 = gage_ht - (2 + 3 * precip_wk_in),\n         resid2 = gage_ht - (4 + 2 * precip_wk_in)) %&gt;% \n  summarize(ssr1 = sum(resid1^2),\n            ssr2 = sum(resid2^2))\n\n# A tibble: 1 × 2\n   ssr1  ssr2\n  &lt;dbl&gt; &lt;dbl&gt;\n1  79.2  65.7\n\n\nResidual map\n\nresid_map &lt;- expand_grid(b = seq(2, 5, length.out = 20),\n            m = seq(1, 4, length.out = 20)) %&gt;% \n  mutate(ssr = map2_dbl(b, m, \\(.b, .m) {\n    storm_data %&gt;% \n      filter(precip_wk_in &lt; 5) %&gt;% \n      mutate(r = gage_ht - (.b + .m * precip_wk_in)) %&gt;% \n      summarize(ssr = sum(r^2)) %&gt;% \n      pull(ssr)\n  }))\nggplot(resid_map, aes(b, m, fill = ssr)) +\n  geom_tile() +\n  geom_point(data = arrange(resid_map, ssr) %&gt;% slice(1),\n             color = \"gold\") +\n  scale_fill_distiller(palette = \"Spectral\") +\n  theme(aspect.ratio = 1)\n\n\n\n\n\n\n\n# remove the highest precip points\nstorm_data &lt;- filter(storm_data, precip_wk_in &lt; 5)\n\n\nstorm_mod &lt;- lm(gage_ht ~ precip_wk_in, data = storm_data)\nsummary(storm_mod)\n\n\nCall:\nlm(formula = gage_ht ~ precip_wk_in, data = storm_data)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-2.6688 -1.1225 -0.6316  0.3928  4.7668 \n\nCoefficients:\n             Estimate Std. Error t value Pr(&gt;|t|)   \n(Intercept)    3.9133     1.1674   3.352  0.00576 **\nprecip_wk_in   2.1697     0.5645   3.844  0.00234 **\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 2.32 on 12 degrees of freedom\nMultiple R-squared:  0.5518,    Adjusted R-squared:  0.5144 \nF-statistic: 14.77 on 1 and 12 DF,  p-value: 0.002337\n\n\nVariation of the response\n\ngage_mean &lt;- mean(storm_data$gage_ht)\ngage_sd &lt;- sd(storm_data$gage_ht)\nggplot(storm_data, aes(gage_ht)) +\n  geom_histogram(bins = 6, fill = \"cornflowerblue\") +\n  geom_vline(xintercept = gage_mean,\n             color = \"firebrick\",\n             linewidth = 2) +\n  geom_segment(x = gage_mean - gage_sd,\n               xend = gage_mean + gage_sd,\n               y = 4, \n               yend = 4, \n               color = \"firebrick\",\n               linewidth = 2,\n               linetype = \"dotted\") +\n  labs(x = \"Gage height (ft)\")\n\n\n\n\n\n\n\n\nVariation of the residuals\n\nresidual_segments &lt;- storm_data %&gt;% \n  mutate(x = precip_wk_in,\n         xend = precip_wk_in,\n         y = gage_ht,\n         yend = predict(storm_mod))\nggplot(storm_data, aes(precip_wk_in, gage_ht)) +\n  geom_segment(aes(x = x, xend = xend, y = y , yend = yend),\n               residual_segments,\n               color = \"gold\",\n               linewidth = 1.5) +\n  geom_point(shape = 21, color = \"firebrick\", stroke = 2) +\n  geom_abline(intercept = coef(storm_mod)[1],\n              slope = coef(storm_mod)[2],\n              color = \"cornflowerblue\",\n              linewidth = 2) +\n  ylim(0, NA) +\n  labs(x = \"Total precip. prev. week (in)\",\n       y = \"Gage height (ft)\")\n\n\n\n\n\n\n\ngage_resid &lt;- tibble(residual = resid(storm_mod))\nresid_mean &lt;- mean(gage_resid$residual)\nresid_sd &lt;- sd(gage_resid$residual)\nggplot(gage_resid, aes(residual)) +\n  geom_histogram(bins = 6, fill = \"gold\") +\n  geom_vline(xintercept = resid_mean,\n             color = \"firebrick\",\n             linewidth = 2) +\n  geom_segment(x = resid_mean - resid_sd,\n               xend = resid_mean + resid_sd,\n               y = 4, \n               yend = 4, \n               color = \"firebrick\",\n               linewidth = 2,\n               linetype = \"dotted\") +\n  labs(x = \"Residual (ft)\")\n\n\n\n\n\n\n\n\n\\[\n\\begin{align}\nSST &= \\text{Total Sum of Squares} \\\\\nSST &= \\sum_i{(y_i - \\bar{y})^2} \\\\\nSSE &= \\text{Total Sum of Errors} \\\\\nSST &= \\sum_i{(y_i - \\hat{y})^2} \\\\\nR^2 &= \\frac{SST - SSE}{SST}\n\\end{align}\n\\]\nCaution!\n\nset.seed(123)\nsin_dat &lt;- tibble(\n  x = runif(20, 0, 300),\n  y = sin(x * pi / 180) + rnorm(20, 0, 0.15)\n)\nsin_mod &lt;- lm(y ~ x, sin_dat)\nsummary(sin_mod)\n\n\nCall:\nlm(formula = y ~ x, data = sin_dat)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-0.89938 -0.27910 -0.01412  0.41464  0.60438 \n\nCoefficients:\n             Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  1.237400   0.214755   5.762 1.84e-05 ***\nx           -0.007653   0.001136  -6.734 2.60e-06 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.4659 on 18 degrees of freedom\nMultiple R-squared:  0.7159,    Adjusted R-squared:  0.7001 \nF-statistic: 45.35 on 1 and 18 DF,  p-value: 2.596e-06\n\nggplot(sin_dat, aes(x, y)) +\n  geom_point(shape = 21, color = \"firebrick\", stroke = 2) +\n  geom_abline(intercept = coef(sin_mod)[1],\n              slope = coef(sin_mod)[2],\n              color = \"cornflowerblue\",\n              linewidth = 2) +\n  theme_classic(18)\n\n\n\n\n\n\n\nsin_dat %&gt;% \n  mutate(residual = resid(sin_mod)) %&gt;% \n  ggplot(aes(x, residual)) +\n  geom_hline(yintercept = 0, color = \"cornflowerblue\", linewidth = 2) +\n  geom_point(shape = 21, color = \"firebrick\", stroke = 2) +\n  theme_classic(18)\n\n\n\n\n\n\n\n\nSliding normal variable\n\nstorm_data %&gt;% \n  filter(precip_wk_in &lt; 5) %&gt;% \n  ggplot(aes(precip_wk_in, gage_ht)) +\n  geom_point(shape = 21, color = \"firebrick\", stroke = 2) +\n  geom_abline(intercept = coef(storm_mod)[1],\n              slope = coef(storm_mod)[2],\n              color = \"cornflowerblue\",\n              linewidth = 2) +\n  ylim(0, NA) +\n  labs(x = \"Total precip. prev. week (in)\",\n       y = \"Gage height (ft)\")"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#where-is-the-lead",
+    "href": "course-materials/lecture-slides/week1_monday.html#where-is-the-lead",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Where is the lead?",
+    "text": "Where is the lead?\n\n\n\nOver 10k homes within 2 km of the Exide plant\nInitial sampling from 244 homes\nGeneralize from sample to population\n\n\n\n\n\nMap of property-average soil lead concentration, interpolated by kriging. Sampling locations are shown as white circles\n\n\n(Small and Rose 2015)"
   },
   {
-    "objectID": "course-materials/keys/key1.1.html",
-    "href": "course-materials/keys/key1.1.html",
-    "title": "Lab 1.1 KEY",
-    "section": "",
-    "text": "# load packages ----\nlibrary(tidyverse)\nlibrary(palmerpenguins)"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#community-organizations-protest",
+    "href": "course-materials/lecture-slides/week1_monday.html#community-organizations-protest",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Community organizations protest",
+    "text": "Community organizations protest\n\n\nProtests intensify in response to increasing violations and dangerous soil samples.\n\n\n\nmark! Lopez in front of the Exide plant. (Photo: Goldman Environmental Prize)\n\n\n\n\nI’m the third generation of my family to fight the Exide smelter. My grandparents started back in the 1990s, and it took three generations of our communities to shut it down.\n\nSierra Club"
   },
   {
-    "objectID": "course-materials/keys/key1.1.html#setup",
-    "href": "course-materials/keys/key1.1.html#setup",
-    "title": "Lab 1.1 KEY",
-    "section": "",
-    "text": "# load packages ----\nlibrary(tidyverse)\nlibrary(palmerpenguins)"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#exide-argues-its-not-responsible",
+    "href": "course-materials/lecture-slides/week1_monday.html#exide-argues-its-not-responsible",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Exide argues it’s not responsible",
+    "text": "Exide argues it’s not responsible\n\n\nOther sources of lead include:\n\nLeaded gas phased out 1973 (proximity to highways)\nLeaded paint banned in 1978 (age of home)\n\n\n\n\n\nBoxplots comparing year of construction of homes (left), distance to the closest freeway (center), and distance to the closest arterial road (right) for each property"
   },
   {
-    "objectID": "course-materials/keys/key1.1.html#tidy-data-review",
-    "href": "course-materials/keys/key1.1.html#tidy-data-review",
-    "title": "Lab 1.1 KEY",
-    "section": "Tidy Data Review",
-    "text": "Tidy Data Review\nExample untidy / wide data:\n\n# create some untidy temperature data ----\ntemp_data_wide &lt;- tribble(\n  ~date, ~station1, ~station2,  ~station3,\n  \"2023-10-01\", 30.1, 29.8,  31.2,\n  \"2023-11-01\", 28.6, 29.1,  33.4,\n  \"2023-12-01\", 29.9, 28.5,  32.3\n)\n\n# print it out ----\nprint(temp_data_wide)\n\n# A tibble: 3 × 4\n  date       station1 station2 station3\n  &lt;chr&gt;         &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;\n1 2023-10-01     30.1     29.8     31.2\n2 2023-11-01     28.6     29.1     33.4\n3 2023-12-01     29.9     28.5     32.3\n\n\nUsing pivot_longer() to “lengthen” / tidy our data:\n\n# convert data from wide &gt; long ----\ntemp_data_long &lt;- temp_data_wide |&gt; \n  pivot_longer(cols = starts_with(\"station\"),\n               names_to = \"station_id\",\n               values_to = \"temp_c\")\n\n# print it out ----\nprint(temp_data_long)\n\n# A tibble: 9 × 3\n  date       station_id temp_c\n  &lt;chr&gt;      &lt;chr&gt;       &lt;dbl&gt;\n1 2023-10-01 station1     30.1\n2 2023-10-01 station2     29.8\n3 2023-10-01 station3     31.2\n4 2023-11-01 station1     28.6\n5 2023-11-01 station2     29.1\n6 2023-11-01 station3     33.4\n7 2023-12-01 station1     29.9\n8 2023-12-01 station2     28.5\n9 2023-12-01 station3     32.3"
+    "objectID": "course-materials/lecture-slides/week1_monday.html#whats-the-ambient",
+    "href": "course-materials/lecture-slides/week1_monday.html#whats-the-ambient",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What’s the ambient?",
+    "text": "What’s the ambient?\n\n\n\n\n\nSoil lead concentration as a function of distance from the Exide facility.\n\n\n\n\nExide report estimated the mean ambient soil Pb level at 218 ppm.\nCA and EPA screen soil Pb for 80 ppm and 200 ppm, respectively.\nMedian soil Pb in LA is 81 ppm (Wu et al. 2010)."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#whats-the-radius",
+    "href": "course-materials/lecture-slides/week1_monday.html#whats-the-radius",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What’s the radius?",
+    "text": "What’s the radius?\n\n\n\n\n\nDistances to reach ambient background concentrations using the linear regression for directional subsets.\n\n\n\n\nExide estimated its radius of effect between 0.2 and 0.75 miles, depending on wind direction.\nDTSC disputed the ambient soil Pb; estimated radius between 1.3 and 1.7 miles"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#reliability-of-a-measurement",
+    "href": "course-materials/lecture-slides/week1_monday.html#reliability-of-a-measurement",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Reliability of a measurement",
+    "text": "Reliability of a measurement\n\nA reliable measure is one that is precise and stable.\n\n(Gelman, Hill, and Vehtari 2021, 25)\n\n\nExide’s argument attacked the reliability of soil Pb measurements.\n\nCollect duplicate samples\nCalculate difference of measurements\nEstimate an error “buffer”\n\n\n\n\n\n\n\n\n\n\n\nExide’s claim: Any contribution &lt;35 ppm is indistinguishable from measurement error"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#generalizing-from-observed-to-underlying-construct",
+    "href": "course-materials/lecture-slides/week1_monday.html#generalizing-from-observed-to-underlying-construct",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Generalizing from observed to underlying construct",
+    "text": "Generalizing from observed to underlying construct\nExide’s radius of effect is not directly measurable\nSame data, two different conclusions.\n\n\n\n\n\nExide’s estimate (Small and Rose 2015)\n\n\n\n\n\n\nDTSC’s estimate (Department of Toxic Substances Control 2015)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#exide-plant-closes",
+    "href": "course-materials/lecture-slides/week1_monday.html#exide-plant-closes",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Exide plant closes",
+    "text": "Exide plant closes\nMarch 11, 2015 Exide closes Vernon plant to avoid criminal prosecution\n\nStephanie Yonekura, acting United States Attorney, announces an agreement to permanently close the Exide lead-acid battery recycling plant in Vernon. (Bob Chamberlin / Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#homes-approved-for-cleanup",
+    "href": "course-materials/lecture-slides/week1_monday.html#homes-approved-for-cleanup",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "2,500 homes approved for cleanup",
+    "text": "2,500 homes approved for cleanup\n\n\nJuly 6, 2017\n\n\n~10k homes exposed to Pb emissions\nState tested Pb soil in 8.2k homes\n2.5k homes with soil Pb &gt;400 ppm scheduled for cleanup\n\n\n\n\n\nAn environmental health specialist collects a soil sample. (Mel Melcon / Los Angeles Times)\n\n\nThousands of L.A. County homes tainted with lead"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#cleanup-progresses-slowly",
+    "href": "course-materials/lecture-slides/week1_monday.html#cleanup-progresses-slowly",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Cleanup progresses slowly",
+    "text": "Cleanup progresses slowly\n\n\n\n\nThe Exide plant in Vernon closed 3 years ago. The vast majority of lead-contaminated properties remain uncleaned."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#community-academy-collaboration",
+    "href": "course-materials/lecture-slides/week1_monday.html#community-academy-collaboration",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Community-academy collaboration",
+    "text": "Community-academy collaboration\n\n\n\n\n\nSteve Zylius / UC Irvine\n\n\nEYCEJ partnered with Prof Jill Johnston to investigate the cleanup (Johnston et al. 2026)\n\n\nGet The Lead Out Study is a community-academic research collaboration with East Yard Communities for Environmental Justice\n\n\nWe collected 1128 samples from 373 properties, of which ∼40% were cleaned by the state"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#study-questions-removal-action-plan",
+    "href": "course-materials/lecture-slides/week1_monday.html#study-questions-removal-action-plan",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Study questions Removal Action Plan",
+    "text": "Study questions Removal Action Plan\n\n\n\nSoil Pb &gt;80 ppm in 39% of samples at cleaned properties\nOutside PIA, soil Pb dropped 24 ppm per 1000 m from Exide plant"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#has-the-cleanup-been-effective",
+    "href": "course-materials/lecture-slides/week1_monday.html#has-the-cleanup-been-effective",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Has the cleanup been effective?",
+    "text": "Has the cleanup been effective?\n\n\n\n\n\nDistributions of residential soil Pb sampling results from homes outside the PIA (in adjacent neighborhoods) and those inside the PIA that received a state-sponsored soil remediation.\n\n\n\nAmong cleaned homes:\n\nMean soil Pb in samples was not significantly &gt;80 ppm\n39% of samples &gt;80 ppm\n73% of homes had 1+ sample &gt;80 ppm\n19% of samples &gt;200 ppm\n\nHas the cleanup been effective?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#generalizing-from-treatment-to-control",
+    "href": "course-materials/lecture-slides/week1_monday.html#generalizing-from-treatment-to-control",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Generalizing from treatment to control",
+    "text": "Generalizing from treatment to control\nGiven samples from treatment and control, what can we say about the treatment’s effect?\n\n\nTreatment: a change or intervention\n\nRemediating soil on a property\nOperating an industrial facility in a neighborhood\n\n\nControl: a comparable group that has not received the treatment\n\nA property pre-remediation\nNearby neighborhoods outside the facility’s effect radius"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#a-century-of-pollution-1",
+    "href": "course-materials/lecture-slides/week1_monday.html#a-century-of-pollution-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "1922 - 2012: A century of pollution",
+    "text": "1922 - 2012: A century of pollution\nFrom 1922 to 2015, the Exide plant emitted lead and polluted nearby communities\n\nThe plant operated in the industrial city of Vernon since 1922, spewing toxic air pollution over decades. (Brian van der Brug / Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#shut-it-down-1",
+    "href": "course-materials/lecture-slides/week1_monday.html#shut-it-down-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "2013 - 2015: Shut it down",
+    "text": "2013 - 2015: Shut it down\nCommunity protests and government investigations led to the plant’s closure\n\nCommunity members in March 2014 again sought the Exide plant’s shutdown in March 2014, during a community meeting at Resurrection Catholic Church in Boyle Heights on the results of lead testing. (Lawrence K. Ho / Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#present-is-it-safe-now-1",
+    "href": "course-materials/lecture-slides/week1_monday.html#present-is-it-safe-now-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "2016 - present: Is it safe now?",
+    "text": "2016 - present: Is it safe now?\nThe largest residential cleanup in California state history, with mixed results\n\nA worker with East Yard Communities for Environmental Justice collects soil samples from the community garden in Boyle Heights, inside the area contaminated by the former Exide battery recycling facility, in September 2022. (Dania Maxwell/Los Angeles Times)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#challenges-of-statistics",
+    "href": "course-materials/lecture-slides/week1_monday.html#challenges-of-statistics",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Challenges of statistics",
+    "text": "Challenges of statistics\n\n\nGeneralize from sample to population\n\n\nGeneralize from obs. measurements to underlying construct\n\n\nGeneralize from treatment to control"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#course-structure",
+    "href": "course-materials/lecture-slides/week1_monday.html#course-structure",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Course structure",
+    "text": "Course structure\n\n\nWhere and when do we meet?\n\nLecture\n\nMW 1424 9:30-10:45\n\nLab\n\nT 3022A 12:30-1:50\n\nStudent hours\n\nT 3022A 2-3\nTh 3022A 3-4\n\n\n\nWhat will I be graded on?\n\n3 homeworks\n1 midterm\n1 final project"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#course-structure-1",
+    "href": "course-materials/lecture-slides/week1_monday.html#course-structure-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Course structure",
+    "text": "Course structure\n\n\nWhat do I do before class?\n\nReadings\nPre-recorded lectures\nPre-class “parking lot”\n\n\nWhat do I do in class?\n\nPay attention\nParticipate in activities\nConnect statistics to your experiences and interests"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#community-agreements",
+    "href": "course-materials/lecture-slides/week1_monday.html#community-agreements",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Community agreements",
+    "text": "Community agreements\nThere are two posters at the back of the room\n\n\n“How can I support myself in this class?”\n\n“How can I support my peers in this class?”\n\n\nReflect on these prompts and put at least one sticky note on each poster"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_monday.html#optimal-stress",
+    "href": "course-materials/lecture-slides/week1_monday.html#optimal-stress",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Optimal stress",
+    "text": "Optimal stress\nRemember, there is an optimal level of stress for learning.\nIf you’re outside the optimal, please come to your instructors!\n\nYerkes-Dodson Curve"
   },
   {
     "objectID": "final-project.html",
@@ -282,44 +408,100 @@
   {
     "objectID": "course-materials/week2.html",
     "href": "course-materials/week2.html",
-    "title": "Regression",
+    "title": "Foundations of inference",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nLinear regression\nIMS Ch 7\n\n\nLab\nRockfish survey gaps\nSantora et al. (2021) Nature Communications (optional)\n\n\nLecture 2\nMultiple regression\nIMS Ch 8"
-  },
-  {
-    "objectID": "course-materials/week2.html#lecture-materials",
-    "href": "course-materials/week2.html#lecture-materials",
-    "title": "Regression",
-    "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nLinear regression\nIMS Ch 7\n\n\nLab\nRockfish survey gaps\nSantora et al. (2021) Nature Communications (optional)\n\n\nLecture 2\nMultiple regression\nIMS Ch 8"
-  },
-  {
-    "objectID": "course-materials/week2.html#assignment-reminders",
-    "href": "course-materials/week2.html#assignment-reminders",
-    "title": "Regression",
-    "section": " Assignment Reminders",
-    "text": "Assignment Reminders\n\n\n\n\n\n\n\nAssignment Type\nNote\n\n\n\n\nHomework\nHomework 1 posted\n\n\nFinal project\nChoose data and question"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week1.html",
     "href": "course-materials/week1.html",
     "title": "Exploring data",
     "section": "",
-    "text": "Session\nSlides\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability\nNone\n\n\nLecture 2\nSampling\nLink 1  Link 2  ROS 1-1.4, 2-2.2  IMS 1-2  Statistical claims"
+    "text": "Session\nSlides\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
   },
   {
     "objectID": "course-materials/week1.html#lecture-materials",
     "href": "course-materials/week1.html#lecture-materials",
     "title": "Exploring data",
     "section": "",
-    "text": "Session\nSlides\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability\nNone\n\n\nLecture 2\nSampling\nLink 1  Link 2  ROS 1-1.4, 2-2.2  IMS 1-2  Statistical claims"
+    "text": "Session\nSlides\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
   },
   {
-    "objectID": "course-materials/week1.html#assignment-reminders",
-    "href": "course-materials/week1.html#assignment-reminders",
+    "objectID": "course-materials/week1.html#additional-materials",
+    "href": "course-materials/week1.html#additional-materials",
     "title": "Exploring data",
-    "section": " Assignment Reminders",
-    "text": "Assignment Reminders\nNothing due in week 1. In week 2, you’ll submit your choice of data and question for the final project. That can more time than you might expect, so it’s a good idea to start this week!"
+    "section": "Additional materials",
+    "text": "Additional materials\nPhilip B. Stark, Andrea Saltelli, Cargo-cult Statistics and Scientific Crisis, Significance, Volume 15, Issue 4, August 2018, Pages 40–43, https://doi.org/10.1111/j.1740-9713.2018.01174.x\nSierra Club interview with mark! Lopez\nWhat we know about California’s largest toxic cleanup: Thousands of L.A. County homes tainted with lead\nJill E. Johnston, Mark Lopez, Stephanie Prieto, Elizabeth Kamai, Bhavna Shamasunder; Get the Lead Out: A Community-Driven Approach to Characterize Urban Soil Lead Levels near a Battery Smelter. Environ. Sci. Technol. 14 April 2026; 60 (14): 11002–11012. https://doi.org/10.1021/acs.est.5c14197"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDebrief the parking lot\nDigging into our statistical claims\nSampling bias experiment"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Activity guide",
+    "text": "Activity guide\n\nCount off into groups.\nShare your prepared statistical claims.\nCollaboratively design a follow-up study.\nEvaluate another group’s study design."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Form groups",
+    "text": "Form groups\n\nCount off 1-10.\nFind your peers with the same number."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Share your claims",
+    "text": "Share your claims\nTake turns sharing your prepared statistical claims.\n\nWhat’s the claim and where did you find it?\nWhat is the relevant challenge of statistics?\nWhat’s the most salient variable?\n\nWhat makes the variable valid?\nHow reliable is the variable?\n\nHow was the sample collected?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Design a follow-up study",
+    "text": "Design a follow-up study\nAs a group, choose one claim to design a follow-up study for. If your claim was chosen, you are now the PI (congrats).\n\nWhat’s the new question?\n\nDoes it fall under the same challenge of statistics, or a new one?\n\nWhat measurement would you need to investigate the question?\n\nEvaluate the validity and reliability of this measurement.\nHow would you get the sample?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Evaluate a study design",
+    "text": "Evaluate a study design\nSend your PI to a new group for study design peer review.\n\nThe PI explains the original claim and the follow up study to the reviewers.\nThe reviewers ask clarifying questions until they understand:\n\nThe context of the new study.\nWhich challenge of statistics is being investigated.\nHow the study design addresses validity, reliability, and potential sampling issues."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Sampling distribution",
+    "text": "Sampling distribution\nYou’ve all drawn samples and estimated the total weight of the bag.\nNow, let’s see the sampling distribution - the distribution of your estimates based on your samples."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What’s our inference?",
+    "text": "What’s our inference?\nTurn to the student next to you. Based on the sampling distribution, what do you think is the total weight of the bag?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#discussion",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#discussion",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Discussion",
+    "text": "Discussion\n\nAs a class, were we too low or too high?\n\nBy how much?\n\nHow would we design a representative sampling strategy?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Preparing for week 2",
+    "text": "Preparing for week 2\nTopic: Foundations of inference\n\nComplete the readings and pre-recorded lectures.\n\n\nHomework 1 will be released tomorrow.\nStart thinking about your final project!\n\nWhat question do you want to investigate?\nWhat data are relevant?\nAn exploratory analysis is due at the end of week 2."
   },
   {
     "objectID": "homework.html",
@@ -329,18 +511,32 @@
     "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nCourse Theme\nDate Posted\nDate Due\nRe-assessment Deadline\n\n\n\n\nExploring uncertainty\n10/8\n10/17\n10/31\n\n\nConducting inference\n10/29\n11/7\n11/21\n\n\nNon-normal data\n11/12\n11/26\n12/5"
   },
   {
-    "objectID": "course-materials/discussion-materials/week1-discussion-slides.html#title-slide",
-    "href": "course-materials/discussion-materials/week1-discussion-slides.html#title-slide",
-    "title": "EDS 222: Statistics for Environmental Data Science",
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html",
+    "href": "course-materials/pre-class/week1_statistical_claims.html",
+    "title": "Week 1 Wednesday pre-class",
     "section": "",
-    "text": "EDS 240: Discussion 1\nToday’s topic here\n\nWeek 1 | January 7th, 2024"
+    "text": "So far this week, you’ve learned about:\nThe three challenges of statistics\nMeasurements and data\nIn class on Wednesday, we’ll discuss these concepts in the context of statistical claims on topics you’re interested in."
   },
   {
-    "objectID": "course-materials/discussion-materials/week1-discussion-slides.html#slide-slug-here",
-    "href": "course-materials/discussion-materials/week1-discussion-slides.html#slide-slug-here",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "",
-    "text": "Slide title"
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#instructions",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#instructions",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Instructions",
+    "text": "Instructions\nBefore class, find a statistical claim. Search the areas of environmental science you’re passionate and knowledgeable about. This could be in a news article, a YouTube video, a documentary, etc. It’s important that you find a claim that is presented as having statistical support.\nRespond to the prompts in this Google Form about your claim."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#example",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#example",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Example",
+    "text": "Example\nDescribe the claim\nCorals growing near islands with healthy seabird colonies grow more than twice as fast as corals near islands where invasive rats have wiped out the seabirds.\nWhere did you find it?\nAudubon Magazine The Remarkable Healing Power of Seabird Poop for Climate-Stressed Coral Reefs\nWhat challenge of statistics does it fall under?\nGeneralize from treatment to control. The “treatment” is the presence of invasive rats (which extirpate seabirds), the “control” is islands without rats.\nPick the most salient variable in the data. In what ways does it accurately represent what its meant to, and in what ways might it be different? (I.e., assess its validity.)\nCoral growth rate. This was measured using the area of corals from photographs1. The claim about growth rate is really more about mass or volume, however area is a reasonably valid proxy because previous research has established area and mass are highly correlated.\nContinuing with the same variable, what are the limitations on its reliability?\nEstimates of area from photographs are sensitive to the angle of the photo and the judgement of the researcher who traces the photo. Although those factors can affect reliability, the study used photos from divers, which are more reliable than photos taken by aircraft or satellites.\nContinuing with the same variable, how was the sample collected? Were there obstacles to selecting a representative sample?\nThe sample came from twelve islands in the Chagos Archipelago (six had rats, six didn’t). There is potential selection bias because this was an observational study, so the researchers couldn’t randomize which islands got rats and which didn’t. Also, the study only looked at one species of coral. It’s possible other corals are more or less affected by seabird abundance."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nThis information isn’t directly in the magazine article, but I’m familiar with the methods. This is why it’s important to pick a statistical claim in a scientific field you’re knowledgeable about!↩︎"
   },
   {
     "objectID": "course-materials/week10.html",
@@ -366,23 +562,9 @@
   {
     "objectID": "course-materials/week3.html",
     "href": "course-materials/week3.html",
-    "title": "Regression continued",
+    "title": "Linear regression",
     "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nInteractions\nNone\n\n\nLab\nMidterm review (Theme 1 Quizzes)\nNone\n\n\nLecture 2\nMidterm 1\nNone"
-  },
-  {
-    "objectID": "course-materials/week3.html#lecture-materials",
-    "href": "course-materials/week3.html#lecture-materials",
-    "title": "Regression continued",
-    "section": "",
-    "text": "Session\nTopic\nReading\n\n\n\n\nLecture 1\nInteractions\nNone\n\n\nLab\nMidterm review (Theme 1 Quizzes)\nNone\n\n\nLecture 2\nMidterm 1\nNone"
-  },
-  {
-    "objectID": "course-materials/week3.html#assignment-reminders",
-    "href": "course-materials/week3.html#assignment-reminders",
-    "title": "Regression continued",
-    "section": " Assignment Reminders",
-    "text": "Assignment Reminders\n\n\n\n\n\n\n\nAssignment Type\nNote\n\n\n\n\nHomework\nHomework 1 due"
+    "text": "Under construction"
   },
   {
     "objectID": "course-materials/week5.html",
@@ -462,514 +644,94 @@
     "text": "Teaching Team\n\n\n\nInstructor\n\nMax Czapanskiy\nEmail: maxczap@ucsb.edu\n\nTeaching Assistant\n\nSloane Stephenson\nEmail: gstephenson@ucsb.edu"
   },
   {
-    "objectID": "course-materials/lecture-slides/pre-lecture7-1.html",
-    "href": "course-materials/lecture-slides/pre-lecture7-1.html",
-    "title": "The Color of Drinking Water",
-    "section": "",
-    "text": "One component of environmental justice is distributive justice, or the fair distribution of environmental harms and benefits across communities. For many distributive justice questions in the US, debates arise whether harms are distributed according to class or race. Switzer and Teodoro (2018) analyzed Safe Drinking Water Act (SDWA) compliance records alongside demographic and economic data at the local government level to investigate whether class, race, or a combination of the two is associated with SDWA violations."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/pre-lecture7-1.html#before-class",
-    "href": "course-materials/lecture-slides/pre-lecture7-1.html#before-class",
-    "title": "The Color of Drinking Water",
-    "section": "Before class",
-    "text": "Before class\nBefore we meet, please read The Color of Drinking Water for context about this study. This is a 6-page summary of the study written for the general public.\nIn class, we will begin to tackle the issues that arise from response variables that don’t fit cleanly into the linear regression framework we’ve been using up to this point. This week, we’ll focus on binary outcomes (yes or no, protected or not protected, etc). Recall the model specification we’ve used until now:\n\\[\n\\begin{align}\ny &\\sim Normal(\\mu, \\sigma) \\\\\n\\mu &= \\beta_0 + \\beta_1 x\n\\end{align}\n\\]\nIf we know \\(\\beta_0\\), \\(\\beta_1\\), and \\(\\sigma\\), we can simulate \\(y\\) based on \\(x\\). Here’s an example:\n\n# Betas and sigma\nbeta0 &lt;- 5\nbeta1 &lt;- -2\nsigma &lt;- 1.5\n\n# Predictor (randomly chosen)\nx &lt;- rnorm(15, 0, 2)\n  \n# Response\nmu &lt;- beta0 + beta1 * x\ny &lt;- rnorm(15, mu, sigma)\n\n# Visualize\nggplot(tibble(x, y), aes(x, y)) +\n  geom_point()\n\n\n\n\n\n\n\n\nBut what if \\(y\\) can only be 0 or 1? I.e, a binary outcome. For example, what if \\(y\\) represents whether a local government recorded a SDWA violation? Recall from earlier weeks that we can use Binomial variables for binary outcomes. The following means “y is distributed as a Binomial variable with one trial and a probability of success p”.\n\\[\ny \\sim Binomial(1, p)\n\\]\nIf SDWA violations always occur with a probability of 0.2, we can simulate them like this:\n\np &lt;- 0.2\nviolation &lt;- rbinom(100, 1, p)\n\nggplot(tibble(violation = violation == 1), aes(violation)) +\n  geom_bar()\n\n\n\n\n\n\n\n\nBut what if we want to know how \\(p\\) varies with other factors, such as race and class? In other words, how do we do regression when the response is binary? We might try this:\n\\[\n\\begin{align}\n\\text{violation} &\\sim Binomial(1, p) \\\\\np &= \\beta_0 + \\beta_1 \\text{PctHisp}\n\\end{align}\n\\]\nTo see how the percentage of Hispanic residents is associated with SDWA violations.\nLet’s say when \\(\\text{PctHisp}\\) is 0, the probability of a SDWA violation is 0.1 (i.e., \\(\\beta_0=0.1\\)), and as \\(\\text{PctHisp}\\) increases by 1, the probability of a SDWA violation goes up by 0.02 (i.e., \\(\\beta_1 = 0.02\\)). You might try to simulate local communities with different demographics like so:\n\n# Betas\nbeta0 &lt;- 0.1\nbeta1 &lt;- 0.02\n\n# Predictor\npcthisp &lt;- runif(15, 0, 100)\n\n# Response\np &lt;- beta0 + beta1 * pcthisp\nviolation &lt;- rbinom(15, size = 1, p = p)\n\nWarning in rbinom(15, size = 1, p = p): NAs produced\n\nprint(p)\n\n [1] 1.1045991 0.8078091 1.3999703 0.8494279 0.8108908 1.1673759 1.5806687\n [8] 0.5422059 0.9254922 0.6313734 1.3599461 0.4676570 1.8272882 1.5931360\n[15] 1.4365693\n\nprint(violation)\n\n [1] NA  1 NA  1  1 NA NA  0  1  0 NA  0 NA NA NA\n\n\nBut the response doesn’t look right, does it? Before class, think about these questions and note your responses; we’ll discuss them in class.\nLook at the simulated outcome, violation. What’s wrong with it?\nLook at the parameter p. What’s wrong with it?\nIn one sentence, what’s the challenge here for regression with binary outcomes?"
-  },
-  {
-    "objectID": "course-materials/labs/lab8.html",
-    "href": "course-materials/labs/lab8.html",
-    "title": "Lab 8",
-    "section": "",
-    "text": "In today’s lab you will…\n\nFit a Poisson regression model to count outcomes\nVisualize predictions\nCompare properly and improperly specified models\n\nComplete sections Poisson model notation and R code and Read and explore the data before lab.\n\nlibrary(tidyverse)\nlibrary(terra)\nlibrary(tidyterra)\ntheme_set(theme_classic(12))\nset.seed(123)"
-  },
-  {
-    "objectID": "course-materials/labs/lab8.html#learning-objectives",
-    "href": "course-materials/labs/lab8.html#learning-objectives",
-    "title": "Lab 8",
-    "section": "",
-    "text": "In today’s lab you will…\n\nFit a Poisson regression model to count outcomes\nVisualize predictions\nCompare properly and improperly specified models\n\nComplete sections Poisson model notation and R code and Read and explore the data before lab.\n\nlibrary(tidyverse)\nlibrary(terra)\nlibrary(tidyterra)\ntheme_set(theme_classic(12))\nset.seed(123)"
-  },
-  {
-    "objectID": "course-materials/labs/lab8.html#poisson-model-notation-and-r-code",
-    "href": "course-materials/labs/lab8.html#poisson-model-notation-and-r-code",
-    "title": "Lab 8",
-    "section": "Poisson model notation and R code",
-    "text": "Poisson model notation and R code\nIn statistical notation, Poisson models take the form:\n\\[\n\\begin{align}\n\\text{CountOutcome} &\\sim Poisson(\\lambda) \\\\\nlog(\\lambda) &= \\beta_0 + \\beta_1 \\text{Predictor}\n\\end{align}\n\\]\nIn R, you can fit a poisson model like this:\npoisson_model &lt;- glm(count_outcome ~ predictor,\n                     data = my_data,\n                     family = poisson(link = \"log\"))\nCompare Poisson and logistic regression. Which of the following change between them?\n\nResponse family\nLink function\nResponse\nPredictor"
-  },
-  {
-    "objectID": "course-materials/labs/lab8.html#read-and-explore-the-data",
-    "href": "course-materials/labs/lab8.html#read-and-explore-the-data",
-    "title": "Lab 8",
-    "section": "Read and explore the data",
-    "text": "Read and explore the data\nDownload and unzip wildfire.zip. Read the spatial and tabular data. This includes:\n\nA wildfire shapefile\nA vapor pressure deficit (VPD) raster\nA table of annual vapor pressure deficit and wildfire data\n\nRecreate the three figures below. Yours don’t have to be exact replicates, but they should communicate the same messages.\nFigure 1: A scatter plot showing the relationship between vapor pressure deficit and wildfire occurence.\n\nFigure 2: Maps of summer VPD in 1980, 2000, and 2020.\n\nFigure 3: Maps of wildfires in 1980, 2000, and 2020."
-  },
-  {
-    "objectID": "course-materials/labs/lab8.html#fit-model",
-    "href": "course-materials/labs/lab8.html#fit-model",
-    "title": "Lab 8",
-    "section": "Fit model",
-    "text": "Fit model\nOur question is:\nHow is the occurrence of wildfires in California associated with the previous summer’s vapor pressure deficit?\nFor more details about vapor pressure deficit and its relationship with fires, see Abatzoglou and Williams (2016) and Seager et al. (2015).\nFit a poisson model to see how n_fires responds to mean_vpd_kpa."
-  },
-  {
-    "objectID": "course-materials/labs/lab8.html#make-predictions",
-    "href": "course-materials/labs/lab8.html#make-predictions",
-    "title": "Lab 8",
-    "section": "Make predictions",
-    "text": "Make predictions\nAs with logistic regression, the coefficients of a Poisson regression model are not terribly intuitive. Once again, we will interpret our model by visualizing predictions. Refer to lab 7 for details about how to generate predictions and CIs for a generalized linear model.\nGenerate predictions and a CI for the number of fires in the range of VPD values in the dataset.\nPlot the raw data with the predictions. Your figure should look something like the figure below."
-  },
-  {
-    "objectID": "course-materials/labs/lab8.html#compare-properly-and-improperly-specified-models",
-    "href": "course-materials/labs/lab8.html#compare-properly-and-improperly-specified-models",
-    "title": "Lab 8",
-    "section": "Compare properly and improperly specified models",
-    "text": "Compare properly and improperly specified models\nSeeing a scatter plot of mean VPD and the number of fires in a year, an uncritical statistics student may think to fit a linear model. But the fact that the response is a count should suggest another approach is necessary. Contrast the model summary and predictions from your Poisson model against a linear model.\n\nCreate a new model using lm().\nCompare the summaries of your Poisson model and the linear model.\nIs the coefficient for mean_vpd_kpa significant in both models? What does that mean for your inferences?\nUse predictions and components of the linear model to answer the following questions.\nWhat is the estimate for \\(\\sigma\\) in your linear model?\nWhat does the linear model predict \\(\\mu\\) is when the VPD is at the minimum value in the dataset?\nWhat is the 95% interval for the predicted number of fires for that mean and standard deviation (hint: use qnorm())?\nWhy doesn’t that interval make any sense?\n\nBased on your answers to the questions above, why is using a properly specified model important?"
-  },
-  {
-    "objectID": "course-materials/labs/lab5-key.html",
-    "href": "course-materials/labs/lab5-key.html",
-    "title": "Lab 5",
-    "section": "",
-    "text": "In today’s lab you will…\n\nUse mathematical models to test hypotheses\nUse mathematical models to construct confidence intervals\nCompare mathematical and randomization approaches to inference\n\n\nlibrary(tidyverse)\ntheme_set(theme_classic(14))\nset.seed(123)"
-  },
-  {
-    "objectID": "course-materials/labs/lab5-key.html#learning-objectives",
-    "href": "course-materials/labs/lab5-key.html#learning-objectives",
-    "title": "Lab 5",
-    "section": "",
-    "text": "In today’s lab you will…\n\nUse mathematical models to test hypotheses\nUse mathematical models to construct confidence intervals\nCompare mathematical and randomization approaches to inference\n\n\nlibrary(tidyverse)\ntheme_set(theme_classic(14))\nset.seed(123)"
-  },
-  {
-    "objectID": "course-materials/labs/lab5-key.html#mathematical-models",
-    "href": "course-materials/labs/lab5-key.html#mathematical-models",
-    "title": "Lab 5",
-    "section": "Mathematical models",
-    "text": "Mathematical models\nThis lab will repeat the inferences you conducted in last week’s lab, using mathematical models instead of randomization. Let’s recall our data from last week. You’ll need to copy the data file to your week5/data directory.\n\nrestoration &lt;- read_csv(\"data/eelgrass.csv\",\n                        show_col_types = FALSE)\nggplot(restoration, aes(treatment, fill = success_fct)) +\n  geom_bar() +\n  scale_fill_manual(values = c(\"firebrick\", \"cornflowerblue\")) +\n  labs(x = \"Restoration method\",\n       y = \"Sites\",\n       fill = \"Outcome\") +\n  theme(legend.position = \"inside\",\n        legend.position.inside = c(1, 1),\n        legend.justification = c(1, 1))\n\n\n\n\n\n\n\nFigure 1: Success of eelgrass restoration plots by restoration method.\n\n\n\n\n\n\nHypothesis test\nOnce again, we want to know if the popsicle stick method works better for restoration than garden staples. This is a “yes/no?” question, so we’re conducting a hypothesis test. Instead of using permutation to estimate our sampling distribution, we will assume the sampling distribution is normally distributed. Under the null hypothesis (i.e., no difference in proportions), we make this assumption:\n\\[\n\\begin{align}\n\\hat{p_2} - \\hat{p_1} &\\sim Normal(0, SE(\\hat{p})) \\\\\n\\hat{p} &= \\frac{x_1 + x_2}{n_1 + n_2} \\\\\nSE(\\hat{p_2} - \\hat{p_1}) &= \\sqrt{\\hat{p} (1 - \\hat{p}) (\\frac{1}{n_1} + \\frac{1}{n_2})} \\\\\n\\end{align}\n\\]\n\n\n\n\n\n\nNote\n\n\n\nThis math describes the assumptions of the null hypothesis for a difference in proportions. The key points are:\n\nThe distribution of the statistic (\\(\\hat{p_2} - \\hat{p_1}\\)) follows a normal distribution (i.e., the shape of the sampling distribution).\nWe assume the mean of the sampling distribution is 0, because this is the null hypothesis.\nThe standard error of the sampling distribution is based on the POOLED proportion because we’re assuming no difference between the proportions.\n\n\n\nThis is how you would have tested your hypothesis using permutation:\n\nIdentify the STATISTIC\nState your NULL and ALTERNATIVE hypotheses\nCalculate the OBSERVED statistic\nEstimate the NULL DISTRIBUTION\nCalculate P-VALUE\nCompare p-value to CRITICAL THRESHOLD\n\nUsing a mathematical model, you modify step 4. Instead of using randomization to estimate the null distribution, you use a normal variable. The following questions walk you through the steps. Note: many of these steps are exactly the same as last week’s lab.\n\nIdentify the statistic\nQ1: What is the appropriate statistic for this question?\nDifference in proportions\n\n\nState your null and alternative hypotheses\nQ2: What are your null and alternative hypotheses?\nH0: There’s no difference in outcome between garden staple and popsicle stick methods.\nHA: The popsicle stick method is more likely to succeed than the garden staple method.\n\n\nCalculate the sample statistic\nQ3: How would you calculate the statistic for the sample?\nCall the variable diff_props.\n\nsuccess_props &lt;- restoration %&gt;% \n  group_by(treatment) %&gt;% \n  summarize(prop_success = mean(success))\n\ndiff_props &lt;- success_props$prop_success[2] - success_props$prop_success[1]\n\ndiff_props\n\n[1] 0.1416667\n\n\n\n\nEstimate the null distribution\nQ4: What’s the standard error of the sample’s statistic?\n\n# p_hat is the POOLED proportion, i.e. the overall proportion of success\np_hat &lt;- sum(restoration$success) / nrow(restoration)\n\n# n's are the number of observations in each treatment\n# n1: number of garden staple observations\n# n2: number of popsicle stick observations\nn1 &lt;- sum(restoration$treatment == \"Garden staple\")\nn2 &lt;- sum(restoration$treatment == \"Popsicle stick\")\n\nse_p_hat &lt;- sqrt(p_hat * (1 - p_hat) * (1 / n1 + 1 / n2))\n\nIf you calculated se_p_hat correctly, the following figure should depict the PDF of the null distribution. It should be a normal variable with mean equal to 0 and standard deviation equal to the standard error of \\(\\hat p\\).\n\nnull_dist &lt;- tibble(\n  diff_prop = seq(-0.4, 0.4, length.out = 1000),\n  density = dnorm(diff_prop, mean = 0, sd = se_p_hat)\n)\n \nggplot(null_dist, aes(diff_prop, density)) +\n  geom_line(color = \"cornflowerblue\", linewidth = 2) +\n  geom_vline(xintercept = diff_props, color = \"firebrick\", linewidth = 2)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCalculate the p-value\nUse the pnorm() function to get the area under the curve of a normal distribution.\n\n\n\n\n\n\nTip\n\n\n\nBy default, pnorm() will tell you the area under the curve to the left of a value. Since we want the area to the right of the observed statistic, set lower.tail to FALSE.\n\n\nQ5: Fill in the blanks to calculate the p-value\n\np_val &lt;- pnorm(diff_props, mean = 0, sd = se_p_hat, lower.tail = FALSE)\np_val\n\n[1] 0.08251953\n\n\n\n\nCompare p-value to critical threshold\nQ6: How does your p-value compare to a critical threshold \\(\\alpha=0.05\\)? How would you interpret that?\nThe p value is greater than the critical threshold, so we fail to reject the null hypothesis. Our data are not consistent with the hypothesis that the popsicle stick method leads to success more often than the garden staple method.\n\n\n\nConfidence interval\nNow we want to estimate how differently the popsicle stick and garden staple methods perform. This is a “how much?” question, so we’re constructing a confidence interval. Instead of using bootstrapping to estimate our sampling distribution, we will assume the sampling distribution is normally distributed. We make this assumption:\n\\[\n\\begin{align}\n\\hat{p_2} - \\hat{p_1} &\\sim Normal(p_2 - p_1, SE(\\hat{p_2} - \\hat{p_1})) \\\\\nSE(\\hat{p_2} - \\hat{p_1}) &= \\sqrt{\\frac{\\hat{p_1}(1 - \\hat{p_1})}{n_1} + \\frac{\\hat{p_2}(1 - \\hat{p_2})}{n_2}} \\\\\n\\end{align}\n\\]\n\n\n\n\n\n\nNote\n\n\n\nThis math describes the assumptions of constructing a confidence interval for a difference in proportions. The key points are:\n\nThe distribution of the statistic (\\(\\hat{p_2} - \\hat{p_1}\\)) follows a normal distribution (i.e., the shape of the sampling distribution).\nWe assume the mean of the sampling distribution is the population parameter (\\(p_2 - p_1\\)).\nThe standard error of the sampling distribution is based on the two samples’ proportions, rather than pooling them, because we’re assuming there’s a difference between the proportions.\n\n\n\nThis is how you would have built a confidence interval using bootstrapping:\n\nIdentify the STATISTIC\nSubstitute sample for population and draw BOOTSTRAP SAMPLES\nEstimate the BOOTSTRAP DISTRIBUTION of the statistic\nConstruct the CONFIDENCE INTERVAL\n\nUsing a mathematical model changes how steps 2 and 3 work, with the same goal of estimating the sampling distribution. Instead of using randomization to draw bootstrap samples, you use a normal variable. The procedure works like this:\n\nIdentify the STATISTIC\nCalculate the STANDARD ERROR of the statistic\nConstruct the CONFIDENCE INTERVAL using a normal variable\n\nThe following questions walk you through the steps.\n\nIdentify the statistic\nQ7: What is the appropriate test statistic for this question?\nDifference in proportions\n\n\nCalculate the standard error\nQ8: Fill in the blanks below to calculate the standard error of the statistic\n\n\n\n\n\n\nNote\n\n\n\nRemember that the standard error is going to differ between hypothesis testing and confidence intervals. Hypothesis testing begins by assuming the null hypothesis is true, so the standard error describes a scenario where there are no differences (\\(p_2=p_1\\)). Confidence intervals assume the difference is real, so the standard error comes from a different scenario (\\(p_2 &gt; p_1\\)). Hence the difference in equations.\n\n\n\n# Calculate the proportions of the two treatments\n# Let treatment 1 be \"Garden staple\"\np_hat1 &lt;- mean(restoration$success[restoration$treatment == \"Garden staple\"])\n# Let treatment 2 be \"Popsicle stick\"\np_hat2 &lt;- mean(restoration$success[restoration$treatment == \"Popsicle stick\"])\n\n# n1 and n2 remain the same from before\n\n# Calculate standard error\nse_diff_props &lt;- sqrt(p_hat1 * (1 - p_hat1) / n1 + p_hat2 * (1 - p_hat2) / n2)\nse_diff_props\n\n[1] 0.1010048\n\n\nIf you calculated se_diff_props correctly, the following figure should depict the PDF of the sampling distribution. It should be a normal variable with mean equal to the observed statistic in the sample and standard deviation equal to the standard error.\n\nsampling_dist &lt;- tibble(\n  diff_prop = seq(-0.2, 0.5, length.out = 1000),\n  density = dnorm(diff_prop, mean = diff_props, sd = se_diff_props)\n)\n \nggplot(sampling_dist, aes(diff_prop, density)) +\n  geom_line(color = \"cornflowerblue\", linewidth = 2) +\n  geom_vline(xintercept = diff_props, color = \"firebrick\", linewidth = 2)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nConstruct the confidence interval\nUsing bootstrapping, you constructed the confidence interval using the 2.5% and 97.5% quantiles of the bootstrapped sampling distribution. Using the mathematical model, you use the function qnorm(). Whereas pnorm() returns the area under the curve, qnorm() tells you what value corresponds to a given area. In other words, they’re inverses of each other.\nIf you wanted to shade in the middle 95% of the area in Figure 3, qnorm() would tell you the left and right boundaries.\nQ9: Fill in the blanks to use qnorm() in constructing the confidence interval.\n\ndiff_props_ci &lt;- qnorm(c(0.025, 0.975), mean = diff_props, sd = se_diff_props)\ndiff_props_ci\n\n[1] -0.05629908  0.33963242\n\n\nQ10: How would you interpret this confidence interval\nWe are 95% confident the true difference in proportions falls between -0.06 and 0.34."
-  },
-  {
-    "objectID": "course-materials/labs/lab5-key.html#comparing-mathematical-and-randomization-approaches",
-    "href": "course-materials/labs/lab5-key.html#comparing-mathematical-and-randomization-approaches",
-    "title": "Lab 5",
-    "section": "Comparing mathematical and randomization approaches",
-    "text": "Comparing mathematical and randomization approaches\nQ11: What are permutation tests and mathematical models both trying to estimate for hypothesis tests?\nThe sampling distribution of the statistic assuming the null hypothesis is true.\nQ12: What are bootstrapping and mathematical models both trying to estimate for confidence intervals?\nThe sampling distribution of the statistic assuming the difference is real.\nQ13: What area under the curve is relevant to hypothesis tests? What R function calculates it for a mathematical model?\nThe area of the null distribution more extreme than the observed value. pnorm()\nQ14: What area under the curve is relevant to confidence intervals? What R function calculates it for a mathematical model?\nThe middle 95% of the area under the sampling distribution. qnorm()"
-  },
-  {
-    "objectID": "course-materials/labs/lab1.html",
-    "href": "course-materials/labs/lab1.html",
-    "title": "Lab 1",
-    "section": "",
-    "text": "In today’s lab you will…\n\nNumerically and graphically explore categorical data\nNumerically and graphically explore continuous data\nExplore a real world dataset"
-  },
-  {
-    "objectID": "course-materials/labs/lab1.html#learning-objectives",
-    "href": "course-materials/labs/lab1.html#learning-objectives",
-    "title": "Lab 1",
-    "section": "",
-    "text": "In today’s lab you will…\n\nNumerically and graphically explore categorical data\nNumerically and graphically explore continuous data\nExplore a real world dataset"
-  },
-  {
-    "objectID": "course-materials/labs/lab1.html#setup",
-    "href": "course-materials/labs/lab1.html#setup",
-    "title": "Lab 1",
-    "section": "Setup",
-    "text": "Setup\n\nlibrary(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.1     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.3     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(palmerpenguins)\n\n\nAttaching package: 'palmerpenguins'\n\nThe following objects are masked from 'package:datasets':\n\n    penguins, penguins_raw\n\ntheme_set(theme_bw(18))\n\nWe’ll use the penguins dataset for today’s lab. Refresh your memory of what it looks like with glimpse().\n\nglimpse(penguins)\n\nRows: 344\nColumns: 8\n$ species           &lt;fct&gt; Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adel…\n$ island            &lt;fct&gt; Torgersen, Torgersen, Torgersen, Torgersen, Torgerse…\n$ bill_length_mm    &lt;dbl&gt; 39.1, 39.5, 40.3, NA, 36.7, 39.3, 38.9, 39.2, 34.1, …\n$ bill_depth_mm     &lt;dbl&gt; 18.7, 17.4, 18.0, NA, 19.3, 20.6, 17.8, 19.6, 18.1, …\n$ flipper_length_mm &lt;int&gt; 181, 186, 195, NA, 193, 190, 181, 195, 193, 190, 186…\n$ body_mass_g       &lt;int&gt; 3750, 3800, 3250, NA, 3450, 3650, 3625, 4675, 3475, …\n$ sex               &lt;fct&gt; male, female, female, NA, female, male, female, male…\n$ year              &lt;int&gt; 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007…"
-  },
-  {
-    "objectID": "course-materials/labs/lab1.html#categorical-data",
-    "href": "course-materials/labs/lab1.html#categorical-data",
-    "title": "Lab 1",
-    "section": "Categorical data",
-    "text": "Categorical data\nCategorical data fall into discrete categories. Examples include:\n\nLand cover type (e.g., forest, wetland, urban)\nEnergy source (e.g., solar, wind, natural gas, coal)\nAir pollutant (e.g., common, hazardous, particulate matter)\n\nWe usually summarize categorical data using counts and proportions. Here we’ll explore how to do so with tables and figures.\n\nContingency tables\nContingency tables summarize combinations of variables by frequency. Create one using the base R function table(). The table below reveals an important pattern not apparent using glimpse(): not all species of penguins were observed at all islands.\n\ntable(penguins$species, penguins$island)\n\n           \n            Biscoe Dream Torgersen\n  Adelie        44    56        52\n  Chinstrap      0    68         0\n  Gentoo       124     0         0\n\n\nThe tidyverse count() function will give you a contingency table in long format.\n\npenguins %&gt;% \n  count(species, island)\n\n# A tibble: 5 × 3\n  species   island        n\n  &lt;fct&gt;     &lt;fct&gt;     &lt;int&gt;\n1 Adelie    Biscoe       44\n2 Adelie    Dream        56\n3 Adelie    Torgersen    52\n4 Chinstrap Dream        68\n5 Gentoo    Biscoe      124\n\n\nQ1 How would you pivot it to look like the contingency table above?\nWe often modify contingency tables in two ways.\nFirst, we often add marginal totals, i.e., the total of each row and column. The addmargins() function does that for us.\n\nspecies_island_table &lt;- table(penguins$species, penguins$island)\naddmargins(species_island_table)\n\n           \n            Biscoe Dream Torgersen Sum\n  Adelie        44    56        52 152\n  Chinstrap      0    68         0  68\n  Gentoo       124     0         0 124\n  Sum          168   124        52 344\n\n\nThese marginal totals demonstrate how counts can be difficult to compare, if they come from rows or columns with different totals. For example, more Adélie penguins were observed at Dream than Torgersen, but they represent a smaller fraction of the observations. Normalizing by proportion helps clarify that. You can calculate proportions either by row or column, for which we can use prop.table().\n\n# Row proportions\nprop.table(species_island_table, margin = 1)\n\n           \n               Biscoe     Dream Torgersen\n  Adelie    0.2894737 0.3684211 0.3421053\n  Chinstrap 0.0000000 1.0000000 0.0000000\n  Gentoo    1.0000000 0.0000000 0.0000000\n\n# Column proportions\nprop.table(species_island_table, margin = 2)\n\n           \n               Biscoe     Dream Torgersen\n  Adelie    0.2619048 0.4516129 1.0000000\n  Chinstrap 0.0000000 0.5483871 0.0000000\n  Gentoo    0.7380952 0.0000000 0.0000000\n\n\nQ2 How would you use count(), group_by(), mutate(), and pivoting to create row- and column-wise proportion tables?\n\n\nBar plots\nBar plots are effective for visualizing counts and proportions of one or more categories.\nThis bar plot visualizes the counts of each species.\n\nggplot(penguins, aes(species)) +\n  geom_bar()\n\n\n\n\n\n\n\n\nQ3 How would you use another aesthetic to show the composition of each species by island?\nQ4 Contrast the bar plot from Q3 with the contingency table from the beginning of the lab - how do they convey information differently?"
-  },
-  {
-    "objectID": "course-materials/labs/lab1.html#continuous-data",
-    "href": "course-materials/labs/lab1.html#continuous-data",
-    "title": "Lab 1",
-    "section": "Continuous data",
-    "text": "Continuous data\nContinuous data can take any value within their bounds. Examples include:\n\nUnbounded data (e.g., temperature1)\nBounded on one side (e.g., time-to-failure can only be positive)\nBounded on two sides (e.g., fractional cover of an invasive plant in a quadrat)\n\nWe can graphically depict continuous data as one variable (i.e., its distribution) or the relationship between two variables.\n\nHistograms and shape\nHistograms show the frequency of observations within bins, revealing the shape of the variable’s distribution.\n\npenguins %&gt;% \n  ggplot(aes(body_mass_g)) +\n  geom_histogram()\n\n`stat_bin()` using `bins = 30`. Pick better value `binwidth`.\n\n\nWarning: Removed 2 rows containing non-finite outside the scale range\n(`stat_bin()`).\n\n\n\n\n\n\n\n\n\nQ5 What’s the difference between a histogram and a bar plot?\n\n\nMean and standard deviation\nRecall that parameters and statistics are numerical summaries of populations and samples, respectively. Mean and standard deviation are useful summaries, but be careful as they can hide important differences.\nThe mean is a measure of central tendency i.e., the expected or center value of an observation in the sample. The standard deviation is a measure of variation i.e., how spread out the sample is.\nAs a rule of thumb, about 68% of a sample’s data will fall within one standard deviation of the mean, and about 95% will fall within two standard deviations. The more “normally” distributed the data is (more on that tomorrow) the better these rules of thumb hold. Highly skewed data or data with a lot of outliers will deviate more from the rule of thumb.\nQ6 What percentage of penguin body masses fall within one standard deviation of the mean? Within two?\n\n\nScatterplots for paired data\nScatter plots depict relationships between variables.\n\npenguins %&gt;% \n  ggplot(aes(bill_length_mm, bill_depth_mm)) +\n  geom_point() \n\nWarning: Removed 2 rows containing missing values or values outside the scale range\n(`geom_point()`).\n\n\n\n\n\n\n\n\n\nThe scatterplot above suggests little relationship between bill length and depth, or perhaps a slightly negative correlation. That means longer bills are not associated with deeper bills. However, if you ask a penguin anatomist, they’ll tell you the opposite is true: longer bills tend to be deeper, too. How can we reconcile these contrasting statements?\nThis is an example of Simpson’s paradox, which is when between-group correlations of one kind mask within-group correlations of another kind. Unmask the paradox by color-coding the points by species.\nQ7: Modify the scatterplot above to color-code the points by species. Then describe the correlations between bill depth, bill length, and species. How do the correlations across species mask the correlations within?"
-  },
-  {
-    "objectID": "course-materials/labs/lab1.html#where-to-find-data",
-    "href": "course-materials/labs/lab1.html#where-to-find-data",
-    "title": "Lab 1",
-    "section": "Where to find data",
-    "text": "Where to find data\nThe Yale University Library provides a useful guide for where to find environmental data. The categories include:\n\nGeneral Environmental Data\nEnergy Data\nClimate & Atmospheric Data\nAgricultural, Forestry, and Ecology Data\nHealth Related Data\n\nFind a dataset containing multiple categorical and continuous variables. You’ll have an easier time if you limit your search to tabular data. Explore the data using each of the following tools.\n\nContingency table\nBar plot\nHistogram\nScatterplot"
-  },
-  {
-    "objectID": "course-materials/labs/lab1.html#finished",
-    "href": "course-materials/labs/lab1.html#finished",
-    "title": "Lab 1",
-    "section": "Finished?",
-    "text": "Finished?\nIf you wrap up before lab is over, head over to the final project page on the course website and look at the section Model and response options. Your final project will require you to choose a question and data to investigate using a model we won’t teach you in class. The defining characteristic for these models are the response variable they can handle. Start thinking up a question and looking for data where the response variable has characteristics listed in the Model and response options table. Keep in mind that transformations and merging datasets are both options, so even if the raw data you find don’t match one of the eligible models, you may be able to derive something that does. Happy hunting!"
-  },
-  {
-    "objectID": "course-materials/labs/lab1.html#footnotes",
-    "href": "course-materials/labs/lab1.html#footnotes",
-    "title": "Lab 1",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nYes, absolute zero does exist, but practically for our purposes temperature is unbounded↩︎"
-  },
-  {
-    "objectID": "course-materials/labs/lab7-key.html",
-    "href": "course-materials/labs/lab7-key.html",
-    "title": "Lab 7",
-    "section": "",
-    "text": "In today’s lab you will…\n\nFit logistic regression models to binary (0/1, no/yes) outcomes\nInterpret coefficients\nVisualize predictions\n\nComplete sections Logistic model notation and R code and Read and explore the data before class.\n\nlibrary(tidyverse)\ntheme_set(theme_classic(12))\nset.seed(123)"
-  },
-  {
-    "objectID": "course-materials/labs/lab7-key.html#learning-objectives",
-    "href": "course-materials/labs/lab7-key.html#learning-objectives",
-    "title": "Lab 7",
-    "section": "",
-    "text": "In today’s lab you will…\n\nFit logistic regression models to binary (0/1, no/yes) outcomes\nInterpret coefficients\nVisualize predictions\n\nComplete sections Logistic model notation and R code and Read and explore the data before class.\n\nlibrary(tidyverse)\ntheme_set(theme_classic(12))\nset.seed(123)"
-  },
-  {
-    "objectID": "course-materials/labs/lab7-key.html#logistic-model-notation-and-r-code",
-    "href": "course-materials/labs/lab7-key.html#logistic-model-notation-and-r-code",
-    "title": "Lab 7",
-    "section": "Logistic model notation and R code",
-    "text": "Logistic model notation and R code\nIn statistical notation, logistic models take the form:\n\\[\n\\begin{align}\n\\text{BinaryOutcome} &\\sim Binomial(1, p) \\\\\nlogit(p) &= \\beta_0 + \\beta_1 \\text{Predictor}\n\\end{align}\n\\]\nIn R, you can fit a logistic model like this:\nlogistic_model &lt;- glm(binary_outcome ~ predictor,\n                      data = my_data,\n                      family = binomial(link = \"logit\"))\nIn both the notation and code above, identify the:\n\nResponse family\nBinomial, binomial\nLink function\nlogit, link = \"logit\"\nResponse\nBinaryOutcome, binary_outcome\nPredictor\nPredictor, predictor"
-  },
-  {
-    "objectID": "course-materials/labs/lab7-key.html#read-and-explore-the-data",
-    "href": "course-materials/labs/lab7-key.html#read-and-explore-the-data",
-    "title": "Lab 7",
-    "section": "Read and explore the data",
-    "text": "Read and explore the data\nRead the dataset in drinking_water.csv.\n\ndrinking_water &lt;- read_csv(\"data/drinking_water.csv\",\n                           show_col_types = FALSE)\n\nDescribe what you think each of the columns represents.\n\n\n\n\n\n\n\nColumn\nMeaning\n\n\n\n\npwsid\nID of the public water system\n\n\npwsname\nName of the public water system\n\n\npctpov\nPercent of the district under the poverty line\n\n\npcthisp\nPercent of the district that is Hispanic\n\n\nhealth\nCount of SDWA violations\n\n\nmedianincomehouse\nMedian household income in the district\n\n\nviolation\nWhether or not the district had a SDWA violation (binary)\n\n\npcthisp_bin\npcthisp, binned to 10% intervals\n\n\npctpov_bin\npctpov, binned to 10% intervals\n\n\n\nCreate three figures summarizing the relationships between race, class, and SDWA violations.\nFigure 1: A scatter plot showing the proportion of districts with SDWA violations in each percent Hispanic bin.\nFigure 2: A scatter plot showing the proportion of districts with SDWA violations in each percent below-poverty bin.\nFigure 3: A scatter plot showing the correlation between percent Hispanic and percent below-poverty at the district level.\n\ndrinking_water %&gt;% \n  group_by(pcthisp_bin) %&gt;% \n  summarize(prop_violation = mean(violation)) %&gt;% \n  ggplot(aes(pcthisp_bin, prop_violation)) +\n  geom_point() +\n  labs(x = \"% Hispanic\",\n       y = \"Prop. SDWA violations\")\n\ndrinking_water %&gt;% \n  group_by(pctpov_bin) %&gt;% \n  summarize(prop_violation = mean(violation)) %&gt;% \n  ggplot(aes(pctpov_bin, prop_violation)) +\n  geom_point() +\n  labs(x = \"% Below Poverty\",\n       y = \"Prop. SDWA violations\")\n\nggplot(drinking_water, aes(pcthisp, pctpov)) +\n  geom_point(shape = 21, alpha = 0.2) +\n  labs(x = \"% Hispanic\",\n       y = \"% Below Poverty\")"
-  },
-  {
-    "objectID": "course-materials/labs/lab7-key.html#fit-and-interpret-model",
-    "href": "course-materials/labs/lab7-key.html#fit-and-interpret-model",
-    "title": "Lab 7",
-    "section": "Fit and interpret model",
-    "text": "Fit and interpret model\nOur question is:\nHow are SDWA violations distributed among communities by class and race?\nLet’s begin by investigating class in isolation. Fit a logistic model to see how violation responds to pctpov.\n\nclass_model &lt;- glm(violation ~ pctpov,\n                   drinking_water,\n                   family = binomial(link = \"logit\"))\n\nJust as we did with linear regression, you can inspect coefficient estimates, p-values, and confidence intervals using summary() and confint().\nWhat is the best estimate for the % Below Poverty coefficient?\n\ncoef(class_model)[\"pctpov\"]\n\n    pctpov \n0.01697973 \n\n\nIs the coefficient significantly different than 0? Assume critical threshold of 0.05.\n\nsummary(class_model)$coefficients[\"pctpov\", 4] &lt; 0.05\n\n[1] TRUE\n\n\nWhat is the 95% CI for the coefficient?\n\nconfint(class_model)[\"pctpov\", ]\n\nWaiting for profiling to be done...\n\n\n     2.5 %     97.5 % \n0.01400774 0.01993638 \n\n\nBased on the sign, what is the relationship between class and SDWA violations?\nProbability of SDWA violation increases with the percentage of households below the poverty line."
-  },
-  {
-    "objectID": "course-materials/labs/lab7-key.html#make-predictions",
-    "href": "course-materials/labs/lab7-key.html#make-predictions",
-    "title": "Lab 7",
-    "section": "Make predictions",
-    "text": "Make predictions\nInterpreting the coefficients directly is pretty difficult with logistic regression! What is the difference between a coefficient of 0.1 and 0.2? Rather than interpreting the coefficient directly, it’s often easier to compare predictions.\nOnce you have a model, you can make predictions using predict(). When calling predict(), the following parameters are important:\n\nobject The model you want to generate predictions from\nnewdata A data frame of predictors your want predictions for\ntype Do you want predictions on the link or response scale? By default, predict() shows the value of \\(logit(p) = \\beta_0 + \\beta_1 x\\) (i.e., link-scale). To get the predicted probability (i.e., response-scale) set type to “response”.\nse.fit If se.fit is TRUE, predict() will calculate the confidence interval of the response on the link scale. You can use that to get the confidence interval of \\(p\\). That will make a ribbon, similar to the confidence interval of \\(\\mu\\) you saw in linear regression.\n\nHere’s how to generate predictions (with CI) for a single predictor.\n\n\n\n\n\n\nTip\n\n\n\nI use expand_grid() instead of tibble() when making the data frame of predictors because it gives you every combination of the values in the columns. That will be important when you have more than one predictor!\n\n\n\n# The predicted best estimates for p\npred_grid &lt;- expand_grid(pctpov = 0:100)\nclass_model_pred &lt;- pred_grid %&gt;% \n  mutate(p = predict(class_model, \n                     newdata = pred_grid,\n                     type = \"response\"))\n\n\nggplot(class_model_pred, aes(pctpov, p)) +\n  geom_line() +\n  labs(x = \"% Below Poverty\",\n       y = \"Prob. of Violation\")\n\n\n\n\n\n\n\n\nThat was just the best estimate. The following code adds the 95% CI for \\(p\\). It uses the inverse link function to go from link-scale to response-scale.\n\n\n\n\n\n\nCaution\n\n\n\nWhen constructing the 95% CI for \\(p\\), one thing remains the same and one thing has changed from constructing the 95% CI for \\(\\mu\\).\nWhat remains the same: the sampling distribution is normal, so once you have the standard error you can use qnorm() to get the 2.5% and 97.5% quantiles.\nWhat’s different: the sampling distribution exists on the link scale. In other words, the standard error is \\(SE(logit(p))\\) rather than \\(SE(p)\\). So you have to get the best estimate and standard error on the link scale, then invert the link function to get back to \\(p\\).\n\n\n\nclass_model_se &lt;- predict(class_model, \n                          newdata = pred_grid,\n                          # Note the link scale\n                          type = \"link\",\n                          # Get the SE of the fit\n                          se.fit = TRUE)\n# Get the inverse link function to go from link to response \nlinkinv &lt;- family(class_model)$linkinv\nclass_model_pred &lt;- pred_grid %&gt;% \n  mutate(\n    # Get logit(p) i.e. prediction on link scale\n    logit_p = class_model_se$fit,\n    # 95% CI on the link scale\n    logit_p_se = class_model_se$se.fit,\n    logit_p_lwr = qnorm(0.025, mean = logit_p, sd = logit_p_se),\n    logit_p_upr = qnorm(0.975, mean = logit_p, sd = logit_p_se),\n    # Invert to get probability i.e. response scale\n    p = linkinv(logit_p),\n    p_lwr = linkinv(logit_p_lwr),\n    p_upr = linkinv(logit_p_upr)\n  )\n\nAnd here’s the fit with the 95% CI presented as the familiar ribbon.\n\nggplot(class_model_pred, aes(pctpov, p)) +\n  geom_ribbon(aes(ymin = p_lwr, ymax = p_upr), alpha = 0.2) +\n  geom_line() +\n  labs(x = \"% Below Poverty\",\n       y = \"Prob. of Violation\")\n\n\n\n\n\n\n\n\nWhat is the probability of a SDWA violation in a district where 5% of households are below the poverty line? When 50% are? Show the best estimate and 95% CI.\n\nfilter(class_model_pred, pctpov %in% c(5, 50)) %&gt;% \n  select(p, p_lwr, p_upr)\n\n# A tibble: 2 × 3\n       p  p_lwr  p_upr\n   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;\n1 0.0695 0.0663 0.0729\n2 0.138  0.127  0.150"
-  },
-  {
-    "objectID": "course-materials/labs/lab7-key.html#your-turn",
-    "href": "course-materials/labs/lab7-key.html#your-turn",
-    "title": "Lab 7",
-    "section": "Your turn",
-    "text": "Your turn\nSwitzer and Teodoro demonstrated that the interaction between race and class is important for understanding the environmental justice dimensions of drinking water. You’ll investigate that here through the following steps.\n\nCreate a new model with an interaction term between pctpov and pcthisp.\nUse the summary and confidence intervals to answer the following questions:\nWhat is the 95% CI for the % Hispanic coefficient?\nIs the interaction between class and race significantly different than 0?\nCreate a new predictor data frame with combinations of both predictors.\nGenerate predictions, including both the best estimate and 95% CI.\nPlot the predictions. In your plot, put pcthisp on the x-axis and probability of SDWA violations on the y-axis. Indicate pctpov using color and fill. To make this work, you’ll have to filter your predictions to a few levels of pctpov (e.g., 0, 25, 50, and 75).\n\n\nej_model &lt;- glm(violation ~ pcthisp * pctpov,\n                drinking_water,\n                family = binomial(link = \"logit\"))\n\nsummary(ej_model) # interaction term p-value &lt;0.0001, significant\n\n\nCall:\nglm(formula = violation ~ pcthisp * pctpov, family = binomial(link = \"logit\"), \n    data = drinking_water)\n\nCoefficients:\n                 Estimate Std. Error z value Pr(&gt;|z|)    \n(Intercept)    -2.610e+00  3.787e-02 -68.917  &lt; 2e-16 ***\npcthisp        -5.636e-03  1.976e-03  -2.853  0.00433 ** \npctpov          1.241e-02  1.734e-03   7.154 8.44e-13 ***\npcthisp:pctpov  3.246e-04  6.696e-05   4.847 1.25e-06 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n(Dispersion parameter for binomial family taken to be 1)\n\n    Null deviance: 30509  on 52179  degrees of freedom\nResidual deviance: 30353  on 52176  degrees of freedom\nAIC: 30361\n\nNumber of Fisher Scoring iterations: 5\n\nconfint(ej_model) # 0.00019 - 0.00046\n\nWaiting for profiling to be done...\n\n\n                       2.5 %        97.5 %\n(Intercept)    -2.6846479109 -2.5361814958\npcthisp        -0.0095294052 -0.0017824730\npctpov          0.0089973881  0.0157956929\npcthisp:pctpov  0.0001928585  0.0004555946\n\npred_grid &lt;- expand_grid(pctpov = 0:100,\n                         pcthisp = 0:100)\nej_model_se &lt;- predict(ej_model, \n                       newdata = pred_grid,\n                       # Note the link scale\n                       type = \"link\",\n                       # Get the SE of the fit\n                       se.fit = TRUE)\n# Get the inverse link function to go from link to response \nlinkinv &lt;- family(class_model)$linkinv\nej_model_pred &lt;- pred_grid %&gt;% \n  mutate(\n    # Get logit(p) i.e. prediction on link scale\n    logit_p = ej_model_se$fit,\n    # +/- 1.96 SEs gives you the 95% CI on the link scale\n    logit_p_se = ej_model_se$se.fit,\n    logit_p_lwr = logit_p - 1.96 * logit_p_se,\n    logit_p_upr = logit_p + 1.96 * logit_p_se,\n    # Invert to get probability i.e. response scale\n    p = linkinv(logit_p),\n    p_lwr = linkinv(logit_p_lwr),\n    p_upr = linkinv(logit_p_upr)\n  )\n\nfilter(ej_model_pred, pctpov %in% c(0, 25, 50, 75)) %&gt;% \n  ggplot(aes(x = pcthisp, y = p, group = pctpov)) +\n  geom_ribbon(aes(ymin = p_lwr, ymax = p_upr, fill = pctpov), \n              alpha = 0.2) +\n  geom_line(aes(color = pctpov)) +\n  labs(x = \"% Hispanic\",\n       y = \"Prob. of Violation\")\n\n\n\n\n\n\n\n\nThe coefficient for an interaction term in a logistic regression model is very difficult to interpret on its own! But that value has important consequences for the lives of millions of people. Predictions are usually more straightforward to interpret than coefficients. Use your figure and the outputs of summary() and confint() to reflect on the following prompt. Reply to the corresponding thread on Slack with your reflection to get 1 token.\nIn plain language, what is the relationship between race, class, and SDWA violations? Which communities face the greatest risks associated with drinking water? How would you use the statistical outputs (model summary, prediction figure) to describe that risk quantitatively? How could those statistical outputs be misinterpreted?"
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html",
-    "href": "course-materials/labs/lab4.html",
-    "title": "Lab 4",
-    "section": "",
-    "text": "In today’s lab you will…\n\nRun a permutation test to answer a “yes/no?” question\nBootstrap a confidence interval to answer a “how much?” question\n\n\nlibrary(tidyverse)\ntheme_set(theme_classic(14))\nset.seed(123)"
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html#learning-objectives",
-    "href": "course-materials/labs/lab4.html#learning-objectives",
-    "title": "Lab 4",
-    "section": "",
-    "text": "In today’s lab you will…\n\nRun a permutation test to answer a “yes/no?” question\nBootstrap a confidence interval to answer a “how much?” question\n\n\nlibrary(tidyverse)\ntheme_set(theme_classic(14))\nset.seed(123)"
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html#eel-grass-restoration",
-    "href": "course-materials/labs/lab4.html#eel-grass-restoration",
-    "title": "Lab 4",
-    "section": "Eel grass restoration",
-    "text": "Eel grass restoration\nRecall the eel grass restoration example from yesterday’s lecture. The data recorded whether attempts to restore eel grass were successful based on the method used (garden staple or popsicle stick) Figure 1.\n\nrestoration &lt;- read_csv(\"data/eelgrass.csv\",\n                        show_col_types = FALSE)\nglimpse(restoration)\n\nRows: 100\nColumns: 5\n$ plot_id          &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16…\n$ treatment        &lt;chr&gt; \"Garden staple\", \"Popsicle stick\", \"Garden staple\", \"…\n$ success          &lt;dbl&gt; 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1,…\n$ shoot_density_m2 &lt;dbl&gt; 45.94241, 91.60585, 120.92760, 67.86314, 88.09977, 87…\n$ success_fct      &lt;chr&gt; \"Succeed\", \"Succeed\", \"Fail\", \"Fail\", \"Succeed\", \"Suc…\n\n\n\nggplot(restoration, aes(treatment, fill = success_fct)) +\n  geom_bar() +\n  scale_fill_manual(values = c(\"firebrick\", \"cornflowerblue\")) +\n  labs(x = \"Restoration method\",\n       y = \"Sites\",\n       fill = \"Outcome\") +\n  theme(legend.position = \"inside\",\n        legend.position.inside = c(1, 1),\n        legend.justification = c(1, 1))\n\n\n\n\n\n\n\nFigure 1: Success of eelgrass restoration plots by restoration method."
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html#permutation-test",
-    "href": "course-materials/labs/lab4.html#permutation-test",
-    "title": "Lab 4",
-    "section": "Permutation test",
-    "text": "Permutation test\nWe want to know if the popsicle stick method works better for restoration than garden staples. This is a “yes/no?” question, so we’ll use a permutation test for our hypothesis. Recall the steps for hypothesis testing:\n\nIdentify the TEST STATISTIC\nState your NULL and ALTERNATIVE hypotheses\nCalculate the OBSERVED test statistic\nEstimate the NULL DISTRIBUTION\nCalculate P-VALUE\nCompare p-value to CRITICAL THRESHOLD\n\n\nIdentify the test statistic\nQ1: What is the appropriate test statistic for this question?\n\n\nState your null and alternative hypotheses\nQ2: What are your null and alternative hypotheses?\nH0:\nHA:\n\n\nCalculate the observed test statistic\nQ3: How would you calculate the test statistic for the sample?\n\n\nEstimate the null distribution\nThis is the key part of a permutation test! Remember, our goal is to estimate the distribution of possible outcomes under the null hypothesis. To do that, we have to break the association between treatment and outcome.\nQ4: What column should we shuffle to break the association between treatment and outcome?\nQ5: Fill in the following code to perform one permutation and calculate the test statistic.\n\none_permutation &lt;- ??? %&gt;% \n  mutate(??? = sample(???, \n                      size = length(???), \n                      replace = FALSE))\n\npermutation_props &lt;- one_permutation %&gt;% \n  group_by(???) %&gt;% \n  summarize(???)\n\npermutation_diff_props &lt;- permutation_props$???[2] - permutation_props$???[1]\n\npermutation_diff_props\n\nThat gives us the value of the test statistic for just one permutation. To get a distribution, we have to repeat the process many times. Let’s do it 1,000 times.\nQ6: Fill in the following code to perform 1,000 permutations and estimate the null distribution\n\npermute &lt;- function(i) {\n  ???\n}\n\nnull_distribution &lt;- map_dbl(???, ???)\n\nQ7: Visualize the null distribution using a histogram and show where the observed test statistic falls\n\n\nCalculate the p-value\nThe p-value is the probability of a test statistic at least as extreme as the observed, given the null hypothesis. In other words, what proportion of the null distribution exceeds the observed?\nQ8: Calculate the p-value using the null distribution and observed test statistic\n\np_val &lt;- ???\n\np_val\n\n\n\nInterpret the p-value\nWhen interpreting the p-value, we compare it to a critical threshold, usually denoted with \\(\\alpha\\). By convention, we usually set \\(\\alpha\\) to 0.05.\nQ10: Given \\(p \\gt \\alpha\\), which of the following statements is a correct interpretation and why?\n\nOur evidence is consistent with the hypothesis that restoration method does not influence restoration outcome\nWe cannot reject the hypothesis that restoration method does not influence restoration outcome"
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html#bootstrap-confidence-interval",
-    "href": "course-materials/labs/lab4.html#bootstrap-confidence-interval",
-    "title": "Lab 4",
-    "section": "Bootstrap confidence interval",
-    "text": "Bootstrap confidence interval\nNow let’s answer a “how much?” question. We want to estimate an interval that we think contains the population parameter. For that, we use bootstrapping.\nRecall the steps for bootstrapping:\n\nIdentify the TEST STATISTIC\nSubstitute sample for population and draw BOOTSTRAP SAMPLES\nEstimate the BOOTSTRAP DISTRIBUTION of the test statistic\nCalculate the CONFIDENCE INTERVAL\n\n\nIdentify the test statistic\nQ11: What is the appropriate test statistic for this question?\n\n\nDraw bootstrap samples\nThis is the key part of bootstrapping! Remember, our goal is to estimate the variation of our population’s parameter due to sampling. To do that, we simulate the process of re-doing our experiment, using the original sample as a substitute for the population. To “re-do” our experiment, we have to keep the association between treatment and outcome.\nQ12: Fill in the following code to draw one bootstrap sample.\n\none_bootstrap &lt;- ??? %&gt;% \n  ??? %&gt;% \n  mutate(??? = sample(???,\n                      size = length(???),\n                      replace = ???)) %&gt;% \n  ungroup()\n\nQ13: Fill in the following code to draw 1,000 bootstrap samples.\n\n\n\n\n\n\nTip\n\n\n\nlist_rbind() will take a list of data frames and bind them row-wise into one data frame.\n\n\n\nbootstrap &lt;- function(i) {\n  ??? %&gt;% \n    mutate(trial = i)\n}\n\nbootstrap_samples &lt;- map(???, ???) %&gt;% \n  ???\n\n\n\nEstimate the bootstrap distribution of the test statistic\nQ14: Fill in the following code to calculate the test statistic for each bootstrap sample.\nQ15: Visualize the bootstrapped distribution of the test statistic.\n\n\nCalculate the confidence interval\nA confidence interval (CI) is a range we are confident contains the population parameter. The bootstrapped distribution of the test statistic describes where we expect the population parameter to fall. So a 95% confidence interval, for example, spans the range from the 2.5% quantile of the bootstrap distribution to the 97.5% quantile.\nQ16: Find the bounds of the 95% CI.\n\n\n\n\n\n\nTip\n\n\n\nThe quantile() function finds quantiles. It’s vectorized over the parameter probs, so you can find multiple quantiles at once\n\n\n\nrestoration_ci &lt;- ???\nrestoration_ci\n\nQ17: Update your visual from Q15 to include the observed test statistic with a solid line and the confidence interval represented with dotted lines."
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html#permutation-vs-bootstrap",
-    "href": "course-materials/labs/lab4.html#permutation-vs-bootstrap",
-    "title": "Lab 4",
-    "section": "Permutation vs bootstrap",
-    "text": "Permutation vs bootstrap\nThe visualization you created for Q7 shows the null distribution of the test statistic. The visualization you created for Q17 shows the bootstrapped distribution of the test statistic.\nQ18: What did you do to make the null distribution center on zero? Specifically, what code?\nQ19: What did you do to make the bootstrap distribution center on the observed test statistic? Specifically, what code?\nQ20: What would happen to your bootstrap distribution if you sampled without replacement?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#statistics-for-environmental-data-science",
-    "href": "course-materials/lecture-slides/wk1a.html#statistics-for-environmental-data-science",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#learning-objectives",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#learning-objectives",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Statistics for Environmental Data Science",
-    "text": "Statistics for Environmental Data Science\nInstructional team: Max Czapanskiy and Sloane Stephenson"
+    "section": "Learning objectives",
+    "text": "Learning objectives\n\nDifferentiate empirical and parametric distributions\nVisualize distributions using histograms and probability density functions\nSimulate sampling in R"
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#todays-goals",
-    "href": "course-materials/lecture-slides/wk1a.html#todays-goals",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s goals",
-    "text": "Today’s goals\n\nDescribe the challenges of statistical inference and identify them in an Environmental Justice (EJ) case study\nDefine validity, reliability, and sampling in the context of measurements and data\nPrepare for success in this course"
+    "section": "Empirical and parametric samples",
+    "text": "Empirical and parametric samples\nEmpirical: derived directly from observations\nParametric: derived from a mathematical formula governed by one or a few parameters"
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#navigating-uncertainty",
-    "href": "course-materials/lecture-slides/wk1a.html#navigating-uncertainty",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-random",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-random",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Navigating uncertainty",
-    "text": "Navigating uncertainty\n\nIf we could directly observe everything without error, we wouldn’t need statistics\nIn practice, we only get a glimpse through a window at what we care about\nStatistics is the practice of interpreting data to understand the whole from the limited part we can see"
+    "section": "Empirical samples: random",
+    "text": "Empirical samples: random\nThe process of collecting real observations is how we get empirical samples.\nWhen feasible, simple random samples are most representative of the population.\n\nIMS Figure 2.1: a simple random sample of recent graduates."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#challenges-of-statistical-inference-1",
-    "href": "course-materials/lecture-slides/wk1a.html#challenges-of-statistical-inference-1",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-biased",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-biased",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Challenges of statistical inference",
-    "text": "Challenges of statistical inference\n\nGeneralizing from sample to population\nGeneralizing from treatment to control group\nGeneralizing from observed measurements to underlying constructs of interest\n\n(Gelman, Hill, and Vehtari 2021)"
+    "section": "Empirical samples: biased",
+    "text": "Empirical samples: biased\nA truly random sample is rarely possible. Without care, there are many ways for biases to creep in. Convenience bias is particularly common.\n\nIMS Figure 2.2: a biased sample."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#neither-math-nor-magic",
-    "href": "course-materials/lecture-slides/wk1a.html#neither-math-nor-magic",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-stratified",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-stratified",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Neither math nor magic",
-    "text": "Neither math nor magic\nStatistics uses math (just like any other field of science) but it’s not a type of math\n\nSure, calculus and linear algebra can be useful, but we’ll mostly bypass them\nInstead, we will instead use simulation to develop (and test) conceptual models"
+    "section": "Empirical samples: stratified",
+    "text": "Empirical samples: stratified\nEven if simple random sampling is infeasible, sampling strategies reduce bias. For example, stratified sampling divides the population into self-similar groups, then randomly samples within those groups.\n\n\nIMS Figure 2.4: a stratified sample."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#neither-math-nor-magic-1",
-    "href": "course-materials/lecture-slides/wk1a.html#neither-math-nor-magic-1",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#example-of-a-parametric-distribution",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#example-of-a-parametric-distribution",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Neither math nor magic",
-    "text": "Neither math nor magic\nTo perform a statistical analysis responsibly you need to understand the assumptions and risks\n\nMany applications of statistics … invoke statistical terms and procedures as incantations, with scant understanding of the assumptions or relevance of the calculations, or even the meaning of the terminology. This demotes statistics from a way of thinking about evidence and avoiding self-deception to a formal “blessing” of claims.\n\n(Stark and Saltelli 2018)"
+    "section": "Example of a parametric distribution",
+    "text": "Example of a parametric distribution\n\nParametric distributions are defined by parameters (instead of observed data).\n\nE.g., a normal distribution has two parameters - the mean controls location and the sd controls shape.\n\nRecall probability density functions (PDFs) tell us how probable different ranges of values are."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#a-way-of-thinking",
-    "href": "course-materials/lecture-slides/wk1a.html#a-way-of-thinking",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#parameterizing-a-distribution",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#parameterizing-a-distribution",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "A way of thinking",
-    "text": "A way of thinking\n\nIn this class you will learn statistical thinking for assessing and interpreting evidence\nWe will avoid formulaic flowcharts for picking tests and models\nThe decisions and choices made by statistics practitioners have real world consequences"
+    "section": "Parameterizing a distribution",
+    "text": "Parameterizing a distribution\nLet’s parameterize a normal distribution with the mean and sd of the lead soil dataset.\n\nsoil_cores |&gt;\n  summarize(\n    mean_pb_ppm = mean(pb_ppm),\n    sd_pb_ppm = sd(pb_ppm)\n  )\n\n# A tibble: 1 × 2\n  mean_pb_ppm sd_pb_ppm\n        &lt;dbl&gt;     &lt;dbl&gt;\n1        253.      371."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#are-my-children-safe",
-    "href": "course-materials/lecture-slides/wk1a.html#are-my-children-safe",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#probability-density-function",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#probability-density-function",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Are my children safe?",
-    "text": "Are my children safe?\n\nCrystal Garcia, 26, is concerned about the safety of her children – Melonie, 4, left, and Jesse, 3 – since elevated levels of lead have been found in the soil around her neighbors’ homes in Boyle Heights, near the Exide Technologies plant in Vernon. (Al Seib / Los Angeles Times)March 13, 2014 in the Los Angeles Times"
+    "section": "Probability density function",
+    "text": "Probability density function\n\nThe PDF describes the relative probability of observing different values.\nThis PDF is a normal distribution with parameters matching the lead soil dataset."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#exide-battery-recycling-plant",
-    "href": "course-materials/lecture-slides/wk1a.html#exide-battery-recycling-plant",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#a-universe-of-parametric-distributions",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#a-universe-of-parametric-distributions",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Exide battery recycling plant",
-    "text": "Exide battery recycling plant\n\nThe 15-acre battery recycling plant is about five miles southeast of downtown Los Angeles. (Irfan Khan / Los Angeles Times)March 23, 2013 in the Los Angeles Times"
+    "section": "A universe of parametric distributions",
+    "text": "A universe of parametric distributions\n\nThe normal distribution is a poor stand-in for the lead data (symmetric, possibly negative).\nA different family (e.g. the lognormal) could do a better job. We’ll cover these more in later weeks."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#a-history-in-three-parts",
-    "href": "course-materials/lecture-slides/wk1a.html#a-history-in-three-parts",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#sampling-parametric-distributions",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#sampling-parametric-distributions",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "A history in three parts",
-    "text": "A history in three parts\n1922 - 2012: A century of pollution\n2013 - 2015: Shut it down\n2016 - present: Is it safe now?"
+    "section": "Sampling parametric distributions",
+    "text": "Sampling parametric distributions\n\nWe will sample from parametric distributions frequently in this course.\nThink of the height of the PDF as the chance of observing a nearby value."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#lead-smelting-operations-begin-in-1922",
-    "href": "course-materials/lecture-slides/wk1a.html#lead-smelting-operations-begin-in-1922",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples-1",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Lead smelting operations begin in 1922",
-    "text": "Lead smelting operations begin in 1922\n\n\n\nPlant opened in 1922 in Vernon, CA - an industrial city 5 miles from Downtown LA\n1 of 2 lead battery recycling plants west of the Rockies\nEmitted lead, arsenic, and other pollutants for 90 years\n\n\n\n\n\nThe plant operated in the industrial city of Vernon since 1922, spewing toxic air pollution over decades. (Brian van der Brug / Los Angeles Times)"
+    "section": "Empirical and parametric samples",
+    "text": "Empirical and parametric samples\nEmpirical: derived directly from observations.\n\nE.g., lead concentrations in soil cores.\n\nParametric: derived from a mathematical formula governed by one or a few parameters.\n\nE.g., a normal distribution with a mean and sd."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#lead-from-emissions-gas-and-paint",
-    "href": "course-materials/lecture-slides/wk1a.html#lead-from-emissions-gas-and-paint",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#sampling-strategies",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#sampling-strategies",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Lead from emissions, gas, and paint",
-    "text": "Lead from emissions, gas, and paint\n\nCCAT Exide Presentation 05.08.24"
+    "section": "Sampling strategies",
+    "text": "Sampling strategies\n\nSimple random is most representative of the population, but often infeasible.\nSampling bias misleads inferences about the population.\nSampling strategies (e.g. stratification) work around biases.\n\n\nIMS Figure 2.1: a simple random sample of recent graduates."
   },
   {
-    "objectID": "course-materials/lecture-slides/wk1a.html#wind-carried-lead-to-nearby-communities",
-    "href": "course-materials/lecture-slides/wk1a.html#wind-carried-lead-to-nearby-communities",
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#parametric-distributions",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#parametric-distributions",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Wind carried lead to nearby communities",
-    "text": "Wind carried lead to nearby communities\n\nCCAT Exide Presentation 05.08.24"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#how-much-lead-is-there",
-    "href": "course-materials/lecture-slides/wk1a.html#how-much-lead-is-there",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "How much lead is there?",
-    "text": "How much lead is there?\nWhat is the lead (Pb) soil concentration on this property? (1 #)\nHow valid is that number? I.e., how well does it represent what you’re trying to measure?\n\n\n\n\nBack yard Front yard Drip line\n\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.1     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.3     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#validity-of-a-measurement",
-    "href": "course-materials/lecture-slides/wk1a.html#validity-of-a-measurement",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Validity of a measurement",
-    "text": "Validity of a measurement\n\nA measure is valid to the degree that it represents what you are trying to measure\n\n(Gelman, Hill, and Vehtari 2021, 24)\nIf the thing we care about is risk of lead poisoning, how valid are the following measurements?\n\nMean soil Pb concentration in the front and back yard of a property\nMean soil Pb concentration within 500 yards of a property\nMaximum soil Pb concentration on a property"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#generalize-from-sample-to-population",
-    "href": "course-materials/lecture-slides/wk1a.html#generalize-from-sample-to-population",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Generalize from sample to population",
-    "text": "Generalize from sample to population\nGiven limited information about a sample, what can we say about the population?\n\n\nPopulation: the entire entity we’re interested in\n\nThe soil Pb contamination on a property\nThe soil Pb contamination in a radius around a pollution source\n\n\n\n\nSample: the subset of the population we have data for\n\nTen soil cores from a property\n“Representative” soil Pb values for 100 residential properties"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#where-is-the-lead",
-    "href": "course-materials/lecture-slides/wk1a.html#where-is-the-lead",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Where is the lead?",
-    "text": "Where is the lead?\n\n\n\nOver 10k homes within 2 km of the Exide plant\nInitial sampling from 244 homes\nGeneralize from sample to population\n\n\n\n\n\nMap of property-average soil lead concentration, interpolated by kriging. Sampling locations are shown as white circles\n\n\n(Small and Rose 2015)"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#community-organizations-protest",
-    "href": "course-materials/lecture-slides/wk1a.html#community-organizations-protest",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Community organizations protest",
-    "text": "Community organizations protest\n\n\nProtests intensify in response to increasing violations and dangerous soil samples.\n\n\n\nmark! Lopez in front of the Exide plant. (Photo: Goldman Environmental Prize)\n\n\n\n\nI’m the third generation of my family to fight the Exide smelter. My grandparents started back in the 1990s, and it took three generations of our communities to shut it down.\n\nSierra Club"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#exide-argues-its-not-responsible",
-    "href": "course-materials/lecture-slides/wk1a.html#exide-argues-its-not-responsible",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Exide argues it’s not responsible",
-    "text": "Exide argues it’s not responsible\n\n\nOther sources of lead include:\n\nLeaded gas phased out 1973 (proximity to highways)\nLeaded paint banned in 1978 (age of home)\n\n\n\n\n\nBoxplots comparing year of construction of homes (left), distance to the closest freeway (center), and distance to the closest arterial road (right) for each property"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#whats-the-ambient",
-    "href": "course-materials/lecture-slides/wk1a.html#whats-the-ambient",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "What’s the ambient?",
-    "text": "What’s the ambient?\n\n\n\n\n\nSoil lead concentration as a function of distance from the Exide facility.\n\n\n\n\nExide report estimated the mean ambient soil Pb level at 218 ppm.\nCA and EPA screen soil Pb for 80 ppm and 200 ppm, respectively.\nMedian soil Pb in LA is 81 ppm (Wu et al. 2010)."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#whats-the-radius",
-    "href": "course-materials/lecture-slides/wk1a.html#whats-the-radius",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "What’s the radius?",
-    "text": "What’s the radius?\n\n\n\n\n\nDistances to reach ambient background concentrations using the linear regression for directional subsets.\n\n\n\n\nExide estimated its radius of effect between 0.2 and 0.75 miles, depending on wind direction.\nDTSC disputed the ambient soil Pb; estimated radius between 1.3 and 1.7 miles"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#reliability-of-a-measurement",
-    "href": "course-materials/lecture-slides/wk1a.html#reliability-of-a-measurement",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Reliability of a measurement",
-    "text": "Reliability of a measurement\n\nA reliable measure is one that is precise and stable.\n\n(Gelman, Hill, and Vehtari 2021, 25)\n\n\nExide’s argument attacked the reliability of soil Pb measurements.\n\nCollect duplicate samples\nCalculate difference of measurements\nEstimate an error “buffer”\n\n\n\npb_mu &lt;- 129.2\npb_sigma &lt;- 100\npb_mu_log &lt;- log(pb_mu / sqrt(1 + pb_sigma^2 / pb_mu^2))\npb_sigma_log &lt;- log(1 + pb_sigma^2 / pb_mu^2)\n\nr_cov &lt;- 0.136\n# cov = sqrt(exp(sigma^2) - 1)\n# cov^2 = exp(sigma^2) - 1\n# cov^2 + 1 = exp(sigma^2)\n# log(cov^2 + 1) = sigma^2\n# sigma = sqrt(log(cov^2 + 1))\nr_sigma &lt;- sqrt(log(r_cov^2 + 1))\ntibble(\n  pb_t = rlnorm(25, meanlog = pb_mu_log, sdlog = pb_sigma_log),\n  r1_log = rnorm(25, mean = 0, sd = r_sigma),\n  r2_log = rnorm(25, mean = 0, sd = r_sigma),\n  pb_1 = pb_t * exp(r1_log),\n  pb_2 = pb_t * exp(r2_log),\n  d = pb_2 - pb_1\n) |&gt;\n  ggplot(aes(d)) +\n  geom_dotplot(method = \"histodot\", binwidth = 10) +\n  geom_vline(xintercept = c(-1, 1) * 35.14, color = \"cornflowerblue\") +\n  labs(x = \"Difference in duplicates (ppm)\") +\n  scale_y_continuous(NULL, breaks = NULL) +\n  theme_bw(18)\n\n\n\n\n\n\n\n\nExide’s claim: Any contribution &lt;35 ppm is indistinguishable from measurement error"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#generalizing-from-observed-to-underlying-construct",
-    "href": "course-materials/lecture-slides/wk1a.html#generalizing-from-observed-to-underlying-construct",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Generalizing from observed to underlying construct",
-    "text": "Generalizing from observed to underlying construct\nExide’s radius of effect is not directly measurable\nSame data, two different conclusions.\n\n\n\n\n\nExide’s estimate (Small and Rose 2015)\n\n\n\n\n\n\nDTSC’s estimate (Department of Toxic Substances Control 2015)"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#exide-plant-closes",
-    "href": "course-materials/lecture-slides/wk1a.html#exide-plant-closes",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Exide plant closes",
-    "text": "Exide plant closes\nMarch 11, 2015 Exide closes Vernon plant to avoid criminal prosecution\n\nStephanie Yonekura, acting United States Attorney, announces an agreement to permanently close the Exide lead-acid battery recycling plant in Vernon. (Bob Chamberlin / Los Angeles Times)"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#homes-approved-for-cleanup",
-    "href": "course-materials/lecture-slides/wk1a.html#homes-approved-for-cleanup",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "2,500 homes approved for cleanup",
-    "text": "2,500 homes approved for cleanup\n\n\nJuly 6, 2017\n\n\n~10k homes exposed to Pb emissions\nState tested Pb soil in 8.2k homes\n2.5k homes with soil Pb &gt;400 ppm scheduled for cleanup\n\n\n\n\n\nAn environmental health specialist collects a soil sample. (Mel Melcon / Los Angeles Times)\n\n\nThousands of L.A. County homes tainted with lead"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#cleanup-progresses-slowly",
-    "href": "course-materials/lecture-slides/wk1a.html#cleanup-progresses-slowly",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Cleanup progresses slowly",
-    "text": "Cleanup progresses slowly\n\n\n\n\nThe Exide plant in Vernon closed 3 years ago. The vast majority of lead-contaminated properties remain uncleaned."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#community-academy-collaboration",
-    "href": "course-materials/lecture-slides/wk1a.html#community-academy-collaboration",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Community-academy collaboration",
-    "text": "Community-academy collaboration\n\n\n\n\n\nSteve Zylius / UC Irvine\n\n\nEYCEJ partnered with Prof Jill Johnston to investigate the cleanup (Johnston et al. 2026)\n\n\nGet The Lead Out Study is a community-academic research collaboration with East Yard Communities for Environmental Justice\n\n\nWe collected 1128 samples from 373 properties, of which ∼40% were cleaned by the state"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#study-questions-removal-action-plan",
-    "href": "course-materials/lecture-slides/wk1a.html#study-questions-removal-action-plan",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Study questions Removal Action Plan",
-    "text": "Study questions Removal Action Plan\n\n\n\nSoil Pb &gt;80 ppm in 39% of samples at cleaned properties\nOutside PIA, soil Pb dropped 24 ppm per 1000 m from Exide plant"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#has-the-cleanup-been-effective",
-    "href": "course-materials/lecture-slides/wk1a.html#has-the-cleanup-been-effective",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Has the cleanup been effective?",
-    "text": "Has the cleanup been effective?\n\n\n\n\n\nDistributions of residential soil Pb sampling results from homes outside the PIA (in adjacent neighborhoods) and those inside the PIA that received a state-sponsored soil remediation.\n\n\n\nAmong cleaned homes:\n\nMean soil Pb in samples was not significantly &gt;80 ppm\n39% of samples &gt;80 ppm\n73% of homes had 1+ sample &gt;80 ppm\n19% of samples &gt;200 ppm\n\nHas the cleanup been effective?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#generalizing-from-treatment-to-control",
-    "href": "course-materials/lecture-slides/wk1a.html#generalizing-from-treatment-to-control",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Generalizing from treatment to control",
-    "text": "Generalizing from treatment to control\nGiven samples from treatment and control, what can we say about the treatment’s effect?\n\n\nTreatment: a change or intervention\n\nRemediating soil on a property\nOperating an industrial facility in a neighborhood\n\n\nControl: a comparable group that has not received the treatment\n\nA property pre-remediation\nNearby neighborhoods outside the facility’s effect radius"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#a-century-of-pollution-1",
-    "href": "course-materials/lecture-slides/wk1a.html#a-century-of-pollution-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "1922 - 2012: A century of pollution",
-    "text": "1922 - 2012: A century of pollution\nFrom 1922 to 2015, the Exide plant emitted lead and polluted nearby communities\n\nThe plant operated in the industrial city of Vernon since 1922, spewing toxic air pollution over decades. (Brian van der Brug / Los Angeles Times)"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#shut-it-down-1",
-    "href": "course-materials/lecture-slides/wk1a.html#shut-it-down-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "2013 - 2015: Shut it down",
-    "text": "2013 - 2015: Shut it down\nCommunity protests and government investigations led to the plant’s closure\n\nCommunity members in March 2014 again sought the Exide plant’s shutdown in March 2014, during a community meeting at Resurrection Catholic Church in Boyle Heights on the results of lead testing. (Lawrence K. Ho / Los Angeles Times)"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#present-is-it-safe-now-1",
-    "href": "course-materials/lecture-slides/wk1a.html#present-is-it-safe-now-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "2016 - present: Is it safe now?",
-    "text": "2016 - present: Is it safe now?\nThe largest residential cleanup in California state history, with mixed results\n\nA worker with East Yard Communities for Environmental Justice collects soil samples from the community garden in Boyle Heights, inside the area contaminated by the former Exide battery recycling facility, in September 2022. (Dania Maxwell/Los Angeles Times)"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#challenges-of-statistics",
-    "href": "course-materials/lecture-slides/wk1a.html#challenges-of-statistics",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Challenges of statistics",
-    "text": "Challenges of statistics\n\n\nGeneralize from sample to population\n\n\nGeneralize from obs. measurements to underlying construct\n\n\nGeneralize from treatment to control"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#course-structure",
-    "href": "course-materials/lecture-slides/wk1a.html#course-structure",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Course structure",
-    "text": "Course structure\n\n\nWhere and when do we meet?\n\nLecture\n\nMW 1424 9:30-10:45\n\nLab\n\nT 3022A 12:30-1:50\n\nStudent hours\n\nT 3022A 2-3\nTh 3022A 3-4\n\n\n\nWhat will I be graded on?\n\n3 homeworks\n1 midterm\n1 final project"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#course-structure-1",
-    "href": "course-materials/lecture-slides/wk1a.html#course-structure-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Course structure",
-    "text": "Course structure\n\n\nWhat do I do before class?\n\nReadings\nPre-recorded lectures\nPre-class “parking lot”\n\n\nWhat do I do in class?\n\nPay attention\nParticipate in activities\nConnect statistics to your experiences and interests"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#community-agreements",
-    "href": "course-materials/lecture-slides/wk1a.html#community-agreements",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Community agreements",
-    "text": "Community agreements\nThere are two posters at the back of the room\n\n\n“How can I support myself in this class?”\n\n“How can I support my peers in this class?”\n\n\nReflect on these prompts and put at least one sticky note on each poster"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html#optimal-stress",
-    "href": "course-materials/lecture-slides/wk1a.html#optimal-stress",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Optimal stress",
-    "text": "Optimal stress\nRemember, there is an optimal level of stress for learning.\nIf you’re outside the optimal, please come to your instructors!\n\nYerkes-Dodson Curve"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/wk1a.html",
-    "href": "course-materials/lecture-slides/wk1a.html",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "",
-    "text": "Instructional team: Max Czapanskiy and Sloane Stephenson\n\n\n\n\nDescribe the challenges of statistical inference and identify them in an Environmental Justice (EJ) case study\nDefine validity, reliability, and sampling in the context of measurements and data\nPrepare for success in this course"
+    "section": "Parametric distributions",
+    "text": "Parametric distributions\n\nParametric distributions are mathematical functions governed by parameters.\nWe use them as theoretical stand-ins for populations.\nPDF says how probable observations are, given parameters."
   }
 ]

@@ -1,23 +1,6 @@
 ---
-title: "Regression"
-subtitle: "Week 2 (October 6 - 10)"
-description: "Theme: Exploring Uncertainty"
+title: "Foundations of inference"
+subtitle: "Week 2 (October 5 - 9)"
 ---
 
-## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Lecture Materials {#lecture-materials}
-
-| Session | Topic  | Reading |
-|---------|--------|---------|
-| Lecture 1 | [Linear regression](lecture-slides/lecture2-1.pdf){target="_blank"} | [IMS Ch 7](https://openintrostat.github.io/ims/model-slr.html){target="_blank"} |
-| Lab | [Rockfish survey gaps](labs/lab2.qmd) | [Santora et al. (2021) *Nature Communications*](https://doi.org/10.1038/s41467-021-26484-5){target="_blank"} (optional) |
-| Lecture 2 | [Multiple regression](lecture-slides/lecture2-2.pdf) | [IMS Ch 8](https://openintrostat.github.io/ims/model-mlr.html){target="_blank"} |
-: {.hover .bordered tbl-colwidths="[25,50,25]"} 
-
-## {{< fa pencil title="pencil" >}} Assignment Reminders {#assignment-reminders}
-
-| Assignment Type | Note                      |
-|-----------------|---------------------------|
-| Homework        | Homework 1 posted         |
-| Final project   | Choose data and question  |
-: {.hover .bordered tbl-colwidths="[20,30,20,30]"} 
-
+**_Under construction_**
