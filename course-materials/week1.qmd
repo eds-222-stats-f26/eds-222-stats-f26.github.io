@@ -5,10 +5,10 @@ subtitle: "Week 1 (September 28 - October 2)"
 
 ## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Class Materials {#lecture-materials}
 
-| Session | Slides | Pre-class |
+| Session | In-class | Pre-class |
 |---------|--------|---------|
 | Lecture 1 | [Welcome to 222!](lecture-slides/week1_monday.qmd){target="_blank"} | _None_ |
-| Lab | Validity and Reliability | _None_ |
+| Lab | Validity and Reliability <br/> [Reliability of Soil Lead Measurements](labs/lab1.qmd) | _None_ |
 | Lecture 2 | [Sampling](lecture-slides/week1_wednesday.qmd){target="_blank"} | ROS 1-1.4, 2-2.2 <br/> IMS 1-2 <br/> [Sampling](https://youtu.be/nA27fUbtPXM){target="_blank"} <br/> [Sampling in R](https://youtu.be/NYf0ihOLM6s){target="_blank"} <br/> [Statistical claims](pre-class/week1_statistical_claims.qmd) |
 : {.hover .bordered tbl-colwidths="[30,30,40]"} 
 
