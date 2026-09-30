@@ -1,0 +1,316 @@
+---
+title: "Lab 2: Foundations of Inference"
+subtitle: "Permutation and bootstrapping"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab2.qmd
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+
+soil_cores <- read_csv("../data/exide-soil-cores.csv")
+```
+
+## Background
+
+> Lead is elevated in the drip line compared to the rest of the yard.
+
+> Neighborhoods north of the Exide plant were exposed to more lead than those south.
+
+These are both claims that we can investigate using statistical inference. In this week's lab, you'll reframe the claims using statistical language, use a _statistical experiment_ to quantify the evidence in the sample, and interpret your results responsibly.
+
+| Claim | Question type | Statistical experiment |
+|------------------------------------|---------------|------------------------|
+| Lead is elevated in the drip line compared to the rest of the yard. | Yes/no? | Permutation |
+| Neighborhoods north of the Exide plant were exposed to more lead than those south. | How much? | Bootstrapping |
+
+## Investigating "yes/no" questions with _permutation_
+
+Let's investigate the claim _"Lead is elevated in the drip line compared to the rest of the yard"_ as a yes/no question. 
+
+### State your hypotheses
+
+Recall that it is more straightforward to find evidence _against_ a hypothesis than for it. So when we investigate yes/no questions, we set up a _null hypothesis_ and see how much evidence there is against it.
+
+State the null and alternative hypotheses for this claim.
+
+$H_0$: The difference in means is 0.
+
+$H_A$: The difference in means is greater than 0.
+
+### Calculate the observed value of the statistic
+
+We'll use the _difference in means_ between samples from the drip line and the yard as the statistic for this question.
+
+
+::: {.callout-important}
+
+Remember, the mean isn't always the most appropriate statistic for representing a distribution! Always think critically about how your data relates to the question.
+
+:::
+
+Calculate the difference in means between the drip line and yard observations in the sample. Remember, this should be a single number (not a data frame or pair of means).
+
+```{r}
+#| label: obs-drip-yard
+
+location_summ <- soil_cores |>
+  summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)
+
+obs_diff_means <- location_summ$mean_pb_ppm[2] - location_summ$mean_pb_ppm[1]
+
+obs_diff_means
+```
+
+### Shuffle the predictor variable and recalculate the statistic
+
+This statistical experiment simulates the _expected variation_ in our statistic (difference in means) just due to chance alone. To conduct this experiment, we have to break the connection between the predictor variable (location code) and response (lead concentration). Randomizing the predictor leaves the variation in the response untouched, while removing any assocation between the two.
+
+Shuffle the predictor variable and recalculate the statistic. Do it just once - we'll repeat in the next section.
+
+::: {.callout-tip}
+
+`sample()` can be used to shuffle vectors.
+
+:::
+
+
+```{r}
+#| label: permute-once
+
+shuffled_summ <- soil_cores |>
+  mutate(location_code = sample(location_code)) |>
+  summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)
+
+shuffled_diff_means <- shuffled_summ$mean_pb_ppm[2] -
+  shuffled_summ$mean_pb_ppm[1]
+
+shuffled_diff_means
+```
+
+### Repeat shuffling
+
+In the previous section, you simulated one statistic from the null hypothesis. What we need now is a whole bunch of statistics from the null hypothesis - our _null distribution_.
+
+Repeat shuffling 10,000 times to create a vector that simulates the null distribution.
+
+::: {.callout-tip}
+
+`replicate()` repeatedly runs expressions over and over.
+
+:::
+
+
+```{r}
+#| label: null-distribution
+
+location_null_dist <- replicate(
+  1e3,
+  {
+    shuffled_summ <- soil_cores |>
+      mutate(location_code = sample(location_code)) |>
+      summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)
+
+    shuffled_summ$mean_pb_ppm[2] -
+      shuffled_summ$mean_pb_ppm[1]
+  }
+)
+```
+
+Visualize the null distribution using a histogram.
+
+```{r}
+#| label: fig-null-dist
+
+tibble(diff_means = location_null_dist) |>
+  ggplot(aes(diff_means)) +
+  geom_histogram(binwidth = 5)
+```
+
+### Compare the observed to the null
+
+The previous figure showed the expected distribution of the statistic (the difference in mean lead between drip line and yard) under the null hypothesis. How does that compare to the observed value?
+
+Plot the null distribution again, but this time add a vertical line indicating the observed statistic.
+
+```{r}
+#| label: fig-null-dist2
+
+tibble(diff_means = location_null_dist) |>
+  ggplot(aes(diff_means)) +
+  geom_histogram(binwidth = 5) +
+  geom_vline(xintercept = obs_diff_means, color = "magenta", linewidth = 1.5)
+```
+
+Calculate your p-value.
+
+::: {.callout-note}
+
+A p-value is the _probability of observing the sample (or something more extreme) **if** the null hypothesis is true_.
+
+:::
+
+```{r}
+#| label: p-val
+
+pval <- mean(location_null_dist > obs_diff_means)
+
+pval
+```
+
+### Interpret your results
+
+Based on your p-value, do you reject or fail to reject the null hypothesis?
+
+What does this mean for your question?
+
+What characteristics of the data may impact your inference?
+
+## Investigating "how much?" questions with bootstrapping
+
+Now, let's investigate the claim _"Neighborhoods north of the Exide plant were exposed to more lead than those south"_ as a _how much?_ question. 
+
+### Calculate the observed value of the statistic
+
+Once again, let's use the difference in means as our statistic. Calculate the difference in means between properties in the extended north area and those in the extended south area.
+
+
+::: {.callout-tip}
+
+Use `dplyr` functions to wrangle the soil core data for this part. Properties starting with "ENA" are in the extended north area, and the "ESA" prefix means extended south area. `str_sub()` will help here.
+
+:::
+
+```{r}
+#| label: obs-ena-esa
+
+ena_esa <- soil_cores |>
+  mutate(area = str_sub(property_id, 1, 3)) |>
+  filter(area %in% c("ENA", "ESA"))
+
+area_summ <- ena_esa |>
+  summarize(mean_pb_ppm = mean(pb_ppm), .by = area) |>
+  arrange(area)
+
+obs_diff_means <- area_summ$mean_pb_ppm[1] - area_summ$mean_pb_ppm[2]
+
+obs_diff_means
+```
+
+### Resample observations and recalculate the statistic
+
+Bootstrapping simulates the _expected variation_ in our statistic (difference in means) from _sampling_. Compare this to permutation, which is about variation just due to chance. For this experiment, we will assume the sample is representative of the population and repeatedly draw "new" samples. This process simulates the process of collecting new samples.
+
+Resample rows from the data frame and recalculate the statistic. Repeat this 10,000 times to simulate the _sampling distribution_.
+
+
+::: {.callout-tip}
+
+Use `slice_sample()` _with replacement_ to get bootstrap samples.
+
+:::
+
+
+```{r}
+#| label: sampling-distribution
+
+area_samp_dist <- replicate(
+  1e3,
+  {
+    resampled_summ <- ena_esa |>
+      slice_sample(n = nrow(ena_esa), replace = TRUE) |>
+      summarize(mean_pb_ppm = mean(pb_ppm), .by = area) |>
+      arrange(area)
+
+    resampled_summ$mean_pb_ppm[1] -
+      resampled_summ$mean_pb_ppm[2]
+  }
+)
+```
+
+Visualize the sampling distribution using a histogram.
+
+```{r}
+#| label: fig-samp-dist
+
+tibble(diff_means = area_samp_dist) |>
+  ggplot(aes(diff_means)) +
+  geom_histogram(binwidth = 5)
+```
+
+### Find the _confidence interval_
+
+The previous figure showed how your statistic varies due to slight differences between samples. Use this sampling distribution to estimate the _95% confidence interval_.
+
+::: {.callout-note}
+
+A **confidence interval** is _a range of values that you are confident contains the population parameter_. 
+
+:::
+
+
+::: {.callout-tip}
+
+Use the `quantile()` function to find the middle 95% of the sampling distribution.
+
+:::
+
+```{r}
+#| label: area_95ci
+
+area_95ci <- quantile(area_samp_dist, c(0.025, 0.975))
+```
+
+Plot the sampling distribution again, but this time add vertical lines indicating the observed statistic and the 95% CI.
+
+```{r}
+#| label: fig-samp-dist2
+
+tibble(diff_means = area_samp_dist) |>
+  ggplot(aes(diff_means)) +
+  geom_histogram(binwidth = 5) +
+  geom_vline(xintercept = obs_diff_means, color = "magenta", linewidth = 1.5) +
+  geom_vline(xintercept = area_95ci, linetype = "dashed", linewidth = 1.5)
+```
+
+### Interpret your results
+
+Based on your confidence interval, how much could the difference in lead exposure between north and south be?
+
+What does this mean for your question?
+
+What characteristics of the data may impact your inference?
+
+## Recap
+
+In this lab, you investigated two claims using _statistical experiments_ to evaluate evidence. 
+
+From this exercise, the practical information you should remember:
+
+|                        | "yes/no" questions | "how much?" questions  |
+|------------------------|--------------------|------------------------|
+| Inference target       | P-value            | Confidence interval    |
+| Statistical experiment | Permutation        | Bootstrapping          |
+| Simulate a...          | Null distribution  | Sampling distribution  |
+| Centered on...         | 0                  | The observed statistic |
+| Randomize with...      | `sample()` (no replacement) | `slice_sample()` (with replacement) |
+| Simulate repeatedly    | `replicate()`      | `replicate()`          |
+
+More importantly, remember how to use these tools responsibly. A p-value and a confidence interval are tools for checking our own cognitive biases. They are useful lines of evidence, but no one statistical procedure ever tells the whole story.
+
+Always think critically!
+
+## Keep going?
+
+Done early? Having fun and want more? Try this out.
+
+P-values are sensitive to sample sizes. Do the permutation exercise again, but this time only on a sub-sample of the data. What kinds of p-values do you get if you only use 20 observations? 50? 100? 1000? Repeat the statistical experiment many times and visualize the relationship between your p-values and your sub-sample size using boxplots.

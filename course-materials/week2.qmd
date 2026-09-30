@@ -3,4 +3,16 @@ title: "Foundations of inference"
 subtitle: "Week 2 (October 5 - 9)"
 ---
 
-**_Under construction_**
+## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Class Materials {#lecture-materials}
+
+| Session | In-class | Pre-class |
+|---------|--------|---------|
+| Lecture 1 | Foundations of inference | IMS 11-13 <br/> [Foundations of inference]{https://youtu.be/ceBieVXdjQo} <br/> [Permutation]{https://youtu.be/vqZewcTM2jo} <br/> [Bootstrapping]{https://youtu.be/e_KYBFGivl8} |
+| Lab | [Investigating claims using inference](labs/lab2.qmd) | Read the documentation for the `replicate()` function |
+| Lecture 2 | Mathematical models for inference | IMS 16-17, 19-21 |
+: {.hover .bordered tbl-colwidths="[30,30,40]"} 
+
+## Additional materials
+
+- [The Permutation Test](https://www.jwilber.me/permutationtest/) A fun visual example where you take on the role of an alpaca shepherd.
+- [Bootstrapping Main Ideas!!!](https://www.youtube.com/watch?v=Xz0x-8-cgaQ) Part of the StatQuest series of videos (an excellent resource itself).

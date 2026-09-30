@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>EDS 222: Statistics for Environmental Data Science – Foundations of inference</title>
+<title>EDS 222: Statistics for Environmental Data Science – Lab 1: Reliability of Soil Lead Measurements</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,28 +20,82 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<link href="../images/bren-hex.png" rel="icon" type="image/png">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../images/bren-hex.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -80,7 +134,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">EDS 222: Statistics for Environmental Data Science</span>
     </a>
   </div>
@@ -91,11 +145,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../eds-222-f26-syllabus.pdf" target="_blank"> 
+    <a class="nav-link" href="../../eds-222-f26-syllabus.pdf" target="_blank"> 
 <span class="menu-text">syllabus</span></a>
   </li>  
   <li class="nav-item">
@@ -108,53 +162,53 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-course-materials">    
         <li>
-    <a class="dropdown-item" href="../course-materials/week1.html">
+    <a class="dropdown-item" href="../../course-materials/week1.html">
  <span class="dropdown-text">week 1 (9/28-10/2)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week2.html">
+    <a class="dropdown-item" href="../../course-materials/week2.html">
  <span class="dropdown-text">week 2 (10/5-10/9)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week3.html">
+    <a class="dropdown-item" href="../../course-materials/week3.html">
  <span class="dropdown-text">week 3 (10/12-10/16)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week4.html">
+    <a class="dropdown-item" href="../../course-materials/week4.html">
  <span class="dropdown-text">week 4 (10/19-10/23)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week5.html">
+    <a class="dropdown-item" href="../../course-materials/week5.html">
  <span class="dropdown-text">week 5 (10/26-10/30)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week6.html">
+    <a class="dropdown-item" href="../../course-materials/week6.html">
  <span class="dropdown-text">week 6 (11/2-11/6)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week7.html">
+    <a class="dropdown-item" href="../../course-materials/week7.html">
  <span class="dropdown-text">week 7 (11/9-11/13)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week8.html">
+    <a class="dropdown-item" href="../../course-materials/week8.html">
  <span class="dropdown-text">week 8 (11/16-11/20)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week9.html">
+    <a class="dropdown-item" href="../../course-materials/week9.html">
  <span class="dropdown-text">week 9 (11/23-11/27)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week10.html">
+    <a class="dropdown-item" href="../../course-materials/week10.html">
  <span class="dropdown-text">week 10 (11/30-12/4)</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../homework.html"> 
+    <a class="nav-link" href="../../homework.html"> 
 <span class="menu-text">homework</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../final-project.html"> 
+    <a class="nav-link" href="../../final-project.html"> 
 <span class="menu-text">final project</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -185,8 +239,8 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-page-left">
-      <h1 class="title">Foundations of inference</h1>
-            <p class="subtitle lead">Week 2 (October 5 - 9)</p>
+      <h1 class="title">Lab 1: Reliability of Soil Lead Measurements</h1>
+            <p class="subtitle lead">Soil lead near the former Exide Technologies facility</p>
                       </div>
   </div>
     
@@ -207,10 +261,25 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#lecture-materials" id="toc-lecture-materials" class="nav-link active" data-scroll-target="#lecture-materials"><i class="fa-solid fa-person-chalkboard" title="a person pointing at a chalkboard" aria-label="person-chalkboard"></i> Class Materials</a></li>
-  <li><a href="#additional-materials" id="toc-additional-materials" class="nav-link" data-scroll-target="#additional-materials">Additional materials</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">The data</a>
+  <ul class="collapse">
+  <li><a href="#data-dictionary" id="toc-data-dictionary" class="nav-link" data-scroll-target="#data-dictionary">Data dictionary</a></li>
+  <li><a href="#what-does-a-row-represent" id="toc-what-does-a-row-represent" class="nav-link" data-scroll-target="#what-does-a-row-represent">What does a row represent?</a></li>
+  <li><a href="#whats-a-drip-line" id="toc-whats-a-drip-line" class="nav-link" data-scroll-target="#whats-a-drip-line">What’s a drip line?</a></li>
+  </ul></li>
+  <li><a href="#lab-activity" id="toc-lab-activity" class="nav-link" data-scroll-target="#lab-activity">Lab activity</a>
+  <ul class="collapse">
+  <li><a href="#read-in-the-data" id="toc-read-in-the-data" class="nav-link" data-scroll-target="#read-in-the-data">1. Read in the data</a></li>
+  <li><a href="#distribution-of-soil-core-lead-measurements" id="toc-distribution-of-soil-core-lead-measurements" class="nav-link" data-scroll-target="#distribution-of-soil-core-lead-measurements">2. Distribution of soil core lead measurements</a></li>
+  <li><a href="#distribution-of-property-level-mean-measurements" id="toc-distribution-of-property-level-mean-measurements" class="nav-link" data-scroll-target="#distribution-of-property-level-mean-measurements">3. Distribution of property-level mean measurements</a></li>
+  <li><a href="#property-level-variability" id="toc-property-level-variability" class="nav-link" data-scroll-target="#property-level-variability">4. Property-level variability</a></li>
+  <li><a href="#lead-measurements-by-location" id="toc-lead-measurements-by-location" class="nav-link" data-scroll-target="#lead-measurements-by-location">5. Lead measurements by location</a></li>
+  <li><a href="#drip-line-vs.-yard-at-the-property-level" id="toc-drip-line-vs.-yard-at-the-property-level" class="nav-link" data-scroll-target="#drip-line-vs.-yard-at-the-property-level">6. Drip line vs.&nbsp;yard, at the property level</a></li>
+  </ul></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation">Interpretation</a></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="lab1.qmd"><i class="bi bi-link-45deg"></i>Download Source</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
@@ -219,51 +288,110 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<section id="lecture-materials" class="level2">
-<h2 class="anchored" data-anchor-id="lecture-materials"><i class="fa-solid fa-person-chalkboard" title="a person pointing at a chalkboard" aria-label="person-chalkboard"></i> Class Materials</h2>
-<table class="table-hover table-bordered caption-top table">
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>Between November 2013 and July 2015, contractors working under the oversight of the California Department of Toxic Substances Control (DTSC) sampled soil lead concentrations at hundreds of residential properties near the former Exide Technologies battery recycling facility in Vernon, CA. Crews collected soil cores from several locations on each property and analyzed them in a laboratory for lead content. This sampling campaign, and this lab’s data, are described in the DTSC <em>Preliminary Estimate of the Geographical Boundary of Emissions report</em> <span class="citation" data-cites="dtsc2015">(<a href="#ref-dtsc2015" role="doc-biblioref">Department of Toxic Substances Control 2015</a>)</span>.</p>
+<p>A single soil sample is a <em>measurement</em> of a property’s soil lead level, but no single measurement perfectly captures the “true” lead burden of an entire property. In this lab you’ll explore how much soil lead measurements vary <em>within</em> a property, and how that variability depends on <em>where</em> on the property a sample was taken. This is a question about <strong>reliability</strong>: if you sampled the same property twice, how close would the two measurements be?</p>
+</section>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">The data</h2>
+<p><code>exide-soil-cores.csv</code> contains a subset of the DTSC’s public data table for the Exide site. You can find it on Workbench under <code>/courses/EDS222/data</code>. It’s limited to the samples collected during the initial and expanded assessments in 2013-2015. The full DTSC public data table contains lots more - you are encouraged to <a href="https://dtsc.ca.gov/soil-sampling-data-for-the-exide-preliminary-investigation-area/">explore it</a> further!</p>
+<section id="data-dictionary" class="level3">
+<h3 class="anchored" data-anchor-id="data-dictionary">Data dictionary</h3>
+<table class="caption-top table">
 <colgroup>
-<col style="width: 30%">
-<col style="width: 30%">
-<col style="width: 40%">
+<col style="width: 50%">
+<col style="width: 50%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Session</th>
-<th>In-class</th>
-<th>Pre-class</th>
+<th>Column</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Lecture 1</td>
-<td>Foundations of inference</td>
-<td>IMS 11-13 <br> [Foundations of inference]{https://youtu.be/ceBieVXdjQo} <br> [Permutation]{https://youtu.be/vqZewcTM2jo} <br> [Bootstrapping]{https://youtu.be/e_KYBFGivl8}</td>
+<td><code>property_id</code></td>
+<td>Identifier for the property a sample was collected from.</td>
 </tr>
 <tr class="even">
-<td>Lab</td>
-<td><a href="../course-materials/labs/lab2.html">Investigating claims using inference</a></td>
-<td>Read the documentation for the <code>replicate()</code> function</td>
+<td><code>sample_id</code></td>
+<td>Identifier for an individual soil sample (boring).</td>
 </tr>
 <tr class="odd">
-<td>Lecture 2</td>
-<td>Mathematical models for inference</td>
-<td>IMS 16-17, 19-21</td>
+<td><code>sample_date</code></td>
+<td>Date the sample was collected.</td>
+</tr>
+<tr class="even">
+<td><code>location_code</code></td>
+<td>Where on the property the sample was taken. <code>DL</code> = drip line. <code>YD</code> = yard.</td>
+</tr>
+<tr class="odd">
+<td><code>pb_ppm</code></td>
+<td>Lead concentration, in parts per million (ppm).</td>
+</tr>
+<tr class="even">
+<td><code>longitude</code>, <code>latitude</code></td>
+<td>Coordinates of the property (WGS84).</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="additional-materials" class="level2">
-<h2 class="anchored" data-anchor-id="additional-materials">Additional materials</h2>
-<ul>
-<li><a href="https://www.jwilber.me/permutationtest/">The Permutation Test</a> A fun visual example where you take on the role of an alpaca shepherd.</li>
-<li><a href="https://www.youtube.com/watch?v=Xz0x-8-cgaQ">Bootstrapping Main Ideas!!!</a> Part of the StatQuest series of videos (an excellent resource itself).</li>
-</ul>
+<section id="what-does-a-row-represent" class="level3">
+<h3 class="anchored" data-anchor-id="what-does-a-row-represent">What does a row represent?</h3>
+<p>Each row is one soil core collected from one location on one property, at a depth of 3 inches below ground surface. Properties were sampled at multiple locations, so <strong><code>property_id</code> repeats across rows</strong>: a single property typically contributes up to ten yard samples and a handful of drip line samples.</p>
+</section>
+<section id="whats-a-drip-line" class="level3">
+<h3 class="anchored" data-anchor-id="whats-a-drip-line">What’s a drip line?</h3>
+<p>The <strong>drip line</strong> is the narrow strip of soil at the edge of a building’s roof - the line where rainwater drips or is directed off the roof and gutters. It sits right against the house, in contrast to the rest of the <strong>yard</strong>, the more open part of the property further from the building. Because paint (a historical source of lead) tends to chip and weather off exterior walls, and because roof runoff concentrates atmospheric deposition falling on the roof into a narrow band, drip line soil can experience different pollutant exposure than yard soil.</p>
+</section>
+</section>
+<section id="lab-activity" class="level2">
+<h2 class="anchored" data-anchor-id="lab-activity">Lab activity</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="read-in-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="read-in-the-data">1. Read in the data</h3>
+</section>
+<section id="distribution-of-soil-core-lead-measurements" class="level3">
+<h3 class="anchored" data-anchor-id="distribution-of-soil-core-lead-measurements">2. Distribution of soil core lead measurements</h3>
+<p>Create a histogram to visualize the distribution of <code>pb_ppm</code> across all samples. How does it compare to the California (80 ppm) and EPA (200 ppm) thresholds for lead in residential soil?</p>
+</section>
+<section id="distribution-of-property-level-mean-measurements" class="level3">
+<h3 class="anchored" data-anchor-id="distribution-of-property-level-mean-measurements">3. Distribution of property-level mean measurements</h3>
+<p>Calculate the <em>mean</em> <code>pb_ppm</code> for each property. What’s the distribution of these property-level means? How does it compare to the distribution of individual soil cores from question 2?</p>
+</section>
+<section id="property-level-variability" class="level3">
+<h3 class="anchored" data-anchor-id="property-level-variability">4. Property-level variability</h3>
+<p>How <em>variable</em> are soil core lead measurements at the property level? Plot the distribution of property-level <em>standard deviations</em> of <code>pb_ppm</code>. What does your plot suggest about the <strong>reliability</strong> of soil lead measurements?</p>
+</section>
+<section id="lead-measurements-by-location" class="level3">
+<h3 class="anchored" data-anchor-id="lead-measurements-by-location">5. Lead measurements by location</h3>
+<p>What is the distribution of <code>pb_ppm</code> for drip line samples (<code>location_code == "DL"</code>) versus everything else (the yard samples)? How much higher do drip line measurements appear to be relative to yard measurements?</p>
+</section>
+<section id="drip-line-vs.-yard-at-the-property-level" class="level3">
+<h3 class="anchored" data-anchor-id="drip-line-vs.-yard-at-the-property-level">6. Drip line vs.&nbsp;yard, at the property level</h3>
+<p>Part 5 looked at the aggregate distribution across all samples. Now let’s look at drip line vs.&nbsp;yard <em>within</em> each property.</p>
+<p><strong>a.</strong> Create a new column called <code>is_dripline</code>: a logical column that’s <code>TRUE</code> for drip line locations and <code>FALSE</code> otherwise.</p>
+<p><strong>b.</strong> Group the data by property and <code>is_dripline</code>, and calculate the mean soil lead concentration in each group.</p>
+<p><strong>c.</strong> For each property, calculate the difference between the mean drip line measurement and the mean non-drip-line (yard) measurement. Hint: pivoting will help!</p>
+<p><strong>d.</strong> Plot the distribution of the property-level drip line/yard differences.</p>
+</section>
+</section>
+<section id="interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="interpretation">Interpretation</h2>
+<p>Interpret your final plot from the perspective of reliability. If you’re estimating the representative soil lead concentration for a property, how does sample location affect measurement reliability? What do you think you should do with the data from different locations?</p>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-dtsc2015" class="csl-entry" role="listitem">
+Department of Toxic Substances Control. 2015. <span>“Preliminary Estimate of the Geographical Boundary of Emissions from the Former <span>Exide Technologies</span> Facility, 2700 Indiana Street, Vernon, <span>CA</span> 90023.”</span> Technical Report. Sacramento, CA: California Department of Toxic Substances Control.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

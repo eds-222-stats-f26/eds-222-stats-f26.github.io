@@ -1,0 +1,97 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 2 Monday"
+format: revealjs
+bibliography: references.bib
+---
+
+# Foundations of inference
+
+## Today's agenda
+
+1. Debrief the parking lot
+2. Does a quarter spin longer than a penny?
+3. How big is the average redwood?
+
+# Debrief the parking lot
+
+# Digging into our statistical claims
+
+## Activity guide
+
+1. Count off into groups.
+2. Share your prepared statistical claims.
+3. Collaboratively design a follow-up study.
+4. Evaluate another group's study design.
+
+## Form groups
+
+1. Count off 1-10.
+2. Find your peers with the same number.
+
+## Share your claims
+
+Take turns sharing your prepared statistical claims.
+  
+- What's the claim and where did you find it?
+- What is the relevant challenge of statistics?
+- What's the most salient variable?
+  - What makes the variable _valid_?
+  - How _reliable_ is the variable?
+- How was the sample collected?
+
+## Design a follow-up study
+
+As a group, choose one claim to design a follow-up study for. If your claim was chosen, you are now the PI (congrats).
+
+- What's the new question?
+  - Does it fall under the same challenge of statistics, or a new one?
+- What measurement would you need to investigate the question?
+  - Evaluate the validity and reliability of this measurement.
+  - How would you get the sample?
+
+## Evaluate a study design
+
+Send your PI to a new group for study design peer review.
+
+1. The PI explains the original claim and the follow up study to the reviewers.
+2. The reviewers ask clarifying questions until they understand:
+    - The context of the new study.
+    - Which challenge of statistics is being investigated.
+    - How the study design addresses _validity_, _reliability_, and potential _sampling_ issues.
+
+# Sampling bias experiment
+
+## Sampling distribution
+
+You've all drawn samples and estimated the total weight of the bag.
+
+Now, let's see the **_sampling distribution_** - the distribution of your estimates based on your samples.
+
+## What's our inference?
+
+Turn to the student next to you. Based on the sampling distribution, what do you think is the total weight of the bag?
+
+## Discussion
+
+- As a class, were we too low or too high? 
+  - By how much?
+- How would we design a representative sampling strategy?
+
+# For next time
+
+## Preparing for week 2
+
+Topic: _**Foundations of inference**_
+
+- Complete the readings and pre-recorded lectures.
+
+<hr/>
+
+Homework 1 will be released tomorrow.
+
+Start thinking about your final project! 
+
+- What question do you want to investigate?
+- What data are relevant?
+- An exploratory analysis is due at the end of week 2.

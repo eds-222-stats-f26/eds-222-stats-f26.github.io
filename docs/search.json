@@ -1,5 +1,47 @@
 [
   {
+    "objectID": "course-materials/labs/lab2.html",
+    "href": "course-materials/labs/lab2.html",
+    "title": "Lab 2: Investigating claims using inference",
+    "section": "",
+    "text": "Lead is elevated in the drip line compared to the rest of the yard.\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\n\nThese are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a statistical experiment to quantify the evidence in the sample, and interpret your results responsibly.\n\n\n\n\n\n\n\n\nClaim\nQuestion type\nStatistical experiment\n\n\n\n\nLead is elevated in the drip line compared to the rest of the yard.\nYes/no?\nPermutation\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\nHow much?\nBootstrapping"
+  },
+  {
+    "objectID": "course-materials/labs/lab2.html#background",
+    "href": "course-materials/labs/lab2.html#background",
+    "title": "Lab 2: Investigating claims using inference",
+    "section": "",
+    "text": "Lead is elevated in the drip line compared to the rest of the yard.\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\n\nThese are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a statistical experiment to quantify the evidence in the sample, and interpret your results responsibly.\n\n\n\n\n\n\n\n\nClaim\nQuestion type\nStatistical experiment\n\n\n\n\nLead is elevated in the drip line compared to the rest of the yard.\nYes/no?\nPermutation\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\nHow much?\nBootstrapping"
+  },
+  {
+    "objectID": "course-materials/labs/lab2.html#investigating-yesno-questions-with-permutation",
+    "href": "course-materials/labs/lab2.html#investigating-yesno-questions-with-permutation",
+    "title": "Lab 2: Investigating claims using inference",
+    "section": "Investigating “yes/no” questions with permutation",
+    "text": "Investigating “yes/no” questions with permutation\nLet’s investigate the claim “Lead is elevated in the drip line compared to the rest of the yard” as a yes/no question.\n\nState your hypotheses\nRecall that it is more straightforward to find evidence against a hypothesis than for it. So when we investigate yes/no questions, we set up a null hypothesis and see how much evidence there is against it.\nState the null and alternative hypotheses for this claim.\n\\(H_0\\):\n\\(H_A\\):\n\n\nCalculate the observed value of the statistic\nWe’ll use the difference in means between samples from the drip line and the yard as the statistic for this question.\n\n\n\n\n\n\nImportant\n\n\n\nRemember, the mean isn’t always the most appropriate statistic for representing a distribution! Always think critically about how your data relates to the question.\n\n\nCalculate the difference in means between the drip line and yard observations in the sample. Remember, this should be a single number (not a data frame or pair of means).\n\n\nShuffle the predictor variable and recalculate the statistic\nThis statistical experiment simulates the expected variation in our statistic (difference in means) just due to chance alone. To conduct this experiment, we have to break the connection between the predictor variable (location code) and response (lead concentration). Randomizing the predictor leaves the variation in the response untouched, while removing any assocation between the two.\nShuffle the predictor variable and recalculate the statistic. Do it just once - we’ll repeat in the next section.\n\n\n\n\n\n\nTip\n\n\n\nsample() can be used to shuffle vectors.\n\n\n\n\nRepeat shuffling\nIn the previous section, you simulated one statistic from the null hypothesis. What we need now is a whole bunch of statistics from the null hypothesis - our null distribution.\nRepeat shuffling 10,000 times to create a vector that simulates the null distribution.\n\n\n\n\n\n\nTip\n\n\n\nreplicate() repeatedly runs expressions over and over.\n\n\nVisualize the null distribution using a histogram.\n\n\nCompare the observed to the null\nThe previous figure showed the expected distribution of the statistic (the difference in mean lead between drip line and yard) under the null hypothesis. How does that compare to the observed value?\nPlot the null distribution again, but this time add a vertical line indicating the observed statistic.\nCalculate your p-value.\n\n\n\n\n\n\nNote\n\n\n\nA p-value is the probability of observing the sample (or something more extreme) if the null hypothesis is true.\n\n\n\n\nInterpret your results\nBased on your p-value, do you reject or fail to reject the null hypothesis?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
+  },
+  {
+    "objectID": "course-materials/labs/lab2.html#investigating-how-much-questions-with-bootstrapping",
+    "href": "course-materials/labs/lab2.html#investigating-how-much-questions-with-bootstrapping",
+    "title": "Lab 2: Investigating claims using inference",
+    "section": "Investigating “how much?” questions with bootstrapping",
+    "text": "Investigating “how much?” questions with bootstrapping\nNow, let’s investigate the claim “Neighborhoods north of the Exide plant were exposed to more lead than those south” as a how much? question.\n\nCalculate the observed value of the statistic\nOnce again, let’s use the difference in means as our statistic. Calculate the difference in means between properties in the extended north area and those in the extended south area.\n\n\n\n\n\n\nTip\n\n\n\nUse dplyr functions to wrangle the soil core data for this part. Properties starting with “ENA” are in the extended north area, and the “ESA” prefix means extended south area. str_sub() will help here.\n\n\n\n\nResample observations and recalculate the statistic\nBootstrapping simulates the expected variation in our statistic (difference in means) from sampling. Compare this to permutation, which is about variation just due to chance. For this experiment, we will assume the sample is representative of the population and repeatedly draw “new” samples. This process simulates the process of collecting new samples.\nResample rows from the data frame and recalculate the statistic. Repeat this 10,000 times to simulate the sampling distribution.\n\n\n\n\n\n\nTip\n\n\n\nUse slice_sample() with replacement to get bootstrap samples.\n\n\nVisualize the sampling distribution using a histogram.\n\n\nFind the confidence interval\nThe previous figure showed how your statistic varies due to slight differences between samples. Use this sampling distribution to estimate the 95% confidence interval.\n\n\n\n\n\n\nNote\n\n\n\nA confidence interval is a range of values that you are confident contains the population parameter.\n\n\n\n\n\n\n\n\nTip\n\n\n\nUse the quantile() function to find the middle 95% of the sampling distribution.\n\n\nPlot the sampling distribution again, but this time add vertical lines indicating the observed statistic and the 95% CI.\n\n\nInterpret your results\nBased on your confidence interval, how much could the difference in lead exposure between north and south be?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
+  },
+  {
+    "objectID": "course-materials/labs/lab2.html#recap",
+    "href": "course-materials/labs/lab2.html#recap",
+    "title": "Lab 2: Investigating claims using inference",
+    "section": "Recap",
+    "text": "Recap\nIn this lab, you investigated two claims using statistical experiments to evaluate evidence.\nFrom this exercise, the practical information you should remember:\n\n\n\n\n\n\n\n\n\n“yes/no” questions\n“how much?” questions\n\n\n\n\nInference target\nP-value\nConfidence interval\n\n\nStatistical experiment\nPermutation\nBootstrapping\n\n\nSimulate a…\nNull distribution\nSampling distribution\n\n\nCentered on…\n0\nThe observed statistic\n\n\nRandomize with…\nsample() (no replacement)\nslice_sample() (with replacement)\n\n\nSimulate repeatedly\nreplicate()\nreplicate()\n\n\n\nMore importantly, remember how to use these tools responsibly. A p-value and a confidence interval are tools for checking our own cognitive biases. They are useful lines of evidence, but no one statistical procedure ever tells the whole story.\nAlways think critically!"
+  },
+  {
+    "objectID": "course-materials/labs/lab2.html#keep-going",
+    "href": "course-materials/labs/lab2.html#keep-going",
+    "title": "Lab 2: Investigating claims using inference",
+    "section": "Keep going?",
+    "text": "Keep going?\nDone early? Having fun and want more? Try this out.\nP-values are sensitive to sample sizes. Do the permutation exercise again, but this time only on a sub-sample of the data. What kinds of p-values do you get if you only use 20 observations? 50? 100? 1000? Repeat the statistical experiment many times and visualize the relationship between your p-values and your sub-sample size using boxplots."
+  },
+  {
     "objectID": "course-materials/labs/lab1.html",
     "href": "course-materials/labs/lab1.html",
     "title": "Lab 1: Reliability of Soil Lead Measurements",
@@ -33,6 +75,97 @@
     "title": "Lab 1: Reliability of Soil Lead Measurements",
     "section": "Interpretation",
     "text": "Interpretation\nInterpret your final plot from the perspective of reliability. If you’re estimating the representative soil lead concentration for a property, how does sample location affect measurement reliability? What do you think you should do with the data from different locations?"
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#learning-objectives",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#learning-objectives",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Learning objectives",
+    "text": "Learning objectives\n\nDifferentiate empirical and parametric distributions\nVisualize distributions using histograms and probability density functions\nSimulate sampling in R"
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Empirical and parametric samples",
+    "text": "Empirical and parametric samples\nEmpirical: derived directly from observations\nParametric: derived from a mathematical formula governed by one or a few parameters"
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-random",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-random",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Empirical samples: random",
+    "text": "Empirical samples: random\nThe process of collecting real observations is how we get empirical samples.\nWhen feasible, simple random samples are most representative of the population.\n\nIMS Figure 2.1: a simple random sample of recent graduates."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-biased",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-biased",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Empirical samples: biased",
+    "text": "Empirical samples: biased\nA truly random sample is rarely possible. Without care, there are many ways for biases to creep in. Convenience bias is particularly common.\n\nIMS Figure 2.2: a biased sample."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-stratified",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-stratified",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Empirical samples: stratified",
+    "text": "Empirical samples: stratified\nEven if simple random sampling is infeasible, sampling strategies reduce bias. For example, stratified sampling divides the population into self-similar groups, then randomly samples within those groups.\n\n\nIMS Figure 2.4: a stratified sample."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#example-of-a-parametric-distribution",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#example-of-a-parametric-distribution",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Example of a parametric distribution",
+    "text": "Example of a parametric distribution\n\nParametric distributions are defined by parameters (instead of observed data).\n\nE.g., a normal distribution has two parameters - the mean controls location and the sd controls shape.\n\nRecall probability density functions (PDFs) tell us how probable different ranges of values are."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#parameterizing-a-distribution",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#parameterizing-a-distribution",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Parameterizing a distribution",
+    "text": "Parameterizing a distribution\nLet’s parameterize a normal distribution with the mean and sd of the lead soil dataset.\n\nsoil_cores |&gt;\n  summarize(\n    mean_pb_ppm = mean(pb_ppm),\n    sd_pb_ppm = sd(pb_ppm)\n  )\n\n# A tibble: 1 × 2\n  mean_pb_ppm sd_pb_ppm\n        &lt;dbl&gt;     &lt;dbl&gt;\n1        253.      371."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#probability-density-function",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#probability-density-function",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Probability density function",
+    "text": "Probability density function\n\nThe PDF describes the relative probability of observing different values.\nThis PDF is a normal distribution with parameters matching the lead soil dataset."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#a-universe-of-parametric-distributions",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#a-universe-of-parametric-distributions",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "A universe of parametric distributions",
+    "text": "A universe of parametric distributions\n\nThe normal distribution is a poor stand-in for the lead data (symmetric, possibly negative).\nA different family (e.g. the lognormal) could do a better job. We’ll cover these more in later weeks."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#sampling-parametric-distributions",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#sampling-parametric-distributions",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Sampling parametric distributions",
+    "text": "Sampling parametric distributions\n\nWe will sample from parametric distributions frequently in this course.\nThink of the height of the PDF as the chance of observing a nearby value."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples-1",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Empirical and parametric samples",
+    "text": "Empirical and parametric samples\nEmpirical: derived directly from observations.\n\nE.g., lead concentrations in soil cores.\n\nParametric: derived from a mathematical formula governed by one or a few parameters.\n\nE.g., a normal distribution with a mean and sd."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#sampling-strategies",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#sampling-strategies",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Sampling strategies",
+    "text": "Sampling strategies\n\nSimple random is most representative of the population, but often infeasible.\nSampling bias misleads inferences about the population.\nSampling strategies (e.g. stratification) work around biases.\n\n\nIMS Figure 2.1: a simple random sample of recent graduates."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_wednesday_a.html#parametric-distributions",
+    "href": "course-materials/pre-class/week1_wednesday_a.html#parametric-distributions",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Parametric distributions",
+    "text": "Parametric distributions\n\nParametric distributions are mathematical functions governed by parameters.\nWe use them as theoretical stand-ins for populations.\nPDF says how probable observations are, given parameters."
   },
   {
     "objectID": "course-materials/lecture-slides/week1_monday.html#statistics-for-environmental-data-science",
@@ -347,7 +480,21 @@
     "href": "course-materials/week2.html",
     "title": "Foundations of inference",
     "section": "",
-    "text": "Under construction"
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  [Foundations of inference]{https://youtu.be/ceBieVXdjQo}  [Permutation]{https://youtu.be/vqZewcTM2jo}  [Bootstrapping]{https://youtu.be/e_KYBFGivl8}\n\n\nLab\nInvestigating claims using inference\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21"
+  },
+  {
+    "objectID": "course-materials/week2.html#lecture-materials",
+    "href": "course-materials/week2.html#lecture-materials",
+    "title": "Foundations of inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  [Foundations of inference]{https://youtu.be/ceBieVXdjQo}  [Permutation]{https://youtu.be/vqZewcTM2jo}  [Bootstrapping]{https://youtu.be/e_KYBFGivl8}\n\n\nLab\nInvestigating claims using inference\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21"
+  },
+  {
+    "objectID": "course-materials/week2.html#additional-materials",
+    "href": "course-materials/week2.html#additional-materials",
+    "title": "Foundations of inference",
+    "section": "Additional materials",
+    "text": "Additional materials\n\nThe Permutation Test A fun visual example where you take on the role of an alpaca shepherd.\nBootstrapping Main Ideas!!! Part of the StatQuest series of videos (an excellent resource itself)."
   },
   {
     "objectID": "course-materials/week1.html",
@@ -369,6 +516,83 @@
     "title": "Exploring data",
     "section": "Additional materials",
     "text": "Additional materials\nPhilip B. Stark, Andrea Saltelli, Cargo-cult Statistics and Scientific Crisis, Significance, Volume 15, Issue 4, August 2018, Pages 40–43, https://doi.org/10.1111/j.1740-9713.2018.01174.x\nSierra Club interview with mark! Lopez\nWhat we know about California’s largest toxic cleanup: Thousands of L.A. County homes tainted with lead\nJill E. Johnston, Mark Lopez, Stephanie Prieto, Elizabeth Kamai, Bhavna Shamasunder; Get the Lead Out: A Community-Driven Approach to Characterize Urban Soil Lead Levels near a Battery Smelter. Environ. Sci. Technol. 14 April 2026; 60 (14): 11002–11012. https://doi.org/10.1021/acs.est.5c14197"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDebrief the parking lot\nDoes a quarter spin longer than a penny?\nHow big is the average redwood?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#activity-guide",
+    "href": "course-materials/lecture-slides/week2_monday.html#activity-guide",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Activity guide",
+    "text": "Activity guide\n\nCount off into groups.\nShare your prepared statistical claims.\nCollaboratively design a follow-up study.\nEvaluate another group’s study design."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#form-groups",
+    "href": "course-materials/lecture-slides/week2_monday.html#form-groups",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Form groups",
+    "text": "Form groups\n\nCount off 1-10.\nFind your peers with the same number."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#share-your-claims",
+    "href": "course-materials/lecture-slides/week2_monday.html#share-your-claims",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Share your claims",
+    "text": "Share your claims\nTake turns sharing your prepared statistical claims.\n\nWhat’s the claim and where did you find it?\nWhat is the relevant challenge of statistics?\nWhat’s the most salient variable?\n\nWhat makes the variable valid?\nHow reliable is the variable?\n\nHow was the sample collected?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#design-a-follow-up-study",
+    "href": "course-materials/lecture-slides/week2_monday.html#design-a-follow-up-study",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Design a follow-up study",
+    "text": "Design a follow-up study\nAs a group, choose one claim to design a follow-up study for. If your claim was chosen, you are now the PI (congrats).\n\nWhat’s the new question?\n\nDoes it fall under the same challenge of statistics, or a new one?\n\nWhat measurement would you need to investigate the question?\n\nEvaluate the validity and reliability of this measurement.\nHow would you get the sample?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#evaluate-a-study-design",
+    "href": "course-materials/lecture-slides/week2_monday.html#evaluate-a-study-design",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Evaluate a study design",
+    "text": "Evaluate a study design\nSend your PI to a new group for study design peer review.\n\nThe PI explains the original claim and the follow up study to the reviewers.\nThe reviewers ask clarifying questions until they understand:\n\nThe context of the new study.\nWhich challenge of statistics is being investigated.\nHow the study design addresses validity, reliability, and potential sampling issues."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#sampling-distribution",
+    "href": "course-materials/lecture-slides/week2_monday.html#sampling-distribution",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Sampling distribution",
+    "text": "Sampling distribution\nYou’ve all drawn samples and estimated the total weight of the bag.\nNow, let’s see the sampling distribution - the distribution of your estimates based on your samples."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#whats-our-inference",
+    "href": "course-materials/lecture-slides/week2_monday.html#whats-our-inference",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What’s our inference?",
+    "text": "What’s our inference?\nTurn to the student next to you. Based on the sampling distribution, what do you think is the total weight of the bag?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#discussion",
+    "href": "course-materials/lecture-slides/week2_monday.html#discussion",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Discussion",
+    "text": "Discussion\n\nAs a class, were we too low or too high?\n\nBy how much?\n\nHow would we design a representative sampling strategy?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#preparing-for-week-2",
+    "href": "course-materials/lecture-slides/week2_monday.html#preparing-for-week-2",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Preparing for week 2",
+    "text": "Preparing for week 2\nTopic: Foundations of inference\n\nComplete the readings and pre-recorded lectures.\n\n\nHomework 1 will be released tomorrow.\nStart thinking about your final project!\n\nWhat question do you want to investigate?\nWhat data are relevant?\nAn exploratory analysis is due at the end of week 2."
+  },
+  {
+    "objectID": "homework.html",
+    "href": "homework.html",
+    "title": "Homework",
+    "section": "",
+    "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nAssignment\nDate Posted\nDate Due\nRevisions Deadline\n\n\n\n\nHomework 1\n10/1\n10/11\n10/25\n\n\nHomework 2\n10/22\n11/1\n11/15\n\n\nHomework 3\n11/19\n11/29\n12/9"
   },
   {
     "objectID": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
@@ -439,13 +663,6 @@
     "title": "EDS 222: Statistics for Environmental Data Science",
     "section": "Preparing for week 2",
     "text": "Preparing for week 2\nTopic: Foundations of inference\n\nComplete the readings and pre-recorded lectures.\n\n\nHomework 1 will be released tomorrow.\nStart thinking about your final project!\n\nWhat question do you want to investigate?\nWhat data are relevant?\nAn exploratory analysis is due at the end of week 2."
-  },
-  {
-    "objectID": "homework.html",
-    "href": "homework.html",
-    "title": "Homework",
-    "section": "",
-    "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nAssignment\nDate Posted\nDate Due\nRevisions Deadline\n\n\n\n\nHomework 1\n10/1\n10/11\n10/25\n\n\nHomework 2\n10/22\n11/1\n11/15\n\n\nHomework 3\n11/19\n11/29\n12/9"
   },
   {
     "objectID": "course-materials/pre-class/week1_statistical_claims.html",
@@ -525,94 +742,248 @@
     "text": "Teaching Team\n\n\n\nInstructor\n\nMax Czapanskiy\nEmail: maxczap@ucsb.edu\n\nTeaching Assistant\n\nSloane Stephenson\nEmail: gstephenson@ucsb.edu"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#learning-objectives",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#learning-objectives",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#learning-objectives",
+    "href": "course-materials/pre-class/week2_monday_a.html#learning-objectives",
     "title": "EDS 222: Statistics for Environmental Data Science",
     "section": "Learning objectives",
-    "text": "Learning objectives\n\nDifferentiate empirical and parametric distributions\nVisualize distributions using histograms and probability density functions\nSimulate sampling in R"
+    "text": "Learning objectives\n\nApply randomization to inferential questions\nUse permutation to quantify uncertainty for yes/no questions\nUse bootstrapping to quantify uncertainty for how much? questions"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method",
+    "href": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Empirical and parametric samples",
-    "text": "Empirical and parametric samples\nEmpirical: derived directly from observations\nParametric: derived from a mathematical formula governed by one or a few parameters"
+    "section": "Statistics is part of the scientific method",
+    "text": "Statistics is part of the scientific method\n\nAsk a question\nFormulate a (scientific) hypothesis\nConduct a study, experimental or observational\nAnalyze data\nInterpret and communicate the results"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-random",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-random",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method-1",
+    "href": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Empirical samples: random",
-    "text": "Empirical samples: random\nThe process of collecting real observations is how we get empirical samples.\nWhen feasible, simple random samples are most representative of the population.\n\nIMS Figure 2.1: a simple random sample of recent graduates."
+    "section": "Statistics is part of the scientific method",
+    "text": "Statistics is part of the scientific method\n\nWhere did lead from the Exide plant end up?\nWind carried more lead NE than SW.\nGather soil cores to measure lead concentrations across the region.\nSTATS STATS STATS\nInterpret and communicate the results"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-biased",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-biased",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#two-types-of-hypotheses",
+    "href": "course-materials/pre-class/week2_monday_a.html#two-types-of-hypotheses",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Empirical samples: biased",
-    "text": "Empirical samples: biased\nA truly random sample is rarely possible. Without care, there are many ways for biases to creep in. Convenience bias is particularly common.\n\nIMS Figure 2.2: a biased sample."
+    "section": "Two types of hypotheses",
+    "text": "Two types of hypotheses\n\n\nWhat a scientist means\nHypothesis: a testable, causal explanation for an observation\n\nLead emissions spread via wind.\n\n\nWhat a statistician means\nHypothesis: a quantitative statement about a parameter of the population\n\nThe proportion of homes downwind of the plant with elevated lead levels is greater than those upwind."
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-stratified",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-samples-stratified",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#variation-is-natural",
+    "href": "course-materials/pre-class/week2_monday_a.html#variation-is-natural",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Empirical samples: stratified",
-    "text": "Empirical samples: stratified\nEven if simple random sampling is infeasible, sampling strategies reduce bias. For example, stratified sampling divides the population into self-similar groups, then randomly samples within those groups.\n\n\nIMS Figure 2.4: a stratified sample."
+    "section": "Variation is natural",
+    "text": "Variation is natural\nA statistician knows that a difference in a sample (between proportions, means, etc) is insufficient to evaluate a hypothesis.\nSampling is random!\nThe real question: is the difference bigger than we’d expect from sampling? Or is it consistent with sampling variation?"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#example-of-a-parametric-distribution",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#example-of-a-parametric-distribution",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#variation-is-natural-1",
+    "href": "course-materials/pre-class/week2_monday_a.html#variation-is-natural-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Example of a parametric distribution",
-    "text": "Example of a parametric distribution\n\nParametric distributions are defined by parameters (instead of observed data).\n\nE.g., a normal distribution has two parameters - the mean controls location and the sd controls shape.\n\nRecall probability density functions (PDFs) tell us how probable different ranges of values are."
+    "section": "Variation is natural",
+    "text": "Variation is natural"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#parameterizing-a-distribution",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#parameterizing-a-distribution",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#assess-the-evidence",
+    "href": "course-materials/pre-class/week2_monday_a.html#assess-the-evidence",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Parameterizing a distribution",
-    "text": "Parameterizing a distribution\nLet’s parameterize a normal distribution with the mean and sd of the lead soil dataset.\n\nsoil_cores |&gt;\n  summarize(\n    mean_pb_ppm = mean(pb_ppm),\n    sd_pb_ppm = sd(pb_ppm)\n  )\n\n# A tibble: 1 × 2\n  mean_pb_ppm sd_pb_ppm\n        &lt;dbl&gt;     &lt;dbl&gt;\n1        253.      371."
+    "section": "Assess the evidence",
+    "text": "Assess the evidence\nGiven that variation is natural in sampling, how do we assess evidence?\nWe can’t gather new data, so we design statistical experiments based on the sample we have."
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#probability-density-function",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#probability-density-function",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-is-a-statistical-experiment-for-yesno-questions",
+    "href": "course-materials/pre-class/week2_monday_a.html#permutation-is-a-statistical-experiment-for-yesno-questions",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Probability density function",
-    "text": "Probability density function\n\nThe PDF describes the relative probability of observing different values.\nThis PDF is a normal distribution with parameters matching the lead soil dataset."
+    "section": "Permutation is a statistical experiment for yes/no questions",
+    "text": "Permutation is a statistical experiment for yes/no questions\nQuestion: Is the proportion of high risk homes higher downwind than upwind?\nLet’s reframe this as:\nQuestion: If there was no relationship between lead risk and wind direction, then how often would our sample be observed?"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#a-universe-of-parametric-distributions",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#a-universe-of-parametric-distributions",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue",
+    "href": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "A universe of parametric distributions",
-    "text": "A universe of parametric distributions\n\nThe normal distribution is a poor stand-in for the lead data (symmetric, possibly negative).\nA different family (e.g. the lognormal) could do a better job. We’ll cover these more in later weeks."
+    "section": "Random to the rescue",
+    "text": "Random to the rescue\nWe can simulate the “what if there’s no relationship?” scenario by randomizing the predictor variable.\nRandomization breaks the link between predictor and response, but keeps all the variation from the sample."
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#sampling-parametric-distributions",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#sampling-parametric-distributions",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#procedure",
+    "href": "course-materials/pre-class/week2_monday_a.html#procedure",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sampling parametric distributions",
-    "text": "Sampling parametric distributions\n\nWe will sample from parametric distributions frequently in this course.\nThink of the height of the PDF as the chance of observing a nearby value."
+    "section": "Procedure",
+    "text": "Procedure\n\\(H_0\\): there is no relationship/effect/etc\n\\(H_A\\): there is a relationship/effect/etc\n\nCalculate the observed value of the statistic (e.g., a difference in proportions)\nShuffle the predictor variable and recalculate the statistic.\nRepeat step 2 until the cows come home (null distribution of the statistic)\nCompare the observed value to the null statistic (p-value)\nReject, or fail to reject, the null hypothesis"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples-1",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#empirical-and-parametric-samples-1",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-visualized",
+    "href": "course-materials/pre-class/week2_monday_a.html#permutation-visualized",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Empirical and parametric samples",
-    "text": "Empirical and parametric samples\nEmpirical: derived directly from observations.\n\nE.g., lead concentrations in soil cores.\n\nParametric: derived from a mathematical formula governed by one or a few parameters.\n\nE.g., a normal distribution with a mean and sd."
+    "section": "Permutation visualized",
+    "text": "Permutation visualized"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#sampling-strategies",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#sampling-strategies",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#compare-the-observed-to-the-null-statistic",
+    "href": "course-materials/pre-class/week2_monday_a.html#compare-the-observed-to-the-null-statistic",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sampling strategies",
-    "text": "Sampling strategies\n\nSimple random is most representative of the population, but often infeasible.\nSampling bias misleads inferences about the population.\nSampling strategies (e.g. stratification) work around biases.\n\n\nIMS Figure 2.1: a simple random sample of recent graduates."
+    "section": "Compare the observed to the null statistic",
+    "text": "Compare the observed to the null statistic"
   },
   {
-    "objectID": "course-materials/pre-class/week1_wednesday_a.html#parametric-distributions",
-    "href": "course-materials/pre-class/week1_wednesday_a.html#parametric-distributions",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#interpret-the-p-value",
+    "href": "course-materials/pre-class/week2_monday_a.html#interpret-the-p-value",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Parametric distributions",
-    "text": "Parametric distributions\n\nParametric distributions are mathematical functions governed by parameters.\nWe use them as theoretical stand-ins for populations.\nPDF says how probable observations are, given parameters."
+    "section": "Interpret the p-value",
+    "text": "Interpret the p-value\nA p-value is the probability of seeing the observed sample, if the null hypothesis is true. That’s it.\nIf p is less than some threshold (often 0.05 by default), then we say there is a statistically significant result. This means the sample is improbable under chance alone."
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-the-p-value",
+    "href": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-the-p-value",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Don’t misinterpret the p-value",
+    "text": "Don’t misinterpret the p-value\nThe following are common misconceptions:\n\nA p-value is the probability that the null hypothesis is true\nA statistically significant result is meaningful by real-world standards\nA statistically non-significant result means there’s no effect"
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-recap",
+    "href": "course-materials/pre-class/week2_monday_a.html#permutation-recap",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Permutation recap",
+    "text": "Permutation recap\n\nGiven only one sample, how do we estimate the natural variation of the statistic? With randomization!\nPermutation breaks the connection between the predictor and response, simulating the variation of the statistic expected by chance.\nPermutation yields a p-value, which says if your result is statistically significant.\n\nYou are wise enough to hold complexity."
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-is-a-statistical-experiment-for-how-much-questions",
+    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-is-a-statistical-experiment-for-how-much-questions",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Bootstrapping is a statistical experiment for “how much?” questions",
+    "text": "Bootstrapping is a statistical experiment for “how much?” questions\nQuestion: How much higher is the proportion of high risk homes downwind than upwind?\nLet’s reframe this as:\nQuestion: What’s the interval that we confidently think contains the population-level parameter?"
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue-1",
+    "href": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Random to the rescue",
+    "text": "Random to the rescue\n\nWe can simulate the variation in our statistic by resampling the observations.\nWe’re making the critical assumption that our sample is representative of the population\n\nInstead of getting new samples from the population (too hard!) we get “bootstrapped” samples from the sample itself."
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#procedure-1",
+    "href": "course-materials/pre-class/week2_monday_a.html#procedure-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Procedure",
+    "text": "Procedure\n\nCalculate the observed value of the statistic (e.g., a difference in proportions)\nResample the observations with replacement and recalculate the statistic.\nRepeat step 2 until the cows come home (sampling distribution)\nFind the range containing a large percentage of the sampling distribution (confidence interval)"
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-visualized",
+    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-visualized",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Bootstrapping visualized",
+    "text": "Bootstrapping visualized"
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#find-your-confidence-interval",
+    "href": "course-materials/pre-class/week2_monday_a.html#find-your-confidence-interval",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Find your confidence interval",
+    "text": "Find your confidence interval"
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#interpret-your-confidence-interval",
+    "href": "course-materials/pre-class/week2_monday_a.html#interpret-your-confidence-interval",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interpret your confidence interval",
+    "text": "Interpret your confidence interval\nA confidence interval is a range of values that you are confident contains the population parameter.\nBut wait… what exactly are we confident in?\nIf we repeated this procedure 100 times, about 95 of those CIs would contain the population parameter.\nOur confidence is in the procedure’s long-run accuracy."
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-your-confidence-interval",
+    "href": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-your-confidence-interval",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Don’t misinterpret your confidence interval",
+    "text": "Don’t misinterpret your confidence interval\nThe following are common misconceptions:\n\nThere’s a 95% chance the 95% CI contains the population parameter\nLarger sample sizes yield more accurate confidence intervals"
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-recap",
+    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-recap",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Bootstrapping recap",
+    "text": "Bootstrapping recap\n\nGiven only one sample, how do we estimate the natural variation of the statistic? With randomization!\nBootstrapping draws “new” samples from the original, simulating the variation of the statistic expected by sampling.\nBootstrapping yields a confidence interval, which describes a range the actual parameter probably falls in.\n\nCIs rigorously communicate uncertainty."
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-vs-bootstrapping",
+    "href": "course-materials/pre-class/week2_monday_a.html#permutation-vs-bootstrapping",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Permutation vs bootstrapping",
+    "text": "Permutation vs bootstrapping\n\n\nPermutation simulates a scenario with no relationship to answer “yes/no” questions.\n\n\n\n\n\n\n\n\n\n\nBootstrapping simulates the original scenario to answer “how much?” questions."
+  },
+  {
+    "objectID": "course-materials/labs/lab1-solution.html",
+    "href": "course-materials/labs/lab1-solution.html",
+    "title": "Lab 1: Reliability of Soil Lead Measurements",
+    "section": "",
+    "text": "Between November 2013 and July 2015, contractors working under the oversight of the California Department of Toxic Substances Control (DTSC) sampled soil lead concentrations at hundreds of residential properties near the former Exide Technologies battery recycling facility in Vernon, CA. Crews collected soil cores from several locations on each property and analyzed them in a laboratory for lead content. This sampling campaign, and this lab’s data, are described in the DTSC Preliminary Estimate of the Geographical Boundary of Emissions report (Department of Toxic Substances Control 2015).\nA single soil sample is a measurement of a property’s soil lead level, but no single measurement perfectly captures the “true” lead burden of an entire property. In this lab you’ll explore how much soil lead measurements vary within a property, and how that variability depends on where on the property a sample was taken. This is a question about reliability: if you sampled the same property twice, how close would the two measurements be?"
+  },
+  {
+    "objectID": "course-materials/labs/lab1-solution.html#background",
+    "href": "course-materials/labs/lab1-solution.html#background",
+    "title": "Lab 1: Reliability of Soil Lead Measurements",
+    "section": "",
+    "text": "Between November 2013 and July 2015, contractors working under the oversight of the California Department of Toxic Substances Control (DTSC) sampled soil lead concentrations at hundreds of residential properties near the former Exide Technologies battery recycling facility in Vernon, CA. Crews collected soil cores from several locations on each property and analyzed them in a laboratory for lead content. This sampling campaign, and this lab’s data, are described in the DTSC Preliminary Estimate of the Geographical Boundary of Emissions report (Department of Toxic Substances Control 2015).\nA single soil sample is a measurement of a property’s soil lead level, but no single measurement perfectly captures the “true” lead burden of an entire property. In this lab you’ll explore how much soil lead measurements vary within a property, and how that variability depends on where on the property a sample was taken. This is a question about reliability: if you sampled the same property twice, how close would the two measurements be?"
+  },
+  {
+    "objectID": "course-materials/labs/lab1-solution.html#the-data",
+    "href": "course-materials/labs/lab1-solution.html#the-data",
+    "title": "Lab 1: Reliability of Soil Lead Measurements",
+    "section": "The data",
+    "text": "The data\nexide-soil-cores.csv contains a subset of the DTSC’s public data table for the Exide site. You can find it on Workbench under /courses/EDS222/data. It’s limited to the samples collected during the initial and expanded assessments in 2013-2015. The full DTSC public data table contains lots more - you are encouraged to explore it further!\n\nData dictionary\n\n\n\n\n\n\n\nColumn\nDescription\n\n\n\n\nproperty_id\nIdentifier for the property a sample was collected from.\n\n\nsample_id\nIdentifier for an individual soil sample (boring).\n\n\nsample_date\nDate the sample was collected.\n\n\nlocation_code\nWhere on the property the sample was taken. DL = drip line. YD = yard.\n\n\npb_ppm\nLead concentration, in parts per million (ppm).\n\n\nlongitude, latitude\nCoordinates of the property (WGS84).\n\n\n\n\n\nWhat does a row represent?\nEach row is one soil core collected from one location on one property, at a depth of 3 inches below ground surface. Properties were sampled at multiple locations, so property_id repeats across rows: a single property typically contributes up to ten yard samples and a handful of drip line samples.\n\n\nWhat’s a drip line?\nThe drip line is the narrow strip of soil at the edge of a building’s roof - the line where rainwater drips or is directed off the roof and gutters. It sits right against the house, in contrast to the rest of the yard, the more open part of the property further from the building. Because paint (a historical source of lead) tends to chip and weather off exterior walls, and because roof runoff concentrates atmospheric deposition falling on the roof into a narrow band, drip line soil can experience different pollutant exposure than yard soil."
+  },
+  {
+    "objectID": "course-materials/labs/lab1-solution.html#lab-activity",
+    "href": "course-materials/labs/lab1-solution.html#lab-activity",
+    "title": "Lab 1: Reliability of Soil Lead Measurements",
+    "section": "Lab activity",
+    "text": "Lab activity\n\nlibrary(tidyverse)\n\n\n1. Read in the data\n\n\n2. Distribution of soil core lead measurements\nCreate a histogram to visualize the distribution of pb_ppm across all samples. How does it compare to the California (80 ppm) and EPA (200 ppm) thresholds for lead in residential soil?\n\n\n3. Distribution of property-level mean measurements\nCalculate the mean pb_ppm for each property. What’s the distribution of these property-level means? How does it compare to the distribution of individual soil cores from question 2?\n\n\n4. Property-level variability\nHow variable are soil core lead measurements at the property level? Plot the distribution of property-level standard deviations of pb_ppm. What does your plot suggest about the reliability of soil lead measurements?\n\n\n5. Lead measurements by location\nWhat is the distribution of pb_ppm for drip line samples (location_code == \"DL\") versus everything else (the yard samples)? How much higher do drip line measurements appear to be relative to yard measurements?\n\n\n6. Drip line vs. yard, at the property level\nPart 5 looked at the aggregate distribution across all samples. Now let’s look at drip line vs. yard within each property.\na. Create a new column called is_dripline: a logical column that’s TRUE for drip line locations and FALSE otherwise.\nb. Group the data by property and is_dripline, and calculate the mean soil lead concentration in each group.\nc. For each property, calculate the difference between the mean drip line measurement and the mean non-drip-line (yard) measurement. Hint: pivoting will help!\nd. Plot the distribution of the property-level drip line/yard differences."
+  },
+  {
+    "objectID": "course-materials/labs/lab1-solution.html#interpretation",
+    "href": "course-materials/labs/lab1-solution.html#interpretation",
+    "title": "Lab 1: Reliability of Soil Lead Measurements",
+    "section": "Interpretation",
+    "text": "Interpretation\nInterpret your final plot from the perspective of reliability. If you’re estimating the representative soil lead concentration for a property, how does sample location affect measurement reliability? What do you think you should do with the data from different locations?"
+  },
+  {
+    "objectID": "course-materials/labs/lab2-solution.html",
+    "href": "course-materials/labs/lab2-solution.html",
+    "title": "Lab 2: Foundations of Inference",
+    "section": "",
+    "text": "Lead is elevated in the drip line compared to the rest of the yard.\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\n\nThese are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a statistical experiment to quantify the evidence in the sample, and interpret your results responsibly.\n\n\n\n\n\n\n\n\nClaim\nQuestion type\nStatistical experiment\n\n\n\n\nLead is elevated in the drip line compared to the rest of the yard.\nYes/no?\nPermutation\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\nHow much?\nBootstrapping"
+  },
+  {
+    "objectID": "course-materials/labs/lab2-solution.html#background",
+    "href": "course-materials/labs/lab2-solution.html#background",
+    "title": "Lab 2: Foundations of Inference",
+    "section": "",
+    "text": "Lead is elevated in the drip line compared to the rest of the yard.\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\n\nThese are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a statistical experiment to quantify the evidence in the sample, and interpret your results responsibly.\n\n\n\n\n\n\n\n\nClaim\nQuestion type\nStatistical experiment\n\n\n\n\nLead is elevated in the drip line compared to the rest of the yard.\nYes/no?\nPermutation\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\nHow much?\nBootstrapping"
+  },
+  {
+    "objectID": "course-materials/labs/lab2-solution.html#investigating-yesno-questions-with-permutation",
+    "href": "course-materials/labs/lab2-solution.html#investigating-yesno-questions-with-permutation",
+    "title": "Lab 2: Foundations of Inference",
+    "section": "Investigating “yes/no” questions with permutation",
+    "text": "Investigating “yes/no” questions with permutation\nLet’s investigate the claim “Lead is elevated in the drip line compared to the rest of the yard” as a yes/no question.\n\nState your hypotheses\nRecall that it is more straightforward to find evidence against a hypothesis than for it. So when we investigate yes/no questions, we set up a null hypothesis and see how much evidence there is against it.\nState the null and alternative hypotheses for this claim.\n\\(H_0\\): The difference in means is 0.\n\\(H_A\\): The difference in means is greater than 0.\n\n\nCalculate the observed value of the statistic\nWe’ll use the difference in means between samples from the drip line and the yard as the statistic for this question.\n\n\n\n\n\n\nImportant\n\n\n\nRemember, the mean isn’t always the most appropriate statistic for representing a distribution! Always think critically about how your data relates to the question.\n\n\nCalculate the difference in means between the drip line and yard observations in the sample. Remember, this should be a single number (not a data frame or pair of means).\n\nlocation_summ &lt;- soil_cores |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\nobs_diff_means &lt;- location_summ$mean_pb_ppm[2] - location_summ$mean_pb_ppm[1]\n\nobs_diff_means\n\n[1] 172.9459\n\n\n\n\nShuffle the predictor variable and recalculate the statistic\nThis statistical experiment simulates the expected variation in our statistic (difference in means) just due to chance alone. To conduct this experiment, we have to break the connection between the predictor variable (location code) and response (lead concentration). Randomizing the predictor leaves the variation in the response untouched, while removing any assocation between the two.\nShuffle the predictor variable and recalculate the statistic. Do it just once - we’ll repeat in the next section.\n\n\n\n\n\n\nTip\n\n\n\nsample() can be used to shuffle vectors.\n\n\n\nshuffled_summ &lt;- soil_cores |&gt;\n  mutate(location_code = sample(location_code)) |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\nshuffled_diff_means &lt;- shuffled_summ$mean_pb_ppm[2] -\n  shuffled_summ$mean_pb_ppm[1]\n\nshuffled_diff_means\n\n[1] -10.1124\n\n\n\n\nRepeat shuffling\nIn the previous section, you simulated one statistic from the null hypothesis. What we need now is a whole bunch of statistics from the null hypothesis - our null distribution.\nRepeat shuffling 10,000 times to create a vector that simulates the null distribution.\n\n\n\n\n\n\nTip\n\n\n\nreplicate() repeatedly runs expressions over and over.\n\n\n\nlocation_null_dist &lt;- replicate(\n  1e3,\n  {\n    shuffled_summ &lt;- soil_cores |&gt;\n      mutate(location_code = sample(location_code)) |&gt;\n      summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\n    shuffled_summ$mean_pb_ppm[2] -\n      shuffled_summ$mean_pb_ppm[1]\n  }\n)\n\nVisualize the null distribution using a histogram.\n\ntibble(diff_means = location_null_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCompare the observed to the null\nThe previous figure showed the expected distribution of the statistic (the difference in mean lead between drip line and yard) under the null hypothesis. How does that compare to the observed value?\nPlot the null distribution again, but this time add a vertical line indicating the observed statistic.\n\ntibble(diff_means = location_null_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5) +\n  geom_vline(xintercept = obs_diff_means, color = \"magenta\", linewidth = 1.5)\n\n\n\n\n\n\n\n\n\n\n\n\nCalculate your p-value.\n\n\n\n\n\n\nNote\n\n\n\nA p-value is the probability of observing the sample (or something more extreme) if the null hypothesis is true.\n\n\n\npval &lt;- mean(location_null_dist &gt; obs_diff_means)\n\npval\n\n[1] 0\n\n\n\n\nInterpret your results\nBased on your p-value, do you reject or fail to reject the null hypothesis?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
+  },
+  {
+    "objectID": "course-materials/labs/lab2-solution.html#investigating-how-much-questions-with-bootstrapping",
+    "href": "course-materials/labs/lab2-solution.html#investigating-how-much-questions-with-bootstrapping",
+    "title": "Lab 2: Foundations of Inference",
+    "section": "Investigating “how much?” questions with bootstrapping",
+    "text": "Investigating “how much?” questions with bootstrapping\nNow, let’s investigate the claim “Neighborhoods north of the Exide plant were exposed to more lead than those south” as a how much? question.\n\nCalculate the observed value of the statistic\nOnce again, let’s use the difference in means as our statistic. Calculate the difference in means between properties in the extended north area and those in the extended south area.\n\n\n\n\n\n\nTip\n\n\n\nUse dplyr functions to wrangle the soil core data for this part. Properties starting with “ENA” are in the extended north area, and the “ESA” prefix means extended south area. str_sub() will help here.\n\n\n\nena_esa &lt;- soil_cores |&gt;\n  mutate(area = str_sub(property_id, 1, 3)) |&gt;\n  filter(area %in% c(\"ENA\", \"ESA\"))\n\narea_summ &lt;- ena_esa |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = area) |&gt;\n  arrange(area)\n\nobs_diff_means &lt;- area_summ$mean_pb_ppm[1] - area_summ$mean_pb_ppm[2]\n\nobs_diff_means\n\n[1] 72.45974\n\n\n\n\nResample observations and recalculate the statistic\nBootstrapping simulates the expected variation in our statistic (difference in means) from sampling. Compare this to permutation, which is about variation just due to chance. For this experiment, we will assume the sample is representative of the population and repeatedly draw “new” samples. This process simulates the process of collecting new samples.\nResample rows from the data frame and recalculate the statistic. Repeat this 10,000 times to simulate the sampling distribution.\n\n\n\n\n\n\nTip\n\n\n\nUse slice_sample() with replacement to get bootstrap samples.\n\n\n\narea_samp_dist &lt;- replicate(\n  1e3,\n  {\n    resampled_summ &lt;- ena_esa |&gt;\n      slice_sample(n = nrow(ena_esa), replace = TRUE) |&gt;\n      summarize(mean_pb_ppm = mean(pb_ppm), .by = area) |&gt;\n      arrange(area)\n\n    resampled_summ$mean_pb_ppm[1] -\n      resampled_summ$mean_pb_ppm[2]\n  }\n)\n\nVisualize the sampling distribution using a histogram.\n\ntibble(diff_means = area_samp_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFind the confidence interval\nThe previous figure showed how your statistic varies due to slight differences between samples. Use this sampling distribution to estimate the 95% confidence interval.\n\n\n\n\n\n\nNote\n\n\n\nA confidence interval is a range of values that you are confident contains the population parameter.\n\n\n\n\n\n\n\n\nTip\n\n\n\nUse the quantile() function to find the middle 95% of the sampling distribution.\n\n\n\narea_95ci &lt;- quantile(area_samp_dist, c(0.025, 0.975))\n\nPlot the sampling distribution again, but this time add vertical lines indicating the observed statistic and the 95% CI.\n\ntibble(diff_means = area_samp_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5) +\n  geom_vline(xintercept = obs_diff_means, color = \"magenta\", linewidth = 1.5) +\n  geom_vline(xintercept = area_95ci, linetype = \"dashed\", linewidth = 1.5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInterpret your results\nBased on your confidence interval, how much could the difference in lead exposure between north and south be?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
+  },
+  {
+    "objectID": "course-materials/labs/lab2-solution.html#recap",
+    "href": "course-materials/labs/lab2-solution.html#recap",
+    "title": "Lab 2: Foundations of Inference",
+    "section": "Recap",
+    "text": "Recap\nIn this lab, you investigated two claims using statistical experiments to evaluate evidence.\nFrom this exercise, the practical information you should remember:\n\n\n\n\n\n\n\n\n\n“yes/no” questions\n“how much?” questions\n\n\n\n\nInference target\nP-value\nConfidence interval\n\n\nStatistical experiment\nPermutation\nBootstrapping\n\n\nSimulate a…\nNull distribution\nSampling distribution\n\n\nCentered on…\n0\nThe observed statistic\n\n\nRandomize with…\nsample() (no replacement)\nslice_sample() (with replacement)\n\n\nSimulate repeatedly\nreplicate()\nreplicate()\n\n\n\nMore importantly, remember how to use these tools responsibly. A p-value and a confidence interval are tools for checking our own cognitive biases. They are useful lines of evidence, but no one statistical procedure ever tells the whole story.\nAlways think critically!"
+  },
+  {
+    "objectID": "course-materials/labs/lab2-solution.html#keep-going",
+    "href": "course-materials/labs/lab2-solution.html#keep-going",
+    "title": "Lab 2: Foundations of Inference",
+    "section": "Keep going?",
+    "text": "Keep going?\nDone early? Having fun and want more? Try this out.\nP-values are sensitive to sample sizes. Do the permutation exercise again, but this time only on a sub-sample of the data. What kinds of p-values do you get if you only use 20 observations? 50? 100? 1000? Repeat the statistical experiment many times and visualize the relationship between your p-values and your sub-sample size using boxplots."
   }
 ]

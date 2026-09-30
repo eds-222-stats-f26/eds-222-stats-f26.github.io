@@ -1,0 +1,114 @@
+---
+title: "Lab 1: Reliability of Soil Lead Measurements"
+subtitle: "Soil lead near the former Exide Technologies facility"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab1.qmd
+bibliography: references.bib
+execute: 
+  eval: false
+---
+
+## Background
+
+Between November 2013 and July 2015, contractors working under the oversight of the California Department of Toxic Substances Control (DTSC) sampled soil lead concentrations at hundreds of residential properties near the former Exide Technologies battery recycling facility in Vernon, CA. Crews collected soil cores from several locations on each property and analyzed them in a laboratory for lead content. This sampling campaign, and this lab's data, are described in the DTSC _Preliminary Estimate of the Geographical Boundary of Emissions report_ [@dtsc2015].
+
+A single soil sample is a *measurement* of a property's soil lead level, but no single measurement perfectly captures the "true" lead burden of an entire property. In this lab you'll explore how much soil lead measurements vary *within* a property, and how that variability depends on *where* on the property a sample was taken. This is a question about **reliability**: if you sampled the same property twice, how close would the two measurements be?
+
+## The data
+
+`exide-soil-cores.csv` contains a subset of the DTSC's public data table for the Exide site. You can find it on Workbench under `/courses/EDS222/data`. It's limited to the samples collected during the initial and expanded assessments in 2013-2015. The full DTSC public data table contains lots more - you are encouraged to [explore it](https://dtsc.ca.gov/soil-sampling-data-for-the-exide-preliminary-investigation-area/) further!
+
+### Data dictionary
+
+| Column | Description |
+|------------------------------------|------------------------------------|
+| `property_id` | Identifier for the property a sample was collected from. |
+| `sample_id` | Identifier for an individual soil sample (boring). |
+| `sample_date` | Date the sample was collected. |
+| `location_code` | Where on the property the sample was taken. `DL` = drip line. `YD` = yard. |
+| `pb_ppm` | Lead concentration, in parts per million (ppm). |
+| `longitude`, `latitude` | Coordinates of the property (WGS84). |
+
+### What does a row represent?
+
+Each row is one soil core collected from one location on one property, at a depth of 3 inches below ground surface. Properties were sampled at multiple locations, so **`property_id` repeats across rows**: a single property typically contributes up to ten yard samples and a handful of drip line samples.
+
+### What's a drip line?
+
+The **drip line** is the narrow strip of soil at the edge of a building's roof - the line where rainwater drips or is directed off the roof and gutters. It sits right against the house, in contrast to the rest of the **yard**, the more open part of the property further from the building. Because paint (a historical source of lead) tends to chip and weather off exterior walls, and because roof runoff concentrates atmospheric deposition falling on the roof into a narrow band, drip line soil can experience different pollutant exposure than yard soil.
+
+## Lab activity
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+```
+
+### 1. Read in the data
+
+```{r}
+#| label: read-data
+
+```
+
+### 2. Distribution of soil core lead measurements
+
+Create a histogram to visualize the distribution of `pb_ppm` across all samples. How does it compare to the California (80 ppm) and EPA (200 ppm) thresholds for lead in residential soil?
+
+```{r}
+#| label: distribution-soil-cores
+
+```
+
+### 3. Distribution of property-level mean measurements
+
+Calculate the *mean* `pb_ppm` for each property. What's the distribution of these property-level means? How does it compare to the distribution of individual soil cores from question 2?
+
+```{r}
+#| label: distribution-property-means
+
+```
+
+### 4. Property-level variability
+
+How *variable* are soil core lead measurements at the property level? Plot the distribution of property-level *standard deviations* of `pb_ppm`. What does your plot suggest about the **reliability** of soil lead measurements?
+
+```{r}
+#| label: distribution-property-sd
+
+```
+
+### 5. Lead measurements by location
+
+What is the distribution of `pb_ppm` for drip line samples (`location_code == "DL"`) versus everything else (the yard samples)? How much higher do drip line measurements appear to be relative to yard measurements?
+
+```{r}
+#| label: distribution-by-location
+
+```
+
+### 6. Drip line vs. yard, at the property level
+
+Part 5 looked at the aggregate distribution across all samples. Now let's look at drip line vs. yard *within* each property.
+
+**a.** Create a new column called `is_dripline`: a logical column that's `TRUE` for drip line locations and `FALSE` otherwise.
+
+**b.** Group the data by property and `is_dripline`, and calculate the mean soil lead concentration in each group.
+
+**c.** For each property, calculate the difference between the mean drip line measurement and the mean non-drip-line (yard) measurement. Hint: pivoting will help!
+
+**d.** Plot the distribution of the property-level drip line/yard differences.
+
+```{r}
+#| label: dripline-vs-yard
+
+```
+
+## Interpretation
+
+Interpret your final plot from the perspective of reliability. If you're estimating the representative soil lead concentration for a property, how does sample location affect measurement reliability? What do you think you should do with the data from different locations?

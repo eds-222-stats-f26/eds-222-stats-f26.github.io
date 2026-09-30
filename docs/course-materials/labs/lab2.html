@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>EDS 222: Statistics for Environmental Data Science – Foundations of inference</title>
+<title>EDS 222: Statistics for Environmental Data Science – Lab 2: Investigating claims using inference</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,25 +23,25 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<link href="../images/bren-hex.png" rel="icon" type="image/png">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../images/bren-hex.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,6 +70,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -80,7 +109,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">EDS 222: Statistics for Environmental Data Science</span>
     </a>
   </div>
@@ -91,11 +120,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../eds-222-f26-syllabus.pdf" target="_blank"> 
+    <a class="nav-link" href="../../eds-222-f26-syllabus.pdf" target="_blank"> 
 <span class="menu-text">syllabus</span></a>
   </li>  
   <li class="nav-item">
@@ -108,53 +137,53 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-course-materials">    
         <li>
-    <a class="dropdown-item" href="../course-materials/week1.html">
+    <a class="dropdown-item" href="../../course-materials/week1.html">
  <span class="dropdown-text">week 1 (9/28-10/2)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week2.html">
+    <a class="dropdown-item" href="../../course-materials/week2.html">
  <span class="dropdown-text">week 2 (10/5-10/9)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week3.html">
+    <a class="dropdown-item" href="../../course-materials/week3.html">
  <span class="dropdown-text">week 3 (10/12-10/16)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week4.html">
+    <a class="dropdown-item" href="../../course-materials/week4.html">
  <span class="dropdown-text">week 4 (10/19-10/23)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week5.html">
+    <a class="dropdown-item" href="../../course-materials/week5.html">
  <span class="dropdown-text">week 5 (10/26-10/30)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week6.html">
+    <a class="dropdown-item" href="../../course-materials/week6.html">
  <span class="dropdown-text">week 6 (11/2-11/6)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week7.html">
+    <a class="dropdown-item" href="../../course-materials/week7.html">
  <span class="dropdown-text">week 7 (11/9-11/13)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week8.html">
+    <a class="dropdown-item" href="../../course-materials/week8.html">
  <span class="dropdown-text">week 8 (11/16-11/20)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week9.html">
+    <a class="dropdown-item" href="../../course-materials/week9.html">
  <span class="dropdown-text">week 9 (11/23-11/27)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week10.html">
+    <a class="dropdown-item" href="../../course-materials/week10.html">
  <span class="dropdown-text">week 10 (11/30-12/4)</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../homework.html"> 
+    <a class="nav-link" href="../../homework.html"> 
 <span class="menu-text">homework</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../final-project.html"> 
+    <a class="nav-link" href="../../final-project.html"> 
 <span class="menu-text">final project</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -185,8 +214,8 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-page-left">
-      <h1 class="title">Foundations of inference</h1>
-            <p class="subtitle lead">Week 2 (October 5 - 9)</p>
+      <h1 class="title">Lab 2: Investigating claims using inference</h1>
+            <p class="subtitle lead">Permutation and bootstrapping</p>
                       </div>
   </div>
     
@@ -207,10 +236,27 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#lecture-materials" id="toc-lecture-materials" class="nav-link active" data-scroll-target="#lecture-materials"><i class="fa-solid fa-person-chalkboard" title="a person pointing at a chalkboard" aria-label="person-chalkboard"></i> Class Materials</a></li>
-  <li><a href="#additional-materials" id="toc-additional-materials" class="nav-link" data-scroll-target="#additional-materials">Additional materials</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#investigating-yesno-questions-with-permutation" id="toc-investigating-yesno-questions-with-permutation" class="nav-link" data-scroll-target="#investigating-yesno-questions-with-permutation">Investigating “yes/no” questions with <em>permutation</em></a>
+  <ul class="collapse">
+  <li><a href="#state-your-hypotheses" id="toc-state-your-hypotheses" class="nav-link" data-scroll-target="#state-your-hypotheses">State your hypotheses</a></li>
+  <li><a href="#calculate-the-observed-value-of-the-statistic" id="toc-calculate-the-observed-value-of-the-statistic" class="nav-link" data-scroll-target="#calculate-the-observed-value-of-the-statistic">Calculate the observed value of the statistic</a></li>
+  <li><a href="#shuffle-the-predictor-variable-and-recalculate-the-statistic" id="toc-shuffle-the-predictor-variable-and-recalculate-the-statistic" class="nav-link" data-scroll-target="#shuffle-the-predictor-variable-and-recalculate-the-statistic">Shuffle the predictor variable and recalculate the statistic</a></li>
+  <li><a href="#repeat-shuffling" id="toc-repeat-shuffling" class="nav-link" data-scroll-target="#repeat-shuffling">Repeat shuffling</a></li>
+  <li><a href="#compare-the-observed-to-the-null" id="toc-compare-the-observed-to-the-null" class="nav-link" data-scroll-target="#compare-the-observed-to-the-null">Compare the observed to the null</a></li>
+  <li><a href="#interpret-your-results" id="toc-interpret-your-results" class="nav-link" data-scroll-target="#interpret-your-results">Interpret your results</a></li>
+  </ul></li>
+  <li><a href="#investigating-how-much-questions-with-bootstrapping" id="toc-investigating-how-much-questions-with-bootstrapping" class="nav-link" data-scroll-target="#investigating-how-much-questions-with-bootstrapping">Investigating “how much?” questions with bootstrapping</a>
+  <ul class="collapse">
+  <li><a href="#calculate-the-observed-value-of-the-statistic-1" id="toc-calculate-the-observed-value-of-the-statistic-1" class="nav-link" data-scroll-target="#calculate-the-observed-value-of-the-statistic-1">Calculate the observed value of the statistic</a></li>
+  <li><a href="#resample-observations-and-recalculate-the-statistic" id="toc-resample-observations-and-recalculate-the-statistic" class="nav-link" data-scroll-target="#resample-observations-and-recalculate-the-statistic">Resample observations and recalculate the statistic</a></li>
+  <li><a href="#find-the-confidence-interval" id="toc-find-the-confidence-interval" class="nav-link" data-scroll-target="#find-the-confidence-interval">Find the <em>confidence interval</em></a></li>
+  <li><a href="#interpret-your-results-1" id="toc-interpret-your-results-1" class="nav-link" data-scroll-target="#interpret-your-results-1">Interpret your results</a></li>
+  </ul></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
+  <li><a href="#keep-going" id="toc-keep-going" class="nav-link" data-scroll-target="#keep-going">Keep going?</a></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="lab2.qmd"><i class="bi bi-link-45deg"></i>Download Source</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
@@ -219,46 +265,267 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<section id="lecture-materials" class="level2">
-<h2 class="anchored" data-anchor-id="lecture-materials"><i class="fa-solid fa-person-chalkboard" title="a person pointing at a chalkboard" aria-label="person-chalkboard"></i> Class Materials</h2>
-<table class="table-hover table-bordered caption-top table">
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<blockquote class="blockquote">
+<p>Lead is elevated in the drip line compared to the rest of the yard.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Neighborhoods north of the Exide plant were exposed to more lead than those south.</p>
+</blockquote>
+<p>These are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a <em>statistical experiment</em> to quantify the evidence in the sample, and interpret your results responsibly.</p>
+<table class="caption-top table">
 <colgroup>
-<col style="width: 30%">
-<col style="width: 30%">
-<col style="width: 40%">
+<col style="width: 48%">
+<col style="width: 20%">
+<col style="width: 32%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Session</th>
-<th>In-class</th>
-<th>Pre-class</th>
+<th>Claim</th>
+<th>Question type</th>
+<th>Statistical experiment</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Lecture 1</td>
-<td>Foundations of inference</td>
-<td>IMS 11-13 <br> [Foundations of inference]{https://youtu.be/ceBieVXdjQo} <br> [Permutation]{https://youtu.be/vqZewcTM2jo} <br> [Bootstrapping]{https://youtu.be/e_KYBFGivl8}</td>
+<td>Lead is elevated in the drip line compared to the rest of the yard.</td>
+<td>Yes/no?</td>
+<td>Permutation</td>
 </tr>
 <tr class="even">
-<td>Lab</td>
-<td><a href="../course-materials/labs/lab2.html">Investigating claims using inference</a></td>
-<td>Read the documentation for the <code>replicate()</code> function</td>
-</tr>
-<tr class="odd">
-<td>Lecture 2</td>
-<td>Mathematical models for inference</td>
-<td>IMS 16-17, 19-21</td>
+<td>Neighborhoods north of the Exide plant were exposed to more lead than those south.</td>
+<td>How much?</td>
+<td>Bootstrapping</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="additional-materials" class="level2">
-<h2 class="anchored" data-anchor-id="additional-materials">Additional materials</h2>
-<ul>
-<li><a href="https://www.jwilber.me/permutationtest/">The Permutation Test</a> A fun visual example where you take on the role of an alpaca shepherd.</li>
-<li><a href="https://www.youtube.com/watch?v=Xz0x-8-cgaQ">Bootstrapping Main Ideas!!!</a> Part of the StatQuest series of videos (an excellent resource itself).</li>
-</ul>
+<section id="investigating-yesno-questions-with-permutation" class="level2">
+<h2 class="anchored" data-anchor-id="investigating-yesno-questions-with-permutation">Investigating “yes/no” questions with <em>permutation</em></h2>
+<p>Let’s investigate the claim <em>“Lead is elevated in the drip line compared to the rest of the yard”</em> as a yes/no question.</p>
+<section id="state-your-hypotheses" class="level3">
+<h3 class="anchored" data-anchor-id="state-your-hypotheses">State your hypotheses</h3>
+<p>Recall that it is more straightforward to find evidence <em>against</em> a hypothesis than for it. So when we investigate yes/no questions, we set up a <em>null hypothesis</em> and see how much evidence there is against it.</p>
+<p>State the null and alternative hypotheses for this claim.</p>
+<p><span class="math inline">\(H_0\)</span>:</p>
+<p><span class="math inline">\(H_A\)</span>:</p>
+</section>
+<section id="calculate-the-observed-value-of-the-statistic" class="level3">
+<h3 class="anchored" data-anchor-id="calculate-the-observed-value-of-the-statistic">Calculate the observed value of the statistic</h3>
+<p>We’ll use the <em>difference in means</em> between samples from the drip line and the yard as the statistic for this question.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Remember, the mean isn’t always the most appropriate statistic for representing a distribution! Always think critically about how your data relates to the question.</p>
+</div>
+</div>
+<p>Calculate the difference in means between the drip line and yard observations in the sample. Remember, this should be a single number (not a data frame or pair of means).</p>
+</section>
+<section id="shuffle-the-predictor-variable-and-recalculate-the-statistic" class="level3">
+<h3 class="anchored" data-anchor-id="shuffle-the-predictor-variable-and-recalculate-the-statistic">Shuffle the predictor variable and recalculate the statistic</h3>
+<p>This statistical experiment simulates the <em>expected variation</em> in our statistic (difference in means) just due to chance alone. To conduct this experiment, we have to break the connection between the predictor variable (location code) and response (lead concentration). Randomizing the predictor leaves the variation in the response untouched, while removing any assocation between the two.</p>
+<p>Shuffle the predictor variable and recalculate the statistic. Do it just once - we’ll repeat in the next section.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>sample()</code> can be used to shuffle vectors.</p>
+</div>
+</div>
+</section>
+<section id="repeat-shuffling" class="level3">
+<h3 class="anchored" data-anchor-id="repeat-shuffling">Repeat shuffling</h3>
+<p>In the previous section, you simulated one statistic from the null hypothesis. What we need now is a whole bunch of statistics from the null hypothesis - our <em>null distribution</em>.</p>
+<p>Repeat shuffling 10,000 times to create a vector that simulates the null distribution.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>replicate()</code> repeatedly runs expressions over and over.</p>
+</div>
+</div>
+<p>Visualize the null distribution using a histogram.</p>
+</section>
+<section id="compare-the-observed-to-the-null" class="level3">
+<h3 class="anchored" data-anchor-id="compare-the-observed-to-the-null">Compare the observed to the null</h3>
+<p>The previous figure showed the expected distribution of the statistic (the difference in mean lead between drip line and yard) under the null hypothesis. How does that compare to the observed value?</p>
+<p>Plot the null distribution again, but this time add a vertical line indicating the observed statistic.</p>
+<p>Calculate your p-value.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A p-value is the <em>probability of observing the sample (or something more extreme) <strong>if</strong> the null hypothesis is true</em>.</p>
+</div>
+</div>
+</section>
+<section id="interpret-your-results" class="level3">
+<h3 class="anchored" data-anchor-id="interpret-your-results">Interpret your results</h3>
+<p>Based on your p-value, do you reject or fail to reject the null hypothesis?</p>
+<p>What does this mean for your question?</p>
+<p>What characteristics of the data may impact your inference?</p>
+</section>
+</section>
+<section id="investigating-how-much-questions-with-bootstrapping" class="level2">
+<h2 class="anchored" data-anchor-id="investigating-how-much-questions-with-bootstrapping">Investigating “how much?” questions with bootstrapping</h2>
+<p>Now, let’s investigate the claim <em>“Neighborhoods north of the Exide plant were exposed to more lead than those south”</em> as a <em>how much?</em> question.</p>
+<section id="calculate-the-observed-value-of-the-statistic-1" class="level3">
+<h3 class="anchored" data-anchor-id="calculate-the-observed-value-of-the-statistic-1">Calculate the observed value of the statistic</h3>
+<p>Once again, let’s use the difference in means as our statistic. Calculate the difference in means between properties in the extended north area and those in the extended south area.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use <code>dplyr</code> functions to wrangle the soil core data for this part. Properties starting with “ENA” are in the extended north area, and the “ESA” prefix means extended south area. <code>str_sub()</code> will help here.</p>
+</div>
+</div>
+</section>
+<section id="resample-observations-and-recalculate-the-statistic" class="level3">
+<h3 class="anchored" data-anchor-id="resample-observations-and-recalculate-the-statistic">Resample observations and recalculate the statistic</h3>
+<p>Bootstrapping simulates the <em>expected variation</em> in our statistic (difference in means) from <em>sampling</em>. Compare this to permutation, which is about variation just due to chance. For this experiment, we will assume the sample is representative of the population and repeatedly draw “new” samples. This process simulates the process of collecting new samples.</p>
+<p>Resample rows from the data frame and recalculate the statistic. Repeat this 10,000 times to simulate the <em>sampling distribution</em>.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use <code>slice_sample()</code> <em>with replacement</em> to get bootstrap samples.</p>
+</div>
+</div>
+<p>Visualize the sampling distribution using a histogram.</p>
+</section>
+<section id="find-the-confidence-interval" class="level3">
+<h3 class="anchored" data-anchor-id="find-the-confidence-interval">Find the <em>confidence interval</em></h3>
+<p>The previous figure showed how your statistic varies due to slight differences between samples. Use this sampling distribution to estimate the <em>95% confidence interval</em>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A <strong>confidence interval</strong> is <em>a range of values that you are confident contains the population parameter</em>.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use the <code>quantile()</code> function to find the middle 95% of the sampling distribution.</p>
+</div>
+</div>
+<p>Plot the sampling distribution again, but this time add vertical lines indicating the observed statistic and the 95% CI.</p>
+</section>
+<section id="interpret-your-results-1" class="level3">
+<h3 class="anchored" data-anchor-id="interpret-your-results-1">Interpret your results</h3>
+<p>Based on your confidence interval, how much could the difference in lead exposure between north and south be?</p>
+<p>What does this mean for your question?</p>
+<p>What characteristics of the data may impact your inference?</p>
+</section>
+</section>
+<section id="recap" class="level2">
+<h2 class="anchored" data-anchor-id="recap">Recap</h2>
+<p>In this lab, you investigated two claims using <em>statistical experiments</em> to evaluate evidence.</p>
+<p>From this exercise, the practical information you should remember:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 35%">
+<col style="width: 29%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>“yes/no” questions</th>
+<th>“how much?” questions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Inference target</td>
+<td>P-value</td>
+<td>Confidence interval</td>
+</tr>
+<tr class="even">
+<td>Statistical experiment</td>
+<td>Permutation</td>
+<td>Bootstrapping</td>
+</tr>
+<tr class="odd">
+<td>Simulate a…</td>
+<td>Null distribution</td>
+<td>Sampling distribution</td>
+</tr>
+<tr class="even">
+<td>Centered on…</td>
+<td>0</td>
+<td>The observed statistic</td>
+</tr>
+<tr class="odd">
+<td>Randomize with…</td>
+<td><code>sample()</code> (no replacement)</td>
+<td><code>slice_sample()</code> (with replacement)</td>
+</tr>
+<tr class="even">
+<td>Simulate repeatedly</td>
+<td><code>replicate()</code></td>
+<td><code>replicate()</code></td>
+</tr>
+</tbody>
+</table>
+<p>More importantly, remember how to use these tools responsibly. A p-value and a confidence interval are tools for checking our own cognitive biases. They are useful lines of evidence, but no one statistical procedure ever tells the whole story.</p>
+<p>Always think critically!</p>
+</section>
+<section id="keep-going" class="level2">
+<h2 class="anchored" data-anchor-id="keep-going">Keep going?</h2>
+<p>Done early? Having fun and want more? Try this out.</p>
+<p>P-values are sensitive to sample sizes. Do the permutation exercise again, but this time only on a sub-sample of the data. What kinds of p-values do you get if you only use 20 observations? 50? 100? 1000? Repeat the statistical experiment many times and visualize the relationship between your p-values and your sub-sample size using boxplots.</p>
 
 
 </section>
