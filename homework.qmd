@@ -9,6 +9,6 @@ All assignments are due at 11:59 PM on the dates listed in the table, below.
  
 | Assignment | Date Posted  | Date Due  | Revisions Deadline |
 |------------|--------------|-----------|--------------------|
-| Homework 1 | 10/1         | 10/11     | 10/25              |
+| [Homework 1](https://github.com/eds-222-stats-f26/eds-222-hw1) | 10/1         | 10/11     | 10/25              |
 | Homework 2 | 10/22        | 11/1      | 11/15              |
 | Homework 3 | 11/19        | 11/29     | 12/9               |   
