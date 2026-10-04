@@ -7,9 +7,9 @@ subtitle: "Week 2 (October 5 - 9)"
 
 | Session | In-class | Pre-class |
 |---------|--------|---------|
-| Lecture 1 | Foundations of inference | IMS 11-13 <br/> [Foundations of inference](https://youtu.be/ceBieVXdjQo) <br/> [Permutation](https://youtu.be/vqZewcTM2jo) <br/> [Bootstrapping](https://youtu.be/e_KYBFGivl8) |
+| Lecture 1 | [Foundations of inference](lecture-slides/week2_monday.qmd) | IMS 11-13 <br/> [Foundations of inference](https://youtu.be/ceBieVXdjQo) <br/> [Permutation](https://youtu.be/vqZewcTM2jo) <br/> [Bootstrapping](https://youtu.be/e_KYBFGivl8) |
 | Lab | [Investigating claims using inference](labs/lab2.qmd) | Read the documentation for the `replicate()` function |
-| Lecture 2 | Mathematical models for inference | IMS 16-17, 19-21 |
+| Lecture 2 | Mathematical models for inference | IMS 16-17, 19-21 <br/> [Mathematical models for inference](https://youtu.be/lz-fGbl2xSQ) <br/> [Simulating DGPs in R](https://youtu.be/jKhiPXo_c20) |
 : {.hover .bordered tbl-colwidths="[30,30,40]"} 
 
 ## Additional materials

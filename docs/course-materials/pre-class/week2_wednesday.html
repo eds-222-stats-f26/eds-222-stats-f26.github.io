@@ -327,86 +327,236 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">EDS 222: Statistics for Environmental Data Science</h1>
-  <p class="subtitle">Week 2 Monday</p>
+  <p class="subtitle">Week 2 Wednesday: Mathematical Models of Inference</p>
 
 <div class="quarto-title-authors">
 </div>
 
 </section>
 <section>
-<section id="foundations-of-inference" class="title-slide slide level1 center">
-<h1>Foundations of inference</h1>
+<section id="mathematical-models-of-inference" class="title-slide slide level1 center">
+<h1>Mathematical Models of Inference</h1>
 
 </section>
-<section id="todays-agenda" class="slide level2">
-<h2>Today’s agenda</h2>
+<section id="learning-objectives" class="slide level2">
+<h2>Learning objectives</h2>
+<ul>
+<li>Use <strong>parametric distributions</strong> to represent <strong>sampling distributions</strong></li>
+<li><strong>Relate</strong> mathematical models of inference to their randomization-based counterparts</li>
+<li><strong>Simulate</strong> a <em>data generating process</em> to check your understanding</li>
+</ul>
+</section></section>
+<section>
+<section id="use-parametric-distributions-to-represent-sampling-distributions" class="title-slide slide level1 center">
+<h1>Use parametric distributions to represent sampling distributions</h1>
+
+</section>
+<section id="sampling-is-normal" class="slide level2">
+<h2>Sampling is normal</h2>
+<ul>
+<li>Given sufficient <em>independent</em> observations, many sampling distributions converge to the <strong>normal distribution</strong></li>
+<li>We can use the normal distribution as a stand-in the <em>entire</em> sampling distribution from just one sample</li>
+</ul>
+<p>Sample -&gt; Normal distribution -&gt; Sampling distribution</p>
+</section>
+<section id="normal-sampling-visualized" class="slide level2">
+<h2>Normal sampling visualized</h2>
+
+<img data-src="images/week2_normal_approx.gif" class="r-stretch"></section>
+<section id="parameterizing-the-sampling-distribution" class="slide level2">
+<h2>Parameterizing the sampling distribution</h2>
+<p>Recall a normal distribution’s has two parameters: the mean and the standard deviation</p>
+<p><strong>Our goal</strong> is to estimate the mean and standard deviation of the sampling distribution</p>
+</section>
+<section id="parameterizing-the-sampling-distribution-1" class="slide level2">
+<h2>Parameterizing the sampling distribution</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div style="font-size: 75%;">
+<p><span class="math display">\[
+\mu = p_1 - p_2
+\]</span></p>
+<p><span class="math display">\[
+\sigma = \sqrt{\frac{p_1 (1 - p_1)}{n_1} + \frac{p_2 (1 - p_2)}{n_2}}
+\]</span></p>
+</div>
+</div><div class="column" style="width:45%;">
+<p>Let <span class="math inline">\(p_1 = 0.60\)</span>, <span class="math inline">\(p_2 = 0.52\)</span>, <span class="math inline">\(n_1 = n_2 = 50\)</span></p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="week2_wednesday_files/figure-revealjs/unnamed-chunk-1-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="relate-mathematical-models-of-inference-to-their-randomization-based-counterparts" class="title-slide slide level1 center">
+<h1>Relate mathematical models of inference to their randomization-based counterparts</h1>
+
+</section>
+<section id="confidence-intervals-two-ways" class="slide level2">
+<h2>Confidence intervals, two ways</h2>
+<p>With <strong>bootstrapping</strong>, we resampled the sample to estimate the <strong>sampling distribution</strong></p>
+<p>With a <strong>mathematical model</strong>, we use the normal distribution to estimate the <strong>sampling distribution</strong></p>
+</section>
+<section id="bootstrapping-revisited" class="slide level2">
+<h2>Bootstrapping revisited</h2>
+
+<img data-src="images/week2_bootstrap.gif" class="r-stretch"></section>
+<section id="confidence-interval-using-a-mathematical-model" class="slide level2">
+<h2>Confidence interval using a mathematical model</h2>
 <ol type="1">
-<li>Debrief the parking lot</li>
-<li>Randomness and intuition</li>
-<li>Sampling distribution and permutation test</li>
+<li>Estimate the parameters of the normal distribution that approximates the sampling distribution.</li>
 </ol>
-</section></section>
-<section id="debrief-the-parking-lot" class="title-slide slide level1 center">
-<h1>Debrief the parking lot</h1>
-
+<div style="font-size: 75%;">
+<p><span class="math display">\[
+\mu = \hat p_1 - \hat p_2
+\]</span></p>
+<p><span class="math display">\[
+\sigma = SE = \sqrt{\frac{\hat p_1 (1 - \hat p_1)}{n_1} + \frac{\hat p_2 (1 - \hat p_2)}{n_2}}
+\]</span></p>
+</div>
+<p>We call our estimate of <span class="math inline">\(\sigma\)</span> the <strong>standard error</strong></p>
 </section>
+<section id="confidence-interval-using-a-mathematical-model-1" class="slide level2">
+<h2>Confidence interval using a mathematical model</h2>
+<ol start="2" type="1">
+<li>Find the interval containing <em>x</em>% of the probability (e.g., 95% for a 95% CI)</li>
+</ol>
 
-<section>
-<section id="randomness-and-intuition" class="title-slide slide level1 center">
-<h1>Randomness and intuition</h1>
+<img data-src="week2_wednesday_files/figure-revealjs/unnamed-chunk-2-1.png" width="960" class="r-stretch"></section>
+<section id="p-values-two-ways" class="slide level2">
+<h2>P-values, two ways</h2>
+<p>With <strong>permutation</strong>, we shuffled the predictor to estimate the <strong>null distribution</strong></p>
+<p>With a <strong>mathematical model</strong>, we use the normal distribution to estimate the <strong>null distribution</strong></p>
+</section>
+<section id="permutation-revisited" class="slide level2">
+<h2>Permutation revisited</h2>
 
-</section>
-<section id="is-randomness-intuitive" class="slide level2">
-<h2>Is randomness intuitive?</h2>
-<p>In this activity, we will compare <em>truly</em> random sequences with <em>pseudo</em>-random sequences.</p>
-<p>See the handout for instructions.</p>
-</section>
-<section id="what-is-the-takeaway-message" class="slide level2">
-<h2>What is the takeaway message?</h2>
-<p>How do the results of this activity motivate the practice of statistical thinking?</p>
-</section></section>
-<section>
-<section id="sampling-distribution-and-permutation-test" class="title-slide slide level1 center">
-<h1>Sampling distribution and permutation test</h1>
-
-</section>
-<section id="how-variable-are-samples-from-the-same-population" class="slide level2">
-<h2>How variable are samples from the same population?</h2>
-<p>In this activity, we will:</p>
+<img data-src="images/week2_permutation.gif" class="r-stretch"></section>
+<section id="p-value-using-a-mathematical-model" class="slide level2">
+<h2>P-value using a mathematical model</h2>
 <ol type="1">
-<li>Collect samples and create a <strong>sampling distribution</strong>.</li>
-<li>Conduct a (micro) <strong>permutation test</strong>.</li>
+<li>Estimate the parameters of the normal distribution that approximates the null distribution.</li>
 </ol>
-<p>See the handout for instructions.</p>
+<div style="font-size: 75%;">
+<p><span class="math display">\[
+\mu = 0
+\]</span></p>
+<p><span class="math display">\[
+\sigma = SE = \sqrt{\hat p_{pool} (1 - \hat p_{pool}) \left( \frac{1}{n_1} + \frac{1}{n_2} \right) }
+\]</span></p>
+</div>
+<p>Why <span class="math inline">\(p_{pool}\)</span> instead of <span class="math inline">\(p_1\)</span> and <span class="math inline">\(p_2\)</span>?</p>
 </section>
-<section id="sampling-distributions" class="slide level2">
-<h2>Sampling distributions</h2>
+<section id="p-value-using-a-mathematical-model-1" class="slide level2">
+<h2>P-value using a mathematical model</h2>
+<ol start="2" type="1">
+<li>Find the probability of observing <em>at least</em> <span class="math inline">\(\hat p_1 - \hat p_2\)</span>, <em>if</em> the null hypothesis is true.</li>
+</ol>
+<p>p-value = 0.21</p>
+
+<img data-src="week2_wednesday_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch"></section>
+<section id="conditions-when-mathematical-models-work-well" class="slide level2">
+<h2>Conditions when mathematical models work well</h2>
+<p>Two conditions are required for the mathematical model approach to work well:</p>
 <ul>
-<li>Form 8 groups of 4-5 students.</li>
-<li>Each group draws a random sample.</li>
-<li>We’ll visualize the <strong>sampling distribution</strong> as a class.</li>
+<li>Independence</li>
+<li>Sample size</li>
 </ul>
 </section>
-<section id="permutation-test" class="slide level2">
-<h2>Permutation test</h2>
+<section id="independence" class="slide level2">
+<h2>Independence</h2>
 <ul>
-<li>In your same group, conduct a (micro) <strong>permutation test</strong>.</li>
-<li>“Micro” because 10k iterations would be too time consuming (thank you, R!).</li>
-<li>We’ll compare <strong>null distributions</strong> as a class.</li>
+<li>Data are <strong>independent</strong> when observations don’t influence each other.</li>
+<li><strong>Controlled experiments</strong> are designed to produce independent observations. In <strong>observational studies</strong>, complete independence is rare.</li>
+<li>Common sources of dependence include:
+<ul>
+<li>Geographic or temporal proximity</li>
+<li>Repeated measures from the same entity</li>
+<li>Shared ancestry or social group</li>
+</ul></li>
+</ul>
+</section>
+<section id="sample-size" class="slide level2">
+<h2>Sample size</h2>
+<ul>
+<li>The normal approximation fails more often for <strong>very small samples</strong></li>
+<li>As a guideline, each group in the sample should have <strong>at least 10 expected successes and failures</strong></li>
+<li><span class="math inline">\(p_1 n_1\)</span>, <span class="math inline">\((1 - p_1) n_1\)</span>, <span class="math inline">\(p_2 n_2\)</span>, and <span class="math inline">\((1 - p_2) n_2\)</span> all <span class="math inline">\(\ge 10\)</span></li>
+<li>When proportions are close to 0 or 1, this condition gets harder to meet</li>
 </ul>
 </section></section>
 <section>
-<section id="recap" class="title-slide slide level1 center">
-<h1>Recap</h1>
+<section id="simulate-a-data-generating-process-to-check-your-understanding" class="title-slide slide level1 center">
+<h1>Simulate a <em>data generating process</em> to check your understanding</h1>
 
 </section>
-<section id="foundations-of-inference-1" class="slide level2">
-<h2>Foundations of inference</h2>
+<section id="statistical-thinking-is-not-dark-magic." class="slide level2">
+<h2>Statistical thinking is not <em>dark magic</em>.</h2>
 <ul>
-<li>A sample is a <em>random glimpse</em> at a population.</li>
-<li><em>Inference</em> uses that sample to estimate something about the population, with <em>uncertainty</em>.</li>
-<li>We rely on statistical inference as a check against our cognitivie biases - it’s easy to “see” patterns that are just random chance!</li>
+<li>The rules and procedures are verifiable through <strong>simulation</strong>.</li>
+<li>Get in the habit of verifying your understanding through simulation.</li>
+<li>Let’s investigate the claim that the <strong><em>standard error of a difference in proportions</em></strong> is:</li>
 </ul>
+<p><span class="math display">\[
+SE = \sqrt{\frac{\hat p_1 (1 - \hat p_1)}{n_1} + \frac{\hat p_2 (1 - \hat p_2)}{n_2}}
+\]</span></p>
+</section>
+<section id="simulating-a-data-generating-process" class="slide level2">
+<h2>Simulating a <em>data generating process</em></h2>
+<ul>
+<li>The <strong><em>data generating process</em></strong> (DGP) is a model describing how the sample emerges from the population.</li>
+<li>Consider the <em>difference in proportions</em> between pre- and post-1950 homes having soil Pb &gt; 200. The DGP is:
+<ul>
+<li>Each observation is <em>TRUE</em> or <em>FALSE</em></li>
+<li>Observations within and across groups are independent</li>
+<li>Observations within groups are <em>TRUE</em> with a proportion of <span class="math inline">\(p_1\)</span> and <span class="math inline">\(p_2\)</span>, respectively</li>
+</ul></li>
+</ul>
+</section>
+<section id="steps-in-the-simulation" class="slide level2">
+<h2>Steps in the simulation</h2>
+<ol type="1">
+<li>Choose the parameters for your simulation</li>
+</ol>
+<p><span class="math display">\[
+\begin{align}
+p_1 &amp;= 0.60 \\
+n_1 &amp;= 25 \\
+p_2 &amp;= 0.52 \\
+n_2 &amp;= 25
+\end{align}
+\]</span></p>
+</section>
+<section id="steps-in-the-simulation-1" class="slide level2">
+<h2>Steps in the simulation</h2>
+<ol start="2" type="1">
+<li>Simulate a sample using <code>r____()</code> functions and calculate the sample statistic</li>
+</ol>
+<ul>
+<li><code>rbinom()</code> for binary <em>TRUE</em>/<em>FALSE</em> variables</li>
+</ul>
+<ol start="3" type="1">
+<li>Continue simulating samples until you reach critical mass (10k usually good)</li>
+</ol>
+</section>
+<section id="steps-in-the-simulation-2" class="slide level2">
+<h2>Steps in the simulation</h2>
+<ol start="4" type="1">
+<li>Check your simulation results against the claim</li>
+</ol>
+<ul>
+<li><em>Do 95% of sample statistics fall within 1.96 SEs of the population parameter?</em></li>
+</ul>
+</section>
+<section id="lets-do-it-in-r" class="slide level2">
+<h2>Let’s do it in R!</h2>
 
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
@@ -624,6 +774,44 @@
         ]
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
       const toggleBodyColorMode = (bsSheetEl) => {

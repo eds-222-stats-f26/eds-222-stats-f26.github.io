@@ -10,88 +10,50 @@ bibliography: references.bib
 ## Today's agenda
 
 1. Debrief the parking lot
-2. Does a quarter spin longer than a penny?
-3. How big is the average redwood?
+2. Randomness and intuition
+3. Sampling distribution and permutation test
 
 # Debrief the parking lot
 
-# Digging into our statistical claims
+# Randomness and intuition
 
-## Activity guide
+## Is randomness intuitive?
 
-1. Count off into groups.
-2. Share your prepared statistical claims.
-3. Collaboratively design a follow-up study.
-4. Evaluate another group's study design.
+In this activity, we will compare _truly_ random sequences with _pseudo_-random sequences.
 
-## Form groups
+See the handout for instructions.
 
-1. Count off 1-10.
-2. Find your peers with the same number.
+## What is the takeaway message?
 
-## Share your claims
+How do the results of this activity motivate the practice of statistical thinking?
 
-Take turns sharing your prepared statistical claims.
-  
-- What's the claim and where did you find it?
-- What is the relevant challenge of statistics?
-- What's the most salient variable?
-  - What makes the variable _valid_?
-  - How _reliable_ is the variable?
-- How was the sample collected?
+# Sampling distribution and permutation test
 
-## Design a follow-up study
+## How variable are samples from the same population?
 
-As a group, choose one claim to design a follow-up study for. If your claim was chosen, you are now the PI (congrats).
+In this activity, we will: 
 
-- What's the new question?
-  - Does it fall under the same challenge of statistics, or a new one?
-- What measurement would you need to investigate the question?
-  - Evaluate the validity and reliability of this measurement.
-  - How would you get the sample?
+1. Collect samples and create a **sampling distribution**.
+2. Conduct a (micro) **permutation test**.
 
-## Evaluate a study design
+See the handout for instructions.
 
-Send your PI to a new group for study design peer review.
+## Sampling distributions
 
-1. The PI explains the original claim and the follow up study to the reviewers.
-2. The reviewers ask clarifying questions until they understand:
-    - The context of the new study.
-    - Which challenge of statistics is being investigated.
-    - How the study design addresses _validity_, _reliability_, and potential _sampling_ issues.
+- Form 8 groups of 4-5 students.
+- Each group draws a random sample.
+- We'll visualize the **sampling distribution** as a class.
 
-# Sampling bias experiment
+## Permutation test
 
-## Sampling distribution
+- In your same group, conduct a (micro) **permutation test**.
+- "Micro" because 10k iterations would be too time consuming (thank you, R!).
+- We'll compare **null distributions** as a class.
 
-You've all drawn samples and estimated the total weight of the bag.
+# Recap
 
-Now, let's see the **_sampling distribution_** - the distribution of your estimates based on your samples.
+## Foundations of inference
 
-## What's our inference?
-
-Turn to the student next to you. Based on the sampling distribution, what do you think is the total weight of the bag?
-
-## Discussion
-
-- As a class, were we too low or too high? 
-  - By how much?
-- How would we design a representative sampling strategy?
-
-# For next time
-
-## Preparing for week 2
-
-Topic: _**Foundations of inference**_
-
-- Complete the readings and pre-recorded lectures.
-
-<hr/>
-
-Homework 1 will be released tomorrow.
-
-Start thinking about your final project! 
-
-- What question do you want to investigate?
-- What data are relevant?
-- An exploratory analysis is due at the end of week 2.
+- A sample is a _random glimpse_ at a population.
+- _Inference_ uses that sample to estimate something about the population, with _uncertainty_.
+- We rely on statistical inference as a check against our cognitivie biases - it's easy to "see" patterns that are just random chance! 
