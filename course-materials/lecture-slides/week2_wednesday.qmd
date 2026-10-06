@@ -1,0 +1,59 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 2 Wednesday"
+format: revealjs
+bibliography: references.bib
+---
+
+# Foundations of inference
+
+## Today's agenda
+
+1. Debrief the parking lot
+2. Interpret normal PDFs
+3. Apply 
+
+# Debrief the parking lot
+
+# Randomness and intuition
+
+## Is randomness intuitive?
+
+In this activity, we will compare _truly_ random sequences with _pseudo_-random sequences.
+
+See the handout for instructions.
+
+## What is the takeaway message?
+
+How do the results of this activity motivate the practice of statistical thinking?
+
+# Sampling distribution and permutation test
+
+## How variable are samples from the same population?
+
+In this activity, we will: 
+
+1. Collect samples and create a **sampling distribution**.
+2. Conduct a (micro) **permutation test**.
+
+See the handout for instructions.
+
+## Sampling distributions
+
+- Form 8 groups of 4-5 students.
+- Each group draws a random sample.
+- We'll visualize the **sampling distribution** as a class.
+
+## Permutation test
+
+- In your same group, conduct a (micro) **permutation test**.
+- "Micro" because 10k iterations would be too time consuming (thank you, R!).
+- We'll compare **null distributions** as a class.
+
+# Recap
+
+## Foundations of inference
+
+- A sample is a _random glimpse_ at a population.
+- _Inference_ uses that sample to estimate something about the population, with _uncertainty_.
+- We rely on statistical inference as a check against our cognitivie biases - it's easy to "see" patterns that are just random chance! 

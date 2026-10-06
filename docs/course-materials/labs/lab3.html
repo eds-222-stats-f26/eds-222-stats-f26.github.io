@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>EDS 222: Statistics for Environmental Data Science – Foundations of inference</title>
+<title>EDS 222: Statistics for Environmental Data Science – Lab 3: Simulate data and fit a regression model</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,28 +20,62 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<link href="../images/bren-hex.png" rel="icon" type="image/png">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../images/bren-hex.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,6 +104,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -80,7 +143,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">EDS 222: Statistics for Environmental Data Science</span>
     </a>
   </div>
@@ -91,11 +154,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../eds-222-f26-syllabus.pdf" target="_blank"> 
+    <a class="nav-link" href="../../eds-222-f26-syllabus.pdf" target="_blank"> 
 <span class="menu-text">syllabus</span></a>
   </li>  
   <li class="nav-item">
@@ -108,53 +171,53 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-course-materials">    
         <li>
-    <a class="dropdown-item" href="../course-materials/week1.html">
+    <a class="dropdown-item" href="../../course-materials/week1.html">
  <span class="dropdown-text">week 1 (9/28-10/2)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week2.html">
+    <a class="dropdown-item" href="../../course-materials/week2.html">
  <span class="dropdown-text">week 2 (10/5-10/9)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week3.html">
+    <a class="dropdown-item" href="../../course-materials/week3.html">
  <span class="dropdown-text">week 3 (10/12-10/16)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week4.html">
+    <a class="dropdown-item" href="../../course-materials/week4.html">
  <span class="dropdown-text">week 4 (10/19-10/23)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week5.html">
+    <a class="dropdown-item" href="../../course-materials/week5.html">
  <span class="dropdown-text">week 5 (10/26-10/30)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week6.html">
+    <a class="dropdown-item" href="../../course-materials/week6.html">
  <span class="dropdown-text">week 6 (11/2-11/6)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week7.html">
+    <a class="dropdown-item" href="../../course-materials/week7.html">
  <span class="dropdown-text">week 7 (11/9-11/13)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week8.html">
+    <a class="dropdown-item" href="../../course-materials/week8.html">
  <span class="dropdown-text">week 8 (11/16-11/20)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week9.html">
+    <a class="dropdown-item" href="../../course-materials/week9.html">
  <span class="dropdown-text">week 9 (11/23-11/27)</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../course-materials/week10.html">
+    <a class="dropdown-item" href="../../course-materials/week10.html">
  <span class="dropdown-text">week 10 (11/30-12/4)</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../homework.html"> 
+    <a class="nav-link" href="../../homework.html"> 
 <span class="menu-text">homework</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../final-project.html"> 
+    <a class="nav-link" href="../../final-project.html"> 
 <span class="menu-text">final project</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -185,8 +248,8 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-page-left">
-      <h1 class="title">Foundations of inference</h1>
-            <p class="subtitle lead">Week 2 (October 5 - 9)</p>
+      <h1 class="title">Lab 3: Simulate data and fit a regression model</h1>
+            <p class="subtitle lead">Ordinary least squares</p>
                       </div>
   </div>
     
@@ -207,10 +270,18 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#lecture-materials" id="toc-lecture-materials" class="nav-link active" data-scroll-target="#lecture-materials"><i class="fa-solid fa-person-chalkboard" title="a person pointing at a chalkboard" aria-label="person-chalkboard"></i> Class Materials</a></li>
-  <li><a href="#additional-materials" id="toc-additional-materials" class="nav-link" data-scroll-target="#additional-materials">Additional materials</a></li>
+  <li><a href="#before-you-code" id="toc-before-you-code" class="nav-link active" data-scroll-target="#before-you-code">Before you code</a></li>
+  <li><a href="#simulate-the-data" id="toc-simulate-the-data" class="nav-link" data-scroll-target="#simulate-the-data">Simulate the data</a>
+  <ul class="collapse">
+  <li><a href="#generate-random-values" id="toc-generate-random-values" class="nav-link" data-scroll-target="#generate-random-values">Generate random values</a></li>
+  </ul></li>
+  <li><a href="#fit-and-interpret-a-regression-model" id="toc-fit-and-interpret-a-regression-model" class="nav-link" data-scroll-target="#fit-and-interpret-a-regression-model">Fit and interpret a regression model</a>
+  <ul class="collapse">
+  <li><a href="#fit-the-model" id="toc-fit-the-model" class="nav-link" data-scroll-target="#fit-the-model">Fit the model</a></li>
+  <li><a href="#interpret-the-model" id="toc-interpret-the-model" class="nav-link" data-scroll-target="#interpret-the-model">Interpret the model</a></li>
+  </ul></li>
   </ul>
-</nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="lab3.qmd"><i class="bi bi-link-45deg"></i>Download Source</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
@@ -219,48 +290,139 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<section id="lecture-materials" class="level2">
-<h2 class="anchored" data-anchor-id="lecture-materials"><i class="fa-solid fa-person-chalkboard" title="a person pointing at a chalkboard" aria-label="person-chalkboard"></i> Class Materials</h2>
-<table class="table-hover table-bordered caption-top table">
-<colgroup>
-<col style="width: 30%">
-<col style="width: 30%">
-<col style="width: 40%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Session</th>
-<th>In-class</th>
-<th>Pre-class</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Lecture 1</td>
-<td><a href="../course-materials/lecture-slides/week2_monday.html">Foundations of inference</a></td>
-<td>IMS 11-13 <br> <a href="https://youtu.be/ceBieVXdjQo">Foundations of inference</a> <br> <a href="https://youtu.be/vqZewcTM2jo">Permutation</a> <br> <a href="https://youtu.be/e_KYBFGivl8">Bootstrapping</a></td>
-</tr>
-<tr class="even">
-<td>Lab</td>
-<td><a href="../course-materials/labs/lab2.html">Investigating claims using inference</a> <br> <a href="../course-materials/labs/lab2-solution.html">Solutions</a></td>
-<td>Read the documentation for the <code>replicate()</code> function</td>
-</tr>
-<tr class="odd">
-<td>Lecture 2</td>
-<td>Mathematical models for inference</td>
-<td>IMS 16-17, 19-21 <br> <a href="https://youtu.be/lz-fGbl2xSQ">Mathematical models for inference</a> <br> <a href="https://youtu.be/jKhiPXo_c20">Simulating DGPs in R</a></td>
-</tr>
-</tbody>
-</table>
+<section id="before-you-code" class="level2">
+<h2 class="anchored" data-anchor-id="before-you-code">Before you code</h2>
+<p>Before you start coding in this document, your group should have completed the sections <strong>Design the scenario</strong> and <strong>Choose your parameters</strong> from the handout.</p>
 </section>
-<section id="additional-materials" class="level2">
-<h2 class="anchored" data-anchor-id="additional-materials">Additional materials</h2>
-<ul>
-<li><a href="https://www.jwilber.me/permutationtest/">The Permutation Test</a> A fun visual example where you take on the role of an alpaca shepherd.</li>
-<li><a href="https://www.youtube.com/watch?v=Xz0x-8-cgaQ">Bootstrapping Main Ideas!!!</a> Part of the StatQuest series of videos (an excellent resource itself).</li>
-</ul>
+<section id="simulate-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="simulate-the-data">Simulate the data</h2>
+<p>You’ve chosen your parameters (<span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span>, and <span class="math inline">\(\sigma\)</span>). Define them here:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>beta_0 <span class="ot">&lt;-</span> ???</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>beta_1 <span class="ot">&lt;-</span> ???</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> ???</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="generate-random-values" class="level3">
+<h3 class="anchored" data-anchor-id="generate-random-values">Generate random values</h3>
+<ol type="1">
+<li>Simulate your predictor variable.</li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You may use any random number generating function to generate your predictor variable. Often, it’s simplest to simulate the predictor variable using the <em>uniform</em> distribution. Here’s an example of generating 5 random numbers between 1 and 2:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runif</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">min =</span> <span class="dv">1</span>, <span class="at">max =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit the following code to simulate your _predictor_ variable</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>your_predictor_variable <span class="ot">&lt;-</span> <span class="fu">some_random_number_generating_function</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> your_sample_size,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  any_other_function_parameters_go_here</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="2" type="1">
+<li>Calculate the expected value of the response.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit the following code to calculate the _expected_ value of the response</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>expected_response <span class="ot">&lt;-</span> what <span class="sc">+</span> goes <span class="sc">*</span> here <span class="co">#?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="3" type="1">
+<li>Simulate the response variable.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Edit the following code to simulate your _response_ variable</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>your_response_variable <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> your_sample_size,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> the_expected_value_of_the_response,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd =</span> your_sigma_parameter</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Visualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># First, put your predictor and response variables into a single data frame.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Then, use ggplot to make a scatter plot.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="fit-and-interpret-a-regression-model" class="level2">
+<h2 class="anchored" data-anchor-id="fit-and-interpret-a-regression-model">Fit and interpret a regression model</h2>
+<section id="fit-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="fit-the-model">Fit the model</h3>
+<p>Use <code>lm()</code> to fit a regression model to your simulated data.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>lm()</code> expects a <em>formula</em> stating your predictor and response variables. It should look like: <code>response ~ predictor</code>.</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>your_model <span class="ot">&lt;-</span> <span class="fu">lm</span>(your_model_formula, <span class="at">data =</span> your_simulated_data)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Use summary() to get the model coefficient estimates and their standard errors</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Use sigma() to get the model's sigma estimate</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="interpret-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="interpret-the-model">Interpret the model</h3>
+<p>Refer back to the worksheet to complete most of this section. When you reach the end (“Test your intuition by modifying your simulation to increase <span class="math inline">\(\sigma\)</span> and n independently, then re-run it several times.”), come back to this document and use the following code chunks to test your intuition.</p>
+<p><strong>Increase <span class="math inline">\(\sigma\)</span></strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep your predictor variable the same, but increase sigma by 2x</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>double_sigma <span class="ot">&lt;-</span> ???</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Modify the following lines of code to re-run your simulation with the bigger sigma</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  expected_response <span class="ot">&lt;-</span> what <span class="sc">+</span> goes <span class="sc">*</span> here</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#?</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>your_response_variable <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> your_sample_size,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> the_expected_value_of_the_response,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd =</span> your_sigma_parameter</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>your_model <span class="ot">&lt;-</span> <span class="fu">lm</span>(your_model_formula, <span class="at">data =</span> your_simulated_data)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Get your betas and their standard errors</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># How do they compare to the population parameters, relative to the original simulation?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Increase n</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Now increase n by 2x. You'll need to create more predictor variable values.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>double_n <span class="ot">&lt;-</span> ???your_predictor_variable_2n <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  your_predictor_variable,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  additional_predictor_variable_values</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Modify the following lines of code to re-run your simulation with the bigger n</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>expected_response <span class="ot">&lt;-</span> what <span class="sc">+</span> goes <span class="sc">*</span> here <span class="co">#?</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>your_response_variable <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> the_bigger_sample_size,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> the_expected_value_of_the_response,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd =</span> your_sigma_parameter</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>your_model <span class="ot">&lt;-</span> <span class="fu">lm</span>(your_model_formula, <span class="at">data =</span> your_simulated_data)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Get your betas and their standard errors</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># How do they compare to the population parameters, relative to the original simulation?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

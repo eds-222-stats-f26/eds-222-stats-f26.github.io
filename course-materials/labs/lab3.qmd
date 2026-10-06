@@ -1,0 +1,148 @@
+---
+title: "Lab 3: Simulate data and fit a regression model"
+subtitle: "Ordinary least squares"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab3.qmd
+execute:
+  eval: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Before you code
+
+Before you start coding in this document, your group should have completed the sections **Design the scenario** and **Choose your parameters** from the handout.
+
+## Simulate the data
+
+You've chosen your parameters ($\beta_0$, $\beta_1$, and $\sigma$). Define them here:
+
+```{r}
+beta_0 <- ???
+beta_1 <- ???
+sigma <- ???
+```
+
+### Generate random values
+
+1. Simulate your predictor variable.
+
+::: {.callout-tip}
+
+You may use any random number generating function to generate your predictor variable. Often, it's simplest to simulate the predictor variable using the _uniform_ distribution. Here's an example of generating 5 random numbers between 1 and 2:
+
+```{r}
+runif(n = 5, min = 1, max = 2)
+```
+
+:::
+
+```{r}
+# Edit the following code to simulate your _predictor_ variable
+your_predictor_variable <- some_random_number_generating_function(
+  n = your_sample_size,
+  any_other_function_parameters_go_here
+)
+```
+
+2. Calculate the expected value of the response.
+
+```{r}
+# Edit the following code to calculate the _expected_ value of the response
+expected_response <- what + goes * here #?
+```
+
+3. Simulate the response variable.
+
+```{r}
+# Edit the following code to simulate your _response_ variable
+your_response_variable <- rnorm(
+  n = your_sample_size,
+  mean = the_expected_value_of_the_response,
+  sd = your_sigma_parameter
+)
+```
+
+Visualize your simulated data. Verify it's comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.
+
+```{r}
+# First, put your predictor and response variables into a single data frame.
+
+# Then, use ggplot to make a scatter plot.
+```
+
+## Fit and interpret a regression model
+
+### Fit the model
+
+Use `lm()` to fit a regression model to your simulated data. 
+
+
+::: {.callout-tip}
+
+`lm()` expects a _formula_ stating your predictor and response variables. It should look like: `response ~ predictor`.
+
+:::
+
+
+```{r}
+your_model <- lm(your_model_formula, data = your_simulated_data)
+# Use summary() to get the model coefficient estimates and their standard errors
+# Use sigma() to get the model's sigma estimate
+```
+
+### Interpret the model
+
+Refer back to the worksheet to complete most of this section. When you reach the end ("Test your intuition by modifying your simulation to increase $\sigma$ and n independently, then re-run it several times."), come back to this document and use the following code chunks to test your intuition.
+
+**Increase $\sigma$**
+
+```{r}
+# Keep your predictor variable the same, but increase sigma by 2x
+double_sigma <- ???
+  # Modify the following lines of code to re-run your simulation with the bigger sigma
+  expected_response <- what + goes * here
+#?
+your_response_variable <- rnorm(
+  n = your_sample_size,
+  mean = the_expected_value_of_the_response,
+  sd = your_sigma_parameter
+)
+your_model <- lm(your_model_formula, data = your_simulated_data)
+# Get your betas and their standard errors
+
+# How do they compare to the population parameters, relative to the original simulation?
+```
+
+**Increase n**
+
+```{r}
+# Now increase n by 2x. You'll need to create more predictor variable values.
+double_n <- ???your_predictor_variable_2n <- c(
+  your_predictor_variable,
+  additional_predictor_variable_values
+)
+
+# Modify the following lines of code to re-run your simulation with the bigger n
+expected_response <- what + goes * here #?
+your_response_variable <- rnorm(
+  n = the_bigger_sample_size,
+  mean = the_expected_value_of_the_response,
+  sd = your_sigma_parameter
+)
+your_model <- lm(your_model_formula, data = your_simulated_data)
+# Get your betas and their standard errors
+
+# How do they compare to the population parameters, relative to the original simulation?
+```
