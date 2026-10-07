@@ -5,55 +5,87 @@ format: revealjs
 bibliography: references.bib
 ---
 
-# Foundations of inference
+# Mathematical models of inference
 
 ## Today's agenda
 
-1. Debrief the parking lot
-2. Interpret normal PDFs
-3. Apply 
+1. Discuss final project deliverable
+2. P-values, two ways
+3. Confidence intervals, two ways
 
-# Debrief the parking lot
+# Discuss final project deliverable
 
-# Randomness and intuition
+## Exploratory data analysis
 
-## Is randomness intuitive?
+> Its purpose is to get you started early and give you feedback while your ideas are still taking shape. You are not committing to a question or dataset.
 
-In this activity, we will compare _truly_ random sequences with _pseudo_-random sequences.
+![](https://upload.wikimedia.org/wikipedia/commons/2/2e/Mud_buffalo.jpg){fig-align="center"}
 
-See the handout for instructions.
+## Check in with your peers
 
-## What is the takeaway message?
+Close your laptops and pull out a sheet of paper. Take **3 minutes** to write down:
 
-How do the results of this activity motivate the practice of statistical thinking?
 
-# Sampling distribution and permutation test
+::: {.columns}
 
-## How variable are samples from the same population?
+::: {.column width="33%"}
 
-In this activity, we will: 
+**Your question**
 
-1. Collect samples and create a **sampling distribution**.
-2. Conduct a (micro) **permutation test**.
+- If you have one, paraphrase it
+- If you don't, brainstorm one possible question
 
-See the handout for instructions.
+:::
 
-## Sampling distributions
+::: {.column width="33%"}
 
-- Form 8 groups of 4-5 students.
-- Each group draws a random sample.
-- We'll visualize the **sampling distribution** as a class.
+**Your dataset**
 
-## Permutation test
+- If you've picked one, what is it and where is it from?
+- If you haven't, what kind of data would help your question?
 
-- In your same group, conduct a (micro) **permutation test**.
-- "Micro" because 10k iterations would be too time consuming (thank you, R!).
-- We'll compare **null distributions** as a class.
+:::
 
-# Recap
+::: {.column width="33%"}
 
-## Foundations of inference
+**A challenge you've encountered**
 
-- A sample is a _random glimpse_ at a population.
-- _Inference_ uses that sample to estimate something about the population, with _uncertainty_.
-- We rely on statistical inference as a check against our cognitivie biases - it's easy to "see" patterns that are just random chance! 
+- Framing a question?
+- Finding data?
+
+:::
+
+:::
+
+## Check in with your peers
+
+Form pairs. In turns, share your question, data, and challenge.
+
+Take **10 minutes** to provide each other with feedback. For example:
+
+- Is the scope of the question feasible? If you had to narrow in on one part, what would it be?
+- How _valid_ are the measurements in the data for the question? What tradeoffs are there between validity and sample size?
+
+# P-values, two ways
+
+## Permutation test vs normal approximation
+
+You are welcome to work in groups of 2-3 for this activity.
+
+Connect to Workbench and clone the repo https://github.com/eds-222-stats-f26/eds-222-inference (I'll put the link on Slack).
+
+Complete the activity in `p-values.qmd`.
+
+We'll use **30 minutes** for this.
+
+When you're done, call your instructor over before continuing.
+
+# Confidence intervals, two ways
+
+## Bootstrapping vs normal approximation
+
+Continue working in the same groups and the same repo.
+
+Complete the activity in `confidence-interval.qmd`.
+
+We'll use **30 minutes** for this.

@@ -690,49 +690,42 @@
     "href": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
     "title": "EDS 222: Statistics for Environmental Data Science",
     "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nDebrief the parking lot\nInterpret normal PDFs\nApply"
+    "text": "Today’s agenda\n\nDiscuss final project deliverable\nP-values, two ways\nConfidence intervals, two ways"
   },
   {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#is-randomness-intuitive",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#is-randomness-intuitive",
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Is randomness intuitive?",
-    "text": "Is randomness intuitive?\nIn this activity, we will compare truly random sequences with pseudo-random sequences.\nSee the handout for instructions."
+    "section": "Exploratory data analysis",
+    "text": "Exploratory data analysis\n\nIts purpose is to get you started early and give you feedback while your ideas are still taking shape. You are not committing to a question or dataset."
   },
   {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#what-is-the-takeaway-message",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#what-is-the-takeaway-message",
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "What is the takeaway message?",
-    "text": "What is the takeaway message?\nHow do the results of this activity motivate the practice of statistical thinking?"
+    "section": "Check in with your peers",
+    "text": "Check in with your peers\nClose your laptops and pull out a sheet of paper. Take 3 minutes to write down:\n\n\nYour question\n\nIf you have one, paraphrase it\nIf you don’t, brainstorm one possible question\n\n\nYour dataset\n\nIf you’ve picked one, what is it and where is it from?\nIf you haven’t, what kind of data would help your question?\n\n\nA challenge you’ve encountered\n\nFraming a question?\nFinding data?"
   },
   {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#how-variable-are-samples-from-the-same-population",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#how-variable-are-samples-from-the-same-population",
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "How variable are samples from the same population?",
-    "text": "How variable are samples from the same population?\nIn this activity, we will:\n\nCollect samples and create a sampling distribution.\nConduct a (micro) permutation test.\n\nSee the handout for instructions."
+    "section": "Check in with your peers",
+    "text": "Check in with your peers\nForm pairs. In turns, share your question, data, and challenge.\nTake 10 minutes to provide each other with feedback. For example:\n\nIs the scope of the question feasible? If you had to narrow in on one part, what would it be?\nHow valid are the measurements in the data for the question? What tradeoffs are there between validity and sample size?"
   },
   {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#sampling-distributions",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#sampling-distributions",
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sampling distributions",
-    "text": "Sampling distributions\n\nForm 8 groups of 4-5 students.\nEach group draws a random sample.\nWe’ll visualize the sampling distribution as a class."
+    "section": "Permutation test vs normal approximation",
+    "text": "Permutation test vs normal approximation\nYou are welcome to work in groups of 2-3 for this activity.\nConnect to Workbench and clone the repo https://github.com/eds-222-stats-f26/eds-222-inference (I’ll put the link on Slack).\nComplete the activity in p-values.qmd.\nWe’ll use 30 minutes for this.\nWhen you’re done, call your instructor over before continuing."
   },
   {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#permutation-test",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#permutation-test",
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation test",
-    "text": "Permutation test\n\nIn your same group, conduct a (micro) permutation test.\n“Micro” because 10k iterations would be too time consuming (thank you, R!).\nWe’ll compare null distributions as a class."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#foundations-of-inference-1",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#foundations-of-inference-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Foundations of inference",
-    "text": "Foundations of inference\n\nA sample is a random glimpse at a population.\nInference uses that sample to estimate something about the population, with uncertainty.\nWe rely on statistical inference as a check against our cognitivie biases - it’s easy to “see” patterns that are just random chance!"
+    "section": "Bootstrapping vs normal approximation",
+    "text": "Bootstrapping vs normal approximation\nContinue working in the same groups and the same repo.\nComplete the activity in confidence-interval.qmd.\nWe’ll use 30 minutes for this."
   },
   {
     "objectID": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",

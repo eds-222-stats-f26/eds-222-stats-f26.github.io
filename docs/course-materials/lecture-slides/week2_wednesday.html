@@ -334,79 +334,87 @@
 
 </section>
 <section>
-<section id="foundations-of-inference" class="title-slide slide level1 center">
-<h1>Foundations of inference</h1>
+<section id="mathematical-models-of-inference" class="title-slide slide level1 center">
+<h1>Mathematical models of inference</h1>
 
 </section>
 <section id="todays-agenda" class="slide level2">
 <h2>Today’s agenda</h2>
 <ol type="1">
-<li>Debrief the parking lot</li>
-<li>Interpret normal PDFs</li>
-<li>Apply</li>
+<li>Discuss final project deliverable</li>
+<li>P-values, two ways</li>
+<li>Confidence intervals, two ways</li>
 </ol>
 </section></section>
-<section id="debrief-the-parking-lot" class="title-slide slide level1 center">
-<h1>Debrief the parking lot</h1>
-
-</section>
-
 <section>
-<section id="randomness-and-intuition" class="title-slide slide level1 center">
-<h1>Randomness and intuition</h1>
+<section id="discuss-final-project-deliverable" class="title-slide slide level1 center">
+<h1>Discuss final project deliverable</h1>
 
 </section>
-<section id="is-randomness-intuitive" class="slide level2">
-<h2>Is randomness intuitive?</h2>
-<p>In this activity, we will compare <em>truly</em> random sequences with <em>pseudo</em>-random sequences.</p>
-<p>See the handout for instructions.</p>
-</section>
-<section id="what-is-the-takeaway-message" class="slide level2">
-<h2>What is the takeaway message?</h2>
-<p>How do the results of this activity motivate the practice of statistical thinking?</p>
-</section></section>
-<section>
-<section id="sampling-distribution-and-permutation-test" class="title-slide slide level1 center">
-<h1>Sampling distribution and permutation test</h1>
+<section id="exploratory-data-analysis" class="slide level2">
+<h2>Exploratory data analysis</h2>
+<blockquote>
+<p>Its purpose is to get you started early and give you feedback while your ideas are still taking shape. You are not committing to a question or dataset.</p>
+</blockquote>
 
-</section>
-<section id="how-variable-are-samples-from-the-same-population" class="slide level2">
-<h2>How variable are samples from the same population?</h2>
-<p>In this activity, we will:</p>
-<ol type="1">
-<li>Collect samples and create a <strong>sampling distribution</strong>.</li>
-<li>Conduct a (micro) <strong>permutation test</strong>.</li>
-</ol>
-<p>See the handout for instructions.</p>
-</section>
-<section id="sampling-distributions" class="slide level2">
-<h2>Sampling distributions</h2>
+<img data-src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Mud_buffalo.jpg" class="quarto-figure quarto-figure-center r-stretch"></section>
+<section id="check-in-with-your-peers" class="slide level2">
+<h2>Check in with your peers</h2>
+<p>Close your laptops and pull out a sheet of paper. Take <strong>3 minutes</strong> to write down:</p>
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><strong>Your question</strong></p>
 <ul>
-<li>Form 8 groups of 4-5 students.</li>
-<li>Each group draws a random sample.</li>
-<li>We’ll visualize the <strong>sampling distribution</strong> as a class.</li>
+<li>If you have one, paraphrase it</li>
+<li>If you don’t, brainstorm one possible question</li>
 </ul>
-</section>
-<section id="permutation-test" class="slide level2">
-<h2>Permutation test</h2>
+</div><div class="column" style="width:33%;">
+<p><strong>Your dataset</strong></p>
 <ul>
-<li>In your same group, conduct a (micro) <strong>permutation test</strong>.</li>
-<li>“Micro” because 10k iterations would be too time consuming (thank you, R!).</li>
-<li>We’ll compare <strong>null distributions</strong> as a class.</li>
+<li>If you’ve picked one, what is it and where is it from?</li>
+<li>If you haven’t, what kind of data would help your question?</li>
+</ul>
+</div><div class="column" style="width:33%;">
+<p><strong>A challenge you’ve encountered</strong></p>
+<ul>
+<li>Framing a question?</li>
+<li>Finding data?</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="check-in-with-your-peers-1" class="slide level2">
+<h2>Check in with your peers</h2>
+<p>Form pairs. In turns, share your question, data, and challenge.</p>
+<p>Take <strong>10 minutes</strong> to provide each other with feedback. For example:</p>
+<ul>
+<li>Is the scope of the question feasible? If you had to narrow in on one part, what would it be?</li>
+<li>How <em>valid</em> are the measurements in the data for the question? What tradeoffs are there between validity and sample size?</li>
 </ul>
 </section></section>
 <section>
-<section id="recap" class="title-slide slide level1 center">
-<h1>Recap</h1>
+<section id="p-values-two-ways" class="title-slide slide level1 center">
+<h1>P-values, two ways</h1>
 
 </section>
-<section id="foundations-of-inference-1" class="slide level2">
-<h2>Foundations of inference</h2>
-<ul>
-<li>A sample is a <em>random glimpse</em> at a population.</li>
-<li><em>Inference</em> uses that sample to estimate something about the population, with <em>uncertainty</em>.</li>
-<li>We rely on statistical inference as a check against our cognitivie biases - it’s easy to “see” patterns that are just random chance!</li>
-</ul>
+<section id="permutation-test-vs-normal-approximation" class="slide level2">
+<h2>Permutation test vs normal approximation</h2>
+<p>You are welcome to work in groups of 2-3 for this activity.</p>
+<p>Connect to Workbench and clone the repo https://github.com/eds-222-stats-f26/eds-222-inference (I’ll put the link on Slack).</p>
+<p>Complete the activity in <code>p-values.qmd</code>.</p>
+<p>We’ll use <strong>30 minutes</strong> for this.</p>
+<p>When you’re done, call your instructor over before continuing.</p>
+</section></section>
+<section>
+<section id="confidence-intervals-two-ways" class="title-slide slide level1 center">
+<h1>Confidence intervals, two ways</h1>
+
+</section>
+<section id="bootstrapping-vs-normal-approximation" class="slide level2">
+<h2>Bootstrapping vs normal approximation</h2>
+<p>Continue working in the same groups and the same repo.</p>
+<p>Complete the activity in <code>confidence-interval.qmd</code>.</p>
+<p>We’ll use <strong>30 minutes</strong> for this.</p>
 
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
