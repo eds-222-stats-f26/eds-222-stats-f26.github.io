@@ -1,0 +1,651 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 3 Monday: Intro to OLS"
+format: revealjs
+execute:
+    echo: false
+---
+
+<style>
+.reveal pre.small-output code {
+  font-size: 80%;
+}
+</style>
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(geosphere)
+set.seed(222)
+theme_set(theme_bw(22))
+
+# Approximate location of the former Exide facility (2700 S Indiana St, Vernon)
+exide_lon <- -118.1923
+exide_lat <- 34.0058
+
+soil_cores <- read_csv("data/exide-soil-cores.csv") |>
+  filter(location_code == "YD", pb_ppm <= 5e3) |>
+  mutate(
+    distance_ft = distGeo(cbind(longitude, latitude), c(exide_lon, exide_lat)) *
+      3.28,
+    distance_mi = distance_ft / 5280,
+    bearing_deg = bearing(c(exide_lon, exide_lat), cbind(longitude, latitude))
+  ) |>
+  drop_na()
+
+step_out <- read_csv("data/step-out.csv") |>
+  mutate(distance_mi = distance_ft / 5280)
+
+all_samples_north <- bind_rows(
+  `soil core` = transmute(
+    filter(soil_cores, between(bearing_deg, 0, 30)),
+    property_id,
+    distance_ft,
+    distance_mi,
+    pb_ppm
+  ),
+  `step out` = select(step_out, property_id, distance_ft, distance_mi, pb_ppm),
+  .id = "source"
+) |>
+  drop_na()
+```
+
+# Intro to OLS
+
+## Learning objectives
+
+- **Describe relationships** between variables using a _regression model_
+- **Estimate** _coefficients_ using _ordinary least squares_
+- **Interpret** the _parameters_ of a regression model
+
+# Describe relationships between variables using a regression model
+
+## How much soil lead would you _expect_ to find 2 mi from Exide?
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+ggplot(all_samples_north, aes(x = distance_mi, y = pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+```
+
+## Fitting a line to data
+
+The line is our **model** explaining the relationship between two variables
+
+$$
+y = mx + b
+$$
+
+* $y$ is the _response_ (AKA dependent) variable
+* $x$ is the _predictor_ (AKA independent) variable
+* $m$ is the slope
+* $b$ is the intercept
+
+## In a world without uncertainty...
+
+Without uncertainty, all the points would fall on the line. 
+
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+lead_lm <- lm(pb_ppm ~ distance_mi, all_samples_north)
+all_samples_north |>
+  mutate(pb_ppm = fitted(lead_lm)) |>
+  ggplot(aes(x = distance_mi, y = pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  ylim(0, 2200) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+ggplot(all_samples_north, aes(x = distance_ft / 5280, y = pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+```
+
+:::
+
+:::
+
+## Fitting a line to data
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+In real world data, the data spread out around the line.
+
+- The difference between the point and the line is the **residual**.
+- Linear regression assumes the residuals are **normally distributed**.
+
+## Fit a lead soil model
+
+Let's fit a linear model to the lead soil data
+
+```{r}
+#| echo: true
+
+# all_samples_north = all samples north of Exide
+soil_lm <- lm(pb_ppm ~ distance_mi, all_samples_north)
+
+coef(soil_lm)
+```
+
+$$
+\text{Pb (ppm)} = 325.6 - 46.1 \times \text{Distance (mi)} + \epsilon
+$$
+
+## A closer look at ENA-31
+
+ENA-31 is 1.13 mi from Exide. This soil sample had Pb 931 ppm.
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+ena_31 <- filter(all_samples_north, property_id == "ENA-31", pb_ppm > 500)
+ggplot(all_samples_north, aes(x = distance_mi, y = pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  geom_point(
+    data = ena_31,
+    color = "firebrick",
+    size = 6,
+    shape = 21,
+    stroke = 3
+  ) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+```
+
+## The _expected_ soil lead level
+
+ENA-31 is 1.13 mi from Exide. This soil sample had Pb 931 ppm.
+
+The **expected** value of soil Pb at that distance is:
+
+$$
+\begin{align}
+\text{Pb (ppm)} &= 325.6 - 46.1 \times \text{Distance (mi)} \\
+\text{Pb (ppm)} &= 325.6 - 46.1 \times 1.13 \\
+\text{Pb (ppm)} &= 273.5 
+\end{align}
+$$
+
+The **residual** is the difference between the observed (931) and the expected (273.5).
+
+## _Residual_ soil lead
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+ggplot(all_samples_north, aes(x = distance_mi, y = pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  geom_segment(
+    aes(yend = 273.5, xend = distance_mi),
+    ena_31,
+    color = "firebrick",
+    linewidth = 1.2
+  ) +
+  geom_point(
+    data = ena_31,
+    color = "firebrick",
+    size = 6,
+    shape = 21,
+    stroke = 3
+  ) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+```
+
+# Estimate coefficients using ordinary least squares
+
+## Picking the right line
+
+There are lots of possible lines through these data, how did the model find its **coefficients**? 
+
+$\text{Pb (ppm)} = 325.6 - 46.1 \times \text{Distance (mi)}$
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+ggplot(all_samples_north, aes(x = distance_mi, y = pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+```
+
+## OLS minimizes the _squared_ residuals
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+# Stratified random sample: 1 point from each of 8 equal-width distance bins
+ols_sample <- all_samples_north |>
+  mutate(stratum = cut(distance_mi, 8)) |>
+  slice_sample(n = 1, by = stratum)
+sample_lm <- lm(pb_ppm ~ distance_mi, ols_sample)
+
+# coord_fixed() makes 1 ppm on the y-axis the same length as `ratio` mi on
+# the x-axis, so a box `ratio * |residual|` wide is a square on screen
+ratio <- diff(range(ols_sample$distance_mi)) /
+  diff(range(ols_sample$pb_ppm)) *
+  0.75
+ols_sample <- ols_sample |>
+  mutate(
+    fitted = fitted(sample_lm),
+    resid = residuals(sample_lm),
+    sq_xmin = distance_mi,
+    sq_xmax = distance_mi + abs(resid) * ratio,
+    sq_ymin = pmin(pb_ppm, fitted),
+    sq_ymax = pmax(pb_ppm, fitted)
+  )
+
+ggplot(ols_sample, aes(x = distance_mi, y = pb_ppm)) +
+  geom_rect(
+    aes(xmin = sq_xmin, xmax = sq_xmax, ymin = sq_ymin, ymax = sq_ymax),
+    fill = "firebrick",
+    alpha = 0.2
+  ) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  geom_segment(
+    aes(xend = distance_mi, yend = fitted),
+    color = "firebrick",
+    linewidth = 1.2
+  ) +
+  geom_point(shape = 21, size = 3, fill = "white") +
+  coord_fixed(ratio = ratio) +
+  labs(
+    title = paste("SSR =", scales::comma(sum(ols_sample$resid^2))),
+    x = "Distance (mi)",
+    y = "Soil Pb (ppm)"
+  )
+```
+
+## Different coefficients yield higher SSR 
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+# Reuses ols_sample, sample_lm, and ratio from the previous slide.
+# Wander through candidate (beta_0, beta_1) pairs, ending at the OLS estimate
+b_hat <- coef(sample_lm)
+x_bar <- mean(ols_sample$distance_mi)
+y_bar <- mean(ols_sample$pb_ppm)
+# Each keyframe shifts the line's height at x_bar and tilts its slope
+keyframes <- tribble(
+  ~shift , ~tilt ,
+     250 ,     0 ,
+    -150 ,   120 ,
+     150 ,   -80 ,
+     -60 ,    30 ,
+       0 ,     0
+) |>
+  mutate(
+    b1 = b_hat[2] + tilt,
+    b0 = y_bar + shift - b1 * x_bar
+  )
+ease <- function(t) (1 - cos(pi * t)) / 2
+frames_per_hold <- 10
+frames_per_move <- 15
+# Pause on each keyframe so the SSR is legible, then glide to the next one
+candidate_lines <- map(seq_len(nrow(keyframes) - 1), \(i) {
+  t <- c(
+    rep(0, frames_per_hold),
+    ease(seq(0, 1, length.out = frames_per_move + 1)[-1])
+  )
+  tibble(
+    b0 = keyframes$b0[i] + t * (keyframes$b0[i + 1] - keyframes$b0[i]),
+    b1 = keyframes$b1[i] + t * (keyframes$b1[i + 1] - keyframes$b1[i])
+  )
+}) |>
+  list_rbind() |>
+  mutate(frame = row_number())
+
+candidate_resids <- cross_join(candidate_lines, ols_sample) |>
+  mutate(
+    fitted = b0 + b1 * distance_mi,
+    resid = pb_ppm - fitted,
+    sq_xmin = distance_mi,
+    sq_xmax = distance_mi + abs(resid) * ratio,
+    sq_ymin = pmin(pb_ppm, fitted),
+    sq_ymax = pmax(pb_ppm, fitted)
+  )
+ssr_by_frame <- candidate_resids |>
+  summarize(ssr = sum(resid^2), .by = frame) |>
+  pull(ssr)
+
+x_lim <- range(ols_sample$distance_mi) + c(-0.1, 0.6)
+y_lim <- c(0, max(ols_sample$pb_ppm) + 50)
+
+ssr_anim <- ggplot(candidate_resids, aes(x = distance_mi, y = pb_ppm)) +
+  geom_rect(
+    aes(xmin = sq_xmin, xmax = sq_xmax, ymin = sq_ymin, ymax = sq_ymax),
+    fill = "firebrick",
+    alpha = 0.2
+  ) +
+  geom_abline(
+    aes(intercept = b0, slope = b1),
+    candidate_lines,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  geom_segment(
+    aes(xend = distance_mi, yend = fitted),
+    color = "firebrick",
+    linewidth = 1.2
+  ) +
+  geom_point(shape = 21, size = 3, fill = "white") +
+  coord_fixed(ratio = ratio, xlim = x_lim, ylim = y_lim, expand = FALSE) +
+  labs(
+    title = "SSR = {scales::comma(ssr_by_frame[as.integer(current_frame)])}",
+    x = "Distance (mi)",
+    y = "Soil Pb (ppm)"
+  ) +
+  gganimate::transition_manual(frame)
+gganimate::animate(
+  ssr_anim,
+  nframes = max(candidate_lines$frame) + 40,
+  fps = 10,
+  end_pause = 40,
+  renderer = gganimate::gifski_renderer()
+)
+```
+
+# Interpret the parameters of a regression model
+
+## The model summary
+
+```{r}
+#| echo: true
+#| class-output: small-output
+
+# all_samples_north = all samples north of Exide
+soil_lm <- lm(pb_ppm ~ distance_mi, all_samples_north)
+
+summary(soil_lm)
+```
+
+## The coefficient estimates $\beta_0, \beta_1$
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+```{r}
+# Coefficient table formatted like summary.lm(), with the estimates highlighted
+coef_tbl <- coef(summary(soil_lm))
+p_vals <- coef_tbl[, "Pr(>|t|)"]
+tibble(
+  ` ` = rownames(coef_tbl),
+  Estimate = sprintf("%.2f", coef_tbl[, "Estimate"]),
+  `Std. Error` = sprintf("%.2f", coef_tbl[, "Std. Error"]),
+  `t value` = sprintf("%.3f", coef_tbl[, "t value"]),
+  `Pr(&gt;|t|)` = format.pval(p_vals, digits = 3, eps = .Machine$double.eps)
+) |>
+  knitr::kable(format = "html", escape = FALSE, align = "lrrrrl") |>
+  kableExtra::kable_styling(full_width = FALSE, font_size = 28) |>
+  kableExtra::row_spec(
+    0,
+    monospace = TRUE,
+    extra_css = "white-space: nowrap;"
+  ) |>
+  kableExtra::column_spec(1:5, monospace = TRUE) |>
+  kableExtra::column_spec(2, bold = TRUE, background = "#FFF3B0")
+```
+
+## The standard errors $SE(\beta)$
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+```{r}
+# Coefficient table formatted like summary.lm(), with the estimates highlighted
+coef_tbl <- coef(summary(soil_lm))
+p_vals <- coef_tbl[, "Pr(>|t|)"]
+tibble(
+  ` ` = rownames(coef_tbl),
+  Estimate = sprintf("%.2f", coef_tbl[, "Estimate"]),
+  `Std. Error` = sprintf("%.2f", coef_tbl[, "Std. Error"]),
+  `t value` = sprintf("%.3f", coef_tbl[, "t value"]),
+  `Pr(&gt;|t|)` = format.pval(p_vals, digits = 3, eps = .Machine$double.eps)
+) |>
+  knitr::kable(format = "html", escape = FALSE, align = "lrrrrl") |>
+  kableExtra::kable_styling(full_width = FALSE, font_size = 28) |>
+  kableExtra::row_spec(
+    0,
+    monospace = TRUE,
+    extra_css = "white-space: nowrap;"
+  ) |>
+  kableExtra::column_spec(1:5, monospace = TRUE) |>
+  kableExtra::column_spec(3, bold = TRUE, background = "#FFF3B0")
+```
+
+## The residual standard deviation $\sigma$
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+```{r}
+#| echo: true
+sigma(soil_lm)
+```
+
+## $\sigma$ visualized
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig-align: center
+# Pick 50 soil samples whose residuals approximate a normal distribution:
+# match each standard normal quantile to the nearest unused residual
+soil_sigma <- sigma(soil_lm)
+soil_resid <- all_samples_north |>
+  mutate(
+    fitted = fitted(soil_lm),
+    resid = residuals(soil_lm),
+    sigmas = cut_width(resid / soil_sigma, 0.5)
+  )
+targets <- qnorm(ppoints(50)) * soil_sigma
+picked <- integer(0)
+for (target in targets) {
+  dist_to_target <- abs(soil_resid$resid - target)
+  dist_to_target[picked] <- Inf
+  picked <- c(picked, which.min(dist_to_target))
+}
+normal_sample <- soil_resid[picked, ] |>
+  filter(distance_mi < 2)
+
+resid_scatter <- ggplot(normal_sample, aes(x = distance_mi, y = pb_ppm)) +
+  geom_abline(
+    intercept = coef(soil_lm)[1],
+    slope = coef(soil_lm)[2],
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  geom_segment(
+    aes(xend = distance_mi, yend = fitted),
+    color = "firebrick",
+    linewidth = 0.8
+  ) +
+  geom_point(shape = 21, size = 2.5, fill = "white") +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+
+# Bins are half a sigma wide so bin edges line up with 1 and 2 sigma
+max_count <- max(table(floor(normal_sample$resid / (soil_sigma / 2))))
+resid_hist <- ggplot(normal_sample, aes(x = resid)) +
+  geom_histogram(
+    binwidth = soil_sigma / 2,
+    boundary = 0,
+    fill = "firebrick",
+    color = "white",
+    alpha = 0.6
+  ) +
+  geom_vline(xintercept = 0, linewidth = 1) +
+  annotate(
+    "segment",
+    x = 0,
+    xend = soil_sigma,
+    y = max_count + 1,
+    yend = max_count + 1,
+    linewidth = 1.2,
+    arrow = arrow(ends = "both", length = unit(0.1, "in"))
+  ) +
+  annotate(
+    "text",
+    x = soil_sigma / 2,
+    y = max_count + 1,
+    label = "sigma",
+    parse = TRUE,
+    vjust = -0.4,
+    size = 9
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(x = "Residual (ppm)", y = "Count")
+
+patchwork::wrap_plots(resid_scatter, resid_hist)
+```
+
+# Recap
+
+## Say hello to the linear model
+
+The linear model is the building block of regression modeling. 
+
+Every model you'll see in this course from now on will build on this.
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+## A linear model describes a relationship
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+ggplot(all_samples_north, aes(x = distance_mi, y = pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+```
+
+## Components of the linear model
+
+- Coefficients
+- Residuals
+- Residual standard deviation
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+## Interpreting the linear model
+
+```{r}
+# Coefficient table formatted like summary.lm(), with the estimates highlighted
+coef_tbl <- coef(summary(soil_lm))
+p_vals <- coef_tbl[, "Pr(>|t|)"]
+tibble(
+  ` ` = rownames(coef_tbl),
+  Estimate = sprintf("%.2f", coef_tbl[, "Estimate"]),
+  `Std. Error` = sprintf("%.2f", coef_tbl[, "Std. Error"]),
+  `t value` = sprintf("%.3f", coef_tbl[, "t value"]),
+  `Pr(&gt;|t|)` = format.pval(p_vals, digits = 3, eps = .Machine$double.eps)
+) |>
+  knitr::kable(format = "html", escape = FALSE, align = "lrrrrl") |>
+  kableExtra::kable_styling(full_width = FALSE, font_size = 28) |>
+  kableExtra::row_spec(
+    0,
+    monospace = TRUE,
+    extra_css = "white-space: nowrap;"
+  ) |>
+  kableExtra::column_spec(1:5, monospace = TRUE)
+```
+
+$$
+\text{Pb (ppm)} = 325.6 - 46.1 \times \text{Distance (mi)} + \epsilon
+$$
