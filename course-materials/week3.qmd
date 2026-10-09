@@ -8,7 +8,7 @@ subtitle: "Week 3 (October 12 - 16)"
 | Session | In-class | Pre-class |
 |---------|--------|---------|
 | Lecture 1 | Intro to OLS | IMS 7 <br/> [Intro to OLS](https://youtu.be/XdoWXTCuxnY) |
-| Lab | [Simulate data and fit a regression model](labs/lab3.qmd) | Simulating data for OLS |
+| Lab | [Simulate data and fit a regression model](labs/lab3.qmd) | [Simulating data for OLS](https://youtu.be/fsd-6He2MwU) |
 | Lecture 2 | Categorical predictors | Categorical predictors <br/> Categorical predictors in R |
 : {.hover .bordered tbl-colwidths="[30,30,40]"} 
 

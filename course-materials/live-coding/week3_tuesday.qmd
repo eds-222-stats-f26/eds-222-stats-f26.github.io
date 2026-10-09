@@ -1,0 +1,120 @@
+```{r}
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+Simulate data following a linear regression model
+
+Our model in statistical notation is:
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+For this example, we'll _simulate_ the relationship between water temperature and the length of copepods.
+
+1. Choose parameters
+2. Simulate data
+3. Fit the model
+4. Interpret the model
+
+## Choose parameters
+
+Our three model parameters are the two $\beta$s and $\sigma. We also need to define our sample size, $n$. 
+
+```{r}
+beta_0 <- 3000 # intercept: length of a copepod (in um) when temp is 0 degC
+beta_1 <- -55 # slope: change in length per degC
+sigma <- 100 # standard deviation of the residuals, the "spread" around the line
+n <- 50 # sample size
+```
+
+## Simulate data
+
+1. Simulate the _predictor_
+2. Calculate the _expected_
+3. Simulate the _response_
+4. Assemble the data frame
+
+### Simulate the predictor
+
+For temperature, _uniformly_ distributed random numbers between 2 and 14 degC.
+
+```{r}
+temp_c <- runif(n, min = 2, max = 14)
+```
+
+### Calculate the expected
+
+The value of the line. $y$ without residuals, $\epsilon$.
+
+$$
+y = \beta_0 + \beta_1 x
+$$
+
+
+```{r}
+expected_length_um <- beta_0 + beta_1 * temp_c
+```
+
+### Simulate the response
+
+The response is _normally distributed_ around the line, thanks to the residuals.
+
+```{r}
+length_um <- rnorm(n, mean = expected_length_um, sd = sigma) # notice the mean is the _vector_ of expected values
+```
+
+### Assemble the data frame
+
+```{r}
+# Create a tibble
+copepods <- tibble(temp_c, length_um)
+
+# Visualize the data
+ggplot(copepods, aes(x = temp_c, y = length_um)) +
+  geom_point()
+```
+
+## Fit the model
+
+Use `lm()` to fit a model. Specify the response and predictor with a _formula_.
+
+```{r}
+copepod_lm <- lm(length_um ~ temp_c, data = copepods)
+```
+
+Done and done!
+
+## Interpret the model
+
+Inspect the coefficients with `summary()`.
+
+```{r}
+summary(copepod_lm)
+```
+
+Note the estimates and their standard errors (SEs). 95% of the time, the estimates will be within 2 SEs of the population parameters (i.e., our chosen simulation values.)
+
+Use `sigma()` to check the model estimate of sigma.
+
+```{r}
+sigma(copepod_lm)
+```
+
+Pretty close!
+
+Our residuals should be normally distributed, with a sd of sigma.
+
+```{r}
+copepods |>
+  # Get the residuals from the model
+  mutate(residual = residuals(copepod_lm)) |>
+  ggplot(aes(x = residual)) +
+  geom_histogram()
+```
+

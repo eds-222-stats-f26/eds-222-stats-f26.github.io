@@ -7,7 +7,7 @@ format:
       - text: Download Source
         href: lab3.qmd
 execute:
-  eval: false
+  eval: true
 ---
 
 ```{r}
@@ -29,9 +29,10 @@ Before you start coding in this document, your group should have completed the s
 You've chosen your parameters ($\beta_0$, $\beta_1$, and $\sigma$). Define them here:
 
 ```{r}
-beta_0 <- ___
-beta_1 <- ___
-sigma <- ___
+# These values chosen to represent the negative relationship between body size and temperature in marine invertebrates (copepods)
+beta_0 <- 3000
+beta_1 <- -55
+sigma <- 100
 ```
 
 ### Generate random values
@@ -49,28 +50,25 @@ runif(n = 5, min = 1, max = 2)
 :::
 
 ```{r}
-# Edit the following code to simulate your _predictor_ variable
-your_predictor_variable <- some_random_number_generating_function(
-  n = your_sample_size,
-  any_other_function_parameters_go_here
-)
+# In the range 2-14degC
+temp_c <- runif(n = 30, min = 2, max = 14)
 ```
 
 2. Calculate the expected value of the response.
 
 ```{r}
-# Edit the following code to calculate the _expected_ value of the response
-expected_response <- what + goes * here #?
+# Expected length in micrometers (um)
+expected_length_um <- beta_0 + beta_1 * temp_c
 ```
 
 3. Simulate the response variable.
 
 ```{r}
-# Edit the following code to simulate your _response_ variable
-your_response_variable <- rnorm(
-  n = your_sample_size,
-  mean = the_expected_value_of_the_response,
-  sd = your_sigma_parameter
+# The simulated lengths
+length_um <- rnorm(
+  n = 30,
+  mean = expected_length_um,
+  sd = sigma
 )
 ```
 
@@ -78,8 +76,11 @@ Visualize your simulated data. Verify it's comparable to your original drawing. 
 
 ```{r}
 # First, put your predictor and response variables into a single data frame.
+simulated_lengths <- tibble(temp_c, length_um)
 
 # Then, use ggplot to make a scatter plot.
+ggplot(simulated_lengths, aes(x = temp_c, y = length_um)) +
+  geom_point()
 ```
 
 ## Fit and interpret a regression model
@@ -97,9 +98,10 @@ Use `lm()` to fit a regression model to your simulated data.
 
 
 ```{r}
-your_model <- lm(your_model_formula, data = your_simulated_data)
-# Use summary() to get the model coefficient estimates and their standard errors
-# Use sigma() to get the model's sigma estimate
+# Fit and summarize model
+length_model <- lm(length_um ~ temp_c, data = simulated_lengths)
+summary(length_model)
+sigma(length_model)
 ```
 
 ### Interpret the model
@@ -110,40 +112,49 @@ Refer back to the worksheet to complete most of this section. When you reach the
 
 ```{r}
 # Keep your predictor variable the same, but increase sigma by 2x
-double_sigma <- ___
+double_sigma <- 2 * sigma
+
 # Modify the following lines of code to re-run your simulation with the bigger sigma
-expected_response2 <- what + goes * here #?
-your_response_variable2 <- rnorm(
-  n = ___,
-  mean = ___,
-  sd = ___
+expected_length_um2 <- beta_0 + beta_1 * temp_c
+length_um2 <- rnorm(
+  n = 30,
+  mean = expected_length_um,
+  sd = double_sigma
 )
-your_model2 <- lm(___, data = ___)
+simulated_lengths2 <- tibble(temp_c, length_um = length_um2)
+length_model2 <- lm(length_um ~ temp_c, data = simulated_lengths2)
 
 # Get your betas and their standard errors
+summary(length_model2)
 
 # How do they compare to the population parameters, relative to the original simulation?
 ```
+
+My $\beta$ estimates only shifted a little bit (consistent with randomness) but the standard errors got much larger. Bigger residuals mean less certainty about the coefficient estimates.
 
 **Increase n**
 
 ```{r}
 # Now increase n by 2x. You'll need to create more predictor variable values.
-your_predictor_variable_2n <- c(
-  your_predictor_variable,
-  additional_predictor_variable_values
+temp_c_2n <- c(
+  temp_c,
+  runif(n = 30)
 )
 
 # Modify the following lines of code to re-run your simulation with the bigger n
-expected_response2 <- what + goes * here #?
-your_response_variable3 <- rnorm(
-  n = the_bigger_sample_size,
-  mean = the_expected_value_of_the_response,
-  sd = your_sigma_parameter
+expected_length_um3 <- beta_0 + beta_1 * temp_c_2n
+length_um3 <- rnorm(
+  n = 60,
+  mean = expected_length_um3,
+  sd = sigma
 )
-your_model3 <- lm(___, data = ___)
+simulated_lengths3 <- tibble(temp_c = temp_c_2n, length_um = length_um3)
+length_model3 <- lm(length_um ~ temp_c, data = simulated_lengths3)
 
 # Get your betas and their standard errors
+summary(length_model3)
 
 # How do they compare to the population parameters, relative to the original simulation?
 ```
+
+Once again, $\beta$ estimates remained pretty similar, but this time the standard error _decreased_. Bigger sample size means less uncertainty!

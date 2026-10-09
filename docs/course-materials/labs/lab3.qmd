@@ -29,9 +29,9 @@ Before you start coding in this document, your group should have completed the s
 You've chosen your parameters ($\beta_0$, $\beta_1$, and $\sigma$). Define them here:
 
 ```{r}
-beta_0 <- ???
-beta_1 <- ???
-sigma <- ???
+beta_0 <- ___
+beta_1 <- ___
+sigma <- ___
 ```
 
 ### Generate random values
@@ -110,16 +110,16 @@ Refer back to the worksheet to complete most of this section. When you reach the
 
 ```{r}
 # Keep your predictor variable the same, but increase sigma by 2x
-double_sigma <- ???
-  # Modify the following lines of code to re-run your simulation with the bigger sigma
-  expected_response <- what + goes * here
-#?
-your_response_variable <- rnorm(
-  n = your_sample_size,
-  mean = the_expected_value_of_the_response,
-  sd = your_sigma_parameter
+double_sigma <- ___
+# Modify the following lines of code to re-run your simulation with the bigger sigma
+expected_response2 <- what + goes * here #?
+your_response_variable2 <- rnorm(
+  n = ___,
+  mean = ___,
+  sd = ___
 )
-your_model <- lm(your_model_formula, data = your_simulated_data)
+your_model2 <- lm(___, data = ___)
+
 # Get your betas and their standard errors
 
 # How do they compare to the population parameters, relative to the original simulation?
@@ -129,19 +129,20 @@ your_model <- lm(your_model_formula, data = your_simulated_data)
 
 ```{r}
 # Now increase n by 2x. You'll need to create more predictor variable values.
-double_n <- ???your_predictor_variable_2n <- c(
+your_predictor_variable_2n <- c(
   your_predictor_variable,
   additional_predictor_variable_values
 )
 
 # Modify the following lines of code to re-run your simulation with the bigger n
-expected_response <- what + goes * here #?
-your_response_variable <- rnorm(
+expected_response2 <- what + goes * here #?
+your_response_variable3 <- rnorm(
   n = the_bigger_sample_size,
   mean = the_expected_value_of_the_response,
   sd = your_sigma_parameter
 )
-your_model <- lm(your_model_formula, data = your_simulated_data)
+your_model3 <- lm(___, data = ___)
+
 # Get your betas and their standard errors
 
 # How do they compare to the population parameters, relative to the original simulation?
