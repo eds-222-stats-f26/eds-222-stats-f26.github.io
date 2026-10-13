@@ -1,0 +1,334 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 3 Wednesday: Categorical predictors"
+format: revealjs
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(geosphere)
+set.seed(222)
+theme_set(theme_bw(22))
+
+soil_cores <- read_csv("data/exide-soil-cores.csv") |>
+  filter(pb_ppm <= 5e3)
+
+ena_esa <- soil_cores |>
+  mutate(area = str_sub(property_id, 1, 3)) |>
+  filter(area %in% c("ENA", "ESA")) |>
+  mutate(area2 = ifelse(area == "ENA", 0, 1)) |>
+  slice_sample(n = 40, by = area)
+
+# Approximate location of the former Exide facility (2700 S Indiana St, Vernon)
+exide_lon <- -118.1923
+exide_lat <- 34.0058
+
+soil_cores <- read_csv("data/exide-soil-cores.csv") |>
+  filter(location_code == "YD", pb_ppm <= 5e3) |>
+  mutate(
+    distance_ft = distGeo(cbind(longitude, latitude), c(exide_lon, exide_lat)) *
+      3.28,
+    distance_mi = distance_ft / 5280,
+    bearing_deg = bearing(c(exide_lon, exide_lat), cbind(longitude, latitude))
+  ) |>
+  drop_na()
+
+step_out <- read_csv("data/step-out.csv") |>
+  mutate(distance_mi = distance_ft / 5280)
+
+all_samples_north <- bind_rows(
+  `soil core` = transmute(
+    filter(soil_cores, between(bearing_deg, 0, 30)),
+    property_id,
+    distance_ft,
+    distance_mi,
+    pb_ppm
+  ),
+  `step out` = select(step_out, property_id, distance_ft, distance_mi, pb_ppm),
+  .id = "source"
+) |>
+  drop_na()
+```
+
+# Categorical predictors
+
+## Learning objectives
+
+- **Visualize** relationships with a _categorical predictor_
+- **Model** relationships with a _categorical predictor_
+- **Implement** a _categorical predictor_ in `lm()`
+
+# Visualize relationships with a _categorical predictor_
+
+## Two continuous variables
+
+Here, a regression line describes the relationship between two continuous variables.
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+ggplot(all_samples_north, aes(x = distance_mi, y = pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+```
+
+## Continuous ~ categorical
+
+Regression can represent more types of relationships, such as a continuous response to categorical predictor.
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+
+ena_esa_lm <- lm(pb_ppm ~ area, data = ena_esa)
+ena_esa_plot <- ggplot(ena_esa, aes(x = area2, y = pb_ppm)) +
+  geom_point(
+    position = position_jitter(width = 0.15, height = 0, seed = 222),
+    shape = 21,
+    fill = "cornflowerblue",
+    color = "white",
+    alpha = 0.5
+  ) +
+  geom_abline(
+    intercept = coef(ena_esa_lm)[1],
+    slope = coef(ena_esa_lm)[2],
+    color = "grey50",
+    linewidth = 2
+  ) +
+  scale_x_continuous(breaks = 0:1, labels = c("ENA", "ESA")) +
+  labs(x = "Area", y = "Soil Pb (ppm)")
+ena_esa_plot
+```
+
+## What's the "value" of $x$?
+
+$$
+y = \beta_0 + \beta_1 x
+$$
+
+What is the value of $x$? $\beta_1 \times \text{ENA}$ doesn't make sense...
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+
+ena_esa_plot
+```
+
+# Model relationships with a _categorical predictor_
+
+## Treat categories as 0's and 1's
+
+::: {.columns}
+
+::: {.column style="font-size: 0.8em;"}
+
+When `area` is "ENA", let $x=0$
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x \\
+y &= \beta_0
+\end{align}
+$$
+
+:::
+
+::: {.column style="font-size: 0.8em;"}
+
+When `area` is "ESA", let $x=1$
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x \\
+y &= \beta_0 + \beta_1
+\end{align}
+$$
+
+
+
+:::
+
+:::
+
+```{r}
+#| fig-width: 6
+#| fig-align: center
+
+ena_esa_plot +
+  scale_x_continuous(breaks = 0:1, labels = c("0\nENA", "1\nESA"))
+```
+
+## Recode your _levels_
+
+Conceptually, here's what happens:
+
+:::{style="font-size: 0.8em;"}
+- `area` was a category with two **_levels_**.
+- Pick one level as the **_reference_** ("ENA").
+- Create a **_dummy variable_** for the other level.
+:::
+
+::: {.columns}
+
+::: {.column}
+
+This...
+
+```{r}
+ena_esa |>
+  slice(1:3, .by = area) |>
+  select(area, pb_ppm) |>
+  head()
+```
+
+:::
+
+::: {.column}
+
+...becomes this
+
+```{r}
+ena_esa |>
+  slice(1:3, .by = area) |>
+  transmute(ESA = as.integer(area == "ESA"), pb_ppm) |>
+  head()
+```
+
+:::
+
+:::
+
+## New interpretations for $\beta$s
+
+With two continuous variables, $\beta_0$ is the **_intercept_** and $\beta_1$ is the **_slope_**.
+
+Look at the statistical notation and the visualization. What do the $\beta$s mean now?
+
+## Reference and difference, equation
+
+::: {.columns}
+
+::: {.column style="font-size: 0.8em;"}
+
+What is the _expected_ value ($y$) when `area` is "ENA" ($x=0$)?
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x \\
+y &= \beta_0 + \beta_1 0 \\
+y &= \beta_0
+\end{align}
+$$
+
+:::
+
+::: {.column style="font-size: 0.8em;"}
+
+What is the _expected_ value ($y$) when `area` is "ESA" ($x=1$)?
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x \\
+y &= \beta_0 + \beta_1 1 \\
+y &= \beta_0 + \beta_1
+\end{align}
+$$
+
+:::
+
+:::
+
+$\beta_0$ is now the expected (mean) value of the _reference level_ (ENA here).
+
+$\beta_1$ is the _difference_ between its level (ESA) and the reference level.
+
+## Reference and difference, visualized
+
+```{r}
+#| fig-width: 7
+#| fig-align: center
+
+dx <- 0.25
+betas <- coef(ena_esa_lm)
+ena_esa_means <- tibble(
+  x1 = 0:1 - dx,
+  x2 = 0:1 + dx,
+  y = c(betas[1], sum(betas))
+)
+
+ena_esa_betas <- tibble(
+  x = c(0, 0.5, 1),
+  y1 = c(0, betas[1], 0),
+  y2 = c(betas[1], sum(betas), sum(betas)),
+  y3 = (y1 + y2) / 2,
+  beta = expression(beta[0], beta[1], beta[0] + beta[1])
+)
+ena_esa_plot_betas <- ggplot(ena_esa, aes(x = area2, y = pb_ppm)) +
+  geom_point(
+    position = position_jitter(width = 0.15, height = 0, seed = 222),
+    shape = 21,
+    fill = "cornflowerblue",
+    color = "white",
+    alpha = 0.5
+  ) +
+  geom_segment(
+    aes(x = x1, xend = x2, y = y, yend = y),
+    ena_esa_means,
+    color = "grey50",
+    linewidth = 1.5
+  ) +
+  geom_segment(
+    aes(x = x, xend = x, y = y1, yend = y2),
+    ena_esa_betas,
+    arrow = arrow(),
+    color = "grey50",
+    linewidth = 1.5
+  ) +
+  geom_text(
+    aes(x = x, y = y3, label = beta),
+    ena_esa_betas,
+    hjust = 0,
+    nudge_x = 0.05
+  ) +
+  scale_x_continuous(breaks = 0:1, labels = c("ENA", "ESA")) +
+  labs(x = "Area", y = "Soil Pb (ppm)")
+ena_esa_plot_betas
+```
+
+# Implement a _categorical predictor_ in `lm()`
+
+
+# Recap
+
+## Categorical predictors
+
+::: {.incremental}
+- Linear regression can model the relationship between a continuous response (e.g., soil lead concentrations) and a _**categorical predictor**_ (e.g., areas ENA and ESA).
+- One _**level**_ becomes the _**reference**_ (e.g., ENA).
+- The interpretation of the coefficients changes.
+  - $\beta_0$ becomes the _**mean of the reference level**_.
+  - $\beta_1$ becomes the _**difference between levels**_.
+- The call to `lm()` is _**unchanged**_.
+  - _How cool is that??_
+:::
+
+## Interpretation
+
+```{r}
+#| fig-width: 7
+#| fig-align: center
+ena_esa_plot_betas
+```

@@ -1,0 +1,50 @@
+```{r}
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+Read the data.
+
+```{r}
+# All soil core data
+soil_cores <- read_csv("data/exide-soil-cores.csv") |>
+  filter(pb_ppm <= 5e3)
+
+# Samples from the expanded areas north (ENA) and south (ESA )
+ena_esa <- soil_cores |>
+  # Create an "area" column
+  mutate(area = str_sub(property_id, 1, 3)) |>
+  # Keep only the rows in the expanded area
+  filter(area %in% c("ENA", "ESA")) |>
+  # Slice a smaller sample, so it's easier to visualize
+  slice_sample(n = 40, by = area)
+```
+
+First, let's visualize the raw data. With a categorical predictor, you can _jitter_ the x-axis so the points don't overlap.
+
+```{r}
+ggplot(ena_esa, aes(area, pb_ppm)) +
+  geom_point(
+    shape = 21,
+    fill = "cornflowerblue",
+    color = "white",
+    alpha = 0.5,
+    position = position_jitter(width = 0.15, height = 0, seed = 222)
+  )
+```
+
+Now, fit the model with `lm()`.
+
+```{r}
+# The formula is the same whether the predictor is continuous or
+ena_esa_lm <- lm(pb_ppm ~ area, data = ena_esa)
+```
+
+Use `summary()` to see the coefficients and other properties of the model.
+
+```{r}
+summary(ena_esa_lm)
+```
+
+NOTE: we never made the dummy variable. `lm()` does that under the hood for you.
