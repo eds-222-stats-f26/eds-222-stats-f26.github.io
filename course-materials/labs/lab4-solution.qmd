@@ -1,0 +1,112 @@
+---
+title: "Lab 4: Simulate Simpson's Paradox"
+subtitle: "Multiple regression"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab4.qmd
+execute:
+  eval: true
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Before you code
+
+Before you start coding in this document, your group should have completed the sections **Design the scenario** and **Choose your parameters** from the handout.
+
+## Simulate the data
+
+You've chosen your parameters ($\beta$s and $\sigma$). Define them here:
+
+```{r}
+# These values chosen to represent a scenario where typing faster increases
+# typos, but faster typists on average commit fewer typos. If you ignore the
+# second predictor (who is typing) then an apparent negative relationship
+# emerges, suggesting typing faster reduces typos.
+beta_0 <- 10 # Intercept
+beta_1 <- 0.1 # Additional typos per increase in speed
+beta_2 <- -10 # Difference between typist B and the reference level (typist A)
+sigma <- 3 # Standard deviation of the residuals
+```
+
+### Generate random values
+
+1. Simulate your predictor variables. Remember, for Simpson's paradox to emerge, there has to be a dependency between the two predictor variables.
+
+```{r}
+# Sample size
+N <- 50
+# Typist identities
+typist <- sample(c("A", "B"), N, replace = TRUE)
+# Dummy variable for typist B
+typistB <- ifelse(typist == "B", 1, 0)
+# Typing speed is _greater_ for typist B, who is also less error-prone
+typing_speed <- rnorm(N, mean = ifelse(typist == "B", 100, 45), sd = 15)
+```
+
+2. Calculate the expected value of the response. This is _similar_ to regression with a single predictor, but includes a second term.
+
+$$
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2
+$$
+
+```{r}
+expected_typos <- beta_0 + beta_1 * typing_speed + beta_2 * typistB
+```
+
+3. Simulate the response variable. This is the _same_ as regression with a single predictor. The expected value incorporates the influence of the multiple predictors. Once you have that number, you just need normally-distributed residuals.
+
+```{r}
+typos <- rnorm(
+  n = N,
+  mean = expected_typos,
+  sd = sigma
+)
+```
+
+Visualize your simulated data. Verify it's comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.
+
+```{r}
+simulated_typing <- tibble(typing_speed, typos, typist)
+
+ggplot(simulated_typing, aes(x = typing_speed, y = typos, fill = typist)) +
+  geom_point(size = 2, shape = 21) +
+  scale_fill_manual(values = c("peachpuff", "lightskyblue1"))
+```
+
+## Fit and interpret regression models
+
+### Fit the models
+
+Use `lm()` to fit _two_ regression models to your simulated data. 
+
+In the first model, only include the first predictor.
+
+```{r}
+speed_only <- lm(typos ~ typing_speed, data = simulated_typing)
+```
+
+In the second model, include both predictors.
+
+```{r}
+speed_typist <- lm(typos ~ typing_speed + typist, data = simulated_typing)
+```
+
+### Interpret the models
+
+Use `summary()` on both models. If you've simulated the paradox properly, the sign of the coefficient for the first predictor should flip between the models.
+
+```{r}
+summary(speed_only) # beta_1 ~= -0.04
+summary(speed_typist) # beta_1 ~= 0.10
+```

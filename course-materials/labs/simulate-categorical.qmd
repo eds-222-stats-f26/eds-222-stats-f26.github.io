@@ -1,0 +1,98 @@
+---
+title: "Simulating categorical data"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: simulate-categorical.qmd
+execute: 
+  eval: false
+---
+
+```{r}
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Simulate the predictor variable
+
+Create a variable called `x`. It should be categorical with 50 values of two levels, "A" and "B". Simulate it using the `sample()` function. 
+
+Then, choose a name for the dummy variable.
+
+```{r}
+x <- _____
+_____ <- ifelse(x == "A", 0, 1)
+```
+
+## Choose your simulation parameters
+
+Create variables for $\beta_0 = -10$, $\beta_1 = 20$, and $sigma = 8$.
+
+```{r}
+
+```
+
+## Calculate the expected
+
+Calculate the expected value of $y$.
+
+```{r}
+y_expected <- _____
+```
+
+## Simulate the response
+
+You have the expected value and $\sigma$. Use these to simulate $y$.
+
+Then make a data frame with the predictor and response.
+
+```{r}
+y <- ____(
+  n = ____,
+  mean = _____,
+  sd = _____
+)
+
+simulated_data <- tibble(
+  _____,
+  _____
+)
+```
+
+## Fit a model
+
+Fit a linear model to the response and predictor variables.
+
+```{r}
+categorical_lm <- lm(_____ ~ _____, data = _____)
+# Verify the model coefficients approximate the simulation parameters
+summary(categorical_lm)
+```
+
+## Visualize the data and model
+
+Fill in the blanks of the ggplot call to complete the visualization.
+
+`annotate()` adds one-off geometries to a ggplot. The following annotations represent $\beta_0$ and $\beta_1$.
+
+```{r}
+betas <- coef(categorical_lm)
+
+ggplot(_____, aes(_____, _____)) +
+  geom_point(position = position_jitter(width = 0.2)) +
+  # beta_0 = mean of reference level
+  annotate("point", x = 1, y = betas[1], color = "cornflowerblue") +
+  # beta_1 = difference from reference level
+  annotate(
+    "segment",
+    x = 1.5,
+    xend = 1.5,
+    y = betas[0],
+    yend = sum(betas),
+    color = "cornflowerblue"
+  ) +
+  # beta_0 + beta_1 = mean of second level
+  annotate("point", x = 1, y = sum(betas), color = "cornflowerblue")
+```

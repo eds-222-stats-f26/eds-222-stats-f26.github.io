@@ -1,0 +1,14 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 3 Wednesday"
+format: revealjs
+bibliography: references.bib
+---
+
+# Categorical predictors
+
+## Today's agenda
+
+1. Categorical predictors worksheet
+2. American birds
+3. Simulating categorical predictors

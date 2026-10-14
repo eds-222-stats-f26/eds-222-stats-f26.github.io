@@ -1,0 +1,109 @@
+---
+title: "Lab 4: Simulate Simpson's Paradox"
+subtitle: "Multiple regression"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab4.qmd
+execute:
+  eval: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Before you code
+
+Before you start coding in this document, your group should have completed the sections **Design the scenario** and **Choose your parameters** from the handout.
+
+## Simulate the data
+
+You've chosen your parameters ($\beta$s and $\sigma$). Define them here:
+
+```{r}
+beta_0 <- ___ # Intercept
+beta_1 <- ___ # Coefficient for the first (continuous) predictor
+beta_2 <- ___ # Coefficient for the second (categorical) predictor
+sigma <- ___ # Standard deviation of the residuals
+```
+
+### Generate random values
+
+1. Simulate your predictor variables. 
+
+Remember, for Simpson's paradox to emerge, there has to be a dependency between the two predictor variables. In this case, you have one categorical and one continuous predictor. Simulate the categorical variable first, then use the level of the category when you simulate the continuous variable. For example, if you use `rnorm()` to simulate the continuous variable, make the `mean` depend on the category level. Alternatively, if you use `runif()`, make the `min` and `max` depend on the category level. `ifelse()` is useful here.
+
+```{r}
+# Sample size
+N <- ___
+# Edit the following code to simulate your _categorical_ predictor variable
+your_second_predictor <- ___
+
+# Edit the following code to simulate your _continuous_ predictor variable. Make
+# sure it depends on your second predictor!
+your_first_predictor <- some_random_number_generating_function(
+  n = N,
+  parameters_that_depend_on = your_second_predictor
+)
+```
+
+2. Calculate the expected value of the response. This is _similar_ to regression with a single predictor, but includes a second term.
+
+$$
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2
+$$
+
+```{r}
+# Edit the following code to calculate the _expected_ value of the response
+your_expected_response <- ____
+```
+
+3. Simulate the response variable. This is the _same_ as regression with a single predictor. The expected value incorporates the influence of the multiple predictors. Once you have that number, you just need normally-distributed residuals.
+
+```{r}
+# Edit the following code to simulate your _response_ variable
+your_response_variable <- _____
+```
+
+Visualize your simulated data. Verify it's comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.
+
+```{r}
+# First, put the predictors and response in a data frame all together
+
+# Then, use ggplot to make a scatter plot. Think carefully about which
+# aesthetics to use.
+```
+
+## Fit and interpret regression models
+
+### Fit the models
+
+Use `lm()` to fit _two_ regression models to your simulated data.
+
+In the first model, only include the first predictor.
+
+```{r}
+your_model1 <- _____
+```
+
+In the second model, include both predictors.
+
+```{r}
+your_model2 <- _____
+```
+
+### Interpret the models
+
+Use `summary()` on both models. If you've simulated the paradox properly, the sign of the coefficient for the first predictor should flip between the models.
+
+```{r}
+
+```

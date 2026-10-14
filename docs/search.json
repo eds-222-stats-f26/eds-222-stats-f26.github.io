@@ -343,6 +343,83 @@
     "text": "Fit and interpret a regression model\n\nFit the model\nUse lm() to fit a regression model to your simulated data.\n\n\n\n\n\n\nTip\n\n\n\nlm() expects a formula stating your predictor and response variables. It should look like: response ~ predictor.\n\n\n\n# Fit and summarize model\nlength_model &lt;- lm(length_um ~ temp_c, data = simulated_lengths)\nsummary(length_model)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-274.89  -83.84   26.07   78.98  157.39 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 2968.796     44.602  66.562  &lt; 2e-16 ***\ntemp_c       -49.188      5.511  -8.925 1.11e-09 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 109.4 on 28 degrees of freedom\nMultiple R-squared:  0.7399,    Adjusted R-squared:  0.7306 \nF-statistic: 79.65 on 1 and 28 DF,  p-value: 1.114e-09\n\nsigma(length_model)\n\n[1] 109.4127\n\n\n\n\nInterpret the model\nRefer back to the worksheet to complete most of this section. When you reach the end (“Test your intuition by modifying your simulation to increase \\(\\sigma\\) and n independently, then re-run it several times.”), come back to this document and use the following code chunks to test your intuition.\nIncrease \\(\\sigma\\)\n\n# Keep your predictor variable the same, but increase sigma by 2x\ndouble_sigma &lt;- 2 * sigma\n\n# Modify the following lines of code to re-run your simulation with the bigger sigma\nexpected_length_um2 &lt;- beta_0 + beta_1 * temp_c\nlength_um2 &lt;- rnorm(\n  n = 30,\n  mean = expected_length_um,\n  sd = double_sigma\n)\nsimulated_lengths2 &lt;- tibble(temp_c, length_um = length_um2)\nlength_model2 &lt;- lm(length_um ~ temp_c, data = simulated_lengths2)\n\n# Get your betas and their standard errors\nsummary(length_model2)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths2)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-312.39  -79.11   -1.71   94.07  359.98 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 3051.100     70.276  43.416  &lt; 2e-16 ***\ntemp_c       -60.184      8.684  -6.931 1.56e-07 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 172.4 on 28 degrees of freedom\nMultiple R-squared:  0.6317,    Adjusted R-squared:  0.6186 \nF-statistic: 48.03 on 1 and 28 DF,  p-value: 1.557e-07\n\n# How do they compare to the population parameters, relative to the original simulation?\n\nMy \\(\\beta\\) estimates only shifted a little bit (consistent with randomness) but the standard errors got much larger. Bigger residuals mean less certainty about the coefficient estimates.\nIncrease n\n\n# Now increase n by 2x. You'll need to create more predictor variable values.\ntemp_c_2n &lt;- c(\n  temp_c,\n  runif(n = 30)\n)\n\n# Modify the following lines of code to re-run your simulation with the bigger n\nexpected_length_um3 &lt;- beta_0 + beta_1 * temp_c_2n\nlength_um3 &lt;- rnorm(\n  n = 60,\n  mean = expected_length_um3,\n  sd = sigma\n)\nsimulated_lengths3 &lt;- tibble(temp_c = temp_c_2n, length_um = length_um3)\nlength_model3 &lt;- lm(length_um ~ temp_c, data = simulated_lengths3)\n\n# Get your betas and their standard errors\nsummary(length_model3)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths3)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-210.040  -64.474    0.891   71.824  185.719 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 2982.626     16.486  180.92   &lt;2e-16 ***\ntemp_c       -54.356      2.874  -18.91   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 94.35 on 58 degrees of freedom\nMultiple R-squared:  0.8605,    Adjusted R-squared:  0.8581 \nF-statistic: 357.7 on 1 and 58 DF,  p-value: &lt; 2.2e-16\n\n# How do they compare to the population parameters, relative to the original simulation?\n\nOnce again, \\(\\beta\\) estimates remained pretty similar, but this time the standard error decreased. Bigger sample size means less uncertainty!"
   },
   {
+    "objectID": "course-materials/labs/lab4.html",
+    "href": "course-materials/labs/lab4.html",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "",
+    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
+  },
+  {
+    "objectID": "course-materials/labs/lab4.html#before-you-code",
+    "href": "course-materials/labs/lab4.html#before-you-code",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "",
+    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
+  },
+  {
+    "objectID": "course-materials/labs/lab4.html#simulate-the-data",
+    "href": "course-materials/labs/lab4.html#simulate-the-data",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "Simulate the data",
+    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta\\)s and \\(\\sigma\\)). Define them here:\n\nbeta_0 &lt;- ___ # Intercept\nbeta_1 &lt;- ___ # Coefficient for the first (continuous) predictor\nbeta_2 &lt;- ___ # Coefficient for the second (categorical) predictor\nsigma &lt;- ___ # Standard deviation of the residuals\n\n\nGenerate random values\n\nSimulate your predictor variables.\n\nRemember, for Simpson’s paradox to emerge, there has to be a dependency between the two predictor variables. In this case, you have one categorical and one continuous predictor. Simulate the categorical variable first, then use the level of the category when you simulate the continuous variable. For example, if you use rnorm() to simulate the continuous variable, make the mean depend on the category level. Alternatively, if you use runif(), make the min and max depend on the category level. ifelse() is useful here.\n\n# Sample size\nN &lt;- ___\n# Edit the following code to simulate your _categorical_ predictor variable\nyour_second_predictor &lt;- ___\n\n# Edit the following code to simulate your _continuous_ predictor variable. Make\n# sure it depends on your second predictor!\nyour_first_predictor &lt;- some_random_number_generating_function(\n  n = N,\n  parameters_that_depend_on = your_second_predictor\n)\n\n\nCalculate the expected value of the response. This is similar to regression with a single predictor, but includes a second term.\n\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\n# Edit the following code to calculate the _expected_ value of the response\nyour_expected_response &lt;- ____\n\n\nSimulate the response variable. This is the same as regression with a single predictor. The expected value incorporates the influence of the multiple predictors. Once you have that number, you just need normally-distributed residuals.\n\n\n# Edit the following code to simulate your _response_ variable\nyour_response_variable &lt;- _____\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\n# First, put the predictors and response in a data frame all together\n\n# Then, use ggplot to make a scatter plot. Think carefully about which\n# aesthetics to use."
+  },
+  {
+    "objectID": "course-materials/labs/lab4.html#fit-and-interpret-regression-models",
+    "href": "course-materials/labs/lab4.html#fit-and-interpret-regression-models",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "Fit and interpret regression models",
+    "text": "Fit and interpret regression models\n\nFit the models\nUse lm() to fit two regression models to your simulated data.\nIn the first model, only include the first predictor.\n\nyour_model1 &lt;- _____\n\nIn the second model, include both predictors.\n\nyour_model2 &lt;- _____\n\n\n\nInterpret the models\nUse summary() on both models. If you’ve simulated the paradox properly, the sign of the coefficient for the first predictor should flip between the models."
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html",
+    "href": "course-materials/labs/simulate-categorical.html",
+    "title": "Simulating categorical data",
+    "section": "",
+    "text": "library(tidyverse)\nset.seed(222)\ntheme_set(theme_bw())"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#simulate-the-predictor-variable",
+    "href": "course-materials/labs/simulate-categorical.html#simulate-the-predictor-variable",
+    "title": "Simulating categorical data",
+    "section": "Simulate the predictor variable",
+    "text": "Simulate the predictor variable\nCreate a variable called x. It should be categorical with 50 values of two levels, “A” and “B”. Simulate it using the sample() function.\nThen, choose a name for the dummy variable.\n\nx &lt;- _____\n_____ &lt;- ifelse(x == \"A\", 0, 1)"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#choose-your-simulation-parameters",
+    "href": "course-materials/labs/simulate-categorical.html#choose-your-simulation-parameters",
+    "title": "Simulating categorical data",
+    "section": "Choose your simulation parameters",
+    "text": "Choose your simulation parameters\nCreate variables for \\(\\beta_0 = -10\\), \\(\\beta_1 = 20\\), and \\(sigma = 8\\)."
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#calculate-the-expected",
+    "href": "course-materials/labs/simulate-categorical.html#calculate-the-expected",
+    "title": "Simulating categorical data",
+    "section": "Calculate the expected",
+    "text": "Calculate the expected\nCalculate the expected value of \\(y\\).\n\ny_expected &lt;- _____"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#simulate-the-response",
+    "href": "course-materials/labs/simulate-categorical.html#simulate-the-response",
+    "title": "Simulating categorical data",
+    "section": "Simulate the response",
+    "text": "Simulate the response\nYou have the expected value and \\(\\sigma\\). Use these to simulate \\(y\\).\nThen make a data frame with the predictor and response.\n\ny &lt;- ____(\n  n = ____,\n  mean = _____,\n  sd = _____\n)\n\nsimulated_data &lt;- tibble(\n  _____,\n  _____\n)"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#fit-a-model",
+    "href": "course-materials/labs/simulate-categorical.html#fit-a-model",
+    "title": "Simulating categorical data",
+    "section": "Fit a model",
+    "text": "Fit a model\nFit a linear model to the response and predictor variables.\n\ncategorical_lm &lt;- lm(_____ ~ _____, data = _____)\n# Verify the model coefficients approximate the simulation parameters\nsummary(categorical_lm)"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#visualize-the-data-and-model",
+    "href": "course-materials/labs/simulate-categorical.html#visualize-the-data-and-model",
+    "title": "Simulating categorical data",
+    "section": "Visualize the data and model",
+    "text": "Visualize the data and model\nFill in the blanks of the ggplot call to complete the visualization.\nannotate() adds one-off geometries to a ggplot. The following annotations represent \\(\\beta_0\\) and \\(\\beta_1\\).\n\nbetas &lt;- coef(categorical_lm)\n\nggplot(_____, aes(_____, _____)) +\n  geom_point(position = position_jitter(width = 0.2)) +\n  # beta_0 = mean of reference level\n  annotate(\"point\", x = 1, y = betas[1], color = \"cornflowerblue\") +\n  # beta_1 = difference from reference level\n  annotate(\n    \"segment\",\n    x = 1.5,\n    xend = 1.5,\n    y = betas[0],\n    yend = sum(betas),\n    color = \"cornflowerblue\"\n  ) +\n  # beta_0 + beta_1 = mean of second level\n  annotate(\"point\", x = 1, y = sum(betas), color = \"cornflowerblue\")"
+  },
+  {
     "objectID": "course-materials/pre-class/week2_wednesday.html#learning-objectives",
     "href": "course-materials/pre-class/week2_wednesday.html#learning-objectives",
     "title": "EDS 222: Statistics for Environmental Data Science",
@@ -536,14 +613,14 @@
     "href": "course-materials/week3.html",
     "title": "Linear regression",
     "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors\nCategorical predictors  Categorical predictors in R"
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors\nCategorical predictors  Categorical predictors in R"
   },
   {
     "objectID": "course-materials/week3.html#lecture-materials",
     "href": "course-materials/week3.html#lecture-materials",
     "title": "Linear regression",
     "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors\nCategorical predictors  Categorical predictors in R"
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors\nCategorical predictors  Categorical predictors in R"
   },
   {
     "objectID": "course-materials/week10.html",
@@ -1097,6 +1174,83 @@
     "title": "EDS 222: Statistics for Environmental Data Science",
     "section": "Optimal stress",
     "text": "Optimal stress\nRemember, there is an optimal level of stress for learning.\nIf you’re outside the optimal, please come to your instructors!\n\nYerkes-Dodson Curve"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html",
+    "href": "course-materials/labs/simulate-categorical-solutions.html",
+    "title": "Simulating categorical data",
+    "section": "",
+    "text": "library(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.1     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.3     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nset.seed(222)\ntheme_set(theme_bw())"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-predictor-variable",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-predictor-variable",
+    "title": "Simulating categorical data",
+    "section": "Simulate the predictor variable",
+    "text": "Simulate the predictor variable\nCreate a variable called x. It should be categorical with 50 values of two levels, “A” and “B”. Simulate it using the sample() function.\nThen, choose a name for the dummy variable.\n\nx &lt;- sample(c(\"A\", \"B\"), size = 50, replace = TRUE)\nxB &lt;- ifelse(x == \"A\", 0, 1)"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#choose-your-simulation-parameters",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#choose-your-simulation-parameters",
+    "title": "Simulating categorical data",
+    "section": "Choose your simulation parameters",
+    "text": "Choose your simulation parameters\nCreate variables for \\(\\beta_0 = -10\\), \\(\\beta_1 = 20\\), and \\(sigma = 8\\).\n\nbeta_0 &lt;- -10\nbeta_1 &lt;- 20\nsigma &lt;- 8"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#calculate-the-expected",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#calculate-the-expected",
+    "title": "Simulating categorical data",
+    "section": "Calculate the expected",
+    "text": "Calculate the expected\nCalculate the expected value of \\(y\\).\n\ny_expected &lt;- beta_0 + beta_1 * xB"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-response",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-response",
+    "title": "Simulating categorical data",
+    "section": "Simulate the response",
+    "text": "Simulate the response\nYou have the expected value and \\(\\sigma\\). Use these to simulate \\(y\\).\nThen make a data frame with the predictor and response.\n\ny &lt;- rnorm(\n  n = 50,\n  mean = y_expected,\n  sd = sigma\n)\n\nsimulated_data &lt;- tibble(\n  x,\n  y\n)"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#fit-a-model",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#fit-a-model",
+    "title": "Simulating categorical data",
+    "section": "Fit a model",
+    "text": "Fit a model\nFit a linear model to the response and predictor variables.\n\ncategorical_lm &lt;- lm(y ~ x, data = simulated_data)\n# Verify the model coefficients approximate the simulation parameters\nsummary(categorical_lm)\n\n\nCall:\nlm(formula = y ~ x, data = simulated_data)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-22.397  -3.321   1.011   5.308  17.075 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)   -9.798      1.576  -6.218 1.16e-07 ***\nxB            20.396      2.274   8.968 7.91e-12 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 8.035 on 48 degrees of freedom\nMultiple R-squared:  0.6262,    Adjusted R-squared:  0.6185 \nF-statistic: 80.42 on 1 and 48 DF,  p-value: 7.905e-12"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#visualize-the-data-and-model",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#visualize-the-data-and-model",
+    "title": "Simulating categorical data",
+    "section": "Visualize the data and model",
+    "text": "Visualize the data and model\nFill in the blanks of the ggplot call to complete the visualization.\nannotate() adds one-off geometries to a ggplot. The following annotations represent \\(\\beta_0\\) and \\(\\beta_1\\).\n\nbetas &lt;- coef(categorical_lm)\n\nggplot(simulated_data, aes(x, y)) +\n  geom_point(position = position_jitter(width = 0.2)) +\n  # beta_0 = mean of reference level\n  annotate(\"point\", x = 1, y = betas[1], color = \"cornflowerblue\", size = 5) +\n  # beta_1 = difference from reference level\n  annotate(\n    \"segment\",\n    x = 1.5,\n    xend = 1.5,\n    y = betas[1],\n    yend = sum(betas),\n    color = \"cornflowerblue\",\n    linewidth = 3\n  ) +\n  # beta_0 + beta_1 = mean of second level\n  annotate(\"point\", x = 2, y = sum(betas), color = \"cornflowerblue\", size = 5)"
+  },
+  {
+    "objectID": "course-materials/labs/lab4-solution.html",
+    "href": "course-materials/labs/lab4-solution.html",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "",
+    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
+  },
+  {
+    "objectID": "course-materials/labs/lab4-solution.html#before-you-code",
+    "href": "course-materials/labs/lab4-solution.html#before-you-code",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "",
+    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
+  },
+  {
+    "objectID": "course-materials/labs/lab4-solution.html#simulate-the-data",
+    "href": "course-materials/labs/lab4-solution.html#simulate-the-data",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "Simulate the data",
+    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta\\)s and \\(\\sigma\\)). Define them here:\n\n# These values chosen to represent a scenario where typing faster increases\n# typos, but faster typists on average commit fewer typos. If you ignore the\n# second predictor (who is typing) then an apparent negative relationship\n# emerges, suggesting typing faster reduces typos.\nbeta_0 &lt;- 10 # Intercept\nbeta_1 &lt;- 0.1 # Additional typos per increase in speed\nbeta_2 &lt;- -10 # Difference between typist B and the reference level (typist A)\nsigma &lt;- 3 # Standard deviation of the residuals\n\n\nGenerate random values\n\nSimulate your predictor variables. Remember, for Simpson’s paradox to emerge, there has to be a dependency between the two predictor variables.\n\n\n# Sample size\nN &lt;- 50\n# Typist identities\ntypist &lt;- sample(c(\"A\", \"B\"), N, replace = TRUE)\n# Dummy variable for typist B\ntypistB &lt;- ifelse(typist == \"B\", 1, 0)\n# Typing speed is _greater_ for typist B, who is also less error-prone\ntyping_speed &lt;- rnorm(N, mean = ifelse(typist == \"B\", 100, 45), sd = 15)\n\n\nCalculate the expected value of the response. This is similar to regression with a single predictor, but includes a second term.\n\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\nexpected_typos &lt;- beta_0 + beta_1 * typing_speed + beta_2 * typistB\n\n\nSimulate the response variable. This is the same as regression with a single predictor. The expected value incorporates the influence of the multiple predictors. Once you have that number, you just need normally-distributed residuals.\n\n\ntypos &lt;- rnorm(\n  n = N,\n  mean = expected_typos,\n  sd = sigma\n)\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\nsimulated_typing &lt;- tibble(typing_speed, typos, typist)\n\nggplot(simulated_typing, aes(x = typing_speed, y = typos, fill = typist)) +\n  geom_point(size = 2, shape = 21) +\n  scale_fill_manual(values = c(\"peachpuff\", \"lightskyblue1\"))"
+  },
+  {
+    "objectID": "course-materials/labs/lab4-solution.html#fit-and-interpret-regression-models",
+    "href": "course-materials/labs/lab4-solution.html#fit-and-interpret-regression-models",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "Fit and interpret regression models",
+    "text": "Fit and interpret regression models\n\nFit the models\nUse lm() to fit two regression models to your simulated data.\nIn the first model, only include the first predictor.\n\nspeed_only &lt;- lm(typos ~ typing_speed, data = simulated_typing)\n\nIn the second model, include both predictors.\n\nspeed_typist &lt;- lm(typos ~ typing_speed + typist, data = simulated_typing)\n\n\n\nInterpret the models\nUse summary() on both models. If you’ve simulated the paradox properly, the sign of the coefficient for the first predictor should flip between the models.\n\nsummary(speed_only) # beta_1 ~= -0.04\n\n\nCall:\nlm(formula = typos ~ typing_speed, data = simulated_typing)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-7.0273 -2.4690 -0.5602  1.8565  9.3844 \n\nCoefficients:\n             Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  15.70437    1.31052  11.983 4.91e-16 ***\ntyping_speed -0.04306    0.01665  -2.587   0.0128 *  \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 3.71 on 48 degrees of freedom\nMultiple R-squared:  0.1223,    Adjusted R-squared:  0.104 \nF-statistic:  6.69 on 1 and 48 DF,  p-value: 0.01278\n\nsummary(speed_typist) # beta_1 ~= 0.10\n\n\nCall:\nlm(formula = typos ~ typing_speed + typist, data = simulated_typing)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-4.9963 -1.6735 -0.0618  1.2214 10.0247 \n\nCoefficients:\n              Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)   10.33208    1.35594   7.620 9.46e-10 ***\ntyping_speed   0.09883    0.02724   3.628 0.000701 ***\ntypistB      -10.13145    1.71841  -5.896 3.87e-07 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 2.843 on 47 degrees of freedom\nMultiple R-squared:  0.4955,    Adjusted R-squared:  0.474 \nF-statistic: 23.08 on 2 and 47 DF,  p-value: 1.042e-07"
   },
   {
     "objectID": "course-materials/pre-class/week2_monday_a.html#learning-objectives",

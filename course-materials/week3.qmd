@@ -9,5 +9,5 @@ subtitle: "Week 3 (October 12 - 16)"
 |---------|--------|---------|
 | Lecture 1 | Intro to OLS <br/> [Review of week 2 and linear equations](handouts/week3-monday-review-linear.pdf) <br/> [Linear regression](handouts/week3-monday-linear-regression.pdf) | IMS 7 <br/> [Intro to OLS](https://youtu.be/XdoWXTCuxnY) |
 | Lab | [Simulate data and fit a regression model](labs/lab3.qmd) | [Simulating data for OLS](https://youtu.be/fsd-6He2MwU) |
-| Lecture 2 | Categorical predictors | [Categorical predictors](https://youtu.be/bfTybgolJV0) <br/> [Categorical predictors in R](https://youtu.be/3O3liYG2MLE) |
+| Lecture 2 | [Categorical predictors](lecture-slides/week3_wednesday.qmd) <br/> [American Birds form](https://forms.gle/yhReyNHhopEG1Sxx5) <br/> [American Birds repo](https://github.com/eds-222-stats-f26/eds-222-american-birds) <br/> [Simulating categorical predictors](labs/simulate-categorical.qmd) | [Categorical predictors](https://youtu.be/bfTybgolJV0) <br/> [Categorical predictors in R](https://youtu.be/3O3liYG2MLE) |
 : {.hover .bordered tbl-colwidths="[30,30,40]"} 
