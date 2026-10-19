@@ -44,7 +44,7 @@ Remember, for Simpson's paradox to emerge, there has to be a dependency between 
 ```{r}
 # Sample size
 N <- ___
-# Edit the following code to simulate your _categorical_ predictor variable
+# Edit the following code to simulate your _categorical_ predictor variable.
 your_second_predictor <- ___
 
 # Edit the following code to simulate your _continuous_ predictor variable. Make

@@ -1,0 +1,502 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 4 Monday"
+format: revealjs
+bibliography: references.bib
+---
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+
+gs4_deauth()
+
+sheet_url <- "https://docs.google.com/spreadsheets/d/1e0eL4NFmGThSgUOGeWmG45urZGSrfKUgX-94tiZ6j6A/edit#gid=1253615536"
+
+# Columns by position: C = value of X, E = estimated % of US bird species in CA
+birds <- read_sheet(sheet_url) |>
+  select(anchor = 3, ca_pct = 5, prior_know = 6) |>
+  mutate(
+    anchor = factor(anchor, levels = c(50, 70)),
+    ca_pct = as.numeric(ca_pct),
+    prior_know = as.numeric(prior_know)
+  )
+
+set.seed(222)
+theme_set(theme_bw(18))
+```
+
+# Multiple regression
+
+## Today's agenda
+
+1. Multiple regression worksheet
+2. American birds revisited
+3. Simpson's paradox
+
+# Multiple regression worksheet
+
+# American birds revisited
+
+## American birds, visualized
+
+Here's the data from the classroom experiment. Use these data to complete the worksheet.
+
+```{r}
+ggplot(birds, aes(x = prior_know, y = ca_pct, shape = anchor)) +
+  geom_point(size = 3) +
+  scale_shape_manual(values = c("circle filled", "triangle filled")) +
+  labs(x = "Prior Knowledge", y = "% American \nBirds in CA", shape = "Anchor")
+```
+
+## Interpreting multiple predictors
+
+A coefficient estimate is the effect of the predictor _**when holding all else equal**_
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+
+american_birds_lm <- lm(ca_pct ~ anchor + prior_know, birds)
+summary(american_birds_lm)
+```
+
+:::
+
+## Multiple regression is _additive_
+
+::: {style="font-size:0.8em"}
+$$
+\begin{align}
+\text{Perc. CA} &= \beta_0 + \beta_1 \text{Prior knowledge} + \beta_2 {(Anchor=70)} + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+:::
+
+```{r}
+#| fig-align: center
+
+model_grid <- expand_grid(prior_know = 0:12, anchor = factor(c(50, 70)))
+model_pred <- model_grid |>
+  mutate(ca_pct = predict(american_birds_lm, newdata = model_grid))
+ggplot(birds, aes(x = prior_know, y = ca_pct, shape = anchor)) +
+  geom_point(size = 3) +
+  geom_line(aes(linetype = anchor), model_pred) +
+  scale_shape_manual(values = c("circle filled", "triangle filled")) +
+  labs(
+    x = "Prior Knowledge",
+    y = "% American \nBirds in CA",
+    shape = "Anchor",
+    linetype = "Anchor"
+  )
+```
+
+## American Bird DAG
+
+::: {.columns}
+
+::: {.column}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    n0((% American<br/>birds in CA))
+    n1((Anchor))
+    n2((Prior<br/>knowledge))
+    n1 --> n0
+    n2 --> n0
+```
+
+:::
+
+::: {.column}
+
+Why isn't there an arrow connecting _Anchor_ and _Prior knowledge_?
+
+
+::: {.fragment}
+
+Assignment of _Anchor_ was **randomized**. Intervening on _Anchor_ can have no effect on _Prior knowledge_ when their relationship is random.
+
+:::
+
+
+:::
+
+:::
+
+## Coefficient estimates unchanged
+
+When predictors are _independent_, coefficient estimates don't affect each other. 
+
+::: {.columns style="font-size: 0.8em"}
+
+::: {.column}
+
+```{r}
+#| echo: true
+
+two_predictors <- lm(
+  ca_pct ~ anchor + prior_know,
+  birds
+)
+coef(two_predictors)
+summary(two_predictors)$r.squared
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| echo: true
+
+one_predictor <- lm(
+  ca_pct ~ anchor,
+  birds
+)
+coef(one_predictor)
+summary(one_predictor)$r.squared
+```
+
+:::
+
+:::
+
+"Prior knowledge" _explained variance_, but the estimate for "Anchor" was unaffected.
+
+
+## But observational data is messy
+
+::: {.columns}
+
+::: {.column}
+
+When predictors are dependent, their coefficients affect each other.
+
+:::
+
+::: {.column}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    n0((Soil Pb))
+    n1((Freeways))
+    n2((Lead paint))
+    n3((Up/down<br/>wind))
+    n4((Development<br/>history))
+    n5((Location))
+    n1 --> n0
+    n2 --> n0
+    n3 --> n0
+    n4 --> n1
+    n4 --> n2
+    n5 --> n1
+    n5 --> n3
+    n5 --> n4
+
+    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px
+    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5
+    class n0,n1,n2,n3,n5 observed
+    class n4 unobserved
+```
+
+:::
+
+:::
+
+# Simpson's Paradox
+
+## Simpson's paradox
+
+> Simpson's paradox is a phenomenon in probability and statistics in which a trend appears in several groups of data but disappears or reverses when the groups are combined.
+
+[Wikipedia](https://en.wikipedia.org/wiki/Simpson%27s_paradox)
+
+## How does bleaching respond to temperature?
+
+```{r}
+set.seed(123)
+n_per_region <- 40
+coral_params <- tibble(
+  region = factor(
+    c("Coolest", "Moderate", "Warmest"),
+    levels = c("Coolest", "Moderate", "Warmest")
+  ),
+  sst_mean = c(28, 29, 30),
+  region_effect = c(0, -20, -40)
+)
+beta_0 <- -151
+beta_sst <- 8
+sigma <- 5
+
+coral <- coral_params |>
+  slice(rep(1:3, each = n_per_region)) |>
+  mutate(
+    peak_sst = rnorm(n(), sst_mean, 0.5),
+    percent_bleached = beta_0 +
+      beta_sst * peak_sst +
+      region_effect +
+      rnorm(n(), 0, sigma)
+  ) |>
+  select(region, peak_sst, percent_bleached)
+```
+
+Each point is a coral reef. What's the relationship between temperature and bleaching?
+
+```{r}
+ggplot(coral, aes(peak_sst, percent_bleached)) +
+  geom_point() +
+  labs(
+    x = "Peak SST (degC)",
+    y = "Percent bleached",
+    caption = "Simulated data"
+  )
+```
+
+## How about now?
+
+How does bleaching respond to temperature?
+
+```{r}
+#| fig-align: center
+ggplot(coral, aes(peak_sst, percent_bleached)) +
+  geom_point(aes(fill = region), shape = 21, color = "black") +
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  labs(x = "Peak SST (degC)", y = "Percent bleached", fill = "Region") +
+  theme(legend_position = "bottom")
+```
+
+::: {.fragment}
+_**Regions**_ with _**higher temperatures**_ are associated with corals that are _**bleaching resistant**_
+:::
+
+## Draw the DAG
+
+Draw a DAG for the coral bleaching scenario. Your variables are:
+
+- Region
+- Peak SST
+- Percent bleached
+
+## The coral bleaching DAG
+
+"Region" is related to both the Peak SST **and** the amount of bleaching that occurs. 
+
+::: {.columns}
+
+::: {.column}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    n0((Percent<br/>bleached))
+    n1((Peak SST))
+    n2((Region))
+    n1 --> n0
+    n2 --> n1
+    n2 --> n0
+```
+
+:::
+
+::: {.column}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    n0((Percent<br/>bleached))
+    n1((Peak SST))
+    n2((Region))
+    n3((Heat\ntolerance))
+    n1 --> n0
+    n2 --> n1
+    n2 --> n3
+    n3 --> n0
+
+    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5
+    class n3 unobserved
+```
+
+:::
+
+:::
+
+Ignorning "Region" opens the door to **bias**.
+
+## Coefficient reversal, visual
+
+```{r}
+#| fig-align: center
+#| fig-width: 12
+#| fig-height: 6
+
+model_levels <- c(
+  "percent_bleached ~ peak_sst",
+  "percent_bleached ~ peak_sst + region"
+)
+model_labels <- c(
+  "Pooled",
+  "Grouped"
+)
+pooled_lm <- lm(percent_bleached ~ peak_sst, coral)
+region_lm <- lm(percent_bleached ~ peak_sst + region, coral)
+coral_fits <- bind_rows(
+  coral |>
+    mutate(
+      model = model_levels[1],
+      fit = predict(pooled_lm),
+      line_group = "All"
+    ),
+  coral |>
+    mutate(
+      model = model_levels[2],
+      fit = predict(region_lm),
+      line_group = region
+    )
+) |>
+  mutate(model = factor(model, levels = model_levels, labels = model_labels))
+
+ggplot(coral_fits, aes(peak_sst, percent_bleached)) +
+  geom_point(aes(fill = region), shape = 21, color = "black", alpha = 0.6) +
+  geom_line(aes(y = fit, group = line_group), linewidth = 1.5) +
+  facet_wrap(~model) +
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  labs(x = "Peak SST (degC)", y = "Percent bleached", fill = "Region") +
+  theme(legend.position = "bottom")
+```
+
+## Coefficient reversal, numeric
+
+```{r}
+#| echo: true
+#| eval: false
+
+two_predictors <- lm(percent_bleached ~ region + peak_sst, coral)
+summary(two_predictors)
+```
+
+```r
+Coefficients:
+               Estimate Std. Error
+(Intercept)    -192.069     28.333
+regionModerate  -20.797      1.478
+regionWarmest   -42.284      2.286
+peak_sst          9.447      1.011 
+```
+
+```{r}
+#| echo: true
+#| eval: false
+
+one_predictor <- lm(percent_bleached ~ peak_sst, coral)
+summary(one_predictor)
+```
+
+```r
+Coefficients:
+               Estimate Std. Error
+(Intercept)   262.0372     27.8707
+peak_sst       -6.9329      0.9603 
+```
+
+## Tomorrow's lab
+
+:::{style="font-size:0.8em"}
+
+Tomorrow, you will **simulate data** and fit a **multiple regression** model for a _Simpson's paradox_ scenario.
+
+Work in groups to brainstorm ideas. **Sketch** a figure and draw a **DAG**.
+
+:::
+
+::: {.columns style="font-size:0.7em"}
+
+::: {.column width="40%"}
+
+Requirements:
+
+- Two predictors: categorical (2 levels) + continuous. These are **correlated**.
+- One continuous response.
+- The relationship **reverses** when the data are _grouped_.
+
+:::
+
+::: {.column width="60%"}
+
+```{r}
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 6
+ggplot(coral_fits, aes(peak_sst, percent_bleached)) +
+  geom_point(aes(fill = region), shape = 21, color = "black", alpha = 0.6) +
+  geom_line(aes(y = fit, group = line_group), linewidth = 1.5) +
+  facet_wrap(~model) +
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  labs(x = "Peak SST (degC)", y = "Percent bleached", fill = "Region") +
+  theme(legend.position = "bottom")
+```
+
+:::
+
+:::
+
+# Recap
+
+## Correlated predictors open the door to bias
+
+```{r}
+ggplot(coral_fits, aes(peak_sst, percent_bleached)) +
+  geom_point(aes(fill = region), shape = 21, color = "black", alpha = 0.6) +
+  geom_line(aes(y = fit, group = line_group), linewidth = 1.5) +
+  facet_wrap(~model) +
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  labs(x = "Peak SST (degC)", y = "Percent bleached", fill = "Region") +
+  theme(legend.position = "bottom")
+```
+
+## Multiple regression adds predictors...
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots + \beta_n x_n + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+## ...which adjusts for bias
+
+```{r}
+#| echo: true
+#| eval: false
+
+two_predictors <- lm(percent_bleached ~ region + peak_sst, coral)
+summary(two_predictors)
+```
+
+```r
+Coefficients:
+               Estimate Std. Error
+(Intercept)    -192.069     28.333
+regionModerate  -20.797      1.478
+regionWarmest   -42.284      2.286
+peak_sst          9.447      1.011 
+```
+
+```{r}
+#| echo: true
+#| eval: false
+
+one_predictor <- lm(percent_bleached ~ peak_sst, coral)
+summary(one_predictor)
+```
+
+```r
+Coefficients:
+               Estimate Std. Error
+(Intercept)   262.0372     27.8707
+peak_sst       -6.9329      0.9603 
+```
