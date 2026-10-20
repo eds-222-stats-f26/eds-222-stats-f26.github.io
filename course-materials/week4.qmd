@@ -7,7 +7,7 @@ subtitle: "Week 4 (October 19 - 23)"
 
 | Session | In-class | Pre-class |
 |---------|--------|---------|
-| Lecture 1 | Multiple regression | IMS 8 <br/> [Visualization and DAGs](https://youtu.be/s9w2tkBYfss) <br/> [Modeling multiple predictors](https://youtu.be/y0XP34vuVMI) |
+| Lecture 1 | [Multiple regression](lecture-slides/week4_monday.qmd) <br/> [Multiple regression worksheet](handouts/week4-monday-multiple-regression.pdf) <br/> [American birds (revisited)](handouts/week4-monday-american-birds-revisited.pdf) | IMS 8 <br/> [Visualization and DAGs](https://youtu.be/s9w2tkBYfss) <br/> [Modeling multiple predictors](https://youtu.be/y0XP34vuVMI) |
 | Lab | [Simulate Simpson's Paradox](labs/lab4.qmd) | [Simulating data reviewed](https://youtu.be/kdzP95Gh4-A) |
-| Lecture 2 | Interactions and the backdoor criterion | CIR 3 <br/> Interactions <br/> Interactions in R <br/> Final project DAGs |
+| Lecture 2 | Interactions | CIR 3 <br/> [Interactions](https://youtu.be/wl7YeTISADg) <br/> [Interactions in R](https://youtu.be/tAZFZc0fJqg) |
 : {.hover .bordered tbl-colwidths="[30,30,40]"} 

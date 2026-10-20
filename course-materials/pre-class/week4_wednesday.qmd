@@ -1,0 +1,576 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 4 Wednesday: Interactions"
+format: revealjs
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+theme_set(theme_bw(18))
+set.seed(222)
+
+# Distribution of intensification
+x_mean <- 80
+x_disp <- 0.2
+x_shape <- 1 / x_disp
+x_rate <- 1 / (x_mean * x_disp)
+
+yield_change <- rgamma(200, x_shape, x_rate) - 40
+
+# make indigenous stewardship inversely correlated with yield change
+indigenous_steward <- rbinom(200, size = 1, prob = plogis(-yield_change / 50))
+
+# forest_loss = beta_0 + beta_1 * yield_change + beta_2 * indig_steward + beta_3 * yield_change * indig_steward
+
+beta_0 <- -5
+beta_1 <- -0.08
+beta_2 <- 2
+beta_3 <- 0.1
+sigma <- 3
+
+forest_data <- tibble(
+  yield_change,
+  indigenous_steward,
+  indigenous_steward_fct = factor(indigenous_steward, labels = c("No", "Yes")),
+  mu = beta_0 +
+    beta_1 * yield_change +
+    beta_2 * indigenous_steward +
+    beta_3 * yield_change * indigenous_steward,
+  forest_loss = -rnorm(200, mu, sigma)
+)
+```
+
+# Interactions
+
+## Learning objectives
+
+- **Recognize** interactive terms
+- **Model** regressions with interactions
+- **Compare** interactive models to additive
+
+# Recognize interactive terms
+
+## Recall multiple regression
+
+
+::: {.columns}
+
+::: {.column style="font-size: 0.8em; width: 40%"}
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x_1 + \beta_2 (x_2=B) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+:::
+
+::: {.column width="60%"}
+
+```{r}
+#| fig-width: 8
+expand_grid(x2 = c("A", "B"), x1 = c(0, 10)) |>
+  mutate(y = 2 - 4 * (x2 == "B") + 1.5 * x1) |>
+  ggplot(aes(x1, y, linetype = x2)) +
+  geom_line() +
+  expand_limits(y = 0)
+```
+
+:::
+
+:::
+
+Each predictor ($x_1$, $x_2=B$) has it's own coefficient ($\beta_1$, $\beta_2$). They act on $y$ separately.
+
+## Interactions mediate relationships
+
+In regular multiple regression, the _relationship_ between $x_1$ and $y$ is the same regardless of $x_2$.
+
+But what if the _relationship_ between $x_1$ and $y$ varies with $x_2$?
+
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+expand_grid(x2 = c("A", "B"), x1 = c(0, 10)) |>
+  mutate(y = 2 - 4 * (x2 == "B") + 1.5 * x1) |>
+  ggplot(aes(x1, y, linetype = x2)) +
+  geom_line() +
+  expand_limits(y = 0)
+```
+
+:::
+
+::: {.column}
+
+```{r}
+expand_grid(x2 = c("A", "B"), x1 = c(0, 10)) |>
+  mutate(y = 2 - 4 * (x2 == "B") + 1.5 * x1 - 2 * x1 * (x2 == "B")) |>
+  ggplot(aes(x1, y, linetype = x2)) +
+  geom_line() +
+  expand_limits(y = 0)
+```
+
+:::
+
+:::
+
+## Deforestation and agriculture
+
+::: {.columns style="font-size: 0.8em"}
+
+::: {.column}
+
+**Land sparing hypothesis**
+
+Increasing yields _reduces_ deforestation.
+
+:::
+
+::: {.column}
+
+**Rebound hypothesis**
+
+Increasing yields _incentivizes_ deforestation.
+
+:::
+
+:::
+
+![A section of the Amazon rainforest stands next to soy fields in Belterra, Para state, Brazil, on Nov. 30, 2019. (AP Photo/Leo Correa, File)](https://dims.apnews.com/dims4/default/b390455/2147483647/strip/true/crop/5379x3584+0+0/resize/980x653!/format/webp/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Fa8%2Fb3%2Fd98d7f6d398774758484cd6495ea%2F94701eddec5648c485e7c1627bbe5843)
+
+## Two hypotheses
+
+::: {style="font-size: 0.9em"}
+What's the _relationship_ between deforestation and increasing yields? 
+:::
+
+```{r}
+#| fig-width: 8
+#| fig-align: center
+
+expand_grid(yield = c(0, 10), hypothesis = c("Land sparing", "Rebound")) |>
+     mutate(
+          deforestation = ifelse(
+               hypothesis == "Land sparing",
+               8 - 0.6 * yield,
+               2 + 0.6 * yield
+          )
+     ) |>
+     ggplot(aes(yield, deforestation, color = hypothesis)) +
+     geom_line(linewidth = 2, linetype = "dashed") +
+     expand_limits(y = 0) +
+     labs(
+          x = "Yield change",
+          y = "Deforestation rate",
+          color = "Hypothesis"
+     ) +
+     theme(axis.text = element_blank(), axis.ticks = element_blank())
+```
+
+## Which hypothesis is supported?
+
+Increasing yields increases deforestation: **rebound hypothesis**
+
+```{r}
+#| fig-width: 7
+#| fig-align: center
+
+ggplot(forest_data, aes(yield_change, forest_loss)) +
+  geom_point(shape = 21) +
+  geom_smooth(method = "lm", se = FALSE, color = "cornflowerblue") +
+  labs(
+    x = "Yield change (%)",
+    y = "Deforestation rate (ha yr^-1)",
+    caption = "Simulated data"
+  )
+```
+
+## Does the _relationship_ vary?
+
+```{r}
+#| fig-width: 7
+#| fig-align: center
+
+ggplot(
+  forest_data,
+  aes(yield_change, forest_loss, color = indigenous_steward_fct)
+) +
+  geom_point(shape = 21) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = c("cornflowerblue", "firebrick")) +
+  labs(
+    x = "Yield change (%)",
+    y = "Deforestation rate (ha yr^-1)",
+    color = "Indigenous stewardship",
+    caption = "Simulated data"
+  ) +
+  theme(
+    legend.position = "bottom"
+  )
+```
+
+# Model regressions with interactions
+
+## Interactive terms
+
+$$
+\begin{align}
+y &= \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_1 x_2 + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align} 
+$$
+
+An interaction term **multiplies two predictors together**
+
+## Deforestation and agriculture model
+
+$$
+\begin{align}
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 \text{Indig. Steward} \\
+&\quad + \beta_3 \text{Yield} \times \text{Indig. Steward} + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align} 
+$$
+
+What's the _relationship_ between deforestion and yield across groups?
+
+## Interactions vary slopes
+
+**No indigenous stewardship** 
+
+$\text{Indig. Steward} = 0$
+
+$$
+\begin{align}
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 \text{Indig. Steward} \\
+&\quad + \beta_3 \text{Yield} \times \text{Indig. Steward} \\
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 0 + \beta_3 \text{Yield} \times 0 \\
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield}
+\end{align} 
+$$
+
+::: {.fragment}
+
+The slope is $\beta_1$
+
+:::
+
+## Interactions vary slopes
+
+**Yes indigenous stewardship**
+
+$\text{Indig. Steward} = 1$
+
+$$
+\begin{align}
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 \text{Indig. Steward} \\
+&\quad + \beta_3 \text{Yield} \times \text{Indig. Steward} \\
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 1 + \beta_3 \text{Yield} \times 1 \\
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 + \beta_3 \text{Yield} \\
+\text{Deforestation} &= \left( \beta_0 + \beta_2 \right) + \left( \beta_1 + \beta_3 \right) \text{Yield}
+\end{align} 
+$$
+
+
+::: {.fragment}
+
+The slope is $\beta_1 + \beta_3$
+
+:::
+
+## Interactions vary slopes
+
+```{r}
+#| fig-width: 7
+#| fig-align: center
+
+interaction_mod <- lm(
+  forest_loss ~ yield_change * indigenous_steward,
+  forest_data
+)
+coefs <- coef(interaction_mod)
+
+# Prediction lines for each group
+pred_lines <- tibble(
+  indigenous_steward_fct = factor(c("No", "Yes"), levels = c("No", "Yes")),
+  intercept = c(coefs[1], coefs[1] + coefs[3]),
+  slope = c(coefs[2], coefs[2] + coefs[4])
+)
+
+# Fix panel limits and aspect ratio so labels can be rotated parallel to lines
+pad <- function(r) r + c(-1, 1) * 0.05 * diff(r)
+x_lim <- pad(range(forest_data$yield_change))
+y_lim <- pad(range(forest_data$forest_loss))
+aspect <- 0.6
+
+slope_labels <- pred_lines %>%
+  mutate(
+    label = c("beta[1]", "beta[1] + beta[3]"),
+    x = x_lim[1] + c(0.78, 0.75) * diff(x_lim),
+    y = intercept + slope * x,
+    angle = atan(slope * diff(x_lim) / diff(y_lim) * aspect) * 180 / pi
+  )
+
+ggplot(
+  forest_data,
+  aes(yield_change, forest_loss, color = indigenous_steward_fct)
+) +
+  geom_point(shape = 21) +
+  geom_abline(
+    aes(intercept = intercept, slope = slope, color = indigenous_steward_fct),
+    pred_lines,
+    linewidth = 1
+  ) +
+  geom_text(
+    aes(x, y, label = label, angle = angle),
+    slope_labels,
+    parse = TRUE,
+    vjust = -0.4,
+    size = 7,
+    show.legend = FALSE
+  ) +
+  scale_color_manual(values = c("cornflowerblue", "firebrick")) +
+  coord_cartesian(xlim = x_lim, ylim = y_lim, expand = FALSE) +
+  labs(
+    x = "Yield change (%)",
+    y = "Deforestation rate (ha yr^-1)",
+    color = "Indigenous stewardship",
+    caption = "Simulated data"
+  ) +
+  theme(
+    aspect.ratio = aspect,
+    legend.position = "bottom"
+  )
+```
+
+# Compare interactive models to additive
+
+## Additive vs. interactive
+
+::: {style="font-size: 0.8em"}
+
+**Additive**
+
+$$
+\text{Deforestation} = \beta_0 + \beta_1 \text{Yield} + \beta_2 \text{Indig. Steward} + \epsilon
+$$
+
+**Interactive**
+
+$$
+\begin{align}
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 \text{Indig. Steward} \\
+&\quad + \beta_3 \text{Yield} \times \text{Indig. Steward} + \epsilon
+\end{align}
+$$
+
+:::
+
+The only difference is the **interaction term**, $\beta_3 \text{Yield} \times \text{Indig. Steward}$
+
+## Additive model: slope
+
+**Yes indigenous stewardship**
+
+$\text{Indig. Steward} = 1$
+
+$$
+\begin{align}
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 \text{Indig. Steward} \\
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 1 \\
+\text{Deforestation} &= \left( \beta_0 + \beta_2 \right) + \beta_1 \text{Yield}
+\end{align}
+$$
+
+::: {.fragment}
+
+The slope is $\beta_1$, **the same as the no stewardship group**. Only the intercept changes.
+
+:::
+
+## Interactive model: slope
+
+**Yes indigenous stewardship**
+
+$\text{Indig. Steward} = 1$
+
+$$
+\begin{align}
+\text{Deforestation} &= \beta_0 + \beta_1 \text{Yield} + \beta_2 \text{Indig. Steward} \\
+&\quad + \beta_3 \text{Yield} \times \text{Indig. Steward} \\
+\text{Deforestation} &= \left( \beta_0 + \beta_2 \right) + \left( \beta_1 + \beta_3 \right) \text{Yield}
+\end{align}
+$$
+
+::: {.fragment}
+
+The slope is $\beta_1 + \beta_3$, **different from the no stewardship group**. Both the intercept and slope change.
+
+:::
+
+## Additive vs. interactive
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5.5
+#| fig-align: center
+
+additive_mod <- lm(
+  forest_loss ~ yield_change + indigenous_steward,
+  forest_data
+)
+add_coefs <- coef(additive_mod)
+
+model_lines <- bind_rows(
+  tibble(
+    model = "Additive",
+    indigenous_steward_fct = factor(c("No", "Yes"), levels = c("No", "Yes")),
+    intercept = c(add_coefs[1], add_coefs[1] + add_coefs[3]),
+    slope = c(add_coefs[2], add_coefs[2])
+  ),
+  mutate(pred_lines, model = "Interactive")
+)
+
+forest_data |>
+  cross_join(tibble(model = c("Additive", "Interactive"))) |>
+  ggplot(aes(yield_change, forest_loss, color = indigenous_steward_fct)) +
+  geom_point(shape = 21) +
+  geom_abline(
+    aes(intercept = intercept, slope = slope, color = indigenous_steward_fct),
+    model_lines,
+    linewidth = 1
+  ) +
+  facet_wrap(~model) +
+  scale_color_manual(values = c("cornflowerblue", "firebrick")) +
+  labs(
+    x = "Yield change (%)",
+    y = "Deforestation rate (ha yr^-1)",
+    color = "Indigenous stewardship",
+    caption = "Simulated data"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+::: {style="font-size: 0.8em"}
+The additive model forces parallel lines. It misses that stewardship removes the rebound effect.
+:::
+
+## When to use interactions
+
+::: {.columns style="font-size: 0.9em"}
+
+::: {.column}
+
+**Additive**
+
+Each predictor affects the response _independently_.
+
+$x_2$ shifts $y$ up or down, but the effect of $x_1$ on $y$ is the same.
+
+:::
+
+::: {.column}
+
+**Interactive**
+
+One predictor _changes the effect_ of another on the response.
+
+The effect of $x_1$ on $y$ depends on $x_2$.
+
+:::
+
+:::
+
+::: {.fragment}
+
+Ask: "Does the _relationship_ between $x_1$ and $y$ depend on $x_2$?"
+
+:::
+
+## Additive is sufficient
+
+::: {.columns}
+
+::: {.column style="font-size: 0.8em; width: 40%"}
+
+**Snowpack and elevation**
+
+North-facing slopes hold more snow than south-facing slopes at every elevation.
+
+But snowpack increases with elevation at the same rate on both.
+
+Aspect shifts the line; it doesn't change the slope.
+
+:::
+
+::: {.column width="60%"}
+
+```{r}
+#| fig-width: 8
+expand_grid(aspect = c("North", "South"), elevation = c(1500, 3000)) |>
+  mutate(snowpack = -100 + 0.1 * elevation - 60 * (aspect == "South")) |>
+  ggplot(aes(elevation, snowpack, color = aspect)) +
+  geom_line(linewidth = 2) +
+  scale_color_manual(values = c("cornflowerblue", "firebrick")) +
+  labs(
+    x = "Elevation (m)",
+    y = "Snow water equivalent (cm)",
+    color = "Aspect"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+:::
+
+:::
+
+## Interactive is necessary
+
+::: {.columns}
+
+::: {.column style="font-size: 0.8em; width: 40%"}
+
+**Stream and air temperature**
+
+Streams warm as air temperature rises.
+
+But a riparian canopy shades the stream, so shaded streams warm _more slowly_.
+
+Canopy changes the slope of the relationship.
+
+:::
+
+::: {.column width="60%"}
+
+```{r}
+#| fig-width: 8
+expand_grid(canopy = c("Open", "Shaded"), air_temp = c(10, 30)) |>
+  mutate(
+    stream_temp = 4 +
+      0.7 * air_temp -
+      0.4 * air_temp * (canopy == "Shaded") +
+      2 * (canopy == "Shaded")
+  ) |>
+  ggplot(aes(air_temp, stream_temp, color = canopy)) +
+  geom_line(linewidth = 2) +
+  scale_color_manual(values = c("firebrick", "cornflowerblue")) +
+  labs(
+    x = "Air temperature (°C)",
+    y = "Stream temperature (°C)",
+    color = "Riparian canopy"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+:::
+
+:::
