@@ -1,360 +1,304 @@
 [
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#learning-objectives",
-    "href": "course-materials/pre-class/week3_monday.html#learning-objectives",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week4_monday.html#todays-agenda",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Learning objectives",
-    "text": "Learning objectives\n\nDescribe relationships between variables using a regression model\nEstimate coefficients using ordinary least squares\nInterpret the parameters of a regression model"
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nMultiple regression worksheet\nAmerican birds revisited\nSimpson’s paradox"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#how-much-soil-lead-would-you-expect-to-find-2-mi-from-exide",
-    "href": "course-materials/pre-class/week3_monday.html#how-much-soil-lead-would-you-expect-to-find-2-mi-from-exide",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#american-birds-visualized",
+    "href": "course-materials/lecture-slides/week4_monday.html#american-birds-visualized",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "How much soil lead would you expect to find 2 mi from Exide?",
-    "text": "How much soil lead would you expect to find 2 mi from Exide?"
+    "section": "American birds, visualized",
+    "text": "American birds, visualized\nHere’s the data from the classroom experiment. Use these data to complete the worksheet."
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#fitting-a-line-to-data",
-    "href": "course-materials/pre-class/week3_monday.html#fitting-a-line-to-data",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#interpreting-multiple-predictors",
+    "href": "course-materials/lecture-slides/week4_monday.html#interpreting-multiple-predictors",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Fitting a line to data",
-    "text": "Fitting a line to data\nThe line is our model explaining the relationship between two variables\n\\[\ny = mx + b\n\\]\n\n\\(y\\) is the response (AKA dependent) variable\n\\(x\\) is the predictor (AKA independent) variable\n\\(m\\) is the slope\n\\(b\\) is the intercept"
+    "section": "Interpreting multiple predictors",
+    "text": "Interpreting multiple predictors\nA coefficient estimate is the effect of the predictor when holding all else equal\n\n\namerican_birds_lm &lt;- lm(ca_pct ~ anchor + prior_know, birds)\nsummary(american_birds_lm)\n\n\nCall:\nlm(formula = ca_pct ~ anchor + prior_know, data = birds)\n\nResiduals:\n   Min     1Q Median     3Q    Max \n-24.91 -12.99  -2.79  12.78  32.74 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)   \n(Intercept)   31.786      9.213   3.450  0.00159 **\nanchor70       7.248      6.189   1.171  0.25024   \nprior_know     1.470      1.081   1.360  0.18339   \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 18.3 on 32 degrees of freedom\nMultiple R-squared:  0.09186,   Adjusted R-squared:  0.0351 \nF-statistic: 1.618 on 2 and 32 DF,  p-value: 0.214"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#in-a-world-without-uncertainty",
-    "href": "course-materials/pre-class/week3_monday.html#in-a-world-without-uncertainty",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#multiple-regression-is-additive",
+    "href": "course-materials/lecture-slides/week4_monday.html#multiple-regression-is-additive",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "In a world without uncertainty…",
-    "text": "In a world without uncertainty…\nWithout uncertainty, all the points would fall on the line."
+    "section": "Multiple regression is additive",
+    "text": "Multiple regression is additive\n\n\\[\n\\begin{align}\n\\text{Perc. CA} &= \\beta_0 + \\beta_1 \\text{Prior knowledge} + \\beta_2 {(Anchor=70)} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#fitting-a-line-to-data-1",
-    "href": "course-materials/pre-class/week3_monday.html#fitting-a-line-to-data-1",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#american-bird-dag",
+    "href": "course-materials/lecture-slides/week4_monday.html#american-bird-dag",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Fitting a line to data",
-    "text": "Fitting a line to data\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\nIn real world data, the data spread out around the line.\n\nThe difference between the point and the line is the residual.\nLinear regression assumes the residuals are normally distributed."
+    "section": "American Bird DAG",
+    "text": "American Bird DAG\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((% American&lt;br/&gt;birds in CA))\n    n1((Anchor))\n    n2((Prior&lt;br/&gt;knowledge))\n    n1 --&gt; n0\n    n2 --&gt; n0\n\n\n\n\n\n\n\nWhy isn’t there an arrow connecting Anchor and Prior knowledge?\n\nAssignment of Anchor was randomized. Intervening on Anchor can have no effect on Prior knowledge when their relationship is random."
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#fit-a-lead-soil-model",
-    "href": "course-materials/pre-class/week3_monday.html#fit-a-lead-soil-model",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#coefficient-estimates-unchanged",
+    "href": "course-materials/lecture-slides/week4_monday.html#coefficient-estimates-unchanged",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Fit a lead soil model",
-    "text": "Fit a lead soil model\nLet’s fit a linear model to the lead soil data\n\n# all_samples_north = all samples north of Exide\nsoil_lm &lt;- lm(pb_ppm ~ distance_mi, all_samples_north)\n\ncoef(soil_lm)\n\n(Intercept) distance_mi \n  325.57432   -46.13838 \n\n\n\\[\n\\text{Pb (ppm)} = 325.6 - 46.1 \\times \\text{Distance (mi)} + \\epsilon\n\\]"
+    "section": "Coefficient estimates unchanged",
+    "text": "Coefficient estimates unchanged\nWhen predictors are independent, coefficient estimates don’t affect each other.\n\n\n\ntwo_predictors &lt;- lm(\n  ca_pct ~ anchor + prior_know,\n  birds\n)\ncoef(two_predictors)\n\n(Intercept)    anchor70  prior_know \n  31.786029    7.247627    1.469587 \n\nsummary(two_predictors)$r.squared\n\n[1] 0.09185841\n\n\n\n\none_predictor &lt;- lm(\n  ca_pct ~ anchor,\n  birds\n)\ncoef(one_predictor)\n\n(Intercept)    anchor70 \n   42.76471     7.29085 \n\nsummary(one_predictor)$r.squared\n\n[1] 0.03938223\n\n\n\n\n“Prior knowledge” explained variance, but the estimate for “Anchor” was unaffected."
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#a-closer-look-at-ena-31",
-    "href": "course-materials/pre-class/week3_monday.html#a-closer-look-at-ena-31",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#but-observational-data-is-messy",
+    "href": "course-materials/lecture-slides/week4_monday.html#but-observational-data-is-messy",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "A closer look at ENA-31",
-    "text": "A closer look at ENA-31\nENA-31 is 1.13 mi from Exide. This soil sample had Pb 931 ppm."
+    "section": "But observational data is messy",
+    "text": "But observational data is messy\n\n\nWhen predictors are dependent, their coefficients affect each other.\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n4((Development&lt;br/&gt;history))\n    n5((Location))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 --&gt; n0\n    n4 --&gt; n1\n    n4 --&gt; n2\n    n5 --&gt; n1\n    n5 --&gt; n3\n    n5 --&gt; n4\n\n    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n0,n1,n2,n3,n5 observed\n    class n4 unobserved"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#the-expected-soil-lead-level",
-    "href": "course-materials/pre-class/week3_monday.html#the-expected-soil-lead-level",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#simpsons-paradox-1",
+    "href": "course-materials/lecture-slides/week4_monday.html#simpsons-paradox-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "The expected soil lead level",
-    "text": "The expected soil lead level\nENA-31 is 1.13 mi from Exide. This soil sample had Pb 931 ppm.\nThe expected value of soil Pb at that distance is:\n\\[\n\\begin{align}\n\\text{Pb (ppm)} &= 325.6 - 46.1 \\times \\text{Distance (mi)} \\\\\n\\text{Pb (ppm)} &= 325.6 - 46.1 \\times 1.13 \\\\\n\\text{Pb (ppm)} &= 273.5\n\\end{align}\n\\]\nThe residual is the difference between the observed (931) and the expected (273.5)."
+    "section": "Simpson’s paradox",
+    "text": "Simpson’s paradox\n\nSimpson’s paradox is a phenomenon in probability and statistics in which a trend appears in several groups of data but disappears or reverses when the groups are combined.\n\nWikipedia"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#residual-soil-lead",
-    "href": "course-materials/pre-class/week3_monday.html#residual-soil-lead",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#how-does-bleaching-respond-to-temperature",
+    "href": "course-materials/lecture-slides/week4_monday.html#how-does-bleaching-respond-to-temperature",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Residual soil lead",
-    "text": "Residual soil lead"
+    "section": "How does bleaching respond to temperature?",
+    "text": "How does bleaching respond to temperature?\nEach point is a coral reef. What’s the relationship between temperature and bleaching?"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#picking-the-right-line",
-    "href": "course-materials/pre-class/week3_monday.html#picking-the-right-line",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#how-about-now",
+    "href": "course-materials/lecture-slides/week4_monday.html#how-about-now",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Picking the right line",
-    "text": "Picking the right line\nThere are lots of possible lines through these data, how did the model find its coefficients?\n\\(\\text{Pb (ppm)} = 325.6 - 46.1 \\times \\text{Distance (mi)}\\)"
+    "section": "How about now?",
+    "text": "How about now?\nHow does bleaching respond to temperature?\n\n\nRegions with higher temperatures are associated with corals that are bleaching resistant"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#ols-minimizes-the-squared-residuals",
-    "href": "course-materials/pre-class/week3_monday.html#ols-minimizes-the-squared-residuals",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#draw-the-dag",
+    "href": "course-materials/lecture-slides/week4_monday.html#draw-the-dag",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "OLS minimizes the squared residuals",
-    "text": "OLS minimizes the squared residuals"
+    "section": "Draw the DAG",
+    "text": "Draw the DAG\nDraw a DAG for the coral bleaching scenario. Your variables are:\n\nRegion\nPeak SST\nPercent bleached"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#different-coefficients-yield-higher-ssr",
-    "href": "course-materials/pre-class/week3_monday.html#different-coefficients-yield-higher-ssr",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#the-coral-bleaching-dag",
+    "href": "course-materials/lecture-slides/week4_monday.html#the-coral-bleaching-dag",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Different coefficients yield higher SSR",
-    "text": "Different coefficients yield higher SSR"
+    "section": "The coral bleaching DAG",
+    "text": "The coral bleaching DAG\n“Region” is related to both the Peak SST and the amount of bleaching that occurs.\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Percent&lt;br/&gt;bleached))\n    n1((Peak SST))\n    n2((Region))\n    n1 --&gt; n0\n    n2 --&gt; n1\n    n2 --&gt; n0\n\n\n\n\n\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Percent&lt;br/&gt;bleached))\n    n1((Peak SST))\n    n2((Region))\n    n3((Heat\\ntolerance))\n    n1 --&gt; n0\n    n2 --&gt; n1\n    n2 --&gt; n3\n    n3 --&gt; n0\n\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n3 unobserved\n\n\n\n\n\n\n\n\nIgnorning “Region” opens the door to bias."
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#the-model-summary",
-    "href": "course-materials/pre-class/week3_monday.html#the-model-summary",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#coefficient-reversal-visual",
+    "href": "course-materials/lecture-slides/week4_monday.html#coefficient-reversal-visual",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "The model summary",
-    "text": "The model summary\n\n# all_samples_north = all samples north of Exide\nsoil_lm &lt;- lm(pb_ppm ~ distance_mi, all_samples_north)\n\nsummary(soil_lm)\n\n\nCall:\nlm(formula = pb_ppm ~ distance_mi, data = all_samples_north)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-281.93 -129.12  -68.56   39.69 1851.76 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)   325.57      19.05  17.090  &lt; 2e-16 ***\ndistance_mi   -46.14      15.48  -2.981  0.00296 ** \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 241 on 839 degrees of freedom\nMultiple R-squared:  0.01048,   Adjusted R-squared:  0.0093 \nF-statistic: 8.886 on 1 and 839 DF,  p-value: 0.002957"
+    "section": "Coefficient reversal, visual",
+    "text": "Coefficient reversal, visual"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#the-coefficient-estimates-beta_0-beta_1",
-    "href": "course-materials/pre-class/week3_monday.html#the-coefficient-estimates-beta_0-beta_1",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#coefficient-reversal-numeric",
+    "href": "course-materials/lecture-slides/week4_monday.html#coefficient-reversal-numeric",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "The coefficient estimates \\(\\beta_0, \\beta_1\\)",
-    "text": "The coefficient estimates \\(\\beta_0, \\beta_1\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\n\nEstimate\nStd. Error\nt value\nPr(&gt;|t|)\n\n\n\n\n(Intercept)\n325.57\n19.05\n17.090\n&lt; 2e-16\n\n\ndistance_mi\n-46.14\n15.48\n-2.981\n0.00296"
+    "section": "Coefficient reversal, numeric",
+    "text": "Coefficient reversal, numeric\n\ntwo_predictors &lt;- lm(percent_bleached ~ region + peak_sst, coral)\nsummary(two_predictors)\n\nCoefficients:\n               Estimate Std. Error\n(Intercept)    -192.069     28.333\nregionModerate  -20.797      1.478\nregionWarmest   -42.284      2.286\npeak_sst          9.447      1.011 \n\none_predictor &lt;- lm(percent_bleached ~ peak_sst, coral)\nsummary(one_predictor)\n\nCoefficients:\n               Estimate Std. Error\n(Intercept)   262.0372     27.8707\npeak_sst       -6.9329      0.9603"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#the-standard-errors-sebeta",
-    "href": "course-materials/pre-class/week3_monday.html#the-standard-errors-sebeta",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#tomorrows-lab",
+    "href": "course-materials/lecture-slides/week4_monday.html#tomorrows-lab",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "The standard errors \\(SE(\\beta)\\)",
-    "text": "The standard errors \\(SE(\\beta)\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\n\nEstimate\nStd. Error\nt value\nPr(&gt;|t|)\n\n\n\n\n(Intercept)\n325.57\n19.05\n17.090\n&lt; 2e-16\n\n\ndistance_mi\n-46.14\n15.48\n-2.981\n0.00296"
+    "section": "Tomorrow’s lab",
+    "text": "Tomorrow’s lab\n\nTomorrow, you will simulate data and fit a multiple regression model for a Simpson’s paradox scenario.\nWork in groups to brainstorm ideas. Sketch a figure and draw a DAG.\n\n\n\nRequirements:\n\nTwo predictors: categorical (2 levels) + continuous. These are correlated.\nOne continuous response.\nThe relationship reverses when the data are grouped."
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#the-residual-standard-deviation-sigma",
-    "href": "course-materials/pre-class/week3_monday.html#the-residual-standard-deviation-sigma",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#correlated-predictors-open-the-door-to-bias",
+    "href": "course-materials/lecture-slides/week4_monday.html#correlated-predictors-open-the-door-to-bias",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "The residual standard deviation \\(\\sigma\\)",
-    "text": "The residual standard deviation \\(\\sigma\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\nsigma(soil_lm)\n\n[1] 241.0151"
+    "section": "Correlated predictors open the door to bias",
+    "text": "Correlated predictors open the door to bias"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#sigma-visualized",
-    "href": "course-materials/pre-class/week3_monday.html#sigma-visualized",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#multiple-regression-adds-predictors",
+    "href": "course-materials/lecture-slides/week4_monday.html#multiple-regression-adds-predictors",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "\\(\\sigma\\) visualized",
-    "text": "\\(\\sigma\\) visualized"
+    "section": "Multiple regression adds predictors…",
+    "text": "Multiple regression adds predictors…\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\dots + \\beta_n x_n + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#say-hello-to-the-linear-model",
-    "href": "course-materials/pre-class/week3_monday.html#say-hello-to-the-linear-model",
+    "objectID": "course-materials/lecture-slides/week4_monday.html#which-adjusts-for-bias",
+    "href": "course-materials/lecture-slides/week4_monday.html#which-adjusts-for-bias",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Say hello to the linear model",
-    "text": "Say hello to the linear model\nThe linear model is the building block of regression modeling.\nEvery model you’ll see in this course from now on will build on this.\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
+    "section": "…which adjusts for bias",
+    "text": "…which adjusts for bias\n\ntwo_predictors &lt;- lm(percent_bleached ~ region + peak_sst, coral)\nsummary(two_predictors)\n\nCoefficients:\n               Estimate Std. Error\n(Intercept)    -192.069     28.333\nregionModerate  -20.797      1.478\nregionWarmest   -42.284      2.286\npeak_sst          9.447      1.011 \n\none_predictor &lt;- lm(percent_bleached ~ peak_sst, coral)\nsummary(one_predictor)\n\nCoefficients:\n               Estimate Std. Error\n(Intercept)   262.0372     27.8707\npeak_sst       -6.9329      0.9603"
   },
   {
-    "objectID": "course-materials/pre-class/week3_monday.html#a-linear-model-describes-a-relationship",
-    "href": "course-materials/pre-class/week3_monday.html#a-linear-model-describes-a-relationship",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "A linear model describes a relationship",
-    "text": "A linear model describes a relationship"
-  },
-  {
-    "objectID": "course-materials/pre-class/week3_monday.html#components-of-the-linear-model",
-    "href": "course-materials/pre-class/week3_monday.html#components-of-the-linear-model",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Components of the linear model",
-    "text": "Components of the linear model\n\nCoefficients\nResiduals\nResidual standard deviation\n\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
-  },
-  {
-    "objectID": "course-materials/pre-class/week3_monday.html#interpreting-the-linear-model",
-    "href": "course-materials/pre-class/week3_monday.html#interpreting-the-linear-model",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interpreting the linear model",
-    "text": "Interpreting the linear model\n\n\n\n\n\n\nEstimate\nStd. Error\nt value\nPr(&gt;|t|)\n\n\n\n\n(Intercept)\n325.57\n19.05\n17.090\n&lt; 2e-16\n\n\ndistance_mi\n-46.14\n15.48\n-2.981\n0.00296\n\n\n\n\n\n\n\n\\[\n\\text{Pb (ppm)} = 325.6 - 46.1 \\times \\text{Distance (mi)} + \\epsilon\n\\]"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#learning-objectives",
-    "href": "course-materials/pre-class/week4_monday.html#learning-objectives",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Learning objectives",
-    "text": "Learning objectives\n\nVisualize data with multiple predictors\nDescribe causal relationships with DAGs\nModel multiple predictors simultaneously"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#so-many-influences",
-    "href": "course-materials/pre-class/week4_monday.html#so-many-influences",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "So many influences!",
-    "text": "So many influences!"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-in-older-homes",
-    "href": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-in-older-homes",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Pb more prevalent in older homes",
-    "text": "Pb more prevalent in older homes\nSoil Pb increases by 25.4 ppm per decade of home age"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-closer-to-freeways",
-    "href": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-closer-to-freeways",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Pb more prevalent closer to freeways",
-    "text": "Pb more prevalent closer to freeways\nSoil Pb decreases by 81.8 ppm per mile from freeway"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-downwind",
-    "href": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-downwind",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Pb more prevalent downwind",
-    "text": "Pb more prevalent downwind\nSoil Pb increases by 66 ppm downwind of Exide"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#correlated-influences",
-    "href": "course-materials/pre-class/week4_monday.html#correlated-influences",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Correlated influences",
-    "text": "Correlated influences\nDid the soil Pb in downwind homes come from Exide … or from lead paint and freeways?"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#who-caused-what",
-    "href": "course-materials/pre-class/week4_monday.html#who-caused-what",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Who caused what?",
-    "text": "Who caused what?\n\n\nThis directed acyclic graph (DAG) describes the presumed causal relationships between variables.\nIt’s missing something - the predictors aren’t independent from each other.\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 --&gt; n0"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#common-causes",
-    "href": "course-materials/pre-class/week4_monday.html#common-causes",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Common causes",
-    "text": "Common causes\n\n\nThis DAG describes causal relationships underlying the predictors.\nCausal = intervening on one variable causes a change in the other.\n\n\nIntervening on Location changes Freeway proximity and Up/down wind\nIntervening on Location changes Development history (unobserved)\n\nIntervening on Development history changes Freeway and Lead paint\n\n\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n4((Development&lt;br/&gt;history))\n    n5((Location))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 --&gt; n0\n    n4 --&gt; n1\n    n4 --&gt; n2\n    n5 --&gt; n1\n    n5 --&gt; n3\n    n5 --&gt; n4\n\n    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n0,n1,n2,n3,n5 observed\n    class n4 unobserved"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#going-from-dag-to-model",
-    "href": "course-materials/pre-class/week4_monday.html#going-from-dag-to-model",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Going from DAG to model",
-    "text": "Going from DAG to model\n\n\nWe are most interested in the Up/downwind -&gt; Soil Pb connection.\nProblem: Confounding variables bias our estimates.\nSolution: Multiple regression controls for confounds.\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n4((Development&lt;br/&gt;history))\n    n5((Location))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 ==&gt; n0\n    n4 --&gt; n1\n    n4 --&gt; n2\n    n5 --&gt; n1\n    n5 --&gt; n3\n    n5 --&gt; n4\n\n    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n0,n1,n2,n3,n5 observed\n    class n4 unobserved"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#multiple-regression-compares-like-to-like",
-    "href": "course-materials/pre-class/week4_monday.html#multiple-regression-compares-like-to-like",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Multiple regression compares like-to-like",
-    "text": "Multiple regression compares like-to-like\nTo estimate the Up/downwind -&gt; Soil Pb relationship, we’re really asking:\n\nIf we hold all else equal, what’s the difference in Soil Pb across the Up/downwind categories?"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#in-statistical-notation",
-    "href": "course-materials/pre-class/week4_monday.html#in-statistical-notation",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "In statistical notation",
-    "text": "In statistical notation\nGenerally:\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\dots + \\beta_n x_n + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#statistical-notation-for-two-predictors",
-    "href": "course-materials/pre-class/week4_monday.html#statistical-notation-for-two-predictors",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Statistical notation for two predictors",
-    "text": "Statistical notation for two predictors\nIf we consider just wind direction and home age:\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Home Age} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#visually",
-    "href": "course-materials/pre-class/week4_monday.html#visually",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Visually",
-    "text": "Visually"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#interpreting-coefficients",
-    "href": "course-materials/pre-class/week4_monday.html#interpreting-coefficients",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interpreting coefficients",
-    "text": "Interpreting coefficients\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind}+ \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n294.99\n\n\nwind_directionUpwind\n-65.84\n\n\n\n\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Home Age} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n54.02\n\n\nwind_directionUpwind\n-40.98\n\n\nhome_age\n2.35\n\n\n\n\n\n\n\nThe first model estimates 66 ppm more Soil Pb downwind of Exide, the estimate is biased by the confounding effect of Home Age.\nFor two homes of the same age, the second model estimates 41 ppm more Soil Pb downwind of Exide."
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#statistical-notation-for-two-predictors-again",
-    "href": "course-materials/pre-class/week4_monday.html#statistical-notation-for-two-predictors-again",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Statistical notation for two predictors (again)",
-    "text": "Statistical notation for two predictors (again)\nNow let’s consider wind direction and distance to freeway:\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Freeway Distance} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#visually-again",
-    "href": "course-materials/pre-class/week4_monday.html#visually-again",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Visually (again)",
-    "text": "Visually (again)"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#interpreting-coefficients-again",
-    "href": "course-materials/pre-class/week4_monday.html#interpreting-coefficients-again",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interpreting coefficients (again)",
-    "text": "Interpreting coefficients (again)\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind}+ \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n294.99\n\n\nwind_directionUpwind\n-65.84\n\n\n\n\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Freeway Distance} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n308.16\n\n\nwind_directionUpwind\n-12.19\n\n\ndist_to_freeway_mi\n-75.60\n\n\n\n\n\n\n\nFor two homes of the same freeway distance, the second model estimates 12 ppm more Soil Pb downwind of Exide."
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#statistical-notation-for-three-predictors",
-    "href": "course-materials/pre-class/week4_monday.html#statistical-notation-for-three-predictors",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Statistical notation for three predictors",
-    "text": "Statistical notation for three predictors\nNow let’s consider wind direction, home age, and distance to freeway:\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Home Age} \\\\ &\\quad + \\beta_3 \\text{Freeway Distance} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#visually-three-predictors",
-    "href": "course-materials/pre-class/week4_monday.html#visually-three-predictors",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Visually (three predictors)",
-    "text": "Visually (three predictors)\nHarder to visualize now! Use a mix of color, facets, and line type."
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#interpreting-coefficients-three-predictors",
-    "href": "course-materials/pre-class/week4_monday.html#interpreting-coefficients-three-predictors",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interpreting coefficients (three predictors)",
-    "text": "Interpreting coefficients (three predictors)\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind}+ \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n294.99\n\n\nwind_directionUpwind\n-65.84\n\n\n\n\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Home Age} \\\\\n&\\quad + \\beta_3 \\text{Freeway Distance} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n100.08\n\n\nwind_directionUpwind\n-7.65\n\n\nhome_age\n1.97\n\n\ndist_to_freeway_mi\n-49.91\n\n\n\n\n\n\n\nFor two homes of the same age and freeway distance, the second model estimates 7.7 ppm more Soil Pb downwind of Exide."
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#multiple-regression-1",
-    "href": "course-materials/pre-class/week4_monday.html#multiple-regression-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Multiple regression",
-    "text": "Multiple regression\nWhen multiple predictors have relationships with each other, the door opens to biased coefficient estimates."
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#describing-relationships",
-    "href": "course-materials/pre-class/week4_monday.html#describing-relationships",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Describing relationships",
-    "text": "Describing relationships\n\n\nA directed acyclic graph (DAG) describes the relationships between variables.\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n4((Development&lt;br/&gt;history))\n    n5((Location))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 --&gt; n0\n    n4 --&gt; n1\n    n4 --&gt; n2\n    n5 --&gt; n1\n    n5 --&gt; n3\n    n5 --&gt; n4\n\n    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n0,n1,n2,n3,n5 observed\n    class n4 unobserved"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#multiple-regression-2",
-    "href": "course-materials/pre-class/week4_monday.html#multiple-regression-2",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Multiple regression",
-    "text": "Multiple regression\nGoing from single to multiple regression involves adding coefficients for each new predictor.\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\dots + \\beta_n x_n + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
-  },
-  {
-    "objectID": "course-materials/pre-class/week4_monday.html#interpretation",
-    "href": "course-materials/pre-class/week4_monday.html#interpretation",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interpretation",
-    "text": "Interpretation\nA coefficient in multiple regression describes the relationship between predictor and response when holding all else equal.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n54.02\n\n\nwind_directionUpwind\n-40.98\n\n\nhome_age\n2.35"
-  },
-  {
-    "objectID": "course-materials/labs/lab2-solution.html",
-    "href": "course-materials/labs/lab2-solution.html",
-    "title": "Lab 2: Foundations of Inference",
+    "objectID": "course-materials/labs/lab2.html",
+    "href": "course-materials/labs/lab2.html",
+    "title": "Lab 2: Investigating claims using inference",
     "section": "",
     "text": "Lead is elevated in the drip line compared to the rest of the yard.\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\n\nThese are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a statistical experiment to quantify the evidence in the sample, and interpret your results responsibly.\n\n\n\n\n\n\n\n\nClaim\nQuestion type\nStatistical experiment\n\n\n\n\nLead is elevated in the drip line compared to the rest of the yard.\nYes/no?\nPermutation\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\nHow much?\nBootstrapping"
   },
   {
-    "objectID": "course-materials/labs/lab2-solution.html#background",
-    "href": "course-materials/labs/lab2-solution.html#background",
-    "title": "Lab 2: Foundations of Inference",
+    "objectID": "course-materials/labs/lab2.html#background",
+    "href": "course-materials/labs/lab2.html#background",
+    "title": "Lab 2: Investigating claims using inference",
     "section": "",
     "text": "Lead is elevated in the drip line compared to the rest of the yard.\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\n\nThese are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a statistical experiment to quantify the evidence in the sample, and interpret your results responsibly.\n\n\n\n\n\n\n\n\nClaim\nQuestion type\nStatistical experiment\n\n\n\n\nLead is elevated in the drip line compared to the rest of the yard.\nYes/no?\nPermutation\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\nHow much?\nBootstrapping"
   },
   {
-    "objectID": "course-materials/labs/lab2-solution.html#investigating-yesno-questions-with-permutation",
-    "href": "course-materials/labs/lab2-solution.html#investigating-yesno-questions-with-permutation",
-    "title": "Lab 2: Foundations of Inference",
+    "objectID": "course-materials/labs/lab2.html#investigating-yesno-questions-with-permutation",
+    "href": "course-materials/labs/lab2.html#investigating-yesno-questions-with-permutation",
+    "title": "Lab 2: Investigating claims using inference",
     "section": "Investigating “yes/no” questions with permutation",
-    "text": "Investigating “yes/no” questions with permutation\nLet’s investigate the claim “Lead is elevated in the drip line compared to the rest of the yard” as a yes/no question.\n\nState your hypotheses\nRecall that it is more straightforward to find evidence against a hypothesis than for it. So when we investigate yes/no questions, we set up a null hypothesis and see how much evidence there is against it.\nState the null and alternative hypotheses for this claim.\n\\(H_0\\): The difference in means is 0.\n\\(H_A\\): The difference in means is greater than 0.\n\n\nCalculate the observed value of the statistic\nWe’ll use the difference in means between samples from the drip line and the yard as the statistic for this question.\n\n\n\n\n\n\nImportant\n\n\n\nRemember, the mean isn’t always the most appropriate statistic for representing a distribution! Always think critically about how your data relates to the question.\n\n\nCalculate the difference in means between the drip line and yard observations in the sample. Remember, this should be a single number (not a data frame or pair of means).\n\nlocation_summ &lt;- soil_cores |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\nobs_diff_means &lt;- location_summ$mean_pb_ppm[2] - location_summ$mean_pb_ppm[1]\n\nobs_diff_means\n\n[1] 172.9459\n\n\n\n\nShuffle the predictor variable and recalculate the statistic\nThis statistical experiment simulates the expected variation in our statistic (difference in means) just due to chance alone. To conduct this experiment, we have to break the connection between the predictor variable (location code) and response (lead concentration). Randomizing the predictor leaves the variation in the response untouched, while removing any assocation between the two.\nShuffle the predictor variable and recalculate the statistic. Do it just once - we’ll repeat in the next section.\n\n\n\n\n\n\nTip\n\n\n\nsample() can be used to shuffle vectors.\n\n\n\nshuffled_summ &lt;- soil_cores |&gt;\n  mutate(location_code = sample(location_code)) |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\nshuffled_diff_means &lt;- shuffled_summ$mean_pb_ppm[2] -\n  shuffled_summ$mean_pb_ppm[1]\n\nshuffled_diff_means\n\n[1] -10.1124\n\n\n\n\nRepeat shuffling\nIn the previous section, you simulated one statistic from the null hypothesis. What we need now is a whole bunch of statistics from the null hypothesis - our null distribution.\nRepeat shuffling 10,000 times to create a vector that simulates the null distribution.\n\n\n\n\n\n\nTip\n\n\n\nreplicate() repeatedly runs expressions over and over.\n\n\n\nlocation_null_dist &lt;- replicate(\n  1e3,\n  {\n    shuffled_summ &lt;- soil_cores |&gt;\n      mutate(location_code = sample(location_code)) |&gt;\n      summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\n    shuffled_summ$mean_pb_ppm[2] -\n      shuffled_summ$mean_pb_ppm[1]\n  }\n)\n\nVisualize the null distribution using a histogram.\n\ntibble(diff_means = location_null_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCompare the observed to the null\nThe previous figure showed the expected distribution of the statistic (the difference in mean lead between drip line and yard) under the null hypothesis. How does that compare to the observed value?\nPlot the null distribution again, but this time add a vertical line indicating the observed statistic.\n\ntibble(diff_means = location_null_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5) +\n  geom_vline(xintercept = obs_diff_means, color = \"magenta\", linewidth = 1.5)\n\n\n\n\n\n\n\n\n\n\n\n\nCalculate your p-value.\n\n\n\n\n\n\nNote\n\n\n\nA p-value is the probability of observing the sample (or something more extreme) if the null hypothesis is true.\n\n\n\npval &lt;- mean(location_null_dist &gt; obs_diff_means)\n\npval\n\n[1] 0\n\n\n\n\nInterpret your results\nBased on your p-value, do you reject or fail to reject the null hypothesis?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
+    "text": "Investigating “yes/no” questions with permutation\nLet’s investigate the claim “Lead is elevated in the drip line compared to the rest of the yard” as a yes/no question.\n\nState your hypotheses\nRecall that it is more straightforward to find evidence against a hypothesis than for it. So when we investigate yes/no questions, we set up a null hypothesis and see how much evidence there is against it.\nState the null and alternative hypotheses for this claim.\n\\(H_0\\):\n\\(H_A\\):\n\n\nCalculate the observed value of the statistic\nWe’ll use the difference in means between samples from the drip line and the yard as the statistic for this question.\n\n\n\n\n\n\nImportant\n\n\n\nRemember, the mean isn’t always the most appropriate statistic for representing a distribution! Always think critically about how your data relates to the question.\n\n\nCalculate the difference in means between the drip line and yard observations in the sample. Remember, this should be a single number (not a data frame or pair of means).\n\n\nShuffle the predictor variable and recalculate the statistic\nThis statistical experiment simulates the expected variation in our statistic (difference in means) just due to chance alone. To conduct this experiment, we have to break the connection between the predictor variable (location code) and response (lead concentration). Randomizing the predictor leaves the variation in the response untouched, while removing any assocation between the two.\nShuffle the predictor variable and recalculate the statistic. Do it just once - we’ll repeat in the next section.\n\n\n\n\n\n\nTip\n\n\n\nsample() can be used to shuffle vectors.\n\n\n\n\nRepeat shuffling\nIn the previous section, you simulated one statistic from the null hypothesis. What we need now is a whole bunch of statistics from the null hypothesis - our null distribution.\nRepeat shuffling 10,000 times to create a vector that simulates the null distribution.\n\n\n\n\n\n\nTip\n\n\n\nreplicate() repeatedly runs expressions over and over.\n\n\nVisualize the null distribution using a histogram.\n\n\nCompare the observed to the null\nThe previous figure showed the expected distribution of the statistic (the difference in mean lead between drip line and yard) under the null hypothesis. How does that compare to the observed value?\nPlot the null distribution again, but this time add a vertical line indicating the observed statistic.\nCalculate your p-value.\n\n\n\n\n\n\nNote\n\n\n\nA p-value is the probability of observing the sample (or something more extreme) if the null hypothesis is true.\n\n\n\n\nInterpret your results\nBased on your p-value, do you reject or fail to reject the null hypothesis?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
   },
   {
-    "objectID": "course-materials/labs/lab2-solution.html#investigating-how-much-questions-with-bootstrapping",
-    "href": "course-materials/labs/lab2-solution.html#investigating-how-much-questions-with-bootstrapping",
-    "title": "Lab 2: Foundations of Inference",
+    "objectID": "course-materials/labs/lab2.html#investigating-how-much-questions-with-bootstrapping",
+    "href": "course-materials/labs/lab2.html#investigating-how-much-questions-with-bootstrapping",
+    "title": "Lab 2: Investigating claims using inference",
     "section": "Investigating “how much?” questions with bootstrapping",
-    "text": "Investigating “how much?” questions with bootstrapping\nNow, let’s investigate the claim “Neighborhoods north of the Exide plant were exposed to more lead than those south” as a how much? question.\n\nCalculate the observed value of the statistic\nOnce again, let’s use the difference in means as our statistic. Calculate the difference in means between properties in the extended north area and those in the extended south area.\n\n\n\n\n\n\nTip\n\n\n\nUse dplyr functions to wrangle the soil core data for this part. Properties starting with “ENA” are in the extended north area, and the “ESA” prefix means extended south area. str_sub() will help here.\n\n\n\nena_esa &lt;- soil_cores |&gt;\n  mutate(area = str_sub(property_id, 1, 3)) |&gt;\n  filter(area %in% c(\"ENA\", \"ESA\"))\n\narea_summ &lt;- ena_esa |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = area) |&gt;\n  arrange(area)\n\nobs_diff_means &lt;- area_summ$mean_pb_ppm[1] - area_summ$mean_pb_ppm[2]\n\nobs_diff_means\n\n[1] 72.45974\n\n\n\n\nResample observations and recalculate the statistic\nBootstrapping simulates the expected variation in our statistic (difference in means) from sampling. Compare this to permutation, which is about variation just due to chance. For this experiment, we will assume the sample is representative of the population and repeatedly draw “new” samples. This process simulates the process of collecting new samples.\nResample rows from the data frame and recalculate the statistic. Repeat this 10,000 times to simulate the sampling distribution.\n\n\n\n\n\n\nTip\n\n\n\nUse slice_sample() with replacement to get bootstrap samples.\n\n\n\narea_samp_dist &lt;- replicate(\n  1e3,\n  {\n    resampled_summ &lt;- ena_esa |&gt;\n      slice_sample(n = nrow(ena_esa), replace = TRUE) |&gt;\n      summarize(mean_pb_ppm = mean(pb_ppm), .by = area) |&gt;\n      arrange(area)\n\n    resampled_summ$mean_pb_ppm[1] -\n      resampled_summ$mean_pb_ppm[2]\n  }\n)\n\nVisualize the sampling distribution using a histogram.\n\ntibble(diff_means = area_samp_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFind the confidence interval\nThe previous figure showed how your statistic varies due to slight differences between samples. Use this sampling distribution to estimate the 95% confidence interval.\n\n\n\n\n\n\nNote\n\n\n\nA confidence interval is a range of values that you are confident contains the population parameter.\n\n\n\n\n\n\n\n\nTip\n\n\n\nUse the quantile() function to find the middle 95% of the sampling distribution.\n\n\n\narea_95ci &lt;- quantile(area_samp_dist, c(0.025, 0.975))\n\nPlot the sampling distribution again, but this time add vertical lines indicating the observed statistic and the 95% CI.\n\ntibble(diff_means = area_samp_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5) +\n  geom_vline(xintercept = obs_diff_means, color = \"magenta\", linewidth = 1.5) +\n  geom_vline(xintercept = area_95ci, linetype = \"dashed\", linewidth = 1.5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInterpret your results\nBased on your confidence interval, how much could the difference in lead exposure between north and south be?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
+    "text": "Investigating “how much?” questions with bootstrapping\nNow, let’s investigate the claim “Neighborhoods north of the Exide plant were exposed to more lead than those south” as a how much? question.\n\nCalculate the observed value of the statistic\nOnce again, let’s use the difference in means as our statistic. Calculate the difference in means between properties in the extended north area and those in the extended south area.\n\n\n\n\n\n\nTip\n\n\n\nUse dplyr functions to wrangle the soil core data for this part. Properties starting with “ENA” are in the extended north area, and the “ESA” prefix means extended south area. str_sub() will help here.\n\n\n\n\nResample observations and recalculate the statistic\nBootstrapping simulates the expected variation in our statistic (difference in means) from sampling. Compare this to permutation, which is about variation just due to chance. For this experiment, we will assume the sample is representative of the population and repeatedly draw “new” samples. This process simulates the process of collecting new samples.\nResample rows from the data frame and recalculate the statistic. Repeat this 10,000 times to simulate the sampling distribution.\n\n\n\n\n\n\nTip\n\n\n\nUse slice_sample() with replacement to get bootstrap samples.\n\n\nVisualize the sampling distribution using a histogram.\n\n\nFind the confidence interval\nThe previous figure showed how your statistic varies due to slight differences between samples. Use this sampling distribution to estimate the 95% confidence interval.\n\n\n\n\n\n\nNote\n\n\n\nA confidence interval is a range of values that you are confident contains the population parameter.\n\n\n\n\n\n\n\n\nTip\n\n\n\nUse the quantile() function to find the middle 95% of the sampling distribution.\n\n\nPlot the sampling distribution again, but this time add vertical lines indicating the observed statistic and the 95% CI.\n\n\nInterpret your results\nBased on your confidence interval, how much could the difference in lead exposure between north and south be?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
   },
   {
-    "objectID": "course-materials/labs/lab2-solution.html#recap",
-    "href": "course-materials/labs/lab2-solution.html#recap",
-    "title": "Lab 2: Foundations of Inference",
+    "objectID": "course-materials/labs/lab2.html#recap",
+    "href": "course-materials/labs/lab2.html#recap",
+    "title": "Lab 2: Investigating claims using inference",
     "section": "Recap",
     "text": "Recap\nIn this lab, you investigated two claims using statistical experiments to evaluate evidence.\nFrom this exercise, the practical information you should remember:\n\n\n\n\n\n\n\n\n\n“yes/no” questions\n“how much?” questions\n\n\n\n\nInference target\nP-value\nConfidence interval\n\n\nStatistical experiment\nPermutation\nBootstrapping\n\n\nSimulate a…\nNull distribution\nSampling distribution\n\n\nCentered on…\n0\nThe observed statistic\n\n\nRandomize with…\nsample() (no replacement)\nslice_sample() (with replacement)\n\n\nSimulate repeatedly\nreplicate()\nreplicate()\n\n\n\nMore importantly, remember how to use these tools responsibly. A p-value and a confidence interval are tools for checking our own cognitive biases. They are useful lines of evidence, but no one statistical procedure ever tells the whole story.\nAlways think critically!"
   },
   {
-    "objectID": "course-materials/labs/lab2-solution.html#keep-going",
-    "href": "course-materials/labs/lab2-solution.html#keep-going",
-    "title": "Lab 2: Foundations of Inference",
+    "objectID": "course-materials/labs/lab2.html#keep-going",
+    "href": "course-materials/labs/lab2.html#keep-going",
+    "title": "Lab 2: Investigating claims using inference",
     "section": "Keep going?",
     "text": "Keep going?\nDone early? Having fun and want more? Try this out.\nP-values are sensitive to sample sizes. Do the permutation exercise again, but this time only on a sub-sample of the data. What kinds of p-values do you get if you only use 20 observations? 50? 100? 1000? Repeat the statistical experiment many times and visualize the relationship between your p-values and your sub-sample size using boxplots."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#learning-objectives",
+    "href": "course-materials/pre-class/week4_wednesday.html#learning-objectives",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Learning objectives",
+    "text": "Learning objectives\n\nRecognize interactive terms\nModel regressions with interactions\nCompare interactive models to additive"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#recall-multiple-regression",
+    "href": "course-materials/pre-class/week4_wednesday.html#recall-multiple-regression",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Recall multiple regression",
+    "text": "Recall multiple regression\n\n\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (x_2=B) + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\n\n\n\n\n\n\n\nEach predictor (\\(x_1\\), \\(x_2=B\\)) has it’s own coefficient (\\(\\beta_1\\), \\(\\beta_2\\)). They act on \\(y\\) separately."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#interactions-mediate-relationships",
+    "href": "course-materials/pre-class/week4_wednesday.html#interactions-mediate-relationships",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interactions mediate relationships",
+    "text": "Interactions mediate relationships\nIn regular multiple regression, the relationship between \\(x_1\\) and \\(y\\) is the same regardless of \\(x_2\\).\nBut what if the relationship between \\(x_1\\) and \\(y\\) varies with \\(x_2\\)?"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#deforestation-and-agriculture",
+    "href": "course-materials/pre-class/week4_wednesday.html#deforestation-and-agriculture",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Deforestation and agriculture",
+    "text": "Deforestation and agriculture\n\n\nLand sparing hypothesis\nIncreasing yields reduces deforestation.\n\nRebound hypothesis\nIncreasing yields incentivizes deforestation.\n\n\n\nA section of the Amazon rainforest stands next to soy fields in Belterra, Para state, Brazil, on Nov. 30, 2019. (AP Photo/Leo Correa, File)"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#two-hypotheses",
+    "href": "course-materials/pre-class/week4_wednesday.html#two-hypotheses",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Two hypotheses",
+    "text": "Two hypotheses\n\nWhat’s the relationship between deforestation and increasing yields?"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#which-hypothesis-is-supported",
+    "href": "course-materials/pre-class/week4_wednesday.html#which-hypothesis-is-supported",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Which hypothesis is supported?",
+    "text": "Which hypothesis is supported?\nIncreasing yields increases deforestation: rebound hypothesis"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#does-the-relationship-vary",
+    "href": "course-materials/pre-class/week4_wednesday.html#does-the-relationship-vary",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Does the relationship vary?",
+    "text": "Does the relationship vary?"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#interactive-terms",
+    "href": "course-materials/pre-class/week4_wednesday.html#interactive-terms",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interactive terms",
+    "text": "Interactive terms\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_1 x_2 + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\nAn interaction term multiplies two predictors together"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#deforestation-and-agriculture-model",
+    "href": "course-materials/pre-class/week4_wednesday.html#deforestation-and-agriculture-model",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Deforestation and agriculture model",
+    "text": "Deforestation and agriculture model\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\nWhat’s the relationship between deforestion and yield across groups?"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes",
+    "href": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interactions vary slopes",
+    "text": "Interactions vary slopes\nNo indigenous stewardship\n\\(\\text{Indig. Steward} = 0\\)\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 0 + \\beta_3 \\text{Yield} \\times 0 \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield}\n\\end{align}\n\\]\n\nThe slope is \\(\\beta_1\\)"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes-1",
+    "href": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interactions vary slopes",
+    "text": "Interactions vary slopes\nYes indigenous stewardship\n\\(\\text{Indig. Steward} = 1\\)\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 1 + \\beta_3 \\text{Yield} \\times 1 \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 + \\beta_3 \\text{Yield} \\\\\n\\text{Deforestation} &= \\left( \\beta_0 + \\beta_2 \\right) + \\left( \\beta_1 + \\beta_3 \\right) \\text{Yield}\n\\end{align}\n\\]\n\nThe slope is \\(\\beta_1 + \\beta_3\\)"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes-2",
+    "href": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes-2",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interactions vary slopes",
+    "text": "Interactions vary slopes"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#additive-vs.-interactive",
+    "href": "course-materials/pre-class/week4_wednesday.html#additive-vs.-interactive",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Additive vs. interactive",
+    "text": "Additive vs. interactive\n\nAdditive\n\\[\n\\text{Deforestation} = \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} + \\epsilon\n\\]\nInteractive\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} + \\epsilon\n\\end{align}\n\\]\n\nThe only difference is the interaction term, \\(\\beta_3 \\text{Yield} \\times \\text{Indig. Steward}\\)"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#additive-model-slope",
+    "href": "course-materials/pre-class/week4_wednesday.html#additive-model-slope",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Additive model: slope",
+    "text": "Additive model: slope\nYes indigenous stewardship\n\\(\\text{Indig. Steward} = 1\\)\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 1 \\\\\n\\text{Deforestation} &= \\left( \\beta_0 + \\beta_2 \\right) + \\beta_1 \\text{Yield}\n\\end{align}\n\\]\n\nThe slope is \\(\\beta_1\\), the same as the no stewardship group. Only the intercept changes."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#interactive-model-slope",
+    "href": "course-materials/pre-class/week4_wednesday.html#interactive-model-slope",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interactive model: slope",
+    "text": "Interactive model: slope\nYes indigenous stewardship\n\\(\\text{Indig. Steward} = 1\\)\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} \\\\\n\\text{Deforestation} &= \\left( \\beta_0 + \\beta_2 \\right) + \\left( \\beta_1 + \\beta_3 \\right) \\text{Yield}\n\\end{align}\n\\]\n\nThe slope is \\(\\beta_1 + \\beta_3\\), different from the no stewardship group. Both the intercept and slope change."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#additive-vs.-interactive-1",
+    "href": "course-materials/pre-class/week4_wednesday.html#additive-vs.-interactive-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Additive vs. interactive",
+    "text": "Additive vs. interactive\n\n\nThe additive model forces parallel lines. It misses that stewardship removes the rebound effect."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#when-to-use-interactions",
+    "href": "course-materials/pre-class/week4_wednesday.html#when-to-use-interactions",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "When to use interactions",
+    "text": "When to use interactions\n\n\nAdditive\nEach predictor affects the response independently.\n\\(x_2\\) shifts \\(y\\) up or down, but the effect of \\(x_1\\) on \\(y\\) is the same.\n\nInteractive\nOne predictor changes the effect of another on the response.\nThe effect of \\(x_1\\) on \\(y\\) depends on \\(x_2\\).\n\n\n\nAsk: “Does the relationship between \\(x_1\\) and \\(y\\) depend on \\(x_2\\)?”"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#additive-is-sufficient",
+    "href": "course-materials/pre-class/week4_wednesday.html#additive-is-sufficient",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Additive is sufficient",
+    "text": "Additive is sufficient\n\n\nSnowpack and elevation\nNorth-facing slopes hold more snow than south-facing slopes at every elevation.\nBut snowpack increases with elevation at the same rate on both.\nAspect shifts the line; it doesn’t change the slope."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_wednesday.html#interactive-is-necessary",
+    "href": "course-materials/pre-class/week4_wednesday.html#interactive-is-necessary",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interactive is necessary",
+    "text": "Interactive is necessary\n\n\nStream and air temperature\nStreams warm as air temperature rises.\nBut a riparian canopy shades the stream, so shaded streams warm more slowly.\nCanopy changes the slope of the relationship."
   },
   {
     "objectID": "course-materials/pre-class/week3_wednesday.html#learning-objectives",
@@ -1047,14 +991,14 @@
     "href": "course-materials/week4.html",
     "title": "Multiple regression",
     "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions\nCIR 3  Interactions  Interactions in R"
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet\nCIR 3  Interactions  Interactions in R"
   },
   {
     "objectID": "course-materials/week4.html#lecture-materials",
     "href": "course-materials/week4.html#lecture-materials",
     "title": "Multiple regression",
     "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions\nCIR 3  Interactions  Interactions in R"
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet\nCIR 3  Interactions  Interactions in R"
   },
   {
     "objectID": "course-materials/week2.html",
@@ -1743,304 +1687,514 @@
     "text": "Interpretation\nInterpret your final plot from the perspective of reliability. If you’re estimating the representative soil lead concentration for a property, how does sample location affect measurement reliability? What do you think you should do with the data from different locations?"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#learning-objectives",
-    "href": "course-materials/pre-class/week4_wednesday.html#learning-objectives",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#todays-agenda",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Learning objectives",
-    "text": "Learning objectives\n\nRecognize interactive terms\nModel regressions with interactions\nCompare interactive models to additive"
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nCategorical predictors with &gt;2 levels\nMoving between representations\nPrepare for concept mapping"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#recall-multiple-regression",
-    "href": "course-materials/pre-class/week4_wednesday.html#recall-multiple-regression",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#categorical-predictors-with-2-levels-1",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#categorical-predictors-with-2-levels-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Recall multiple regression",
-    "text": "Recall multiple regression\n\n\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (x_2=B) + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\n\n\n\n\n\n\n\nEach predictor (\\(x_1\\), \\(x_2=B\\)) has it’s own coefficient (\\(\\beta_1\\), \\(\\beta_2\\)). They act on \\(y\\) separately."
+    "section": "Categorical predictors with 2 levels",
+    "text": "Categorical predictors with 2 levels\n\nRecall the American birds experiment. Anchor had two levels: 50 and 70.\n\\[\n\\text{Perc. CA} = \\beta_0 + \\beta_1 (\\text{Anchor}=70) + \\epsilon\n\\]\n\nThe reference level (Anchor = 50) is absorbed into the intercept, \\(\\beta_0\\)\nA dummy variable \\((\\text{Anchor}=70)\\) is 1 for anchor 70 and 0 otherwise\n\n\n\n\n\nAnchor\n\\((\\text{Anchor}=70)\\)\nMean\n\n\n\n\n50\n0\n\\(\\beta_0\\)\n\n\n70\n1\n\\(\\beta_0 + \\beta_1\\)"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#interactions-mediate-relationships",
-    "href": "course-materials/pre-class/week4_wednesday.html#interactions-mediate-relationships",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#categorical-predictor-with-3-levels",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#categorical-predictor-with-3-levels",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interactions mediate relationships",
-    "text": "Interactions mediate relationships\nIn regular multiple regression, the relationship between \\(x_1\\) and \\(y\\) is the same regardless of \\(x_2\\).\nBut what if the relationship between \\(x_1\\) and \\(y\\) varies with \\(x_2\\)?"
+    "section": "Categorical predictor with 3 levels",
+    "text": "Categorical predictor with 3 levels\n\nRecall the coral bleaching data. Region has three levels: Coolest, Moderate, Warmest.\n\nReference level: Coolest (absorbed into \\(\\beta_0\\))\nTWO dummy variables: \\((\\text{Region}=\\text{Moderate})\\) and \\((\\text{Region}=\\text{Warmest})\\)\n\n\n\n\n\nRegion\n\\((\\text{Moderate})\\)\n\\((\\text{Warmest})\\)\nMean\n\n\n\n\nCoolest\n0\n0\n\\(\\beta_0\\)\n\n\nModerate\n1\n0\n\\(\\beta_0 + \\beta_1\\)\n\n\nWarmest\n0\n1\n\\(\\beta_0 + \\beta_2\\)\n\n\n\n\n\nA categorical predictor with \\(k\\) levels needs \\(k - 1\\) dummy variables."
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#deforestation-and-agriculture",
-    "href": "course-materials/pre-class/week4_wednesday.html#deforestation-and-agriculture",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#in-equation-form",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#in-equation-form",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Deforestation and agriculture",
-    "text": "Deforestation and agriculture\n\n\nLand sparing hypothesis\nIncreasing yields reduces deforestation.\n\nRebound hypothesis\nIncreasing yields incentivizes deforestation.\n\n\n\nA section of the Amazon rainforest stands next to soy fields in Belterra, Para state, Brazil, on Nov. 30, 2019. (AP Photo/Leo Correa, File)"
+    "section": "In equation form",
+    "text": "In equation form\n\n\\[\n\\begin{align}\n\\text{Perc. bleached} &= \\beta_0 + \\beta_1 (\\text{Region}=\\text{Moderate}) \\\\\n&\\quad + \\beta_2 (\\text{Region}=\\text{Warmest}) + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\\(\\beta_0\\): mean bleaching in the Coolest region\n\\(\\beta_1\\): difference between Moderate and Coolest\n\\(\\beta_2\\): difference between Warmest and Coolest\n\n\nWhat’s the difference between Warmest and Moderate?\n\n\n\\(\\beta_2 - \\beta_1\\)"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#two-hypotheses",
-    "href": "course-materials/pre-class/week4_wednesday.html#two-hypotheses",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#in-visual-form",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#in-visual-form",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Two hypotheses",
-    "text": "Two hypotheses\n\nWhat’s the relationship between deforestation and increasing yields?"
+    "section": "In visual form",
+    "text": "In visual form"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#which-hypothesis-is-supported",
-    "href": "course-materials/pre-class/week4_wednesday.html#which-hypothesis-is-supported",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#in-computational-form",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#in-computational-form",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Which hypothesis is supported?",
-    "text": "Which hypothesis is supported?\nIncreasing yields increases deforestation: rebound hypothesis"
+    "section": "In computational form",
+    "text": "In computational form\n\n\nregion_lm &lt;- lm(percent_bleached ~ region, coral)\nsummary(region_lm)\n\n\nCall:\nlm(formula = percent_bleached ~ region, data = coral)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-12.1411  -4.4231  -0.4061   4.0666  24.8246 \n\nCoefficients:\n               Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)      72.652      1.028  70.705  &lt; 2e-16 ***\nregionModerate  -11.595      1.453  -7.979 1.12e-12 ***\nregionWarmest   -23.567      1.453 -16.218  &lt; 2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 6.499 on 117 degrees of freedom\nMultiple R-squared:  0.6921,    Adjusted R-squared:  0.6869 \nF-statistic: 131.5 on 2 and 117 DF,  p-value: &lt; 2.2e-16"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#does-the-relationship-vary",
-    "href": "course-materials/pre-class/week4_wednesday.html#does-the-relationship-vary",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#continuous-categorical-equation",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#continuous-categorical-equation",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Does the relationship vary?",
-    "text": "Does the relationship vary?"
+    "section": "Continuous + categorical: equation",
+    "text": "Continuous + categorical: equation\n\n\\[\n\\begin{align}\n\\text{Perc. bleached} &= \\beta_0 + \\beta_1 \\text{Peak SST} \\\\\n&\\quad + \\beta_2 (\\text{Region}=\\text{Moderate}) \\\\\n&\\quad + \\beta_3 (\\text{Region}=\\text{Warmest}) + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nRegion\nIntercept\nSlope\n\n\n\n\nCoolest\n\\(\\beta_0\\)\n\\(\\beta_1\\)\n\n\nModerate\n\\(\\beta_0 + \\beta_2\\)\n\\(\\beta_1\\)\n\n\nWarmest\n\\(\\beta_0 + \\beta_3\\)\n\\(\\beta_1\\)\n\n\n\n\n\nThree parallel lines: same slope, different intercepts."
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#interactive-terms",
-    "href": "course-materials/pre-class/week4_wednesday.html#interactive-terms",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#continuous-categorical-visual",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#continuous-categorical-visual",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interactive terms",
-    "text": "Interactive terms\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_1 x_2 + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\nAn interaction term multiplies two predictors together"
+    "section": "Continuous + categorical: visual",
+    "text": "Continuous + categorical: visual"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#deforestation-and-agriculture-model",
-    "href": "course-materials/pre-class/week4_wednesday.html#deforestation-and-agriculture-model",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#continuous-categorical-computational",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#continuous-categorical-computational",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Deforestation and agriculture model",
-    "text": "Deforestation and agriculture model\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\nWhat’s the relationship between deforestion and yield across groups?"
+    "section": "Continuous + categorical: computational",
+    "text": "Continuous + categorical: computational\n\n\nsst_region_lm &lt;- lm(percent_bleached ~ peak_sst + region, coral)\nsummary(sst_region_lm)\n\n\nCall:\nlm(formula = percent_bleached ~ peak_sst + region, data = coral)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-9.3023 -3.6841 -0.6996  2.8867 14.5481 \n\nCoefficients:\n               Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)    -192.069     28.333  -6.779 5.34e-10 ***\npeak_sst          9.447      1.011   9.347 8.07e-16 ***\nregionModerate  -20.797      1.478 -14.072  &lt; 2e-16 ***\nregionWarmest   -42.284      2.286 -18.498  &lt; 2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 4.929 on 116 degrees of freedom\nMultiple R-squared:  0.8244,    Adjusted R-squared:  0.8199 \nF-statistic: 181.5 on 3 and 116 DF,  p-value: &lt; 2.2e-16"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes",
-    "href": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#review-of-y-mx-b",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#review-of-y-mx-b",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interactions vary slopes",
-    "text": "Interactions vary slopes\nNo indigenous stewardship\n\\(\\text{Indig. Steward} = 0\\)\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 0 + \\beta_3 \\text{Yield} \\times 0 \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield}\n\\end{align}\n\\]\n\nThe slope is \\(\\beta_1\\)"
+    "section": "Review of \\(y = mx + b\\)",
+    "text": "Review of \\(y = mx + b\\)\n\\[\ny = \\beta_0 + \\beta_1 x_1\n\\]\n\n\nWhat are \\(m\\) and \\(b\\)?\n\n\n\\(m = \\beta_1\\)\n\\(b = \\beta_0\\)"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes-1",
-    "href": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes-1",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#categorical-x_2-additive",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#categorical-x_2-additive",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interactions vary slopes",
-    "text": "Interactions vary slopes\nYes indigenous stewardship\n\\(\\text{Indig. Steward} = 1\\)\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 1 + \\beta_3 \\text{Yield} \\times 1 \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 + \\beta_3 \\text{Yield} \\\\\n\\text{Deforestation} &= \\left( \\beta_0 + \\beta_2 \\right) + \\left( \\beta_1 + \\beta_3 \\right) \\text{Yield}\n\\end{align}\n\\]\n\nThe slope is \\(\\beta_1 + \\beta_3\\)"
+    "section": "Categorical \\(x_2\\), additive",
+    "text": "Categorical \\(x_2\\), additive\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\\(x_2\\) is categorical (A or B). What are \\(m\\) and \\(b\\) for each level?\n\n\nA (\\(x_2 = 0\\))\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (0) \\\\\ny &= \\beta_0 + \\beta_1 x_1\n\\end{align}\n\\]\n\\(m = \\beta_1\\), \\(b = \\beta_0\\)\n\nB (\\(x_2 = 1\\))\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (1) \\\\\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 \\\\\ny &= \\left( \\beta_0 + \\beta_2 \\right) + \\beta_1 x_1\n\\end{align}\n\\]\n\\(m = \\beta_1\\), \\(b = \\beta_0 + \\beta_2\\)"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes-2",
-    "href": "course-materials/pre-class/week4_wednesday.html#interactions-vary-slopes-2",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#categorical-x_2-additive-summary",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#categorical-x_2-additive-summary",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interactions vary slopes",
-    "text": "Interactions vary slopes"
+    "section": "Categorical \\(x_2\\), additive: summary",
+    "text": "Categorical \\(x_2\\), additive: summary\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\n\n\n\n\n\\(x_2\\)\n\\(m\\)\n\\(b\\)\n\n\n\n\nA (0)\n\\(\\beta_1\\)\n\\(\\beta_0\\)\n\n\nB (1)\n\\(\\beta_1\\)\n\\(\\beta_0 + \\beta_2\\)\n\n\n\nSame slope, different intercepts."
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#additive-vs.-interactive",
-    "href": "course-materials/pre-class/week4_wednesday.html#additive-vs.-interactive",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#continuous-x_2-additive",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#continuous-x_2-additive",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Additive vs. interactive",
-    "text": "Additive vs. interactive\n\nAdditive\n\\[\n\\text{Deforestation} = \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} + \\epsilon\n\\]\nInteractive\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} + \\epsilon\n\\end{align}\n\\]\n\nThe only difference is the interaction term, \\(\\beta_3 \\text{Yield} \\times \\text{Indig. Steward}\\)"
+    "section": "Continuous \\(x_2\\), additive",
+    "text": "Continuous \\(x_2\\), additive\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\\(x_2\\) is continuous. What are \\(m\\) and \\(b\\) when \\(x_2\\) is 0, 1, or 2?\n\n\n\\(x_2 = 0\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (0) \\\\\ny &= \\beta_0 + \\beta_1 x_1\n\\end{align}\n\\]\n\\(m = \\beta_1\\), \\(b = \\beta_0\\)\n\n\\(x_2 = 1\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (1) \\\\\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 \\\\\ny &= \\left( \\beta_0 + \\beta_2 \\right) + \\beta_1 x_1\n\\end{align}\n\\]\n\\(m = \\beta_1\\), \\(b = \\beta_0 + \\beta_2\\)\n\n\\(x_2 = 2\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (2) \\\\\ny &= \\beta_0 + \\beta_1 x_1 + 2 \\beta_2 \\\\\ny &= \\left( \\beta_0 + 2 \\beta_2 \\right) + \\beta_1 x_1\n\\end{align}\n\\]\n\\(m = \\beta_1\\), \\(b = \\beta_0 + 2 \\beta_2\\)"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#additive-model-slope",
-    "href": "course-materials/pre-class/week4_wednesday.html#additive-model-slope",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#continuous-x_2-additive-summary",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#continuous-x_2-additive-summary",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Additive model: slope",
-    "text": "Additive model: slope\nYes indigenous stewardship\n\\(\\text{Indig. Steward} = 1\\)\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 1 \\\\\n\\text{Deforestation} &= \\left( \\beta_0 + \\beta_2 \\right) + \\beta_1 \\text{Yield}\n\\end{align}\n\\]\n\nThe slope is \\(\\beta_1\\), the same as the no stewardship group. Only the intercept changes."
+    "section": "Continuous \\(x_2\\), additive: summary",
+    "text": "Continuous \\(x_2\\), additive: summary\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\n\n\n\n\n\\(x_2\\)\n\\(m\\)\n\\(b\\)\n\n\n\n\n0\n\\(\\beta_1\\)\n\\(\\beta_0\\)\n\n\n1\n\\(\\beta_1\\)\n\\(\\beta_0 + \\beta_2\\)\n\n\n2\n\\(\\beta_1\\)\n\\(\\beta_0 + 2\\beta_2\\)\n\n\n\nSame slope, intercept shifts by \\(\\beta_2\\) per unit of \\(x_2\\)."
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#interactive-model-slope",
-    "href": "course-materials/pre-class/week4_wednesday.html#interactive-model-slope",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#categorical-x_2-interactive",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#categorical-x_2-interactive",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interactive model: slope",
-    "text": "Interactive model: slope\nYes indigenous stewardship\n\\(\\text{Indig. Steward} = 1\\)\n\\[\n\\begin{align}\n\\text{Deforestation} &= \\beta_0 + \\beta_1 \\text{Yield} + \\beta_2 \\text{Indig. Steward} \\\\\n&\\quad + \\beta_3 \\text{Yield} \\times \\text{Indig. Steward} \\\\\n\\text{Deforestation} &= \\left( \\beta_0 + \\beta_2 \\right) + \\left( \\beta_1 + \\beta_3 \\right) \\text{Yield}\n\\end{align}\n\\]\n\nThe slope is \\(\\beta_1 + \\beta_3\\), different from the no stewardship group. Both the intercept and slope change."
+    "section": "Categorical \\(x_2\\), interactive",
+    "text": "Categorical \\(x_2\\), interactive\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_1 x_2\n\\]\n\\(x_2\\) is categorical (A or B). What are \\(m\\) and \\(b\\) for each level?\n\n\nA (\\(x_2 = 0\\))\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (0) + \\beta_3 x_1 (0) \\\\\ny &= \\beta_0 + \\beta_1 x_1\n\\end{align}\n\\]\n\\(m = \\beta_1\\), \\(b = \\beta_0\\)\n\nB (\\(x_2 = 1\\))\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (1) + \\beta_3 x_1 (1) \\\\\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 + \\beta_3 x_1 \\\\\ny &= \\left( \\beta_0 + \\beta_2 \\right) + \\left( \\beta_1 + \\beta_3 \\right) x_1\n\\end{align}\n\\]\n\\(m = \\beta_1 + \\beta_3\\), \\(b = \\beta_0 + \\beta_2\\)"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#additive-vs.-interactive-1",
-    "href": "course-materials/pre-class/week4_wednesday.html#additive-vs.-interactive-1",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#categorical-x_2-interactive-summary",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#categorical-x_2-interactive-summary",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Additive vs. interactive",
-    "text": "Additive vs. interactive\n\n\nThe additive model forces parallel lines. It misses that stewardship removes the rebound effect."
+    "section": "Categorical \\(x_2\\), interactive: summary",
+    "text": "Categorical \\(x_2\\), interactive: summary\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_1 x_2\n\\]\n\n\n\n\n\n\\(x_2\\)\n\\(m\\)\n\\(b\\)\n\n\n\n\nA (0)\n\\(\\beta_1\\)\n\\(\\beta_0\\)\n\n\nB (1)\n\\(\\beta_1 + \\beta_3\\)\n\\(\\beta_0 + \\beta_2\\)\n\n\n\nDifferent slopes and different intercepts."
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#when-to-use-interactions",
-    "href": "course-materials/pre-class/week4_wednesday.html#when-to-use-interactions",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#continuous-x_2-interactive",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#continuous-x_2-interactive",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "When to use interactions",
-    "text": "When to use interactions\n\n\nAdditive\nEach predictor affects the response independently.\n\\(x_2\\) shifts \\(y\\) up or down, but the effect of \\(x_1\\) on \\(y\\) is the same.\n\nInteractive\nOne predictor changes the effect of another on the response.\nThe effect of \\(x_1\\) on \\(y\\) depends on \\(x_2\\).\n\n\n\nAsk: “Does the relationship between \\(x_1\\) and \\(y\\) depend on \\(x_2\\)?”"
+    "section": "Continuous \\(x_2\\), interactive",
+    "text": "Continuous \\(x_2\\), interactive\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_1 x_2\n\\]\n\\(x_2\\) is continuous. What are \\(m\\) and \\(b\\) when \\(x_2\\) is 0, 1, or 2?\n\n\\(x_2 = 0\\): \\(\\quad y = \\beta_0 + \\beta_1 x_1 + \\beta_2 (0) + \\beta_3 x_1 (0) = \\beta_0 + \\beta_1 x_1 \\quad\\) so \\(m = \\beta_1\\), \\(b = \\beta_0\\)\n\n\n\n\\(x_2 = 1\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (1) + \\beta_3 x_1 (1) \\\\\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 + \\beta_3 x_1 \\\\\ny &= \\left( \\beta_0 + \\beta_2 \\right) + \\left( \\beta_1 + \\beta_3 \\right) x_1\n\\end{align}\n\\]\n\\(m = \\beta_1 + \\beta_3\\), \\(b = \\beta_0 + \\beta_2\\)\n\n\\(x_2 = 2\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 (2) + \\beta_3 x_1 (2) \\\\\ny &= \\beta_0 + \\beta_1 x_1 + 2 \\beta_2 + 2 \\beta_3 x_1 \\\\\ny &= \\left( \\beta_0 + 2 \\beta_2 \\right) + \\left( \\beta_1 + 2 \\beta_3 \\right) x_1\n\\end{align}\n\\]\n\\(m = \\beta_1 + 2 \\beta_3\\), \\(b = \\beta_0 + 2 \\beta_2\\)"
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#additive-is-sufficient",
-    "href": "course-materials/pre-class/week4_wednesday.html#additive-is-sufficient",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#continuous-x_2-interactive-summary",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#continuous-x_2-interactive-summary",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Additive is sufficient",
-    "text": "Additive is sufficient\n\n\nSnowpack and elevation\nNorth-facing slopes hold more snow than south-facing slopes at every elevation.\nBut snowpack increases with elevation at the same rate on both.\nAspect shifts the line; it doesn’t change the slope."
+    "section": "Continuous \\(x_2\\), interactive: summary",
+    "text": "Continuous \\(x_2\\), interactive: summary\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\beta_3 x_1 x_2\n\\]\n\n\n\n\n\n\\(x_2\\)\n\\(m\\)\n\\(b\\)\n\n\n\n\n0\n\\(\\beta_1\\)\n\\(\\beta_0\\)\n\n\n1\n\\(\\beta_1 + \\beta_3\\)\n\\(\\beta_0 + \\beta_2\\)\n\n\n2\n\\(\\beta_1 + 2\\beta_3\\)\n\\(\\beta_0 + 2\\beta_2\\)\n\n\n\nSlope shifts by \\(\\beta_3\\) and intercept by \\(\\beta_2\\) per unit of \\(x_2\\)."
   },
   {
-    "objectID": "course-materials/pre-class/week4_wednesday.html#interactive-is-necessary",
-    "href": "course-materials/pre-class/week4_wednesday.html#interactive-is-necessary",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#moving-between-representations-worksheet",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#moving-between-representations-worksheet",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interactive is necessary",
-    "text": "Interactive is necessary\n\n\nStream and air temperature\nStreams warm as air temperature rises.\nBut a riparian canopy shades the stream, so shaded streams warm more slowly.\nCanopy changes the slope of the relationship."
+    "section": "Moving between representations worksheet",
+    "text": "Moving between representations worksheet\nEvery model can be written three ways. Practice translating between them.\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    eq[\"&lt;b&gt;Equation&lt;/b&gt;&lt;br/&gt;y = β₀ + β₁x₁ + β₂x₂ + β₃x₁x₂\"]\n    vis[\"&lt;b&gt;Visual&lt;/b&gt;&lt;br/&gt;lines, slopes, intercepts\"]\n    comp[\"&lt;b&gt;Computational&lt;/b&gt;&lt;br/&gt;lm() and summary()\"]\n    eq &lt;--&gt; vis\n    vis &lt;--&gt; comp\n    comp &lt;--&gt; eq\n\n\n\n\n\n\nGiven one representation, produce the other two."
   },
   {
-    "objectID": "course-materials/labs/lab2.html",
-    "href": "course-materials/labs/lab2.html",
-    "title": "Lab 2: Investigating claims using inference",
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#midway-review",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#midway-review",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Midway review",
+    "text": "Midway review\nNext week is the midway point of the quarter. Lab will be used to review the first half of the course with concept maps.\nToday we’ll prepare by building keyword banks for each lecture."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#group-assignments",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#group-assignments",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Group assignments",
+    "text": "Group assignments\nBreak into 8 groups. Each group is assigned one lecture.\n\n\n\n\n\nGroup\nLecture\n\n\n\n\n1\nWeek 1 Monday\n\n\n2\nWeek 1 Wednesday\n\n\n3\nWeek 2 Monday\n\n\n4\nWeek 2 Wednesday\n\n\n\n\n\n\n\nGroup\nLecture\n\n\n\n\n5\nWeek 3 Monday\n\n\n6\nWeek 3 Wednesday\n\n\n7\nWeek 4 Monday\n\n\n8\nWeek 4 Wednesday (today)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week4_wednesday.html#build-your-keyword-bank",
+    "href": "course-materials/lecture-slides/week4_wednesday.html#build-your-keyword-bank",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Build your keyword bank",
+    "text": "Build your keyword bank\n\nBrainstorm: make an initial list of the concepts covered in your assigned lecture. Put down everything you can think of!\n\n\n\nRefine: what are the 3-5 most important concepts from your lecture?\n\n\n\n\nSubmit using the Google Form (link on Slack)"
+  },
+  {
+    "objectID": "course-materials/labs/lab2-solution.html",
+    "href": "course-materials/labs/lab2-solution.html",
+    "title": "Lab 2: Foundations of Inference",
     "section": "",
     "text": "Lead is elevated in the drip line compared to the rest of the yard.\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\n\nThese are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a statistical experiment to quantify the evidence in the sample, and interpret your results responsibly.\n\n\n\n\n\n\n\n\nClaim\nQuestion type\nStatistical experiment\n\n\n\n\nLead is elevated in the drip line compared to the rest of the yard.\nYes/no?\nPermutation\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\nHow much?\nBootstrapping"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#background",
-    "href": "course-materials/labs/lab2.html#background",
-    "title": "Lab 2: Investigating claims using inference",
+    "objectID": "course-materials/labs/lab2-solution.html#background",
+    "href": "course-materials/labs/lab2-solution.html#background",
+    "title": "Lab 2: Foundations of Inference",
     "section": "",
     "text": "Lead is elevated in the drip line compared to the rest of the yard.\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\n\nThese are both claims that we can investigate using statistical inference. In this week’s lab, you’ll reframe the claims using statistical language, use a statistical experiment to quantify the evidence in the sample, and interpret your results responsibly.\n\n\n\n\n\n\n\n\nClaim\nQuestion type\nStatistical experiment\n\n\n\n\nLead is elevated in the drip line compared to the rest of the yard.\nYes/no?\nPermutation\n\n\nNeighborhoods north of the Exide plant were exposed to more lead than those south.\nHow much?\nBootstrapping"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#investigating-yesno-questions-with-permutation",
-    "href": "course-materials/labs/lab2.html#investigating-yesno-questions-with-permutation",
-    "title": "Lab 2: Investigating claims using inference",
+    "objectID": "course-materials/labs/lab2-solution.html#investigating-yesno-questions-with-permutation",
+    "href": "course-materials/labs/lab2-solution.html#investigating-yesno-questions-with-permutation",
+    "title": "Lab 2: Foundations of Inference",
     "section": "Investigating “yes/no” questions with permutation",
-    "text": "Investigating “yes/no” questions with permutation\nLet’s investigate the claim “Lead is elevated in the drip line compared to the rest of the yard” as a yes/no question.\n\nState your hypotheses\nRecall that it is more straightforward to find evidence against a hypothesis than for it. So when we investigate yes/no questions, we set up a null hypothesis and see how much evidence there is against it.\nState the null and alternative hypotheses for this claim.\n\\(H_0\\):\n\\(H_A\\):\n\n\nCalculate the observed value of the statistic\nWe’ll use the difference in means between samples from the drip line and the yard as the statistic for this question.\n\n\n\n\n\n\nImportant\n\n\n\nRemember, the mean isn’t always the most appropriate statistic for representing a distribution! Always think critically about how your data relates to the question.\n\n\nCalculate the difference in means between the drip line and yard observations in the sample. Remember, this should be a single number (not a data frame or pair of means).\n\n\nShuffle the predictor variable and recalculate the statistic\nThis statistical experiment simulates the expected variation in our statistic (difference in means) just due to chance alone. To conduct this experiment, we have to break the connection between the predictor variable (location code) and response (lead concentration). Randomizing the predictor leaves the variation in the response untouched, while removing any assocation between the two.\nShuffle the predictor variable and recalculate the statistic. Do it just once - we’ll repeat in the next section.\n\n\n\n\n\n\nTip\n\n\n\nsample() can be used to shuffle vectors.\n\n\n\n\nRepeat shuffling\nIn the previous section, you simulated one statistic from the null hypothesis. What we need now is a whole bunch of statistics from the null hypothesis - our null distribution.\nRepeat shuffling 10,000 times to create a vector that simulates the null distribution.\n\n\n\n\n\n\nTip\n\n\n\nreplicate() repeatedly runs expressions over and over.\n\n\nVisualize the null distribution using a histogram.\n\n\nCompare the observed to the null\nThe previous figure showed the expected distribution of the statistic (the difference in mean lead between drip line and yard) under the null hypothesis. How does that compare to the observed value?\nPlot the null distribution again, but this time add a vertical line indicating the observed statistic.\nCalculate your p-value.\n\n\n\n\n\n\nNote\n\n\n\nA p-value is the probability of observing the sample (or something more extreme) if the null hypothesis is true.\n\n\n\n\nInterpret your results\nBased on your p-value, do you reject or fail to reject the null hypothesis?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
+    "text": "Investigating “yes/no” questions with permutation\nLet’s investigate the claim “Lead is elevated in the drip line compared to the rest of the yard” as a yes/no question.\n\nState your hypotheses\nRecall that it is more straightforward to find evidence against a hypothesis than for it. So when we investigate yes/no questions, we set up a null hypothesis and see how much evidence there is against it.\nState the null and alternative hypotheses for this claim.\n\\(H_0\\): The difference in means is 0.\n\\(H_A\\): The difference in means is greater than 0.\n\n\nCalculate the observed value of the statistic\nWe’ll use the difference in means between samples from the drip line and the yard as the statistic for this question.\n\n\n\n\n\n\nImportant\n\n\n\nRemember, the mean isn’t always the most appropriate statistic for representing a distribution! Always think critically about how your data relates to the question.\n\n\nCalculate the difference in means between the drip line and yard observations in the sample. Remember, this should be a single number (not a data frame or pair of means).\n\nlocation_summ &lt;- soil_cores |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\nobs_diff_means &lt;- location_summ$mean_pb_ppm[2] - location_summ$mean_pb_ppm[1]\n\nobs_diff_means\n\n[1] 172.9459\n\n\n\n\nShuffle the predictor variable and recalculate the statistic\nThis statistical experiment simulates the expected variation in our statistic (difference in means) just due to chance alone. To conduct this experiment, we have to break the connection between the predictor variable (location code) and response (lead concentration). Randomizing the predictor leaves the variation in the response untouched, while removing any assocation between the two.\nShuffle the predictor variable and recalculate the statistic. Do it just once - we’ll repeat in the next section.\n\n\n\n\n\n\nTip\n\n\n\nsample() can be used to shuffle vectors.\n\n\n\nshuffled_summ &lt;- soil_cores |&gt;\n  mutate(location_code = sample(location_code)) |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\nshuffled_diff_means &lt;- shuffled_summ$mean_pb_ppm[2] -\n  shuffled_summ$mean_pb_ppm[1]\n\nshuffled_diff_means\n\n[1] -10.1124\n\n\n\n\nRepeat shuffling\nIn the previous section, you simulated one statistic from the null hypothesis. What we need now is a whole bunch of statistics from the null hypothesis - our null distribution.\nRepeat shuffling 10,000 times to create a vector that simulates the null distribution.\n\n\n\n\n\n\nTip\n\n\n\nreplicate() repeatedly runs expressions over and over.\n\n\n\nlocation_null_dist &lt;- replicate(\n  1e3,\n  {\n    shuffled_summ &lt;- soil_cores |&gt;\n      mutate(location_code = sample(location_code)) |&gt;\n      summarize(mean_pb_ppm = mean(pb_ppm), .by = location_code)\n\n    shuffled_summ$mean_pb_ppm[2] -\n      shuffled_summ$mean_pb_ppm[1]\n  }\n)\n\nVisualize the null distribution using a histogram.\n\ntibble(diff_means = location_null_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCompare the observed to the null\nThe previous figure showed the expected distribution of the statistic (the difference in mean lead between drip line and yard) under the null hypothesis. How does that compare to the observed value?\nPlot the null distribution again, but this time add a vertical line indicating the observed statistic.\n\ntibble(diff_means = location_null_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5) +\n  geom_vline(xintercept = obs_diff_means, color = \"magenta\", linewidth = 1.5)\n\n\n\n\n\n\n\n\n\n\n\n\nCalculate your p-value.\n\n\n\n\n\n\nNote\n\n\n\nA p-value is the probability of observing the sample (or something more extreme) if the null hypothesis is true.\n\n\n\npval &lt;- mean(location_null_dist &gt; obs_diff_means)\n\npval\n\n[1] 0\n\n\n\n\nInterpret your results\nBased on your p-value, do you reject or fail to reject the null hypothesis?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#investigating-how-much-questions-with-bootstrapping",
-    "href": "course-materials/labs/lab2.html#investigating-how-much-questions-with-bootstrapping",
-    "title": "Lab 2: Investigating claims using inference",
+    "objectID": "course-materials/labs/lab2-solution.html#investigating-how-much-questions-with-bootstrapping",
+    "href": "course-materials/labs/lab2-solution.html#investigating-how-much-questions-with-bootstrapping",
+    "title": "Lab 2: Foundations of Inference",
     "section": "Investigating “how much?” questions with bootstrapping",
-    "text": "Investigating “how much?” questions with bootstrapping\nNow, let’s investigate the claim “Neighborhoods north of the Exide plant were exposed to more lead than those south” as a how much? question.\n\nCalculate the observed value of the statistic\nOnce again, let’s use the difference in means as our statistic. Calculate the difference in means between properties in the extended north area and those in the extended south area.\n\n\n\n\n\n\nTip\n\n\n\nUse dplyr functions to wrangle the soil core data for this part. Properties starting with “ENA” are in the extended north area, and the “ESA” prefix means extended south area. str_sub() will help here.\n\n\n\n\nResample observations and recalculate the statistic\nBootstrapping simulates the expected variation in our statistic (difference in means) from sampling. Compare this to permutation, which is about variation just due to chance. For this experiment, we will assume the sample is representative of the population and repeatedly draw “new” samples. This process simulates the process of collecting new samples.\nResample rows from the data frame and recalculate the statistic. Repeat this 10,000 times to simulate the sampling distribution.\n\n\n\n\n\n\nTip\n\n\n\nUse slice_sample() with replacement to get bootstrap samples.\n\n\nVisualize the sampling distribution using a histogram.\n\n\nFind the confidence interval\nThe previous figure showed how your statistic varies due to slight differences between samples. Use this sampling distribution to estimate the 95% confidence interval.\n\n\n\n\n\n\nNote\n\n\n\nA confidence interval is a range of values that you are confident contains the population parameter.\n\n\n\n\n\n\n\n\nTip\n\n\n\nUse the quantile() function to find the middle 95% of the sampling distribution.\n\n\nPlot the sampling distribution again, but this time add vertical lines indicating the observed statistic and the 95% CI.\n\n\nInterpret your results\nBased on your confidence interval, how much could the difference in lead exposure between north and south be?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
+    "text": "Investigating “how much?” questions with bootstrapping\nNow, let’s investigate the claim “Neighborhoods north of the Exide plant were exposed to more lead than those south” as a how much? question.\n\nCalculate the observed value of the statistic\nOnce again, let’s use the difference in means as our statistic. Calculate the difference in means between properties in the extended north area and those in the extended south area.\n\n\n\n\n\n\nTip\n\n\n\nUse dplyr functions to wrangle the soil core data for this part. Properties starting with “ENA” are in the extended north area, and the “ESA” prefix means extended south area. str_sub() will help here.\n\n\n\nena_esa &lt;- soil_cores |&gt;\n  mutate(area = str_sub(property_id, 1, 3)) |&gt;\n  filter(area %in% c(\"ENA\", \"ESA\"))\n\narea_summ &lt;- ena_esa |&gt;\n  summarize(mean_pb_ppm = mean(pb_ppm), .by = area) |&gt;\n  arrange(area)\n\nobs_diff_means &lt;- area_summ$mean_pb_ppm[1] - area_summ$mean_pb_ppm[2]\n\nobs_diff_means\n\n[1] 72.45974\n\n\n\n\nResample observations and recalculate the statistic\nBootstrapping simulates the expected variation in our statistic (difference in means) from sampling. Compare this to permutation, which is about variation just due to chance. For this experiment, we will assume the sample is representative of the population and repeatedly draw “new” samples. This process simulates the process of collecting new samples.\nResample rows from the data frame and recalculate the statistic. Repeat this 10,000 times to simulate the sampling distribution.\n\n\n\n\n\n\nTip\n\n\n\nUse slice_sample() with replacement to get bootstrap samples.\n\n\n\narea_samp_dist &lt;- replicate(\n  1e3,\n  {\n    resampled_summ &lt;- ena_esa |&gt;\n      slice_sample(n = nrow(ena_esa), replace = TRUE) |&gt;\n      summarize(mean_pb_ppm = mean(pb_ppm), .by = area) |&gt;\n      arrange(area)\n\n    resampled_summ$mean_pb_ppm[1] -\n      resampled_summ$mean_pb_ppm[2]\n  }\n)\n\nVisualize the sampling distribution using a histogram.\n\ntibble(diff_means = area_samp_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nFind the confidence interval\nThe previous figure showed how your statistic varies due to slight differences between samples. Use this sampling distribution to estimate the 95% confidence interval.\n\n\n\n\n\n\nNote\n\n\n\nA confidence interval is a range of values that you are confident contains the population parameter.\n\n\n\n\n\n\n\n\nTip\n\n\n\nUse the quantile() function to find the middle 95% of the sampling distribution.\n\n\n\narea_95ci &lt;- quantile(area_samp_dist, c(0.025, 0.975))\n\nPlot the sampling distribution again, but this time add vertical lines indicating the observed statistic and the 95% CI.\n\ntibble(diff_means = area_samp_dist) |&gt;\n  ggplot(aes(diff_means)) +\n  geom_histogram(binwidth = 5) +\n  geom_vline(xintercept = obs_diff_means, color = \"magenta\", linewidth = 1.5) +\n  geom_vline(xintercept = area_95ci, linetype = \"dashed\", linewidth = 1.5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInterpret your results\nBased on your confidence interval, how much could the difference in lead exposure between north and south be?\nWhat does this mean for your question?\nWhat characteristics of the data may impact your inference?"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#recap",
-    "href": "course-materials/labs/lab2.html#recap",
-    "title": "Lab 2: Investigating claims using inference",
+    "objectID": "course-materials/labs/lab2-solution.html#recap",
+    "href": "course-materials/labs/lab2-solution.html#recap",
+    "title": "Lab 2: Foundations of Inference",
     "section": "Recap",
     "text": "Recap\nIn this lab, you investigated two claims using statistical experiments to evaluate evidence.\nFrom this exercise, the practical information you should remember:\n\n\n\n\n\n\n\n\n\n“yes/no” questions\n“how much?” questions\n\n\n\n\nInference target\nP-value\nConfidence interval\n\n\nStatistical experiment\nPermutation\nBootstrapping\n\n\nSimulate a…\nNull distribution\nSampling distribution\n\n\nCentered on…\n0\nThe observed statistic\n\n\nRandomize with…\nsample() (no replacement)\nslice_sample() (with replacement)\n\n\nSimulate repeatedly\nreplicate()\nreplicate()\n\n\n\nMore importantly, remember how to use these tools responsibly. A p-value and a confidence interval are tools for checking our own cognitive biases. They are useful lines of evidence, but no one statistical procedure ever tells the whole story.\nAlways think critically!"
   },
   {
-    "objectID": "course-materials/labs/lab2.html#keep-going",
-    "href": "course-materials/labs/lab2.html#keep-going",
-    "title": "Lab 2: Investigating claims using inference",
+    "objectID": "course-materials/labs/lab2-solution.html#keep-going",
+    "href": "course-materials/labs/lab2-solution.html#keep-going",
+    "title": "Lab 2: Foundations of Inference",
     "section": "Keep going?",
     "text": "Keep going?\nDone early? Having fun and want more? Try this out.\nP-values are sensitive to sample sizes. Do the permutation exercise again, but this time only on a sub-sample of the data. What kinds of p-values do you get if you only use 20 observations? 50? 100? 1000? Repeat the statistical experiment many times and visualize the relationship between your p-values and your sub-sample size using boxplots."
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week4_monday.html#todays-agenda",
+    "objectID": "course-materials/pre-class/week4_monday.html#learning-objectives",
+    "href": "course-materials/pre-class/week4_monday.html#learning-objectives",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nMultiple regression worksheet\nAmerican birds revisited\nSimpson’s paradox"
+    "section": "Learning objectives",
+    "text": "Learning objectives\n\nVisualize data with multiple predictors\nDescribe causal relationships with DAGs\nModel multiple predictors simultaneously"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#american-birds-visualized",
-    "href": "course-materials/lecture-slides/week4_monday.html#american-birds-visualized",
+    "objectID": "course-materials/pre-class/week4_monday.html#so-many-influences",
+    "href": "course-materials/pre-class/week4_monday.html#so-many-influences",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "American birds, visualized",
-    "text": "American birds, visualized\nHere’s the data from the classroom experiment. Use these data to complete the worksheet."
+    "section": "So many influences!",
+    "text": "So many influences!"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#interpreting-multiple-predictors",
-    "href": "course-materials/lecture-slides/week4_monday.html#interpreting-multiple-predictors",
+    "objectID": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-in-older-homes",
+    "href": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-in-older-homes",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interpreting multiple predictors",
-    "text": "Interpreting multiple predictors\nA coefficient estimate is the effect of the predictor when holding all else equal\n\n\namerican_birds_lm &lt;- lm(ca_pct ~ anchor + prior_know, birds)\nsummary(american_birds_lm)\n\n\nCall:\nlm(formula = ca_pct ~ anchor + prior_know, data = birds)\n\nResiduals:\n   Min     1Q Median     3Q    Max \n-24.91 -12.99  -2.79  12.78  32.74 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)   \n(Intercept)   31.786      9.213   3.450  0.00159 **\nanchor70       7.248      6.189   1.171  0.25024   \nprior_know     1.470      1.081   1.360  0.18339   \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 18.3 on 32 degrees of freedom\nMultiple R-squared:  0.09186,   Adjusted R-squared:  0.0351 \nF-statistic: 1.618 on 2 and 32 DF,  p-value: 0.214"
+    "section": "Pb more prevalent in older homes",
+    "text": "Pb more prevalent in older homes\nSoil Pb increases by 25.4 ppm per decade of home age"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#multiple-regression-is-additive",
-    "href": "course-materials/lecture-slides/week4_monday.html#multiple-regression-is-additive",
+    "objectID": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-closer-to-freeways",
+    "href": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-closer-to-freeways",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Multiple regression is additive",
-    "text": "Multiple regression is additive\n\n\\[\n\\begin{align}\n\\text{Perc. CA} &= \\beta_0 + \\beta_1 \\text{Prior knowledge} + \\beta_2 {(Anchor=70)} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
+    "section": "Pb more prevalent closer to freeways",
+    "text": "Pb more prevalent closer to freeways\nSoil Pb decreases by 81.8 ppm per mile from freeway"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#american-bird-dag",
-    "href": "course-materials/lecture-slides/week4_monday.html#american-bird-dag",
+    "objectID": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-downwind",
+    "href": "course-materials/pre-class/week4_monday.html#pb-more-prevalent-downwind",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "American Bird DAG",
-    "text": "American Bird DAG\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((% American&lt;br/&gt;birds in CA))\n    n1((Anchor))\n    n2((Prior&lt;br/&gt;knowledge))\n    n1 --&gt; n0\n    n2 --&gt; n0\n\n\n\n\n\n\n\nWhy isn’t there an arrow connecting Anchor and Prior knowledge?\n\nAssignment of Anchor was randomized. Intervening on Anchor can have no effect on Prior knowledge when their relationship is random."
+    "section": "Pb more prevalent downwind",
+    "text": "Pb more prevalent downwind\nSoil Pb increases by 66 ppm downwind of Exide"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#coefficient-estimates-unchanged",
-    "href": "course-materials/lecture-slides/week4_monday.html#coefficient-estimates-unchanged",
+    "objectID": "course-materials/pre-class/week4_monday.html#correlated-influences",
+    "href": "course-materials/pre-class/week4_monday.html#correlated-influences",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Coefficient estimates unchanged",
-    "text": "Coefficient estimates unchanged\nWhen predictors are independent, coefficient estimates don’t affect each other.\n\n\n\ntwo_predictors &lt;- lm(\n  ca_pct ~ anchor + prior_know,\n  birds\n)\ncoef(two_predictors)\n\n(Intercept)    anchor70  prior_know \n  31.786029    7.247627    1.469587 \n\nsummary(two_predictors)$r.squared\n\n[1] 0.09185841\n\n\n\n\none_predictor &lt;- lm(\n  ca_pct ~ anchor,\n  birds\n)\ncoef(one_predictor)\n\n(Intercept)    anchor70 \n   42.76471     7.29085 \n\nsummary(one_predictor)$r.squared\n\n[1] 0.03938223\n\n\n\n\n“Prior knowledge” explained variance, but the estimate for “Anchor” was unaffected."
+    "section": "Correlated influences",
+    "text": "Correlated influences\nDid the soil Pb in downwind homes come from Exide … or from lead paint and freeways?"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#but-observational-data-is-messy",
-    "href": "course-materials/lecture-slides/week4_monday.html#but-observational-data-is-messy",
+    "objectID": "course-materials/pre-class/week4_monday.html#who-caused-what",
+    "href": "course-materials/pre-class/week4_monday.html#who-caused-what",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "But observational data is messy",
-    "text": "But observational data is messy\n\n\nWhen predictors are dependent, their coefficients affect each other.\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n4((Development&lt;br/&gt;history))\n    n5((Location))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 --&gt; n0\n    n4 --&gt; n1\n    n4 --&gt; n2\n    n5 --&gt; n1\n    n5 --&gt; n3\n    n5 --&gt; n4\n\n    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n0,n1,n2,n3,n5 observed\n    class n4 unobserved"
+    "section": "Who caused what?",
+    "text": "Who caused what?\n\n\nThis directed acyclic graph (DAG) describes the presumed causal relationships between variables.\nIt’s missing something - the predictors aren’t independent from each other.\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 --&gt; n0"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#simpsons-paradox-1",
-    "href": "course-materials/lecture-slides/week4_monday.html#simpsons-paradox-1",
+    "objectID": "course-materials/pre-class/week4_monday.html#common-causes",
+    "href": "course-materials/pre-class/week4_monday.html#common-causes",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Simpson’s paradox",
-    "text": "Simpson’s paradox\n\nSimpson’s paradox is a phenomenon in probability and statistics in which a trend appears in several groups of data but disappears or reverses when the groups are combined.\n\nWikipedia"
+    "section": "Common causes",
+    "text": "Common causes\n\n\nThis DAG describes causal relationships underlying the predictors.\nCausal = intervening on one variable causes a change in the other.\n\n\nIntervening on Location changes Freeway proximity and Up/down wind\nIntervening on Location changes Development history (unobserved)\n\nIntervening on Development history changes Freeway and Lead paint\n\n\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n4((Development&lt;br/&gt;history))\n    n5((Location))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 --&gt; n0\n    n4 --&gt; n1\n    n4 --&gt; n2\n    n5 --&gt; n1\n    n5 --&gt; n3\n    n5 --&gt; n4\n\n    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n0,n1,n2,n3,n5 observed\n    class n4 unobserved"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#how-does-bleaching-respond-to-temperature",
-    "href": "course-materials/lecture-slides/week4_monday.html#how-does-bleaching-respond-to-temperature",
+    "objectID": "course-materials/pre-class/week4_monday.html#going-from-dag-to-model",
+    "href": "course-materials/pre-class/week4_monday.html#going-from-dag-to-model",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "How does bleaching respond to temperature?",
-    "text": "How does bleaching respond to temperature?\nEach point is a coral reef. What’s the relationship between temperature and bleaching?"
+    "section": "Going from DAG to model",
+    "text": "Going from DAG to model\n\n\nWe are most interested in the Up/downwind -&gt; Soil Pb connection.\nProblem: Confounding variables bias our estimates.\nSolution: Multiple regression controls for confounds.\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n4((Development&lt;br/&gt;history))\n    n5((Location))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 ==&gt; n0\n    n4 --&gt; n1\n    n4 --&gt; n2\n    n5 --&gt; n1\n    n5 --&gt; n3\n    n5 --&gt; n4\n\n    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n0,n1,n2,n3,n5 observed\n    class n4 unobserved"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#how-about-now",
-    "href": "course-materials/lecture-slides/week4_monday.html#how-about-now",
+    "objectID": "course-materials/pre-class/week4_monday.html#multiple-regression-compares-like-to-like",
+    "href": "course-materials/pre-class/week4_monday.html#multiple-regression-compares-like-to-like",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "How about now?",
-    "text": "How about now?\nHow does bleaching respond to temperature?\n\n\nRegions with higher temperatures are associated with corals that are bleaching resistant"
+    "section": "Multiple regression compares like-to-like",
+    "text": "Multiple regression compares like-to-like\nTo estimate the Up/downwind -&gt; Soil Pb relationship, we’re really asking:\n\nIf we hold all else equal, what’s the difference in Soil Pb across the Up/downwind categories?"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#draw-the-dag",
-    "href": "course-materials/lecture-slides/week4_monday.html#draw-the-dag",
+    "objectID": "course-materials/pre-class/week4_monday.html#in-statistical-notation",
+    "href": "course-materials/pre-class/week4_monday.html#in-statistical-notation",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Draw the DAG",
-    "text": "Draw the DAG\nDraw a DAG for the coral bleaching scenario. Your variables are:\n\nRegion\nPeak SST\nPercent bleached"
+    "section": "In statistical notation",
+    "text": "In statistical notation\nGenerally:\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\dots + \\beta_n x_n + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#the-coral-bleaching-dag",
-    "href": "course-materials/lecture-slides/week4_monday.html#the-coral-bleaching-dag",
+    "objectID": "course-materials/pre-class/week4_monday.html#statistical-notation-for-two-predictors",
+    "href": "course-materials/pre-class/week4_monday.html#statistical-notation-for-two-predictors",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "The coral bleaching DAG",
-    "text": "The coral bleaching DAG\n“Region” is related to both the Peak SST and the amount of bleaching that occurs.\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Percent&lt;br/&gt;bleached))\n    n1((Peak SST))\n    n2((Region))\n    n1 --&gt; n0\n    n2 --&gt; n1\n    n2 --&gt; n0\n\n\n\n\n\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Percent&lt;br/&gt;bleached))\n    n1((Peak SST))\n    n2((Region))\n    n3((Heat\\ntolerance))\n    n1 --&gt; n0\n    n2 --&gt; n1\n    n2 --&gt; n3\n    n3 --&gt; n0\n\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n3 unobserved\n\n\n\n\n\n\n\n\nIgnorning “Region” opens the door to bias."
+    "section": "Statistical notation for two predictors",
+    "text": "Statistical notation for two predictors\nIf we consider just wind direction and home age:\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Home Age} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#coefficient-reversal-visual",
-    "href": "course-materials/lecture-slides/week4_monday.html#coefficient-reversal-visual",
+    "objectID": "course-materials/pre-class/week4_monday.html#visually",
+    "href": "course-materials/pre-class/week4_monday.html#visually",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Coefficient reversal, visual",
-    "text": "Coefficient reversal, visual"
+    "section": "Visually",
+    "text": "Visually"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#coefficient-reversal-numeric",
-    "href": "course-materials/lecture-slides/week4_monday.html#coefficient-reversal-numeric",
+    "objectID": "course-materials/pre-class/week4_monday.html#interpreting-coefficients",
+    "href": "course-materials/pre-class/week4_monday.html#interpreting-coefficients",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Coefficient reversal, numeric",
-    "text": "Coefficient reversal, numeric\n\ntwo_predictors &lt;- lm(percent_bleached ~ region + peak_sst, coral)\nsummary(two_predictors)\n\nCoefficients:\n               Estimate Std. Error\n(Intercept)    -192.069     28.333\nregionModerate  -20.797      1.478\nregionWarmest   -42.284      2.286\npeak_sst          9.447      1.011 \n\none_predictor &lt;- lm(percent_bleached ~ peak_sst, coral)\nsummary(one_predictor)\n\nCoefficients:\n               Estimate Std. Error\n(Intercept)   262.0372     27.8707\npeak_sst       -6.9329      0.9603"
+    "section": "Interpreting coefficients",
+    "text": "Interpreting coefficients\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind}+ \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n294.99\n\n\nwind_directionUpwind\n-65.84\n\n\n\n\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Home Age} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n54.02\n\n\nwind_directionUpwind\n-40.98\n\n\nhome_age\n2.35\n\n\n\n\n\n\n\nThe first model estimates 66 ppm more Soil Pb downwind of Exide, the estimate is biased by the confounding effect of Home Age.\nFor two homes of the same age, the second model estimates 41 ppm more Soil Pb downwind of Exide."
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#tomorrows-lab",
-    "href": "course-materials/lecture-slides/week4_monday.html#tomorrows-lab",
+    "objectID": "course-materials/pre-class/week4_monday.html#statistical-notation-for-two-predictors-again",
+    "href": "course-materials/pre-class/week4_monday.html#statistical-notation-for-two-predictors-again",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Tomorrow’s lab",
-    "text": "Tomorrow’s lab\n\nTomorrow, you will simulate data and fit a multiple regression model for a Simpson’s paradox scenario.\nWork in groups to brainstorm ideas. Sketch a figure and draw a DAG.\n\n\n\nRequirements:\n\nTwo predictors: categorical (2 levels) + continuous. These are correlated.\nOne continuous response.\nThe relationship reverses when the data are grouped."
+    "section": "Statistical notation for two predictors (again)",
+    "text": "Statistical notation for two predictors (again)\nNow let’s consider wind direction and distance to freeway:\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Freeway Distance} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#correlated-predictors-open-the-door-to-bias",
-    "href": "course-materials/lecture-slides/week4_monday.html#correlated-predictors-open-the-door-to-bias",
+    "objectID": "course-materials/pre-class/week4_monday.html#visually-again",
+    "href": "course-materials/pre-class/week4_monday.html#visually-again",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Correlated predictors open the door to bias",
-    "text": "Correlated predictors open the door to bias"
+    "section": "Visually (again)",
+    "text": "Visually (again)"
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#multiple-regression-adds-predictors",
-    "href": "course-materials/lecture-slides/week4_monday.html#multiple-regression-adds-predictors",
+    "objectID": "course-materials/pre-class/week4_monday.html#interpreting-coefficients-again",
+    "href": "course-materials/pre-class/week4_monday.html#interpreting-coefficients-again",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Multiple regression adds predictors…",
-    "text": "Multiple regression adds predictors…\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\dots + \\beta_n x_n + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
+    "section": "Interpreting coefficients (again)",
+    "text": "Interpreting coefficients (again)\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind}+ \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n294.99\n\n\nwind_directionUpwind\n-65.84\n\n\n\n\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Freeway Distance} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n308.16\n\n\nwind_directionUpwind\n-12.19\n\n\ndist_to_freeway_mi\n-75.60\n\n\n\n\n\n\n\nFor two homes of the same freeway distance, the second model estimates 12 ppm more Soil Pb downwind of Exide."
   },
   {
-    "objectID": "course-materials/lecture-slides/week4_monday.html#which-adjusts-for-bias",
-    "href": "course-materials/lecture-slides/week4_monday.html#which-adjusts-for-bias",
+    "objectID": "course-materials/pre-class/week4_monday.html#statistical-notation-for-three-predictors",
+    "href": "course-materials/pre-class/week4_monday.html#statistical-notation-for-three-predictors",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "…which adjusts for bias",
-    "text": "…which adjusts for bias\n\ntwo_predictors &lt;- lm(percent_bleached ~ region + peak_sst, coral)\nsummary(two_predictors)\n\nCoefficients:\n               Estimate Std. Error\n(Intercept)    -192.069     28.333\nregionModerate  -20.797      1.478\nregionWarmest   -42.284      2.286\npeak_sst          9.447      1.011 \n\none_predictor &lt;- lm(percent_bleached ~ peak_sst, coral)\nsummary(one_predictor)\n\nCoefficients:\n               Estimate Std. Error\n(Intercept)   262.0372     27.8707\npeak_sst       -6.9329      0.9603"
+    "section": "Statistical notation for three predictors",
+    "text": "Statistical notation for three predictors\nNow let’s consider wind direction, home age, and distance to freeway:\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Home Age} \\\\ &\\quad + \\beta_3 \\text{Freeway Distance} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_monday.html#visually-three-predictors",
+    "href": "course-materials/pre-class/week4_monday.html#visually-three-predictors",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Visually (three predictors)",
+    "text": "Visually (three predictors)\nHarder to visualize now! Use a mix of color, facets, and line type."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_monday.html#interpreting-coefficients-three-predictors",
+    "href": "course-materials/pre-class/week4_monday.html#interpreting-coefficients-three-predictors",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interpreting coefficients (three predictors)",
+    "text": "Interpreting coefficients (three predictors)\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind}+ \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n294.99\n\n\nwind_directionUpwind\n-65.84\n\n\n\n\n\n\n\\[\n\\begin{align}\n\\text{Soil Pb} &= \\beta_0 + \\beta_1 \\text{Is Upwind} + \\beta_2 \\text{Home Age} \\\\\n&\\quad + \\beta_3 \\text{Freeway Distance} + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n100.08\n\n\nwind_directionUpwind\n-7.65\n\n\nhome_age\n1.97\n\n\ndist_to_freeway_mi\n-49.91\n\n\n\n\n\n\n\nFor two homes of the same age and freeway distance, the second model estimates 7.7 ppm more Soil Pb downwind of Exide."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_monday.html#multiple-regression-1",
+    "href": "course-materials/pre-class/week4_monday.html#multiple-regression-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Multiple regression",
+    "text": "Multiple regression\nWhen multiple predictors have relationships with each other, the door opens to biased coefficient estimates."
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_monday.html#describing-relationships",
+    "href": "course-materials/pre-class/week4_monday.html#describing-relationships",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Describing relationships",
+    "text": "Describing relationships\n\n\nA directed acyclic graph (DAG) describes the relationships between variables.\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    n0((Soil Pb))\n    n1((Freeways))\n    n2((Lead paint))\n    n3((Up/down&lt;br/&gt;wind))\n    n4((Development&lt;br/&gt;history))\n    n5((Location))\n    n1 --&gt; n0\n    n2 --&gt; n0\n    n3 --&gt; n0\n    n4 --&gt; n1\n    n4 --&gt; n2\n    n5 --&gt; n1\n    n5 --&gt; n3\n    n5 --&gt; n4\n\n    classDef observed fill:#cfe2f3,stroke:#1f4e79,stroke-width:2px\n    classDef unobserved fill:#f2f2f2,stroke:#7f7f7f,stroke-width:2px,stroke-dasharray:5 5\n    class n0,n1,n2,n3,n5 observed\n    class n4 unobserved"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_monday.html#multiple-regression-2",
+    "href": "course-materials/pre-class/week4_monday.html#multiple-regression-2",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Multiple regression",
+    "text": "Multiple regression\nGoing from single to multiple regression involves adding coefficients for each new predictor.\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2 + \\dots + \\beta_n x_n + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
+  },
+  {
+    "objectID": "course-materials/pre-class/week4_monday.html#interpretation",
+    "href": "course-materials/pre-class/week4_monday.html#interpretation",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interpretation",
+    "text": "Interpretation\nA coefficient in multiple regression describes the relationship between predictor and response when holding all else equal.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCoefficient\nEstimate\n\n\n\n\n(Intercept)\n54.02\n\n\nwind_directionUpwind\n-40.98\n\n\nhome_age\n2.35"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#learning-objectives",
+    "href": "course-materials/pre-class/week3_monday.html#learning-objectives",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Learning objectives",
+    "text": "Learning objectives\n\nDescribe relationships between variables using a regression model\nEstimate coefficients using ordinary least squares\nInterpret the parameters of a regression model"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#how-much-soil-lead-would-you-expect-to-find-2-mi-from-exide",
+    "href": "course-materials/pre-class/week3_monday.html#how-much-soil-lead-would-you-expect-to-find-2-mi-from-exide",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "How much soil lead would you expect to find 2 mi from Exide?",
+    "text": "How much soil lead would you expect to find 2 mi from Exide?"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#fitting-a-line-to-data",
+    "href": "course-materials/pre-class/week3_monday.html#fitting-a-line-to-data",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Fitting a line to data",
+    "text": "Fitting a line to data\nThe line is our model explaining the relationship between two variables\n\\[\ny = mx + b\n\\]\n\n\\(y\\) is the response (AKA dependent) variable\n\\(x\\) is the predictor (AKA independent) variable\n\\(m\\) is the slope\n\\(b\\) is the intercept"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#in-a-world-without-uncertainty",
+    "href": "course-materials/pre-class/week3_monday.html#in-a-world-without-uncertainty",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "In a world without uncertainty…",
+    "text": "In a world without uncertainty…\nWithout uncertainty, all the points would fall on the line."
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#fitting-a-line-to-data-1",
+    "href": "course-materials/pre-class/week3_monday.html#fitting-a-line-to-data-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Fitting a line to data",
+    "text": "Fitting a line to data\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\nIn real world data, the data spread out around the line.\n\nThe difference between the point and the line is the residual.\nLinear regression assumes the residuals are normally distributed."
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#fit-a-lead-soil-model",
+    "href": "course-materials/pre-class/week3_monday.html#fit-a-lead-soil-model",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Fit a lead soil model",
+    "text": "Fit a lead soil model\nLet’s fit a linear model to the lead soil data\n\n# all_samples_north = all samples north of Exide\nsoil_lm &lt;- lm(pb_ppm ~ distance_mi, all_samples_north)\n\ncoef(soil_lm)\n\n(Intercept) distance_mi \n  325.57432   -46.13838 \n\n\n\\[\n\\text{Pb (ppm)} = 325.6 - 46.1 \\times \\text{Distance (mi)} + \\epsilon\n\\]"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#a-closer-look-at-ena-31",
+    "href": "course-materials/pre-class/week3_monday.html#a-closer-look-at-ena-31",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "A closer look at ENA-31",
+    "text": "A closer look at ENA-31\nENA-31 is 1.13 mi from Exide. This soil sample had Pb 931 ppm."
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#the-expected-soil-lead-level",
+    "href": "course-materials/pre-class/week3_monday.html#the-expected-soil-lead-level",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "The expected soil lead level",
+    "text": "The expected soil lead level\nENA-31 is 1.13 mi from Exide. This soil sample had Pb 931 ppm.\nThe expected value of soil Pb at that distance is:\n\\[\n\\begin{align}\n\\text{Pb (ppm)} &= 325.6 - 46.1 \\times \\text{Distance (mi)} \\\\\n\\text{Pb (ppm)} &= 325.6 - 46.1 \\times 1.13 \\\\\n\\text{Pb (ppm)} &= 273.5\n\\end{align}\n\\]\nThe residual is the difference between the observed (931) and the expected (273.5)."
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#residual-soil-lead",
+    "href": "course-materials/pre-class/week3_monday.html#residual-soil-lead",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Residual soil lead",
+    "text": "Residual soil lead"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#picking-the-right-line",
+    "href": "course-materials/pre-class/week3_monday.html#picking-the-right-line",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Picking the right line",
+    "text": "Picking the right line\nThere are lots of possible lines through these data, how did the model find its coefficients?\n\\(\\text{Pb (ppm)} = 325.6 - 46.1 \\times \\text{Distance (mi)}\\)"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#ols-minimizes-the-squared-residuals",
+    "href": "course-materials/pre-class/week3_monday.html#ols-minimizes-the-squared-residuals",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "OLS minimizes the squared residuals",
+    "text": "OLS minimizes the squared residuals"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#different-coefficients-yield-higher-ssr",
+    "href": "course-materials/pre-class/week3_monday.html#different-coefficients-yield-higher-ssr",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Different coefficients yield higher SSR",
+    "text": "Different coefficients yield higher SSR"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#the-model-summary",
+    "href": "course-materials/pre-class/week3_monday.html#the-model-summary",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "The model summary",
+    "text": "The model summary\n\n# all_samples_north = all samples north of Exide\nsoil_lm &lt;- lm(pb_ppm ~ distance_mi, all_samples_north)\n\nsummary(soil_lm)\n\n\nCall:\nlm(formula = pb_ppm ~ distance_mi, data = all_samples_north)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-281.93 -129.12  -68.56   39.69 1851.76 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)   325.57      19.05  17.090  &lt; 2e-16 ***\ndistance_mi   -46.14      15.48  -2.981  0.00296 ** \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 241 on 839 degrees of freedom\nMultiple R-squared:  0.01048,   Adjusted R-squared:  0.0093 \nF-statistic: 8.886 on 1 and 839 DF,  p-value: 0.002957"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#the-coefficient-estimates-beta_0-beta_1",
+    "href": "course-materials/pre-class/week3_monday.html#the-coefficient-estimates-beta_0-beta_1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "The coefficient estimates \\(\\beta_0, \\beta_1\\)",
+    "text": "The coefficient estimates \\(\\beta_0, \\beta_1\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\n\nEstimate\nStd. Error\nt value\nPr(&gt;|t|)\n\n\n\n\n(Intercept)\n325.57\n19.05\n17.090\n&lt; 2e-16\n\n\ndistance_mi\n-46.14\n15.48\n-2.981\n0.00296"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#the-standard-errors-sebeta",
+    "href": "course-materials/pre-class/week3_monday.html#the-standard-errors-sebeta",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "The standard errors \\(SE(\\beta)\\)",
+    "text": "The standard errors \\(SE(\\beta)\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\n\n\n\n\n\nEstimate\nStd. Error\nt value\nPr(&gt;|t|)\n\n\n\n\n(Intercept)\n325.57\n19.05\n17.090\n&lt; 2e-16\n\n\ndistance_mi\n-46.14\n15.48\n-2.981\n0.00296"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#the-residual-standard-deviation-sigma",
+    "href": "course-materials/pre-class/week3_monday.html#the-residual-standard-deviation-sigma",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "The residual standard deviation \\(\\sigma\\)",
+    "text": "The residual standard deviation \\(\\sigma\\)\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]\n\nsigma(soil_lm)\n\n[1] 241.0151"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#sigma-visualized",
+    "href": "course-materials/pre-class/week3_monday.html#sigma-visualized",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "\\(\\sigma\\) visualized",
+    "text": "\\(\\sigma\\) visualized"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#say-hello-to-the-linear-model",
+    "href": "course-materials/pre-class/week3_monday.html#say-hello-to-the-linear-model",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Say hello to the linear model",
+    "text": "Say hello to the linear model\nThe linear model is the building block of regression modeling.\nEvery model you’ll see in this course from now on will build on this.\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#a-linear-model-describes-a-relationship",
+    "href": "course-materials/pre-class/week3_monday.html#a-linear-model-describes-a-relationship",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "A linear model describes a relationship",
+    "text": "A linear model describes a relationship"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#components-of-the-linear-model",
+    "href": "course-materials/pre-class/week3_monday.html#components-of-the-linear-model",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Components of the linear model",
+    "text": "Components of the linear model\n\nCoefficients\nResiduals\nResidual standard deviation\n\n\\[\n\\begin{align}\ny &= \\beta_0 + \\beta_1 x + \\epsilon \\\\\n\\epsilon &\\sim Normal(0, \\sigma)\n\\end{align}\n\\]"
+  },
+  {
+    "objectID": "course-materials/pre-class/week3_monday.html#interpreting-the-linear-model",
+    "href": "course-materials/pre-class/week3_monday.html#interpreting-the-linear-model",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interpreting the linear model",
+    "text": "Interpreting the linear model\n\n\n\n\n\n\nEstimate\nStd. Error\nt value\nPr(&gt;|t|)\n\n\n\n\n(Intercept)\n325.57\n19.05\n17.090\n&lt; 2e-16\n\n\ndistance_mi\n-46.14\n15.48\n-2.981\n0.00296\n\n\n\n\n\n\n\n\\[\n\\text{Pb (ppm)} = 325.6 - 46.1 \\times \\text{Distance (mi)} + \\epsilon\n\\]"
   }
 ]

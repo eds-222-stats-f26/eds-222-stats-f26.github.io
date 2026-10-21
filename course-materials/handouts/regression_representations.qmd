@@ -1,0 +1,757 @@
+---
+format:
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    papersize: letter
+    fontsize: 10pt
+    linestretch: 1.05
+    mainfont: Lora
+    monofont: Roboto Mono
+    monofontoptions:
+      - Scale=0.9
+    geometry:
+      - top=0.75in
+      - bottom=0.6in
+      - left=0.95in
+      - right=0.95in
+    pagestyle: empty
+    number-sections: false
+    include-in-header:
+      text: |
+        \usepackage{titlesec}
+        \usepackage{array}
+        \usepackage{enumitem}
+        \usepackage{unicode-math}
+        \setmathfont{latinmodern-math.otf}
+        \setmathfont[range={up/{latin,Latin,num}, it/{latin,Latin}}]{Lora}
+        \setlength{\parindent}{0pt}
+        \setlength{\parskip}{5pt}
+        \titleformat{\section}{\normalfont\fontsize{15}{18}\selectfont}{}{0pt}{}
+        \titlespacing*{\section}{0pt}{0pt}{6pt}
+        \titleformat{\subsection}{\normalfont\fontsize{12}{15}\selectfont}{}{0pt}{}
+        \titlespacing*{\subsection}{0pt}{10pt}{2pt}
+        \setlist[itemize]{label=\textbullet, leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \newcommand{\doctitle}[1]{{\fontsize{21}{25}\selectfont #1}\par\vspace{8pt}}
+        \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+        \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+params:
+  key: false
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: ""
+    fig.align: center
+    fig.pos: "H"
+    dev: cairo_pdf
+---
+
+```{r}
+#| label: setup
+library(ggplot2)
+
+key <- isTRUE(params$key)
+
+# ---- Plot style (matches the Lab 4 handout) ----
+pal3 <- c("#9ecae1", "#e6ee9c", "#f4a582")
+pal2 <- c("#9ecae1", "#f4a582")
+theme_set(
+  theme_bw(base_size = 11) +
+    theme(
+      legend.position = "bottom",
+      legend.margin = margin(0, 0, 0, 0),
+      plot.margin = margin(4, 6, 2, 4)
+    )
+)
+pts <- function(...) {
+  geom_point(shape = 21, size = 2, color = "grey20", stroke = 0.4, ...)
+}
+
+# Empty grid for students to sketch on: ticks, no labels
+blank_plot <- function() {
+  ggplot() +
+    scale_x_continuous(
+      limits = c(0, 1),
+      breaks = seq(0, 1, 0.25),
+      labels = NULL
+    ) +
+    scale_y_continuous(
+      limits = c(0, 1),
+      breaks = seq(0, 1, 0.25),
+      labels = NULL
+    ) +
+    labs(x = NULL, y = NULL) +
+    theme(axis.ticks.length = unit(4, "pt"))
+}
+
+# Blank summary() table for students. Five rows so the count isn't a hint.
+summary_blank <- function() {
+  row <- "& \\\\ \\hline\n"
+  cat(
+    "```{=latex}\n",
+    "\\texttt{lm(formula = }\\rule{2.4in}{0.4pt}\\texttt{, data = }\\rule{0.9in}{0.4pt}\\texttt{)}\n\n",
+    "\\vspace{6pt}{\\renewcommand{\\arraystretch}{1.3}\n",
+    "\\begin{tabular}{|L{2.4in}|C{1.2in}|}\\hline\n",
+    "& Estimate \\\\ \\hline\n",
+    strrep(row, 5),
+    "\\end{tabular}}\n",
+    "```\n",
+    sep = ""
+  )
+}
+
+# Print R output in a slightly smaller monospace size
+mono <- function(x) {
+  cat("```{=latex}\n\\begingroup\\footnotesize\n```\n\n```\n")
+  print(x)
+  cat("```\n\n```{=latex}\n\\endgroup\n```\n")
+}
+
+# ---- Equation helpers (for the answer key) ----
+num <- function(x, d = 2) formatC(abs(x), format = "f", digits = d)
+term <- function(b, name, d = 2) {
+  paste0(if (b < 0) " - " else " + ", num(b, d), " \\cdot ", name)
+}
+tx <- function(s) paste0("\\text{", gsub("_", "\\\\_", s), "}")
+eq_tex <- function(lhs, b0, terms, sigma, d = 2, note = NULL) {
+  paste0(
+    "$$",
+    tx(lhs),
+    " = ",
+    formatC(b0, format = "f", digits = d),
+    paste(terms, collapse = ""),
+    " + \\varepsilon, \\qquad \\varepsilon \\sim Normal(0,\\ ",
+    num(sigma, d),
+    ")$$\n",
+    if (!is.null(note)) {
+      paste0("\n\\begin{center}", note, "\\end{center}\n")
+    } else {
+      ""
+    }
+  )
+}
+eq_slot <- function(tex) if (key) cat(tex) else cat("\\vspace{0.65in}\n")
+summary_slot <- function(fit) if (key) mono(summary(fit)) else summary_blank()
+```
+
+\doctitle{Three ways to represent a model`r if (params$key) " (answer key)" else ""`}
+
+Every linear regression model can be represented three ways. On each of the following pages you'll find an environmental case study and **one** representation of its model. Your job is to create the other **two**.
+
+- **Equation.** The model in statistical notation, with values for each coefficient. Write categorical predictors as dummy variables and say what each one means. Include the standard deviation of the residuals: $\varepsilon \sim Normal(0, \sigma)$.
+- **Visual.** A scatter plot of the response and predictor(s), with the regression line(s) drawn on top. Label the axes and add tick labels. For a categorical predictor, draw one line (or one group mean) per level. For an interaction between two continuous predictors, draw lines for two or three values of the second predictor.
+- **Computational.** The output of `summary()` for the `lm()` model in R. Write the formula, the coefficient names as R would print them (for example, `mountTracker` or `urchins:protectionMPA`), and the estimates.
+
+Your three representations should describe the same model. Use the variable names, units, and reference levels in each page's table. Sketches don't need to be exact, but the intercepts and slopes should be reasonable.
+
+When you finish a page, check your work: set the continuous predictor to 0 and use the reference level. Does your equation give the same value as the intercept in your `summary()` output and the reference line in your figure?
+
+```{=latex}
+\vspace{6pt}
+{\renewcommand{\arraystretch}{1.45}
+\begin{tabular}{|C{0.35in}|L{2.75in}|L{1.75in}|L{1.1in}|}\hline
+ & \textbf{Model} & \textbf{Case study} & \textbf{Given} \\ \hline
+1 & One continuous predictor & Restoration & Equation \\ \hline
+2 & One categorical predictor (2 levels) & Groundwater & Visual \\ \hline
+3 & One categorical predictor (3 levels) & Wildfire & Computational \\ \hline
+4 & One continuous + one categorical (2 levels) & Green energy & Computational \\ \hline
+5 & One continuous + one categorical (3 levels) & Climate & Visual \\ \hline
+6 & One continuous interacting with one categorical (2 levels) & Marine and coastal & Visual \\ \hline
+7 & One continuous interacting with one continuous & Forestry & Equation \\ \hline
+\end{tabular}}
+```
+
+<!-- =========================================================== -->
+<!-- MODEL 1: Conservation & restoration -- GIVEN: equation       -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: m1-data
+set.seed(101)
+n <- 30
+sites <- data.frame(years = runif(n, 0, 12))
+sites$native_cover <- pmin(
+  pmax(12.4 + 4.8 * sites$years + rnorm(n, 0, 6), 0.5),
+  99
+)
+fit1 <- lm(native_cover ~ years, data = sites)
+```
+
+# 1. Restoring coastal sage scrub
+
+A land trust has replanted coastal sage scrub on 30 former grazing parcels in the Santa Barbara foothills over the past 12 years. At each site, ecologists estimated the percent cover of native plants and recorded how many years had passed since restoration began. The data are in a data frame called `sites`.
+
+```{=latex}
+{\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|L{1.5in}|L{4.75in}|}\hline
+\textbf{Variable} & \textbf{Description} \\ \hline
+\texttt{native\_cover} & Native plant cover (\%) \\ \hline
+\texttt{years} & Years since restoration began (0 to 12) \\ \hline
+\end{tabular}}
+```
+
+## Equation (given)
+
+$$\text{native\_cover} = 12.4 + 4.8 \cdot \text{years} + \varepsilon, \qquad \varepsilon \sim Normal(0,\ 35)$$
+
+## Visual
+
+`r if (!key) "Sketch this model. Add axis labels, tick labels, and the regression line."`
+
+```{r}
+#| fig-width: 6
+#| fig-height: !expr if (key) 2.5 else 3.4
+#| out-width: "62%"
+if (key) {
+  ggplot(sites, aes(years, native_cover)) +
+    pts(fill = pal3[1]) +
+    geom_abline(intercept = 12.4, slope = 4.8, linewidth = 0.9) +
+    labs(x = "Years since restoration", y = "Native plant cover (%)")
+} else {
+  blank_plot()
+}
+```
+
+## Computational
+
+`r if (!key) "Fill in the output of \x60summary()\x60 for this model."`
+
+```{r}
+#| results: asis
+summary_slot(fit1)
+```
+
+<!-- =========================================================== -->
+<!-- MODEL 2: Groundwater -- GIVEN: visual                        -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: m2-data
+set.seed(202)
+wells <- data.frame(
+  land_use = factor(rep(c("Agricultural", "Urban"), each = 15))
+)
+wells$nitrate <- pmax(
+  ifelse(wells$land_use == "Agricultural", 11.2, 4.6) + rnorm(30, 0, 2.4),
+  0.3
+)
+fit2 <- lm(nitrate ~ land_use, data = wells)
+b2 <- coef(fit2)
+```
+
+# 2. Nitrate in domestic wells
+
+Nitrate from fertilizer and septic systems is one of the most common groundwater contaminants in California's agricultural valleys. A water district sampled 30 domestic wells, 15 surrounded mostly by farmland and 15 in urban neighborhoods, and measured nitrate in each. The data are in `wells`. In the figure, black bars mark the group means and the dashed line is the federal drinking-water limit.
+
+```{=latex}
+{\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|L{1.5in}|L{4.75in}|}\hline
+\textbf{Variable} & \textbf{Description} \\ \hline
+\texttt{nitrate} & Nitrate-N concentration (mg/L) \\ \hline
+\texttt{land\_use} & Land use near the well: Agricultural (reference level) or Urban \\ \hline
+\end{tabular}}
+```
+
+## Visual (given)
+
+```{r}
+#| fig-width: 6
+#| fig-height: 2.8
+#| out-width: "70%"
+set.seed(2)
+ggplot(wells, aes(land_use, nitrate)) +
+  pts(
+    aes(fill = land_use),
+    position = position_jitter(width = 0.12, height = 0)
+  ) +
+  stat_summary(
+    fun = mean,
+    fun.min = mean,
+    fun.max = mean,
+    geom = "crossbar",
+    width = 0.55,
+    linewidth = 0.6
+  ) +
+  scale_fill_manual(values = pal2, guide = "none") +
+  scale_y_continuous(
+    limits = c(0, 18),
+    breaks = seq(0, 18, 2),
+    minor_breaks = 0:18
+  ) +
+  labs(x = "Land use near well", y = "Nitrate-N (mg/L)")
+```
+
+## Equation
+
+`r if (!key) "Write the model in statistical notation. Define your dummy variable."`
+
+```{r}
+#| results: asis
+eq_slot(eq_tex(
+  "nitrate",
+  b2[1],
+  term(b2[2], "\\text{Urban}"),
+  sigma(fit2),
+  note = "Urban = 1 for urban wells and 0 otherwise"
+))
+```
+
+## Computational
+
+`r if (!key) "Fill in the output of \x60summary()\x60 for this model."`
+
+```{r}
+#| results: asis
+summary_slot(fit2)
+```
+
+<!-- =========================================================== -->
+<!-- MODEL 3: Wildfire & hazards -- GIVEN: computational          -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: m3-data
+set.seed(303)
+plots <- data.frame(
+  severity = factor(
+    rep(c("Low", "Moderate", "High"), each = 12),
+    levels = c("Low", "Moderate", "High")
+  )
+)
+mu3 <- c(Low = 2.3, Moderate = 7.1, High = 15.8)
+plots$erosion <- pmax(
+  mu3[as.character(plots$severity)] + rnorm(36, 0, 3.1),
+  0.1
+)
+fit3 <- lm(erosion ~ severity, data = plots)
+b3 <- coef(fit3)
+```
+
+# 3. Erosion after a wildfire
+
+After a wildfire, burned hillslopes can lose a lot of soil during the first rainy season. Researchers installed silt fences on 36 hillslope plots, 12 in each burn severity class, and weighed the sediment each fence caught over the winter. The data are in `plots`.
+
+```{=latex}
+{\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|L{1.5in}|L{4.75in}|}\hline
+\textbf{Variable} & \textbf{Description} \\ \hline
+\texttt{erosion} & Sediment caught over the first winter (Mg/ha) \\ \hline
+\texttt{severity} & Burn severity: Low (reference level), Moderate, or High \\ \hline
+\end{tabular}}
+```
+
+## Computational (given)
+
+```{r}
+#| results: asis
+mono(summary(fit3))
+```
+
+## Equation
+
+`r if (!key) "Write the model in statistical notation. Define your dummy variables."`
+
+```{r}
+#| results: asis
+eq_slot(eq_tex(
+  "erosion",
+  b3[1],
+  c(term(b3[2], "\\text{Moderate}"), term(b3[3], "\\text{High}")),
+  sigma(fit3)
+))
+```
+
+## Visual
+
+`r if (!key) "Sketch this model. Add axis labels, tick labels, and the group means."`
+
+```{r}
+#| fig-width: 6
+#| fig-height: !expr if (key) 2.5 else 2.8
+#| out-width: "62%"
+if (key) {
+  set.seed(3)
+  ggplot(plots, aes(severity, erosion)) +
+    pts(
+      aes(fill = severity),
+      position = position_jitter(width = 0.12, height = 0)
+    ) +
+    stat_summary(
+      fun = mean,
+      fun.min = mean,
+      fun.max = mean,
+      geom = "crossbar",
+      width = 0.55,
+      linewidth = 0.6
+    ) +
+    scale_fill_manual(values = pal3, guide = "none") +
+    labs(x = "Burn severity", y = "Soil erosion (Mg/ha)")
+} else {
+  blank_plot()
+}
+```
+
+<!-- =========================================================== -->
+<!-- MODEL 4: Green energy -- GIVEN: computational                -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: m4-data
+set.seed(404)
+n <- 40
+arrays <- data.frame(
+  irradiance = runif(n, 2.5, 7.5),
+  mount = factor(rep(c("Fixed", "Tracker"), n / 2))
+)
+arrays$energy <- 1.5 +
+  7.9 * arrays$irradiance +
+  8.3 * (arrays$mount == "Tracker") +
+  rnorm(n, 0, 3.2)
+fit4 <- lm(energy ~ irradiance + mount, data = arrays)
+b4 <- coef(fit4)
+```
+
+# 4. Do solar trackers pay off?
+
+A community solar program runs 40 identical 10 kW solar arrays. Half are on fixed racks and half are on single-axis trackers that turn to follow the sun. For each array, analysts recorded one day's energy output and that day's solar irradiance. The data are in `arrays`.
+
+```{=latex}
+{\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|L{1.5in}|L{4.75in}|}\hline
+\textbf{Variable} & \textbf{Description} \\ \hline
+\texttt{energy} & Energy produced (kWh/day) \\ \hline
+\texttt{irradiance} & Solar irradiance (kWh/m\textsuperscript{2}/day) \\ \hline
+\texttt{mount} & Fixed (reference level) or Tracker \\ \hline
+\end{tabular}}
+```
+
+## Computational (given)
+
+```{r}
+#| results: asis
+mono(summary(fit4))
+```
+
+## Equation
+
+`r if (!key) "Write the model in statistical notation. Define your dummy variable."`
+
+```{r}
+#| results: asis
+eq_slot(eq_tex(
+  "energy",
+  b4[1],
+  c(term(b4[2], "\\text{irradiance}"), term(b4[3], "\\text{Tracker}")),
+  sigma(fit4)
+))
+```
+
+## Visual
+
+`r if (!key) "Sketch this model. Add axis labels, tick labels, and the regression lines."`
+
+```{r}
+#| fig-width: 6
+#| fig-height: !expr if (key) 2.5 else 2.6
+#| out-width: "62%"
+if (key) {
+  arrays$fitted <- fitted(fit4)
+  ggplot(arrays, aes(irradiance, energy)) +
+    pts(aes(fill = mount)) +
+    geom_line(aes(y = fitted, group = mount), linewidth = 0.9) +
+    scale_fill_manual(values = pal2) +
+    labs(
+      x = expression("Solar irradiance (kWh/m"^2 * "/day)"),
+      y = "Energy output (kWh/day)",
+      fill = "Mount"
+    )
+} else {
+  blank_plot()
+}
+```
+
+<!-- =========================================================== -->
+<!-- MODEL 5: Climate -- GIVEN: visual                            -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: m5-data
+set.seed(505)
+stations <- data.frame(
+  zone = factor(
+    rep(c("Coastal", "Valley", "Desert"), each = 15),
+    levels = c("Coastal", "Valley", "Desert")
+  )
+)
+stations$years <- pmin(
+  pmax(rep(seq(0, 42, length.out = 15), 3) + runif(45, -1, 1), 0),
+  42
+)
+off5 <- c(Coastal = 0, Valley = 20, Desert = 55)
+stations$heat_days <- round(pmax(
+  3 +
+    0.5 * stations$years +
+    off5[as.character(stations$zone)] +
+    rnorm(45, 0, 5),
+  0
+))
+fit5 <- lm(heat_days ~ years + zone, data = stations)
+b5 <- coef(fit5)
+```
+
+# 5. Extreme heat days
+
+Extreme heat is becoming more common across California, but how much heat a place already gets depends on where it is. Using weather station records, a climate team counted the number of days each year with a high temperature above 35 °C in three climate zones (15 station-years per zone). The data are in `stations`.
+
+```{=latex}
+{\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|L{1.5in}|L{4.75in}|}\hline
+\textbf{Variable} & \textbf{Description} \\ \hline
+\texttt{heat\_days} & Days per year with a high temperature above 35 °C \\ \hline
+\texttt{years} & Years since 1980 \\ \hline
+\texttt{zone} & Coastal (reference level), Valley, or Desert \\ \hline
+\end{tabular}}
+```
+
+## Visual (given)
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "64%"
+stations$fitted <- fitted(fit5)
+ggplot(stations, aes(years, heat_days)) +
+  pts(aes(fill = zone)) +
+  geom_line(aes(y = fitted, group = zone), linewidth = 0.9) +
+  scale_fill_manual(values = pal3) +
+  scale_x_continuous(breaks = seq(0, 40, 5)) +
+  scale_y_continuous(breaks = seq(0, 100, 10)) +
+  labs(
+    x = "Years since 1980",
+    y = expression("Days above 35 " * degree * "C"),
+    fill = "Climate zone"
+  )
+```
+
+## Equation
+
+`r if (!key) "Write the model in statistical notation. Define your dummy variables."`
+
+```{r}
+#| results: asis
+eq_slot(eq_tex(
+  "heat_days",
+  b5[1],
+  c(
+    term(b5["years"], "\\text{years}"),
+    term(b5["zoneValley"], "\\text{Valley}"),
+    term(b5["zoneDesert"], "\\text{Desert}")
+  ),
+  sigma(fit5)
+))
+```
+
+## Computational
+
+`r if (!key) "Fill in the output of \x60summary()\x60 for this model."`
+
+```{r}
+#| results: asis
+summary_slot(fit5)
+```
+
+<!-- =========================================================== -->
+<!-- MODEL 6: Marine & coastal -- GIVEN: visual                   -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: m6-data
+set.seed(606)
+transects <- data.frame(
+  protection = factor(rep(c("Fished", "MPA"), each = 20)),
+  urchins = runif(40, 0, 25)
+)
+mpa <- transects$protection == "MPA"
+transects$kelp <- pmax(
+  ifelse(mpa, 10.0 - 0.12 * transects$urchins, 9.0 - 0.30 * transects$urchins) +
+    rnorm(40, 0, 0.9),
+  0.1
+)
+fit6 <- lm(kelp ~ urchins * protection, data = transects)
+b6 <- coef(fit6)
+```
+
+# 6. Urchins, kelp, and marine protected areas
+
+Purple sea urchins eat giant kelp, and urchin outbreaks can turn kelp forests into urchin barrens. Inside marine protected areas (MPAs), urchin predators like California sheephead and spiny lobster are more common, which may change how strongly urchins affect kelp. Divers surveyed 40 transects (20 fished, 20 inside MPAs) for urchin and kelp density. The data are in `transects`.
+
+```{=latex}
+{\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|L{1.5in}|L{4.75in}|}\hline
+\textbf{Variable} & \textbf{Description} \\ \hline
+\texttt{kelp} & Kelp density (stipes/m\textsuperscript{2}) \\ \hline
+\texttt{urchins} & Purple urchin density (urchins/m\textsuperscript{2}) \\ \hline
+\texttt{protection} & Fished (reference level) or MPA \\ \hline
+\end{tabular}}
+```
+
+## Visual (given)
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "64%"
+transects$fitted <- fitted(fit6)
+ggplot(transects, aes(urchins, kelp)) +
+  pts(aes(fill = protection)) +
+  geom_line(aes(y = fitted, group = protection), linewidth = 0.9) +
+  scale_fill_manual(values = pal2) +
+  scale_x_continuous(breaks = seq(0, 25, 5)) +
+  scale_y_continuous(
+    limits = c(0, 12.5),
+    breaks = seq(0, 12, 2),
+    minor_breaks = 0:12
+  ) +
+  labs(
+    x = expression("Urchin density (urchins/m"^2 * ")"),
+    y = expression("Kelp density (stipes/m"^2 * ")"),
+    fill = "Protection"
+  )
+```
+
+## Equation
+
+`r if (!key) "Write the model in statistical notation. Define your dummy variable."`
+
+```{r}
+#| results: asis
+eq_slot(eq_tex(
+  "kelp",
+  b6[1],
+  c(
+    term(b6[2], "\\text{urchins}"),
+    term(b6[3], "\\text{MPA}"),
+    term(b6[4], "\\text{urchins} \\cdot \\text{MPA}")
+  ),
+  sigma(fit6)
+))
+```
+
+## Computational
+
+`r if (!key) "Fill in the output of \x60summary()\x60 for this model."`
+
+```{r}
+#| results: asis
+summary_slot(fit6)
+```
+
+<!-- =========================================================== -->
+<!-- MODEL 7: Forestry -- GIVEN: equation                         -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: m7-data
+set.seed(707)
+n <- 50
+trees <- data.frame(precip = runif(n, 40, 120), density = runif(n, 2, 10))
+trees$growth <- pmax(
+  0.5 +
+    0.06 * trees$precip -
+    0.10 * trees$density -
+    0.004 * trees$precip * trees$density +
+    rnorm(n, 0, 0.5),
+  0.05
+)
+fit7 <- lm(growth ~ precip * density, data = trees)
+```
+
+# 7. Thinning, rainfall, and tree growth
+
+Forest managers want to know whether thinning crowded conifer stands helps trees grow more in wet years. Across 50 plots in the Sierra Nevada, foresters measured average annual diameter growth, annual precipitation, and stand density. The data are in `trees`.
+
+```{=latex}
+{\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{|L{1.5in}|L{4.75in}|}\hline
+\textbf{Variable} & \textbf{Description} \\ \hline
+\texttt{growth} & Average annual diameter growth (mm/yr) \\ \hline
+\texttt{precip} & Annual precipitation (cm, 40 to 120) \\ \hline
+\texttt{density} & Stand density (hundreds of trees per hectare, 2 to 10) \\ \hline
+\end{tabular}}
+```
+
+## Equation (given)
+
+$$\text{growth} = 0.5 + 0.06 \cdot \text{precip} - 0.10 \cdot \text{density} - 0.004 \cdot \text{precip} \cdot \text{density} + \varepsilon,$$
+$$\varepsilon \sim Normal(0,\ 0.25)$$
+
+## Visual
+
+`r if (!key) "Sketch this model on the figure below with growth on the y-axis and precipitation on the x-axis. Add axis labels, tick labels, and regression lines for two or three values of density."`
+
+```{r}
+#| fig-width: 6
+#| fig-height: !expr if (key) 2.5 else 3.4
+#| out-width: "62%"
+if (key) {
+  lines7 <- expand.grid(
+    precip = seq(40, 120, length.out = 50),
+    density = c(2, 6, 10)
+  )
+  lines7$growth <- 0.5 +
+    0.06 * lines7$precip -
+    0.10 * lines7$density -
+    0.004 * lines7$precip * lines7$density
+  ends7 <- subset(lines7, precip == 120)
+  ggplot(trees, aes(precip, growth)) +
+    geom_line(
+      data = lines7,
+      aes(color = density, group = density),
+      linewidth = 0.9
+    ) +
+    pts(aes(fill = density)) +
+    geom_text(
+      data = ends7,
+      aes(label = paste("density =", density)),
+      hjust = -0.1,
+      size = 3
+    ) +
+    scale_fill_viridis_c(aesthetics = c("fill", "color")) +
+    scale_x_continuous(limits = c(40, 138), breaks = seq(40, 120, 20)) +
+    labs(
+      x = "Annual precipitation (cm)",
+      y = "Diameter growth (mm/yr)",
+      fill = "Density",
+      color = "Density"
+    ) +
+    theme(legend.position = "right")
+} else {
+  blank_plot()
+}
+```
+
+## Computational
+
+`r if (!key) "Fill in the output of \x60summary()\x60 for this model."`
+
+```{r}
+#| results: asis
+summary_slot(fit7)
+```
