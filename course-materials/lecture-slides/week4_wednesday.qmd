@@ -7,21 +7,6 @@ bibliography: references.bib
 
 ```{r}
 library(tidyverse)
-library(googlesheets4)
-
-gs4_deauth()
-
-sheet_url <- "https://docs.google.com/spreadsheets/d/1e0eL4NFmGThSgUOGeWmG45urZGSrfKUgX-94tiZ6j6A/edit#gid=1253615536"
-
-# Columns by position: C = value of X, E = estimated % of US bird species in CA
-birds <- read_sheet(sheet_url) |>
-  select(anchor = 3, ca_pct = 5, prior_know = 6) |>
-  mutate(
-    anchor = factor(anchor, levels = c(50, 70)),
-    ca_pct = as.numeric(ca_pct),
-    prior_know = as.numeric(prior_know)
-  )
-
 set.seed(222)
 theme_set(theme_bw(18))
 
