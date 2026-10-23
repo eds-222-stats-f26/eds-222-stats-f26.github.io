@@ -3,4 +3,13 @@ title: "Linear model inference"
 subtitle: "Week 5 (October 26 - 30)"
 ---
 
-**_Under construction_**
+## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Class Materials {#lecture-materials}
+
+| Session | In-class | Pre-class |
+|---------|--------|---------|
+| Lecture 1 | Linear regression inference | IMS 24 <br/> [Linear regression inference](https://youtu.be/U4VR5kFZOww) |
+| Lab | Concept maps | None |
+| Lecture 2 | Causality | IMS 25 |
+: {.hover .bordered tbl-colwidths="[30,30,40]"} 
+
+
