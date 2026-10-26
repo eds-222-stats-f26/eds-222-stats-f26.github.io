@@ -1,0 +1,714 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 5 Monday"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        </style>
+execute:
+  echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+# Same simulated nitrate population and sample as the lab
+beta_0 <- 4
+beta_1 <- 0.035
+sigma <- 2
+
+ag_pct <- runif(1e4, 0, 80)
+nitrate_hat <- beta_0 + beta_1 * ag_pct
+nitrate <- rnorm(1e4, nitrate_hat, sigma)
+simulated_population <- tibble(ag_pct, nitrate_hat, nitrate)
+
+one_sample <- slice_sample(simulated_population, n = 30)
+one_sample_lm <- lm(nitrate ~ ag_pct, one_sample)
+beta_1_hat <- coef(one_sample_lm)[["ag_pct"]]
+se_beta_1 <- coef(summary(one_sample_lm))["ag_pct", "Std. Error"]
+
+# Least squares slope, without the overhead of lm()
+ols_slope <- function(x, y) cov(x, y) / var(x)
+
+# Scatter plot of nitrate by farmland with its least squares line
+plot_wells <- function(wells, line_colour = "firebrick", alpha = 0.6) {
+  slope <- ols_slope(wells$ag_pct, wells$nitrate)
+  ggplot(wells, aes(ag_pct, nitrate)) +
+    geom_point(
+      shape = 21,
+      fill = "cornflowerblue",
+      color = "navy",
+      size = 3,
+      alpha = alpha
+    ) +
+    geom_smooth(
+      method = "lm",
+      formula = y ~ x,
+      se = FALSE,
+      color = line_colour,
+      linewidth = 1.5
+    ) +
+    coord_cartesian(xlim = c(0, 80), ylim = range(one_sample$nitrate)) +
+    labs(
+      x = "Farmland within 1 km (%)",
+      y = "Nitrate (mg/L)",
+      title = sprintf("Slope = %.3f mg/L per %%", slope)
+    )
+}
+
+# Shuffle farmland across wells 10,000 times, recalculating the slope each time
+null_slopes <- replicate(1e4, {
+  ols_slope(sample(one_sample$ag_pct), one_sample$nitrate)
+})
+# Two-sided: slopes at least as far from 0 as observed, in either direction
+perm_pvalue <- mean(abs(null_slopes) >= abs(beta_1_hat))
+
+# Resample wells with replacement 10,000 times, recalculating the slope each time
+boot_slopes <- replicate(1e4, {
+  resampled <- slice_sample(one_sample, prop = 1, replace = TRUE)
+  ols_slope(resampled$ag_pct, resampled$nitrate)
+})
+boot_ci <- quantile(boot_slopes, c(0.025, 0.975))
+
+lm_pvalue <- coef(summary(one_sample_lm))["ag_pct", "Pr(>|t|)"]
+lm_ci <- confint(one_sample_lm)["ag_pct", ]
+
+slope_xlim <- c(-0.07, 0.09)
+```
+
+# Linear regression inference
+
+## Learning objectives
+
+- **Review inference**: hypothesis tests and confidence intervals
+- Apply **hypothesis testing** to linear regression
+- Apply **confidence intervals** to linear regression
+
+## How today works
+
+Each new method follows the same three steps:
+
+1. **I do**: I explain it with slides
+2. **We do**: we write the code together
+3. **You do**: you fill in the blanks on a new problem
+
+Live coding and exercises can be found [here](../labs/week5-monday-inference.qmd).
+
+# Review inference
+
+## Hypotheses
+
+**Question**: _If_ there were no effect, _then_ how surprising is our sample?
+
+- **Null hypothesis**, $H_0$: no effect. The skeptic's position.
+- **Alternative hypothesis**, $H_A$: the effect we're looking for.
+
+::: {.fragment style="font-size:0.8em"}
+
+| | $H_0$ | $H_A$ | Counts as "at least as extreme" |
+|---|---|---|---|
+| One-sided | $\beta_1 = 0$ | $\beta_1 < 0$ (or $> 0$) | One tail |
+| Two-sided | $\beta_1 = 0$ | $\beta_1 \ne 0$ | Both tails |
+
+:::
+
+## Null distribution and p-value
+
+The **null distribution** is what the statistic looks like across samples _if_ $H_0$ is true.
+
+The **p-value** is the proportion of the null distribution at least as extreme as the observed statistic.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 3.5
+#| fig-align: center
+
+observed_z <- 1.8
+null_demo <- expand_grid(
+  sides = c("One-sided: one tail", "Two-sided: both tails"),
+  z = seq(-3.5, 3.5, by = 0.01)
+) |>
+  mutate(
+    density = dnorm(z),
+    extreme = if_else(
+      str_starts(sides, "One"),
+      z >= observed_z,
+      abs(z) >= observed_z
+    )
+  )
+
+ggplot(null_demo, aes(z, density)) +
+  geom_area(
+    aes(group = z > 0),
+    filter(null_demo, extreme),
+    fill = "steelblue",
+    alpha = 0.5
+  ) +
+  geom_line() +
+  geom_vline(xintercept = observed_z, linewidth = 1) +
+  annotate(
+    "text",
+    x = observed_z + 0.15,
+    y = 0.35,
+    label = "Observed",
+    hjust = 0,
+    size = 6
+  ) +
+  facet_wrap(~sides) +
+  labs(x = "Statistic", y = NULL) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+```
+
+Small p-value (< 0.05): the sample would be surprising under $H_0$, so we **reject** $H_0$.
+
+## Two ways to get a null distribution
+
+::: {.columns}
+
+::: {.column}
+
+**Randomization: permutation**
+
+_Shuffle_ the predictor to break its link with the response. Recalculate the statistic. Repeat 1,000s of times.
+
+:::
+
+::: {.column}
+
+**Mathematical model**
+
+Given enough independent observations, the null distribution is approximately
+
+$$
+Normal(0, SE)
+$$
+
+where $SE$ is the **standard error** of the statistic.
+
+:::
+
+:::
+
+## Confidence intervals
+
+**Question**: _How big_ is the effect?
+
+A **confidence interval** is a range of plausible values for the population parameter. It comes from the **sampling distribution**: what the statistic looks like across many samples from the population.
+
+::: {.fragment}
+
+"95% confident" means: if we repeated the procedure many times, about 95% of the intervals would contain the population parameter.
+
+:::
+
+## 95% of intervals contain $\beta_1$
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5.5
+#| fig-align: center
+
+many_cis <- map(1:50, \(i) {
+  wells <- slice_sample(simulated_population, n = 30)
+  ci <- confint(lm(nitrate ~ ag_pct, wells))["ag_pct", ]
+  tibble(sample = i, lower = ci[1], upper = ci[2])
+}) |>
+  list_rbind() |>
+  mutate(contains = lower <= beta_1 & upper >= beta_1)
+
+ggplot(
+  many_cis,
+  aes(y = sample, xmin = lower, xmax = upper, color = contains)
+) +
+  geom_errorbarh(height = 0, linewidth = 1) +
+  geom_vline(xintercept = beta_1, linetype = "dashed") +
+  scale_color_manual(
+    values = c(`TRUE` = "grey50", `FALSE` = "darkorange"),
+    labels = c(`TRUE` = "Contains", `FALSE` = "Misses")
+  ) +
+  labs(
+    x = expression("95% CI for " * beta[1]),
+    y = "Sample",
+    color = NULL,
+    title = sprintf(
+      "%d of 50 intervals contain the population slope (dashed)",
+      sum(many_cis$contains)
+    )
+  ) +
+  theme(legend.position = "bottom")
+```
+
+## Two ways to get a sampling distribution
+
+::: {.columns}
+
+::: {.column}
+
+**Randomization: bootstrap**
+
+_Resample_ the sample with replacement, as a stand-in for the population. Recalculate the statistic. Repeat 1,000s of times.
+
+95% CI: the middle 95% of the bootstrap distribution.
+
+:::
+
+::: {.column}
+
+**Mathematical model**
+
+The sampling distribution is approximately
+
+$$
+Normal(\hat \beta_1, SE)
+$$
+
+:::
+
+:::
+
+## What's the same, what's new
+
+Linear regression inference is the inference you already know.
+
+::: {.columns}
+
+::: {.column}
+
+**Same**
+
+- $H_0$, $H_A$, null distributions, p-values
+- Sampling distributions, standard errors, CIs
+
+:::
+
+::: {.column}
+
+**New**
+
+- The statistic is a coefficient, $\hat \beta_1$
+- `lm()` does the mathematical model for you
+
+:::
+
+:::
+
+# Hypothesis testing with linear regression
+
+## Scenario: nitrate in drinking water wells
+
+::: {style="font-size:0.8em"}
+
+Fertilizer and manure leach nitrate into groundwater. Many rural Central Valley communities drink from wells. Above 10 mg/L is a health risk, especially for infants.
+
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+
+::: {style="font-size:0.8em"}
+
+A water agency tests 30 wells.
+
+- $x$: farmland within 1 km (%)
+- $y$: nitrate (mg/L)
+- $\beta_1$: nitrate change per % farmland
+
+$$
+\text{Nitrate} = \beta_0 + \beta_1 \text{Farmland} + \epsilon
+$$
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 3.7
+plot_wells(one_sample, alpha = 1) +
+  labs(caption = "Simulated data")
+```
+
+:::
+
+:::
+
+## Is the slope different from 0?
+
+The sample slope is $\hat \beta_1$ = `r round(beta_1_hat, 3)` mg/L per %. But sampling is random!
+
+::: {.fragment}
+
+$H_0$: $\beta_1 = 0$ (farmland has no relationship with nitrate)
+
+$H_A$: $\beta_1 \ne 0$ (farmland has a relationship with nitrate)
+
+:::
+
+# P-value by permutation 
+
+## I do: shuffle the predictor
+
+If $H_0$ is true, farmland is unrelated to nitrate, so shuffling farmland across wells shouldn't matter.
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+plot_wells(one_sample) +
+  labs(subtitle = "Observed")
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+one_shuffle <- mutate(one_sample, ag_pct = sample(ag_pct))
+plot_wells(one_shuffle, line_colour = "steelblue") +
+  labs(subtitle = "Farmland shuffled")
+```
+
+:::
+
+:::
+
+## I do: the null distribution
+
+Shuffle 10,000 times. Each shuffle gives one slope from the null distribution.
+
+```{r}
+#| fig-width: 11
+#| fig-height: 5
+#| fig-align: center
+
+p_perm <- tibble(slope = null_slopes) |>
+  mutate(extreme = abs(slope) >= abs(beta_1_hat)) |>
+  ggplot(aes(slope)) +
+  geom_histogram(
+    aes(fill = extreme),
+    binwidth = 0.004,
+    boundary = 0,
+    color = "white"
+  ) +
+  geom_vline(xintercept = beta_1_hat, linewidth = 1, color = "firebrick") +
+  geom_vline(
+    xintercept = -beta_1_hat,
+    linewidth = 1,
+    linetype = "dashed",
+    color = "firebrick"
+  ) +
+  scale_fill_manual(values = c(`FALSE` = "grey70", `TRUE` = "steelblue")) +
+  coord_cartesian(xlim = slope_xlim) +
+  labs(
+    x = expression("Slope under " * H[0]),
+    y = "Count",
+    title = sprintf("Permutation p = %.3f", perm_pvalue)
+  ) +
+  theme(legend.position = "none")
+p_perm
+```
+
+Two-sided: count shuffles at least as far from 0 as `r round(beta_1_hat, 3)` in _either_ direction.
+
+## I do: interpret the p-value
+
+_If_ farmland had no relationship with nitrate, we would see a slope at least as far from 0 as `r round(beta_1_hat, 3)` mg/L per % in about `r scales::percent(perm_pvalue, accuracy = 0.1)` of samples.
+
+::: {.fragment}
+
+p < 0.05, so we reject $H_0$. The slope is _statistically significant_.
+
+:::
+
+## We do: live coding
+
+Open the [exercises](../labs/week5-monday-inference.qmd), **Setup** and **Part 1**, _We do_.
+
+1. Simulate the population and draw one sample of 30 wells
+2. Fit the model with `lm()`
+3. Shuffle `ag_pct` 1,000 times and refit to build the null distribution
+4. Calculate the p-value
+
+## You do: exercise part 1
+
+Urban tree canopy and summer surface temperature.
+
+Complete the _You do_ sections of **Setup** and **Part 1: p-value by permutation**.
+
+# P-value by mathematical model
+
+## I do: the null distribution, mathematically
+
+Under $H_0$, the sampling distribution of $\hat \beta_1$ is approximately
+
+$$
+\hat \beta_1 \sim Normal(0, SE(\hat \beta_1))
+$$
+
+`lm()` estimates $SE(\hat \beta_1)$ from the residuals and the spread of the predictor. No shuffling needed.
+
+## I do: read the coefficients table
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+one_sample_lm <- lm(nitrate ~ ag_pct, one_sample)
+coef(summary(one_sample_lm))
+```
+
+:::
+
+::: {style="font-size:0.8em"}
+
+- **Estimate**: $\hat \beta_1$, the sample statistic
+- **Std. Error**: $SE(\hat \beta_1)$, the standard deviation of the sampling distribution
+- **t value**: Estimate / Std. Error, how many SEs $\hat \beta_1$ is from 0
+- **Pr(>|t|)**: the **two-sided** p-value for $H_0: \beta_1 = 0$. For a one-sided $H_A$, divide by 2 (if $\hat \beta_1$ is in the direction of $H_A$).
+
+:::
+
+## I do: permutation vs mathematical model
+
+```{r}
+#| fig-width: 11
+#| fig-height: 5
+#| fig-align: center
+
+normal_null <- tibble(
+  slope = seq(slope_xlim[1], slope_xlim[2], length.out = 400),
+  # Scale density to counts so it overlays the histogram
+  count = dnorm(slope, 0, se_beta_1) * length(null_slopes) * 0.004
+)
+p_perm +
+  geom_line(aes(slope, count), normal_null, linewidth = 1.5) +
+  labs(
+    title = sprintf(
+      "Permutation p = %.3f   lm() p = %.3f",
+      perm_pvalue,
+      lm_pvalue
+    )
+  )
+```
+
+The normal curve (black) closely matches the permutation null distribution.
+
+## I do: compare the p-values
+
+| Method | p-value |
+|---|:---:|
+| Permutation | `r round(perm_pvalue, 3)` |
+| `lm()`'s `Pr(>|t|)` | `r round(lm_pvalue, 3)` |
+
+Same interpretation, same conclusion: reject $H_0$.
+
+## We do: live coding
+
+Back to the exercises, **Part 2**, _We do_.
+
+1. Find `Pr(>|t|)` for `ag_pct` in `summary(one_sample_lm)`
+2. Compare it to the permutation p-value
+
+## You do: exercise part 2
+
+Complete _You do_ in **Part 2: p-value by mathematical model**.
+
+# Confidence intervals with linear regression
+
+## How much does nitrate increase?
+
+We rejected $H_0$: farmland is related to nitrate. But _how much_ does nitrate increase per percentage point of farmland?
+
+::: {.fragment}
+
+**Question**: What's the interval we're confident contains the population slope, $\beta_1$?
+
+:::
+
+# Confidence interval by bootstrap
+
+## I do: resample with replacement
+
+Treat the sample as a stand-in for the population. Draw 30 wells _with replacement_ and refit.
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+plot_wells(one_sample) +
+  labs(subtitle = "Observed")
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+one_resample <- slice_sample(one_sample, prop = 1, replace = TRUE)
+plot_wells(one_resample, line_colour = "darkorange", alpha = 0.4) +
+  labs(subtitle = "Resampled (darker = drawn more)")
+```
+
+:::
+
+:::
+
+## I do: the bootstrap distribution {.nostretch}
+
+Resample 10,000 times. The middle 95% is the 95% confidence interval.
+
+```{r}
+#| fig-width: 11
+#| fig-height: 3.6
+#| fig-align: center
+
+p_boot <- tibble(slope = boot_slopes) |>
+  mutate(in_ci = between(slope, boot_ci[1], boot_ci[2])) |>
+  ggplot(aes(slope)) +
+  geom_histogram(
+    aes(fill = in_ci),
+    binwidth = 0.004,
+    boundary = 0,
+    color = "white"
+  ) +
+  geom_vline(xintercept = beta_1_hat, linewidth = 1, color = "firebrick") +
+  scale_fill_manual(values = c(`FALSE` = "grey70", `TRUE` = "darkorange")) +
+  coord_cartesian(xlim = slope_xlim) +
+  labs(
+    x = "Slope (bootstrap distribution)",
+    y = "Count",
+    title = sprintf("Bootstrap 95%% CI: [%.3f, %.3f]", boot_ci[1], boot_ci[2])
+  ) +
+  theme(legend.position = "none")
+p_boot
+```
+
+The bootstrap distribution is centered on $\hat \beta_1$ (red), not $H_0$.
+
+## I do: interpret the confidence interval
+
+We are 95% confident that nitrate increases by between `r round(boot_ci[1], 3)` and `r round(boot_ci[2], 3)` mg/L for each additional percentage point of farmland.
+
+## We do: live coding
+
+Back to the lab, **Part 3**, _We do_.
+
+1. Resample the wells with replacement 10,000 times and refit
+2. Find the middle 95% with `quantile()`
+3. Compare the bootstrap distribution to $\hat \beta_1$ and $\beta_1$
+
+## You do: exercise part 3
+
+Complete _You do_ in **Part 3: confidence interval by bootstrap**.
+
+# Confidence interval by mathematical model
+
+## I do: the sampling distribution, mathematically
+
+The sampling distribution of $\hat \beta_1$ is approximately
+
+$$
+\hat \beta_1 \sim Normal(\beta_1, SE(\hat \beta_1))
+$$
+
+We don't know $\beta_1$, so center on $\hat \beta_1$. 
+
+## I do: bootstrap vs mathematical model
+
+```{r}
+#| fig-width: 11
+#| fig-height: 5
+#| fig-align: center
+
+normal_sampling <- tibble(
+  slope = seq(slope_xlim[1], slope_xlim[2], length.out = 400),
+  count = dnorm(slope, beta_1_hat, se_beta_1) * length(boot_slopes) * 0.004
+)
+p_boot +
+  geom_line(aes(slope, count), normal_sampling, linewidth = 1.5) +
+  geom_vline(xintercept = lm_ci, linetype = "dashed", linewidth = 1) +
+  labs(
+    title = sprintf(
+      "Bootstrap [%.3f, %.3f]   confint() (dashed) [%.3f, %.3f]",
+      boot_ci[1],
+      boot_ci[2],
+      lm_ci[1],
+      lm_ci[2]
+    )
+  )
+```
+
+The standard deviation of the bootstrap distribution, `r round(sd(boot_slopes), 4)`, approximates the standard error, `r round(se_beta_1, 4)`.
+
+## I do: let `confint()` do it
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+confint(one_sample_lm)
+```
+
+:::
+
+| Method | 95% CI |
+|---|:---:|
+| Bootstrap | [`r round(boot_ci[1], 3)`, `r round(boot_ci[2], 3)`] |
+| `confint()` | [`r round(lm_ci[1], 3)`, `r round(lm_ci[2], 3)`] |
+
+## We do: live coding
+
+Back to the lab, **Part 4**, _We do_.
+
+1. Compare the bootstrap CI to `confint()`
+2. Compare the bootstrap standard deviation to `Std. Error`
+
+## You do: exercise part 4
+
+Complete _You do_ in **Part 4: confidence interval by mathematical model**.
+
+# Recap
+
+## Four tools, two questions
+
+::: {style="font-size:0.8em"}
+
+| | Randomization | Mathematical model |
+|---|:---:|:---:|
+| **Is there an effect?** | Permutation: shuffle $x$, refit | `Pr(>|t|)` in `summary()` |
+| **How big is it?** | Bootstrap: resample rows, refit | `confint()` |
+
+:::
+
+::: {.fragment style="font-size:0.8em"}
+
+- Hypothesis tests center on $H_0$; confidence intervals center on $\hat \beta_1$
+- Both mathematical tools rely on the **standard error**, `Std. Error` in `summary()`
+- When the model's assumptions hold, randomization and mathematical models agree
+
+:::
