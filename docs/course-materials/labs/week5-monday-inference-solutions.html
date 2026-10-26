@@ -331,6 +331,19 @@ window.Quarto = {
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">222</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_bw</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>set.seed(222)</code> makes the random numbers reproducible. Every simulation, permutation, and bootstrap below uses R’s random number generator, so without a seed your results would change each time you ran the document. With the seed, everyone who runs the whole document top to bottom gets the same numbers. If you run chunks out of order or re-run some of them, your numbers will be a little different from these. That’s expected and isn’t a mistake.</p>
+</div>
+</div>
 <section id="scenarios" class="level2">
 <h2 class="anchored" data-anchor-id="scenarios">Scenarios</h2>
 <section id="we-do-nitrate-in-drinking-water-wells" class="level3">
@@ -351,6 +364,23 @@ window.Quarto = {
 <li>y: July land surface temperature (°C)</li>
 <li><span class="math inline">\(\beta_1\)</span>: change in surface temperature per additional percentage point of canopy</li>
 </ul>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Both scenarios use the same model:</p>
+<p><span class="math display">\[
+y = \beta_0 + \beta_1 x + \varepsilon, \quad \varepsilon \sim Normal(0, \sigma)
+\]</span></p>
+<p><span class="math inline">\(\beta_1\)</span> is the quantity we care about. In both scenarios, the question is whether x is related to y: <span class="math inline">\(H_0: \beta_1 = 0\)</span> versus <span class="math inline">\(H_A: \beta_1 \neq 0\)</span>. We can’t observe <span class="math inline">\(\beta_1\)</span> directly. We only get a sample and an estimate, <span class="math inline">\(\hat\beta_1\)</span>. Inference is about using one sample to say how far <span class="math inline">\(\hat\beta_1\)</span> might be from <span class="math inline">\(\beta_1\)</span> and whether the data are consistent with <span class="math inline">\(\beta_1 = 0\)</span>.</p>
+</div>
+</div>
 </section>
 </section>
 <section id="setup" class="level2">
@@ -366,12 +396,44 @@ window.Quarto = {
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Residual standard deviation (mg/L)</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>wells_sigma <span class="ot">&lt;-</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>These are the “truth” that we normally never get to see. A well with no farmland nearby averages 4 mg/L of nitrate. Each additional percentage point of farmland adds 0.035 mg/L, so a well surrounded by 80% farmland averages <span class="math inline">\(4 + 0.035 \times 80 = 6.8\)</span> mg/L. That’s still below the 10 mg/L standard on average. But with <span class="math inline">\(\sigma = 2\)</span> mg/L, individual wells scatter widely around that average, and some will exceed the standard.</p>
+</div>
+</div>
 <p>Simulated population of wells</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ag_pct <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="fl">1e4</span>, <span class="dv">0</span>, <span class="dv">80</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>nitrate_hat <span class="ot">&lt;-</span> wells_beta_0 <span class="sc">+</span> wells_beta_1 <span class="sc">*</span> ag_pct</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>nitrate <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="fl">1e4</span>, nitrate_hat, wells_sigma)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>simulated_population <span class="ot">&lt;-</span> <span class="fu">tibble</span>(ag_pct, nitrate_hat, nitrate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We simulate a population of 10,000 wells in three steps:</p>
+<ol type="1">
+<li><strong>Predictor.</strong> <code>runif(1e4, 0, 80)</code> gives each well a farmland percentage drawn uniformly between 0% and 80%.</li>
+<li><strong>Expected value.</strong> <code>nitrate_hat</code> is the point on the population line for each well: <span class="math inline">\(\beta_0 + \beta_1 x\)</span>. This is the <em>systematic</em> part of the model.</li>
+<li><strong>Response.</strong> <code>rnorm(1e4, nitrate_hat, wells_sigma)</code> adds normally distributed noise with standard deviation <span class="math inline">\(\sigma\)</span> around each expected value. This is the <span class="math inline">\(\varepsilon\)</span> part of the model, and it represents everything other than farmland that affects nitrate (soil type, well depth, irrigation practices, …).</li>
+</ol>
+<p>Each well gets its own mean in <code>rnorm()</code>, because <code>nitrate_hat</code> is a vector of 10,000 values.</p>
+</div>
 </div>
 <p>Visualize</p>
 <div class="cell">
@@ -388,8 +450,7 @@ window.Quarto = {
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"firebrick"</span>,</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">1.5</span></span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">10</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Farmland within 1 km (%)"</span>, <span class="at">y =</span> <span class="st">"Nitrate (mg/L)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Farmland within 1 km (%)"</span>, <span class="at">y =</span> <span class="st">"Nitrate (mg/L)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -398,9 +459,35 @@ window.Quarto = {
 </div>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>geom_abline()</code> draws the <strong>population regression line</strong> using the true <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>. The relationship is real but modest compared to the noise. Across the full range of farmland, the line rises less than 3 mg/L, while individual wells spread several mg/L above and below it. With this much noise, a small sample could easily give a misleading slope.</p>
+</div>
+</div>
 <p>A water agency tests 30 wells</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>one_sample <span class="ot">&lt;-</span> <span class="fu">slice_sample</span>(simulated_population, <span class="at">n =</span> <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>slice_sample()</code> draws 30 rows at random, <em>without</em> replacement, from the population. This is the dataset a real agency would have: 30 wells, with no access to the other 9,970 or to the true parameters.</p>
+</div>
 </div>
 <p>Fit the model</p>
 <div class="cell">
@@ -428,6 +515,20 @@ F-statistic: 5.675 on 1 and 28 DF,  p-value: 0.02424</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wells_beta_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(one_sample_lm)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>wells_beta_1_hat <span class="ot">&lt;-</span> wells_beta_hat[<span class="st">"ag_pct"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>lm(nitrate ~ ag_pct, one_sample)</code> fits the least squares line to the 30 wells. <code>coef()</code> returns a named vector with <code>(Intercept)</code> and <code>ag_pct</code>. Indexing by name (<code>["ag_pct"]</code>) is safer than indexing by position, because it still works if you add predictors later.</p>
+<p>Our estimate is <span class="math inline">\(\hat\beta_1 =\)</span> 0.0372 mg/L per %, compared to the true <span class="math inline">\(\beta_1 =\)</span> 0.035. They’re close, but not identical. A different sample of 30 wells would give a different <span class="math inline">\(\hat\beta_1\)</span>. The rest of this lab is about measuring that sample-to-sample variability.</p>
+</div>
 </div>
 <p>Compare the fitted line (light) to the population line (dark)</p>
 <div class="cell">
@@ -460,6 +561,19 @@ F-statistic: 5.675 on 1 and 28 DF,  p-value: 0.02424</code></pre>
 </div>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We draw two lines on the same plot. The dark line uses the population parameters (<code>wells_beta_0</code>, <code>wells_beta_1</code>). The light line uses the sample estimates (<code>wells_beta_hat[1]</code>, <code>wells_beta_hat[2]</code>). The gap between them is <strong>sampling error</strong>. In real research we only ever see the light line, so we need tools that tell us how far it might be from the dark one.</p>
+</div>
+</div>
 </section>
 <section id="you-do" class="level3">
 <h3 class="anchored" data-anchor-id="you-do">You do</h3>
@@ -474,6 +588,20 @@ F-statistic: 5.675 on 1 and 28 DF,  p-value: 0.02424</code></pre>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>canopy_pct <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">40</span>, <span class="dv">0</span>, <span class="dv">60</span>)</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>surface_temp <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">40</span>, beta_0 <span class="sc">+</span> beta_1 <span class="sc">*</span> canopy_pct, sigma)</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>neighborhoods <span class="ot">&lt;-</span> <span class="fu">tibble</span>(canopy_pct, surface_temp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This uses the same three steps as the wells simulation (predictor, expected value, noise), but it skips the population and simulates the 40 sampled neighborhoods directly.</p>
+<p>Look closely at the parameters. The true effect is <strong>small</strong> relative to the noise. Going from 0% to 60% canopy lowers the expected temperature by only <span class="math inline">\(0.01 \times 60 = 0.6\)</span> °C, while the residual standard deviation is 3 °C. With only 40 neighborhoods, that makes this a hard effect to detect, so expect a less clear-cut result than the wells example.</p>
+</div>
 </div>
 <p>Visualize the data.</p>
 <div class="cell">
@@ -519,6 +647,24 @@ F-statistic: 3.837 on 1 and 38 DF,  p-value: 0.05749</code></pre>
 -0.05363882 </code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The formula is <code>response ~ predictor</code>. Surface temperature is the response (y) and canopy is the predictor (x), so it’s <code>surface_temp ~ canopy_pct</code>.</li>
+<li><code>data = neighborhoods</code> tells <code>lm()</code> which data frame holds those columns.</li>
+<li><code>coef(canopy_lm)["canopy_pct"]</code> pulls out the slope by name. (<code>coef(canopy_lm)[2]</code> also works, but the name is clearer.)</li>
+</ul>
+<p>Our estimate is <span class="math inline">\(\hat\beta_1 =\)</span> -0.0536 °C per %. The true value is <span class="math inline">\(\beta_1 =\)</span> -0.01. The estimate has the right sign, but it’s noticeably larger in magnitude than the truth. With noise this large, that’s typical.</p>
+</div>
+</div>
 </section>
 </section>
 <section id="part-1-p-value-by-permutation" class="level2">
@@ -537,6 +683,27 @@ F-statistic: 3.837 on 1 and 38 DF,  p-value: 0.05749</code></pre>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  permuted_beta_1_hat</span>
 <span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>wells_null_distribution <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">beta_1_hat =</span> wells_permutations)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>The logic.</strong> If <span class="math inline">\(H_0\)</span> were true, which well had which farmland percentage would be irrelevant to its nitrate level. So we can reassign the farmland values at random and get a dataset that could just as plausibly have come from a world where <span class="math inline">\(H_0\)</span> is true.</p>
+<p><strong>The code.</strong></p>
+<ul>
+<li><code>sample(ag_pct)</code> with no other arguments returns the same 30 values in a random order. Every farmland value is still in the data and every nitrate value is still in the data. Only the <em>pairing</em> between them changes. Shuffling breaks any association between x and y while keeping each variable’s own distribution exactly the same.</li>
+<li>We refit the model on the shuffled data and keep the slope.</li>
+<li><code>replicate(1e3, { ... })</code> runs the code in braces 1,000 times and collects the last value from each run into a vector. Here that’s the 1,000 slopes.</li>
+<li>We put the vector in a tibble so it’s easy to plot with ggplot.</li>
+</ul>
+<p>The result is the <strong>null distribution</strong>: the slopes we’d expect to see from samples like ours <em>if farmland had no effect on nitrate</em>.</p>
+</div>
 </div>
 <p>Compare the null distribution to the observed <span class="math inline">\(\hat\beta_1\)</span>. Shade the regions at least as extreme as the observed <span class="math inline">\(\hat\beta_1\)</span> (in either direction, because <span class="math inline">\(H_A\)</span> is two-sided).</p>
 <div class="cell">
@@ -575,13 +742,49 @@ F-statistic: 3.837 on 1 and 38 DF,  p-value: 0.05749</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The p-value is the proportion of the null distribution in the shaded regions</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The p-value is the proportion of the null distribution at least as extreme as</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># the observed beta_1_hat (i.e., in the shaded regions)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The null distribution is centered on 0, as it should be. Shuffling destroys the relationship, so the slopes average out to nothing.</p>
+<p>The two <code>annotate("rect", ...)</code> layers shade the tails:</p>
+<ul>
+<li>The left rectangle runs from <code>-Inf</code> to <code>-abs(wells_beta_1_hat)</code>.</li>
+<li>The right rectangle runs from <code>abs(wells_beta_1_hat)</code> to <code>Inf</code>.</li>
+</ul>
+<p>Using <code>abs()</code> means the shading is correct whether <span class="math inline">\(\hat\beta_1\)</span> is positive or negative. We shade <em>both</em> tails because <span class="math inline">\(H_A: \beta_1 \neq 0\)</span> is two-sided. Before seeing the data, a large negative slope would have been just as much evidence against <span class="math inline">\(H_0\)</span> as a large positive one.</p>
+<p><code>ymin = -Inf, ymax = Inf</code> stretches the rectangles to the full height of the plot.</p>
+</div>
 </div>
 <p>The <strong>p-value</strong> is the proportion of the null distribution at least as extreme as the observed <span class="math inline">\(\hat\beta_1\)</span></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">abs</span>(wells_null_distribution<span class="sc">$</span>beta_1_hat) <span class="sc">&gt;=</span> <span class="fu">abs</span>(wells_beta_1_hat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.015</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>abs(wells_null_distribution$beta_1_hat) &gt;= abs(wells_beta_1_hat)</code> is a logical vector with one <code>TRUE</code>/<code>FALSE</code> per permutation. <code>TRUE</code> means that permuted slope was at least as far from 0 as the slope we observed. Taking the <code>mean()</code> of a logical vector gives the proportion of <code>TRUE</code>s, because R treats <code>TRUE</code> as 1 and <code>FALSE</code> as 0.</p>
+<p><strong>Interpretation:</strong> if farmland had no relationship with nitrate, only about 1.5% of samples would show a slope at least as far from 0 as ours, in either direction. That’s below 0.05, so we reject <span class="math inline">\(H_0\)</span>. The data are hard to explain without some relationship between farmland and nitrate.</p>
+<p>With 1,000 permutations, the p-value can only take values in steps of 0.001, and it would change slightly with a different seed. More permutations would make it more precise.</p>
 </div>
 </div>
 </section>
@@ -598,6 +801,23 @@ F-statistic: 3.837 on 1 and 38 DF,  p-value: 0.05749</code></pre>
 <span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coef</span>(permuted_lm)[<span class="st">"canopy_pct"</span>]</span>
 <span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>null_distribution <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">beta_1_hat =</span> permutations)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><code>sample(canopy_pct)</code> shuffles the canopy values among the neighborhoods. This breaks the link between canopy and temperature, which is exactly what <span class="math inline">\(H_0\)</span> says doesn’t exist.</li>
+<li>The model is fit to <code>permuted_sample</code>, the <em>shuffled</em> data. A common mistake is to write <code>data = neighborhoods</code> here. That refits the original data 1,000 times and gives the same slope every time.</li>
+<li><code>coef(permuted_lm)["canopy_pct"]</code> is the last line in the braces, so it’s the value <code>replicate()</code> collects from each run.</li>
+</ul>
+</div>
 </div>
 <p>Visualize the null distribution. Shade the regions at least as extreme as the observed <span class="math inline">\(\hat \beta_1\)</span> (in either direction, because <span class="math inline">\(H_A\)</span> is two-sided).</p>
 <div class="cell">
@@ -630,6 +850,20 @@ F-statistic: 3.837 on 1 and 38 DF,  p-value: 0.05749</code></pre>
 </div>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The left tail runs from <code>-Inf</code> to <code>-abs(beta_1_hat)</code>, and the right tail runs from <code>abs(beta_1_hat)</code> to <code>Inf</code>. Here <span class="math inline">\(\hat\beta_1\)</span> is negative, so the solid line sits in the left shaded region. The right shaded region is its mirror image. We still count it because the test is two-sided.</p>
+<p>Compared to the wells, the observed slope sits much closer to the edge of the null distribution. It’s in the tail, but not far out in it.</p>
+</div>
+</div>
 <p>Calculate the p-value: the proportion of the null distribution at least as extreme as the observed <span class="math inline">\(\hat \beta_1\)</span>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>perm_pvalue <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(null_distribution<span class="sc">$</span>beta_1_hat) <span class="sc">&gt;=</span> <span class="fu">abs</span>(beta_1_hat))</span>
@@ -638,10 +872,47 @@ F-statistic: 3.837 on 1 and 38 DF,  p-value: 0.05749</code></pre>
 <pre><code>[1] 0.047</code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Both blanks are <code>abs</code>. Comparing absolute values counts permuted slopes that are extreme in <em>either</em> direction, which matches the two-sided <span class="math inline">\(H_A\)</span>. If you left out <code>abs()</code>, you’d count every permuted slope above a negative number, which would be almost all of them. That gives a p-value near 1, and the result is meaningless.</p>
+</div>
+</div>
 <p>Interpret the p-value in one sentence. Do you reject <span class="math inline">\(H_0\)</span>?</p>
 <blockquote class="blockquote">
 <p>If tree canopy had no relationship with surface temperature, we would see a slope at least as far from 0 as the observed <span class="math inline">\(\hat \beta_1\)</span> in about 4.7% of samples. p &lt; 0.05, so we reject <span class="math inline">\(H_0\)</span>.</p>
 </blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A good interpretation has three parts:</p>
+<ol type="1">
+<li><strong>The assumption:</strong> <em>if <span class="math inline">\(H_0\)</span> were true</em> (no relationship).</li>
+<li><strong>What the p-value is a proportion of:</strong> samples with a slope <em>at least as extreme</em> as ours, in either direction (at least as far from 0).</li>
+<li><strong>The decision:</strong> compare to <span class="math inline">\(\alpha = 0.05\)</span>.</li>
+</ol>
+<p>Common mistakes:</p>
+<ul>
+<li><strong>“There’s a 4.7% chance that <span class="math inline">\(H_0\)</span> is true.”</strong> This is wrong. The p-value is computed <em>assuming</em> <span class="math inline">\(H_0\)</span> is true, so it can’t be the probability that <span class="math inline">\(H_0\)</span> is true.</li>
+<li><strong>“We accept <span class="math inline">\(H_0\)</span>.”</strong> We never accept <span class="math inline">\(H_0\)</span>. If p ≥ 0.05, we <em>fail to reject</em>. The data just aren’t strong enough evidence against it.</li>
+</ul>
+<p>Here p = 0.047, which is right at the edge of the 0.05 threshold. Keep that in mind when you compare it to <code>lm()</code> in Part 2.</p>
+</div>
+</div>
 </section>
 </section>
 <section id="part-2-p-value-by-mathematical-model" class="level2">
@@ -661,6 +932,27 @@ F-statistic: 3.837 on 1 and 38 DF,  p-value: 0.05749</code></pre>
 <pre><code>[1] 0.02423736</code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>summary(one_sample_lm)$coefficients</code> is a matrix with one row per coefficient and four columns: <code>Estimate</code>, <code>Std. Error</code>, <code>t value</code>, and <code>Pr(&gt;|t|)</code>. We index it as <code>[row, column]</code> by name.</p>
+<p><code>lm()</code> doesn’t shuffle anything. It uses a mathematical shortcut instead:</p>
+<ol type="1">
+<li>Compute the <strong>t statistic</strong>: <span class="math inline">\(t = \hat\beta_1 / SE(\hat\beta_1)\)</span>, or how many standard errors the estimate is from 0.</li>
+<li>If <span class="math inline">\(H_0\)</span> is true <em>and</em> the model’s assumptions hold (linear relationship, independent observations, normal residuals with constant variance), <span class="math inline">\(t\)</span> follows a t distribution with <span class="math inline">\(n - 2\)</span> degrees of freedom.</li>
+<li><code>Pr(&gt;|t|)</code> is the area in both tails of that t distribution beyond <span class="math inline">\(|t|\)</span>.</li>
+</ol>
+<p>So the t distribution plays the same role as our permutation null distribution. One is derived from theory and the other is built by simulation.</p>
+<p>The two p-values (0.015 and 0.024) are similar, and both are below 0.05. They aren’t identical because the permutation test has simulation noise and the t-test relies on distributional assumptions. When the assumptions are reasonable, the two methods should agree closely.</p>
+</div>
+</div>
 </section>
 <section id="you-do-2" class="level3">
 <h3 class="anchored" data-anchor-id="you-do-2">You do</h3>
@@ -678,10 +970,42 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 <pre><code>[1] 0.05748845</code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The blank is the column name <code>"Pr(&gt;|t|)"</code>, typed exactly as it appears in the coefficients table, inside quotes. <code>coef(summary(canopy_lm))</code> is equivalent to <code>summary(canopy_lm)$coefficients</code>.</p>
+<p>You can check this against the t statistic by hand. <span class="math inline">\(t =\)</span> -0.0536 / 0.0274 = -1.96, and <code>2 * pt(-abs(t), df = 38)</code> gives the same p-value.</p>
+</div>
+</div>
 <p>How do the permutation and <code>lm()</code> p-values compare? Do they lead to the same conclusion?</p>
 <blockquote class="blockquote">
-<p>They’re close to each other (0.047 and 0.057), so they lead to the same conclusion: we fail to reject <span class="math inline">\(H_0\)</span>.</p>
+<p>The two p-values are similar (0.047 from the permutation test and 0.057 from <code>lm()</code>). But they fall on opposite sides of 0.05, so they lead to <em>different</em> conclusions: the permutation test says reject and lm() says fail to reject. The evidence against <span class="math inline">\(H_0\)</span> is borderline either way.</p>
 </blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is a useful case to think about. The two methods disagree on the decision, even though the p-values themselves are close. A few points to take from this:</p>
+<ul>
+<li><strong>Similar p-values are what we expect.</strong> The permutation test and the t-test answer the same question with different machinery, so they should land in the same neighborhood. A difference of about 0.01 is typical, given simulation noise from 1,000 permutations plus the t-test’s assumptions.</li>
+<li><strong>The 0.05 threshold is a convention, not a law of nature.</strong> Two p-values this close (0.047 and 0.057) carry nearly the same amount of evidence. Treating one as a “discovery” and the other as “nothing” is a common misuse of hypothesis testing. Report the p-value itself, not just “significant” or “not significant.”</li>
+<li><strong>Remember the truth.</strong> We know the true <span class="math inline">\(\beta_1 =\)</span> -0.01, so <span class="math inline">\(H_0\)</span> is actually <em>false</em>. But the true effect is tiny relative to <span class="math inline">\(\sigma\)</span>, and 40 neighborhoods isn’t enough to detect it reliably. That’s what <strong>low statistical power</strong> looks like. Failing to reject <span class="math inline">\(H_0\)</span> doesn’t mean there’s no effect.</li>
+</ul>
+</div>
+</div>
 </section>
 </section>
 <section id="part-3-confidence-interval-by-bootstrap" class="level2">
@@ -701,6 +1025,58 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 <span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  boot_betas <span class="ot">&lt;-</span> <span class="fu">rbind</span>(boot_betas, resampled_betas)</span>
 <span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>The logic.</strong> A confidence interval should reflect how much <span class="math inline">\(\hat\beta_1\)</span> would vary if we could draw many samples from the population. We can’t do that, because we only have one sample. The bootstrap’s trick is to treat the sample <em>as if it were the population</em> and draw new samples from it.</p>
+<p><strong>Why with replacement?</strong> Each bootstrap sample has the same size as the original (<code>n = nrow(one_sample)</code>, here 30). If we sampled 30 out of 30 <em>without</em> replacement, we’d get the exact same wells every time, just in a different order, and the same slope. Sampling <em>with</em> replacement means some wells show up two or three times and others don’t show up at all. That creates realistic variation between bootstrap samples.</p>
+<p><strong>Permutation vs.&nbsp;bootstrap.</strong> Both resample, but in different ways for different purposes:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Permutation (Part 1)</th>
+<th>Bootstrap (Part 3)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>What’s resampled</td>
+<td>Shuffle x only</td>
+<td>Resample whole rows (x and y together)</td>
+</tr>
+<tr class="even">
+<td>Relationship between x and y</td>
+<td>Destroyed</td>
+<td>Preserved</td>
+</tr>
+<tr class="odd">
+<td>Distribution is centered on</td>
+<td>0</td>
+<td><span class="math inline">\(\hat\beta_1\)</span></td>
+</tr>
+<tr class="even">
+<td>Used for</td>
+<td>p-value (testing <span class="math inline">\(H_0\)</span>)</td>
+<td>Confidence interval (estimating <span class="math inline">\(\beta_1\)</span>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The code.</strong> This version uses a <code>for</code> loop instead of <code>replicate()</code> so you can see each step. Each iteration builds a one-row tibble and <code>rbind()</code>s it onto <code>boot_betas</code>. It also records the <code>iteration</code> number, which can be handy for debugging. <code>replicate()</code> (as in the You do) is shorter and faster, and it gives the same result.</p>
+</div>
 </div>
 <p>The middle 95% of the bootstrap distribution is the 95% <strong>confidence interval</strong>. Shade it on the bootstrap distribution, and compare to the observed <span class="math inline">\(\hat\beta_1\)</span> (solid) and the true <span class="math inline">\(\beta_1\)</span> (dashed).</p>
 <div class="cell">
@@ -739,6 +1115,22 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The bootstrap distribution is centered on beta_1_hat, not beta_1!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>quantile(x, c(0.025, 0.975))</code> returns the 2.5th and 97.5th percentiles, so the middle 95% of the bootstrap slopes falls between them. This is the <strong>percentile bootstrap</strong> confidence interval: (0.0055, 0.0694) mg/L per %.</p>
+<p><strong>Notice where the histogram is centered.</strong> It’s centered on <span class="math inline">\(\hat\beta_1\)</span> (solid line), not on the true <span class="math inline">\(\beta_1\)</span> (dashed line). The bootstrap can’t know the truth, because it only knows our sample. What it gets right is the <em>spread</em>. The bootstrap distribution’s width approximates the width of the true sampling distribution, and that’s all we need for a confidence interval.</p>
+<p><strong>Interpretation:</strong> we are 95% confident that each additional percentage point of farmland is associated with between 0.006 and 0.069 mg/L more nitrate. The interval contains the true <span class="math inline">\(\beta_1 =\)</span> 0.035. It also doesn’t contain 0, which matches our Part 1 decision to reject <span class="math inline">\(H_0\)</span>. A 95% CI that excludes 0 corresponds to a two-sided test that rejects at <span class="math inline">\(\alpha = 0.05\)</span>.</p>
+<p>“95% confident” refers to the <em>procedure</em>. If we repeated this whole process (draw a sample, bootstrap, build the interval) many times, about 95% of the intervals would contain the true <span class="math inline">\(\beta_1\)</span>. Any single interval either contains <span class="math inline">\(\beta_1\)</span> or it doesn’t.</p>
+</div>
+</div>
 </section>
 <section id="you-do-3" class="level3">
 <h3 class="anchored" data-anchor-id="you-do-3">You do</h3>
@@ -755,6 +1147,24 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 <span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>})</span>
 <span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>boot_distribution <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">beta_1_hat =</span> bootstraps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><code>n = nrow(neighborhoods)</code>: each bootstrap sample is the same size as the original, 40 neighborhoods. Writing <code>n = 40</code> works too, but <code>nrow()</code> keeps working if the data change.</li>
+<li><code>replace = TRUE</code>: this is what makes it a bootstrap. With <code>replace = FALSE</code>, every “resample” would contain the same 40 neighborhoods, and all 1,000 slopes would be identical.</li>
+<li><code>lm(surface_temp ~ canopy_pct, data = boot_sample)</code>: fit the same model as before, but to the <em>resampled</em> data.</li>
+</ul>
+<p>Unlike the permutation test, we resample whole rows. Each neighborhood’s canopy and temperature stay together, so the relationship between them is preserved.</p>
+</div>
+</div>
 <p>Find the middle 95% of the bootstrap distribution.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>boot_ci <span class="ot">&lt;-</span> <span class="fu">quantile</span>(boot_distribution<span class="sc">$</span>beta_1_hat, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span>
@@ -762,6 +1172,19 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>        2.5%        97.5% 
 -0.105396412  0.003531714 </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The middle 95% leaves 2.5% in each tail, so the probabilities are <code>0.025</code> and <code>0.975</code>. A common mistake is <code>c(0.05, 0.95)</code>, which gives the middle <em>90%</em>.</p>
 </div>
 </div>
 <p>Visualize the bootstrap distribution. Shade the 95% CI, and mark the observed <span class="math inline">\(\hat \beta_1\)</span> (solid) and the population <span class="math inline">\(\beta_1\)</span> (dashed).</p>
@@ -792,10 +1215,46 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 </div>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The rectangle spans the CI: <code>xmin = boot_ci[1]</code> (2.5th percentile) and <code>xmax = boot_ci[2]</code> (97.5th percentile).</li>
+<li>The solid line is the observed estimate, <code>beta_1_hat</code>.</li>
+<li>The dashed line is the population parameter, <code>beta_1</code>.</li>
+</ul>
+<p>As with the wells, the bootstrap distribution is centered on <span class="math inline">\(\hat\beta_1\)</span>, not on <span class="math inline">\(\beta_1\)</span>. Here the gap between them is relatively large. Our sample happened to show a stronger cooling effect than the truth.</p>
+</div>
+</div>
 <p>Interpret the confidence interval in one sentence. Does it contain the population <span class="math inline">\(\beta_1\)</span>?</p>
 <blockquote class="blockquote">
 <p>We are 95% confident that surface temperature changes by between -0.105 and 0.004 °C for each additional percentage point of tree canopy. It contains the population <span class="math inline">\(\beta_1\)</span> = -0.01.</p>
 </blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A complete interpretation includes the confidence level, the interval in the units of the problem (°C per percentage point of canopy), and what the parameter means in context.</p>
+<p>Two more things to notice:</p>
+<ul>
+<li><strong>Does it contain 0?</strong> The interval <em>does</em> contain 0. So a slope of zero (no cooling effect) is among the plausible values, which is consistent with failing to reject <span class="math inline">\(H_0\)</span>. That doesn’t quite match the permutation test from Part 1, which is one more sign that this result is borderline. Different reasonable methods land on different sides of the line.</li>
+<li><strong>The interval is wide.</strong> It runs from a fairly strong cooling effect (-6.3 °C across 0–60% canopy) to slight warming (0.2 °C). With 40 noisy neighborhoods, the data can’t pin down <span class="math inline">\(\beta_1\)</span> precisely. A wide interval is an honest statement of that uncertainty.</li>
+</ul>
+</div>
+</div>
 </section>
 </section>
 <section id="part-4-confidence-interval-by-mathematical-model" class="level2">
@@ -817,6 +1276,24 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 0.005219117 0.069263593 </code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>confint()</code> builds the interval from a formula instead of resampling:</p>
+<p><span class="math display">\[
+\hat\beta_1 \pm t^*_{n-2} \times SE(\hat\beta_1)
+\]</span></p>
+<p><span class="math inline">\(t^*_{n-2}\)</span> is the 97.5th percentile of a t distribution with <span class="math inline">\(n - 2\)</span> degrees of freedom, <code>qt(0.975, df = 28)</code> <span class="math inline">\(\approx\)</span> 2.05 for 30 wells. <code>confint()</code> returns a matrix with one row per coefficient, so <code>["ag_pct", ]</code> picks the slope row and both columns.</p>
+<p>The two intervals are very close. As with the p-values in Part 2, the simulation method and the formula agree when the model’s assumptions are reasonable. One difference is that the formula interval is always symmetric around <span class="math inline">\(\hat\beta_1\)</span>, while the bootstrap interval can be lopsided if the sampling distribution is skewed.</p>
+</div>
+</div>
 <p>The standard deviation of the bootstrap distribution approximates the standard error</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using the bootstrap</span></span>
@@ -828,6 +1305,20 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(one_sample_lm)<span class="sc">$</span>coefficients[<span class="st">"ag_pct"</span>, <span class="st">"Std. Error"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.01563275</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="How it works">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How it works
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <strong>standard error</strong> is, by definition, the standard deviation of the sampling distribution of <span class="math inline">\(\hat\beta_1\)</span>. The bootstrap distribution approximates the sampling distribution, so its standard deviation approximates the standard error. <code>lm()</code> calculates the same quantity from a formula based on <span class="math inline">\(\hat\sigma\)</span>, <span class="math inline">\(n\)</span>, and the spread of x. The two numbers (0.0164 and 0.0156) are nearly identical.</p>
+<p>This ties the lab together. The standard error is the key quantity behind both the t statistic (Part 2) and the confidence interval (Part 4).</p>
 </div>
 </div>
 </section>
@@ -842,6 +1333,42 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 -0.109070018  0.001792381 </code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The blank is <code>confint</code>. By default it gives a 95% interval. Use <code>confint(canopy_lm, level = 0.90)</code> for other levels.</p>
+<p>Compare it to the bootstrap:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Lower</th>
+<th>Upper</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bootstrap</td>
+<td>-0.1054</td>
+<td>0.0035</td>
+</tr>
+<tr class="even">
+<td><code>confint()</code></td>
+<td>-0.1091</td>
+<td>0.0018</td>
+</tr>
+</tbody>
+</table>
+<p>The two intervals are close. Both contain 0 (just barely) and both contain the true <span class="math inline">\(\beta_1 =\)</span> -0.01. The <code>confint()</code> interval contains 0, which agrees with <code>lm()</code>’s p-value of 0.057. The formula CI and the t-test p-value always agree with each other, because they’re built from the same estimate, standard error, and t distribution.</p>
+</div>
+</div>
 <p>The standard deviation of the bootstrap distribution approximates the standard error. Compare them.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(boot_distribution<span class="sc">$</span>beta_1_hat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -851,6 +1378,51 @@ canopy_pct  -0.05363882 0.02738162 -1.958935 5.748845e-02</code></pre>
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(canopy_lm))[<span class="st">"canopy_pct"</span>, <span class="st">"Std. Error"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.02738162</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><code>sd()</code> computes the standard deviation of the 1,000 bootstrap slopes.</li>
+<li><code>"Std. Error"</code> is the column name in the coefficients table, in quotes and spelled exactly as printed.</li>
+</ul>
+<p>The two values (0.0275 and 0.0274) are nearly identical. Simulation and theory agree on how uncertain <span class="math inline">\(\hat\beta_1\)</span> is.</p>
+<p><strong>Big picture:</strong> for both scenarios, we answered the same two questions in two ways.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Question</th>
+<th>Simulation</th>
+<th>Mathematical model</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Is the data consistent with <span class="math inline">\(\beta_1 = 0\)</span>?</td>
+<td>Permutation test</td>
+<td>t-test (<code>lm()</code> p-value)</td>
+</tr>
+<tr class="even">
+<td>What values of <span class="math inline">\(\beta_1\)</span> are plausible?</td>
+<td>Bootstrap CI</td>
+<td><code>confint()</code></td>
+</tr>
+</tbody>
+</table>
+<p>The simulation methods make the logic visible. The mathematical methods are faster and are what you’ll usually see reported. When the model’s assumptions hold, they give nearly the same answers.</p>
 </div>
 </div>
 

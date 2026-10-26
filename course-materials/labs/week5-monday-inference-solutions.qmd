@@ -20,6 +20,10 @@ set.seed(222)
 theme_set(theme_bw())
 ```
 
+::: {.callout-note title="How it works"}
+`set.seed(222)` makes the random numbers reproducible. Every simulation, permutation, and bootstrap below uses R's random number generator, so without a seed your results would change each time you ran the document. With the seed, everyone who runs the whole document top to bottom gets the same numbers. If you run chunks out of order or re-run some of them, your numbers will be a little different from these. That's expected and isn't a mistake.
+:::
+
 ## Scenarios
 
 ### We do: nitrate in drinking water wells
@@ -40,6 +44,16 @@ A city measures tree canopy and the average July land surface temperature in 40 
 - y: July land surface temperature (°C)
 - $\beta_1$: change in surface temperature per additional percentage point of canopy
 
+::: {.callout-note title="How it works"}
+Both scenarios use the same model:
+
+$$
+y = \beta_0 + \beta_1 x + \varepsilon, \quad \varepsilon \sim Normal(0, \sigma)
+$$
+
+$\beta_1$ is the quantity we care about. In both scenarios, the question is whether x is related to y: $H_0: \beta_1 = 0$ versus $H_A: \beta_1 \neq 0$. We can't observe $\beta_1$ directly. We only get a sample and an estimate, $\hat\beta_1$. Inference is about using one sample to say how far $\hat\beta_1$ might be from $\beta_1$ and whether the data are consistent with $\beta_1 = 0$.
+:::
+
 ## Setup
 
 ### We do
@@ -55,6 +69,10 @@ wells_beta_1 <- 0.035
 wells_sigma <- 2
 ```
 
+::: {.callout-note title="How it works"}
+These are the "truth" that we normally never get to see. A well with no farmland nearby averages 4 mg/L of nitrate. Each additional percentage point of farmland adds 0.035 mg/L, so a well surrounded by 80% farmland averages $4 + 0.035 \times 80 = 6.8$ mg/L. That's still below the 10 mg/L standard on average. But with $\sigma = 2$ mg/L, individual wells scatter widely around that average, and some will exceed the standard.
+:::
+
 Simulated population of wells
 
 ```{r}
@@ -63,6 +81,16 @@ nitrate_hat <- wells_beta_0 + wells_beta_1 * ag_pct
 nitrate <- rnorm(1e4, nitrate_hat, wells_sigma)
 simulated_population <- tibble(ag_pct, nitrate_hat, nitrate)
 ```
+
+::: {.callout-note title="How it works"}
+We simulate a population of 10,000 wells in three steps:
+
+1. **Predictor.** `runif(1e4, 0, 80)` gives each well a farmland percentage drawn uniformly between 0% and 80%.
+2. **Expected value.** `nitrate_hat` is the point on the population line for each well: $\beta_0 + \beta_1 x$. This is the *systematic* part of the model.
+3. **Response.** `rnorm(1e4, nitrate_hat, wells_sigma)` adds normally distributed noise with standard deviation $\sigma$ around each expected value. This is the $\varepsilon$ part of the model, and it represents everything other than farmland that affects nitrate (soil type, well depth, irrigation practices, ...).
+
+Each well gets its own mean in `rnorm()`, because `nitrate_hat` is a vector of 10,000 values.
+:::
 
 Visualize
 
@@ -80,15 +108,22 @@ ggplot(simulated_population, aes(ag_pct, nitrate)) +
     color = "firebrick",
     linewidth = 1.5
   ) +
-  geom_hline(yintercept = 10, linetype = "dashed") +
   labs(x = "Farmland within 1 km (%)", y = "Nitrate (mg/L)")
 ```
+
+::: {.callout-note title="How it works"}
+`geom_abline()` draws the **population regression line** using the true $\beta_0$ and $\beta_1$. The relationship is real but modest compared to the noise. Across the full range of farmland, the line rises less than 3 mg/L, while individual wells spread several mg/L above and below it. With this much noise, a small sample could easily give a misleading slope.
+:::
 
 A water agency tests 30 wells
 
 ```{r}
 one_sample <- slice_sample(simulated_population, n = 30)
 ```
+
+::: {.callout-note title="How it works"}
+`slice_sample()` draws 30 rows at random, *without* replacement, from the population. This is the dataset a real agency would have: 30 wells, with no access to the other 9,970 or to the true parameters.
+:::
 
 Fit the model
 
@@ -98,6 +133,12 @@ summary(one_sample_lm)
 wells_beta_hat <- coef(one_sample_lm)
 wells_beta_1_hat <- wells_beta_hat["ag_pct"]
 ```
+
+::: {.callout-note title="How it works"}
+`lm(nitrate ~ ag_pct, one_sample)` fits the least squares line to the 30 wells. `coef()` returns a named vector with `(Intercept)` and `ag_pct`. Indexing by name (`["ag_pct"]`) is safer than indexing by position, because it still works if you add predictors later.
+
+Our estimate is $\hat\beta_1 =$ `r round(wells_beta_1_hat, 4)` mg/L per %, compared to the true $\beta_1 =$ `r wells_beta_1`. They're close, but not identical. A different sample of 30 wells would give a different $\hat\beta_1$. The rest of this lab is about measuring that sample-to-sample variability.
+:::
 
 Compare the fitted line (light) to the population line (dark)
 
@@ -125,6 +166,10 @@ ggplot(one_sample, aes(ag_pct, nitrate)) +
   labs(x = "Farmland within 1 km (%)", y = "Nitrate (mg/L)")
 ```
 
+::: {.callout-note title="How it works"}
+We draw two lines on the same plot. The dark line uses the population parameters (`wells_beta_0`, `wells_beta_1`). The light line uses the sample estimates (`wells_beta_hat[1]`, `wells_beta_hat[2]`). The gap between them is **sampling error**. In real research we only ever see the light line, so we need tools that tell us how far it might be from the dark one.
+:::
+
 ### You do
 
 Run this chunk to simulate the data. In real life we wouldn't know the population parameters, but here we can use them to check our inferences.
@@ -140,6 +185,12 @@ canopy_pct <- runif(40, 0, 60)
 surface_temp <- rnorm(40, beta_0 + beta_1 * canopy_pct, sigma)
 neighborhoods <- tibble(canopy_pct, surface_temp)
 ```
+
+::: {.callout-note title="How it works"}
+This uses the same three steps as the wells simulation (predictor, expected value, noise), but it skips the population and simulates the 40 sampled neighborhoods directly.
+
+Look closely at the parameters. The true effect is **small** relative to the noise. Going from 0% to 60% canopy lowers the expected temperature by only $0.01 \times 60 = 0.6$ °C, while the residual standard deviation is 3 °C. With only 40 neighborhoods, that makes this a hard effect to detect, so expect a less clear-cut result than the wells example.
+:::
 
 Visualize the data.
 
@@ -157,6 +208,14 @@ summary(canopy_lm)
 beta_1_hat <- coef(canopy_lm)["canopy_pct"]
 beta_1_hat
 ```
+
+::: {.callout-tip title="Solution"}
+- The formula is `response ~ predictor`. Surface temperature is the response (y) and canopy is the predictor (x), so it's `surface_temp ~ canopy_pct`.
+- `data = neighborhoods` tells `lm()` which data frame holds those columns.
+- `coef(canopy_lm)["canopy_pct"]` pulls out the slope by name. (`coef(canopy_lm)[2]` also works, but the name is clearer.)
+
+Our estimate is $\hat\beta_1 =$ `r round(beta_1_hat, 4)` °C per %. The true value is $\beta_1 =$ `r beta_1`. The estimate has the right sign, but it's `r if (abs(beta_1_hat) > abs(beta_1)) "noticeably larger in magnitude" else "smaller in magnitude"` than the truth. With noise this large, that's typical.
+:::
 
 ## Part 1: p-value by permutation
 
@@ -178,6 +237,19 @@ wells_permutations <- replicate(1e3, {
 })
 wells_null_distribution <- tibble(beta_1_hat = wells_permutations)
 ```
+
+::: {.callout-note title="How it works"}
+**The logic.** If $H_0$ were true, which well had which farmland percentage would be irrelevant to its nitrate level. So we can reassign the farmland values at random and get a dataset that could just as plausibly have come from a world where $H_0$ is true.
+
+**The code.**
+
+- `sample(ag_pct)` with no other arguments returns the same 30 values in a random order. Every farmland value is still in the data and every nitrate value is still in the data. Only the *pairing* between them changes. Shuffling breaks any association between x and y while keeping each variable's own distribution exactly the same.
+- We refit the model on the shuffled data and keep the slope.
+- `replicate(1e3, { ... })` runs the code in braces 1,000 times and collects the last value from each run into a vector. Here that's the 1,000 slopes.
+- We put the vector in a tibble so it's easy to plot with ggplot.
+
+The result is the **null distribution**: the slopes we'd expect to see from samples like ours *if farmland had no effect on nitrate*.
+:::
 
 Compare the null distribution to the observed $\hat\beta_1$. Shade the regions at least as extreme as the observed $\hat\beta_1$ (in either direction, because $H_A$ is two-sided).
 
@@ -207,14 +279,36 @@ ggplot(wells_null_distribution, aes(beta_1_hat)) +
     color = "firebrick",
     linewidth = 1.5
   )
-# The p-value is the proportion of the null distribution in the shaded regions
+# The p-value is the proportion of the null distribution at least as extreme as
+# the observed beta_1_hat (i.e., in the shaded regions)
 ```
+
+::: {.callout-note title="How it works"}
+The null distribution is centered on 0, as it should be. Shuffling destroys the relationship, so the slopes average out to nothing.
+
+The two `annotate("rect", ...)` layers shade the tails:
+
+- The left rectangle runs from `-Inf` to `-abs(wells_beta_1_hat)`.
+- The right rectangle runs from `abs(wells_beta_1_hat)` to `Inf`.
+
+Using `abs()` means the shading is correct whether $\hat\beta_1$ is positive or negative. We shade *both* tails because $H_A: \beta_1 \neq 0$ is two-sided. Before seeing the data, a large negative slope would have been just as much evidence against $H_0$ as a large positive one.
+
+`ymin = -Inf, ymax = Inf` stretches the rectangles to the full height of the plot.
+:::
 
 The **p-value** is the proportion of the null distribution at least as extreme as the observed $\hat\beta_1$
 
 ```{r}
 mean(abs(wells_null_distribution$beta_1_hat) >= abs(wells_beta_1_hat))
 ```
+
+::: {.callout-note title="How it works"}
+`abs(wells_null_distribution$beta_1_hat) >= abs(wells_beta_1_hat)` is a logical vector with one `TRUE`/`FALSE` per permutation. `TRUE` means that permuted slope was at least as far from 0 as the slope we observed. Taking the `mean()` of a logical vector gives the proportion of `TRUE`s, because R treats `TRUE` as 1 and `FALSE` as 0.
+
+**Interpretation:** if farmland had no relationship with nitrate, only about `r scales::percent(mean(abs(wells_null_distribution$beta_1_hat) >= abs(wells_beta_1_hat)), accuracy = 0.1)` of samples would show a slope at least as far from 0 as ours, in either direction. That's below 0.05, so we reject $H_0$. The data are hard to explain without some relationship between farmland and nitrate.
+
+With 1,000 permutations, the p-value can only take values in steps of 0.001, and it would change slightly with a different seed. More permutations would make it more precise.
+:::
 
 ### You do
 
@@ -233,6 +327,12 @@ permutations <- replicate(1e3, {
 })
 null_distribution <- tibble(beta_1_hat = permutations)
 ```
+
+::: {.callout-tip title="Solution"}
+- `sample(canopy_pct)` shuffles the canopy values among the neighborhoods. This breaks the link between canopy and temperature, which is exactly what $H_0$ says doesn't exist.
+- The model is fit to `permuted_sample`, the *shuffled* data. A common mistake is to write `data = neighborhoods` here. That refits the original data 1,000 times and gives the same slope every time.
+- `coef(permuted_lm)["canopy_pct"]` is the last line in the braces, so it's the value `replicate()` collects from each run.
+:::
 
 Visualize the null distribution. Shade the regions at least as extreme as the observed $\hat \beta_1$ (in either direction, because $H_A$ is two-sided).
 
@@ -260,6 +360,12 @@ ggplot(null_distribution, aes(beta_1_hat)) +
   geom_vline(xintercept = beta_1_hat, color = "firebrick", linewidth = 1.5)
 ```
 
+::: {.callout-tip title="Solution"}
+The left tail runs from `-Inf` to `-abs(beta_1_hat)`, and the right tail runs from `abs(beta_1_hat)` to `Inf`. Here $\hat\beta_1$ is negative, so the solid line sits in the left shaded region. The right shaded region is its mirror image. We still count it because the test is two-sided.
+
+Compared to the wells, the observed slope sits much closer to the edge of the null distribution. It's in the tail, but not far out in it.
+:::
+
 Calculate the p-value: the proportion of the null distribution at least as extreme as the observed $\hat \beta_1$.
 
 ```{r}
@@ -267,9 +373,28 @@ perm_pvalue <- mean(abs(null_distribution$beta_1_hat) >= abs(beta_1_hat))
 perm_pvalue
 ```
 
+::: {.callout-tip title="Solution"}
+Both blanks are `abs`. Comparing absolute values counts permuted slopes that are extreme in *either* direction, which matches the two-sided $H_A$. If you left out `abs()`, you'd count every permuted slope above a negative number, which would be almost all of them. That gives a p-value near 1, and the result is meaningless.
+:::
+
 Interpret the p-value in one sentence. Do you reject $H_0$?
 
 > If tree canopy had no relationship with surface temperature, we would see a slope at least as far from 0 as the observed $\hat \beta_1$ in about `r scales::percent(perm_pvalue, accuracy = 0.1)` of samples. p `r if (perm_pvalue < 0.05) "<" else ">="` 0.05, so we `r if (perm_pvalue < 0.05) "reject" else "fail to reject"` $H_0$.
+
+::: {.callout-tip title="Solution"}
+A good interpretation has three parts:
+
+1. **The assumption:** *if $H_0$ were true* (no relationship).
+2. **What the p-value is a proportion of:** samples with a slope *at least as extreme* as ours, in either direction (at least as far from 0).
+3. **The decision:** compare to $\alpha = 0.05$.
+
+Common mistakes:
+
+- **"There's a `r scales::percent(perm_pvalue, accuracy = 0.1)` chance that $H_0$ is true."** This is wrong. The p-value is computed *assuming* $H_0$ is true, so it can't be the probability that $H_0$ is true.
+- **"We accept $H_0$."** We never accept $H_0$. If p ≥ 0.05, we *fail to reject*. The data just aren't strong enough evidence against it.
+
+Here p = `r round(perm_pvalue, 3)`, which is `r if (abs(perm_pvalue - 0.05) < 0.02) "right at the edge of the 0.05 threshold" else if (perm_pvalue < 0.05) "comfortably below 0.05" else "comfortably above 0.05"`. Keep that in mind when you compare it to `lm()` in Part 2.
+:::
 
 ## Part 2: p-value by mathematical model
 
@@ -285,6 +410,20 @@ mean(abs(wells_null_distribution$beta_1_hat) >= abs(wells_beta_1_hat))
 summary(one_sample_lm)$coefficients["ag_pct", "Pr(>|t|)"]
 ```
 
+::: {.callout-note title="How it works"}
+`summary(one_sample_lm)$coefficients` is a matrix with one row per coefficient and four columns: `Estimate`, `Std. Error`, `t value`, and `Pr(>|t|)`. We index it as `[row, column]` by name.
+
+`lm()` doesn't shuffle anything. It uses a mathematical shortcut instead:
+
+1. Compute the **t statistic**: $t = \hat\beta_1 / SE(\hat\beta_1)$, or how many standard errors the estimate is from 0.
+2. If $H_0$ is true *and* the model's assumptions hold (linear relationship, independent observations, normal residuals with constant variance), $t$ follows a t distribution with $n - 2$ degrees of freedom.
+3. `Pr(>|t|)` is the area in both tails of that t distribution beyond $|t|$.
+
+So the t distribution plays the same role as our permutation null distribution. One is derived from theory and the other is built by simulation.
+
+The two p-values (`r round(mean(abs(wells_null_distribution$beta_1_hat) >= abs(wells_beta_1_hat)), 3)` and `r round(summary(one_sample_lm)$coefficients["ag_pct", "Pr(>|t|)"], 3)`) are similar, and both are below 0.05. They aren't identical because the permutation test has simulation noise and the t-test relies on distributional assumptions. When the assumptions are reasonable, the two methods should agree closely.
+:::
+
 ### You do
 
 Find the p-value for `canopy_pct` in the coefficients table. `Pr(>|t|)` is **two-sided**, just like our $H_A$.
@@ -295,9 +434,23 @@ lm_pvalue <- coef(summary(canopy_lm))["canopy_pct", "Pr(>|t|)"]
 lm_pvalue
 ```
 
+::: {.callout-tip title="Solution"}
+The blank is the column name `"Pr(>|t|)"`, typed exactly as it appears in the coefficients table, inside quotes. `coef(summary(canopy_lm))` is equivalent to `summary(canopy_lm)$coefficients`.
+
+You can check this against the t statistic by hand. $t =$ `r round(coef(summary(canopy_lm))["canopy_pct", "Estimate"], 4)` / `r round(coef(summary(canopy_lm))["canopy_pct", "Std. Error"], 4)` = `r round(coef(summary(canopy_lm))["canopy_pct", "t value"], 2)`, and `2 * pt(-abs(t), df = 38)` gives the same p-value.
+:::
+
 How do the permutation and `lm()` p-values compare? Do they lead to the same conclusion?
 
-> They're close to each other (`r round(perm_pvalue, 3)` and `r round(lm_pvalue, 3)`), so they lead to the same conclusion: we `r if (lm_pvalue < 0.05) "reject" else "fail to reject"` $H_0$.
+> The two p-values are similar (`r round(perm_pvalue, 3)` from the permutation test and `r round(lm_pvalue, 3)` from `lm()`). `r if ((perm_pvalue < 0.05) == (lm_pvalue < 0.05)) paste0("They lead to the same conclusion: we ", if (lm_pvalue < 0.05) "reject" else "fail to reject", " $H_0$.") else paste0("But they fall on opposite sides of 0.05, so they lead to *different* conclusions: the permutation test says ", if (perm_pvalue < 0.05) "reject" else "fail to reject", " and lm() says ", if (lm_pvalue < 0.05) "reject" else "fail to reject", ". The evidence against $H_0$ is borderline either way.")`
+
+::: {.callout-tip title="Solution"}
+`r if ((perm_pvalue < 0.05) == (lm_pvalue < 0.05)) "Here both methods agree." else "This is a useful case to think about. The two methods disagree on the decision, even though the p-values themselves are close."` A few points to take from this:
+
+- **Similar p-values are what we expect.** The permutation test and the t-test answer the same question with different machinery, so they should land in the same neighborhood. A difference of about `r round(abs(perm_pvalue - lm_pvalue), 3)` is typical, given simulation noise from 1,000 permutations plus the t-test's assumptions.
+- **The 0.05 threshold is a convention, not a law of nature.** Two p-values this close (`r round(perm_pvalue, 3)` and `r round(lm_pvalue, 3)`) carry nearly the same amount of evidence. Treating one as a "discovery" and the other as "nothing" is a common misuse of hypothesis testing. Report the p-value itself, not just "significant" or "not significant."
+- **Remember the truth.** We know the true $\beta_1 =$ `r beta_1`, so $H_0$ is actually *false*. But the true effect is tiny relative to $\sigma$, and 40 neighborhoods isn't enough to detect it reliably. That's what **low statistical power** looks like. Failing to reject $H_0$ doesn't mean there's no effect.
+:::
 
 ## Part 3: confidence interval by bootstrap
 
@@ -318,6 +471,23 @@ for (i in 1:1000) {
   boot_betas <- rbind(boot_betas, resampled_betas)
 }
 ```
+
+::: {.callout-note title="How it works"}
+**The logic.** A confidence interval should reflect how much $\hat\beta_1$ would vary if we could draw many samples from the population. We can't do that, because we only have one sample. The bootstrap's trick is to treat the sample *as if it were the population* and draw new samples from it.
+
+**Why with replacement?** Each bootstrap sample has the same size as the original (`n = nrow(one_sample)`, here 30). If we sampled 30 out of 30 *without* replacement, we'd get the exact same wells every time, just in a different order, and the same slope. Sampling *with* replacement means some wells show up two or three times and others don't show up at all. That creates realistic variation between bootstrap samples.
+
+**Permutation vs. bootstrap.** Both resample, but in different ways for different purposes:
+
+| | Permutation (Part 1) | Bootstrap (Part 3) |
+|---|---|---|
+| What's resampled | Shuffle x only | Resample whole rows (x and y together) |
+| Relationship between x and y | Destroyed | Preserved |
+| Distribution is centered on | 0 | $\hat\beta_1$ |
+| Used for | p-value (testing $H_0$) | Confidence interval (estimating $\beta_1$) |
+
+**The code.** This version uses a `for` loop instead of `replicate()` so you can see each step. Each iteration builds a one-row tibble and `rbind()`s it onto `boot_betas`. It also records the `iteration` number, which can be handy for debugging. `replicate()` (as in the You do) is shorter and faster, and it gives the same result.
+:::
 
 The middle 95% of the bootstrap distribution is the 95% **confidence interval**. Shade it on the bootstrap distribution, and compare to the observed $\hat\beta_1$ (solid) and the true $\beta_1$ (dashed).
 
@@ -348,6 +518,16 @@ ggplot(boot_betas, aes(beta_1_hat)) +
 # The bootstrap distribution is centered on beta_1_hat, not beta_1!
 ```
 
+::: {.callout-note title="How it works"}
+`quantile(x, c(0.025, 0.975))` returns the 2.5th and 97.5th percentiles, so the middle 95% of the bootstrap slopes falls between them. This is the **percentile bootstrap** confidence interval: (`r round(wells_boot_ci[1], 4)`, `r round(wells_boot_ci[2], 4)`) mg/L per %.
+
+**Notice where the histogram is centered.** It's centered on $\hat\beta_1$ (solid line), not on the true $\beta_1$ (dashed line). The bootstrap can't know the truth, because it only knows our sample. What it gets right is the *spread*. The bootstrap distribution's width approximates the width of the true sampling distribution, and that's all we need for a confidence interval.
+
+**Interpretation:** we are 95% confident that each additional percentage point of farmland is associated with between `r round(wells_boot_ci[1], 3)` and `r round(wells_boot_ci[2], 3)` mg/L more nitrate. The interval `r if (between(wells_beta_1, wells_boot_ci[1], wells_boot_ci[2])) "contains" else "does not contain"` the true $\beta_1 =$ `r wells_beta_1`. It also doesn't contain 0, which matches our Part 1 decision to reject $H_0$. A 95% CI that excludes 0 corresponds to a two-sided test that rejects at $\alpha = 0.05$.
+
+"95% confident" refers to the *procedure*. If we repeated this whole process (draw a sample, bootstrap, build the interval) many times, about 95% of the intervals would contain the true $\beta_1$. Any single interval either contains $\beta_1$ or it doesn't.
+:::
+
 ### You do
 
 How much does surface temperature change per percentage point of canopy? Resample the neighborhoods _with replacement_ 1,000 times, refitting the model each time, to approximate the sampling distribution of $\hat \beta_1$.
@@ -365,12 +545,24 @@ bootstraps <- replicate(1e3, {
 boot_distribution <- tibble(beta_1_hat = bootstraps)
 ```
 
+::: {.callout-tip title="Solution"}
+- `n = nrow(neighborhoods)`: each bootstrap sample is the same size as the original, 40 neighborhoods. Writing `n = 40` works too, but `nrow()` keeps working if the data change.
+- `replace = TRUE`: this is what makes it a bootstrap. With `replace = FALSE`, every "resample" would contain the same 40 neighborhoods, and all 1,000 slopes would be identical.
+- `lm(surface_temp ~ canopy_pct, data = boot_sample)`: fit the same model as before, but to the *resampled* data.
+
+Unlike the permutation test, we resample whole rows. Each neighborhood's canopy and temperature stay together, so the relationship between them is preserved.
+:::
+
 Find the middle 95% of the bootstrap distribution.
 
 ```{r}
 boot_ci <- quantile(boot_distribution$beta_1_hat, c(0.025, 0.975))
 boot_ci
 ```
+
+::: {.callout-tip title="Solution"}
+The middle 95% leaves 2.5% in each tail, so the probabilities are `0.025` and `0.975`. A common mistake is `c(0.05, 0.95)`, which gives the middle *90%*.
+:::
 
 Visualize the bootstrap distribution. Shade the 95% CI, and mark the observed $\hat \beta_1$ (solid) and the population $\beta_1$ (dashed).
 
@@ -395,9 +587,26 @@ ggplot(boot_distribution, aes(beta_1_hat)) +
   )
 ```
 
+::: {.callout-tip title="Solution"}
+- The rectangle spans the CI: `xmin = boot_ci[1]` (2.5th percentile) and `xmax = boot_ci[2]` (97.5th percentile).
+- The solid line is the observed estimate, `beta_1_hat`.
+- The dashed line is the population parameter, `beta_1`.
+
+As with the wells, the bootstrap distribution is centered on $\hat\beta_1$, not on $\beta_1$. Here the gap between them is relatively large. Our sample happened to show a stronger cooling effect than the truth.
+:::
+
 Interpret the confidence interval in one sentence. Does it contain the population $\beta_1$?
 
 > We are 95% confident that surface temperature changes by between `r round(boot_ci[1], 3)` and `r round(boot_ci[2], 3)` °C for each additional percentage point of tree canopy. It `r if (between(beta_1, boot_ci[1], boot_ci[2])) "contains" else "does not contain"` the population $\beta_1$ = `r beta_1`.
+
+::: {.callout-tip title="Solution"}
+A complete interpretation includes the confidence level, the interval in the units of the problem (°C per percentage point of canopy), and what the parameter means in context.
+
+Two more things to notice:
+
+- **Does it contain 0?** The interval `r if (between(0, boot_ci[1], boot_ci[2])) "*does* contain 0" else "does not contain 0"`. `r if (between(0, boot_ci[1], boot_ci[2])) "So a slope of zero (no cooling effect) is among the plausible values, which is consistent with failing to reject $H_0$." else "So a slope of zero is not among the plausible values, which is consistent with rejecting $H_0$."` `r if (between(0, boot_ci[1], boot_ci[2]) == (perm_pvalue < 0.05)) "That doesn't quite match the permutation test from Part 1, which is one more sign that this result is borderline. Different reasonable methods land on different sides of the line." else ""`
+- **The interval is wide.** It runs from a fairly strong cooling effect (`r round(boot_ci[1] * 60, 1)` °C across 0–60% canopy) to `r if (boot_ci[2] > 0) "slight warming" else "a weak cooling effect"` (`r round(boot_ci[2] * 60, 1)` °C). With 40 noisy neighborhoods, the data can't pin down $\beta_1$ precisely. A wide interval is an honest statement of that uncertainty.
+:::
 
 ## Part 4: confidence interval by mathematical model
 
@@ -413,6 +622,18 @@ wells_boot_ci
 confint(one_sample_lm)["ag_pct", ]
 ```
 
+::: {.callout-note title="How it works"}
+`confint()` builds the interval from a formula instead of resampling:
+
+$$
+\hat\beta_1 \pm t^*_{n-2} \times SE(\hat\beta_1)
+$$
+
+$t^*_{n-2}$ is the 97.5th percentile of a t distribution with $n - 2$ degrees of freedom, `qt(0.975, df = 28)` $\approx$ `r round(qt(0.975, 28), 2)` for 30 wells. `confint()` returns a matrix with one row per coefficient, so `["ag_pct", ]` picks the slope row and both columns.
+
+The two intervals are very close. As with the p-values in Part 2, the simulation method and the formula agree when the model's assumptions are reasonable. One difference is that the formula interval is always symmetric around $\hat\beta_1$, while the bootstrap interval can be lopsided if the sampling distribution is skewed.
+:::
+
 The standard deviation of the bootstrap distribution approximates the standard error
 
 ```{r}
@@ -423,6 +644,12 @@ sd(boot_betas$beta_1_hat)
 summary(one_sample_lm)$coefficients["ag_pct", "Std. Error"]
 ```
 
+::: {.callout-note title="How it works"}
+The **standard error** is, by definition, the standard deviation of the sampling distribution of $\hat\beta_1$. The bootstrap distribution approximates the sampling distribution, so its standard deviation approximates the standard error. `lm()` calculates the same quantity from a formula based on $\hat\sigma$, $n$, and the spread of x. The two numbers (`r round(sd(boot_betas$beta_1_hat), 4)` and `r round(summary(one_sample_lm)$coefficients["ag_pct", "Std. Error"], 4)`) are nearly identical.
+
+This ties the lab together. The standard error is the key quantity behind both the t statistic (Part 2) and the confidence interval (Part 4).
+:::
+
 ### You do
 
 Let `confint()` calculate the 95% CI.
@@ -432,9 +659,38 @@ lm_ci <- confint(canopy_lm)["canopy_pct", ]
 lm_ci
 ```
 
+::: {.callout-tip title="Solution"}
+The blank is `confint`. By default it gives a 95% interval. Use `confint(canopy_lm, level = 0.90)` for other levels.
+
+Compare it to the bootstrap:
+
+| Method | Lower | Upper |
+|---|---|---|
+| Bootstrap | `r round(boot_ci[1], 4)` | `r round(boot_ci[2], 4)` |
+| `confint()` | `r round(lm_ci[1], 4)` | `r round(lm_ci[2], 4)` |
+
+The two intervals are close. Both `r if (between(0, lm_ci[1], lm_ci[2]) == between(0, boot_ci[1], boot_ci[2])) (if (between(0, lm_ci[1], lm_ci[2])) "contain 0 (just barely)" else "exclude 0") else "are close to 0, but only one of them contains it"` and both `r if (between(beta_1, lm_ci[1], lm_ci[2]) && between(beta_1, boot_ci[1], boot_ci[2])) "contain" else "may not contain"` the true $\beta_1 =$ `r beta_1`. The `confint()` interval `r if (between(0, lm_ci[1], lm_ci[2])) "contains 0" else "excludes 0"`, which agrees with `lm()`'s p-value of `r round(lm_pvalue, 3)`. The formula CI and the t-test p-value always agree with each other, because they're built from the same estimate, standard error, and t distribution.
+:::
+
 The standard deviation of the bootstrap distribution approximates the standard error. Compare them.
 
 ```{r}
 sd(boot_distribution$beta_1_hat)
 coef(summary(canopy_lm))["canopy_pct", "Std. Error"]
 ```
+
+::: {.callout-tip title="Solution"}
+- `sd()` computes the standard deviation of the 1,000 bootstrap slopes.
+- `"Std. Error"` is the column name in the coefficients table, in quotes and spelled exactly as printed.
+
+The two values (`r round(sd(boot_distribution$beta_1_hat), 4)` and `r round(coef(summary(canopy_lm))["canopy_pct", "Std. Error"], 4)`) are nearly identical. Simulation and theory agree on how uncertain $\hat\beta_1$ is.
+
+**Big picture:** for both scenarios, we answered the same two questions in two ways.
+
+| Question | Simulation | Mathematical model |
+|---|---|---|
+| Is the data consistent with $\beta_1 = 0$? | Permutation test | t-test (`lm()` p-value) |
+| What values of $\beta_1$ are plausible? | Bootstrap CI | `confint()` |
+
+The simulation methods make the logic visible. The mathematical methods are faster and are what you'll usually see reported. When the model's assumptions hold, they give nearly the same answers.
+:::

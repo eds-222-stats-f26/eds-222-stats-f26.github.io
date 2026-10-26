@@ -7,8 +7,8 @@ subtitle: "Week 5 (October 26 - 30)"
 
 | Session | In-class | Pre-class |
 |---------|--------|---------|
-| Lecture 1 | [Linear regression inference](lecture-slides/week5_monday.qmd) <br/> [Linear regression inference exercise](labs/week5-monday-inference.qmd) | IMS 24 <br/> [Linear regression inference](https://youtu.be/U4VR5kFZOww) |
-| Lab | Concept maps | None |
+| Lecture 1 | [Linear regression inference](lecture-slides/week5_monday.qmd) <br/> [Linear regression inference exercise](labs/week5-monday-inference.qmd) ([Solutions](labs/week5-monday-inference-solutions.qmd)) | IMS 24 <br/> [Linear regression inference](https://youtu.be/U4VR5kFZOww) |
+| Lab | [Concept maps](labs/lab5.qmd) | None |
 | Lecture 2 | Causality | IMS 25 |
 : {.hover .bordered tbl-colwidths="[30,30,40]"} 
 

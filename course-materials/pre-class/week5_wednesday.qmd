@@ -1,0 +1,981 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 5 Wednesday: Causal inference"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+# Coral bleaching scenario from Week 4 (Simpson's paradox)
+n_per_region <- 40
+coral <- tibble(
+  region = factor(
+    c("Coolest", "Moderate", "Warmest"),
+    levels = c("Coolest", "Moderate", "Warmest")
+  ),
+  sst_mean = c(28, 29, 30),
+  region_effect = c(0, -20, -40)
+) |>
+  slice(rep(1:3, each = n_per_region)) |>
+  mutate(
+    peak_sst = rnorm(n(), sst_mean, 0.5),
+    percent_bleached = -151 + 8 * peak_sst + region_effect + rnorm(n(), 0, 5)
+  )
+
+# Estimate and 95% CI of the pesticide coefficient from each model, compared to
+# the true effect used in the simulation
+plot_estimates <- function(models, true_effect, true_label = "True effect") {
+  estimates <- imap(models, \(m, label) {
+    ci <- confint(m)["pesticide", ]
+    tibble(
+      model = label,
+      estimate = coef(m)[["pesticide"]],
+      lower = ci[[1]],
+      upper = ci[[2]]
+    )
+  }) |>
+    list_rbind() |>
+    mutate(model = fct_inorder(model))
+
+  ggplot(estimates, aes(estimate, fct_rev(model))) +
+    geom_vline(xintercept = true_effect, linetype = "dashed") +
+    geom_pointrange(
+      aes(xmin = lower, xmax = upper),
+      colour = "cornflowerblue",
+      linewidth = 1.5,
+      size = 1
+    ) +
+    annotate(
+      "label",
+      x = true_effect,
+      y = 2.5,
+      label = true_label,
+      size = 6
+    ) +
+    labs(x = "Pesticide coefficient (bees per kg/ha)", y = NULL)
+}
+```
+
+# Causal inference
+
+## Learning objectives
+
+- **Define** the backdoor criterion
+- **Identify** confounders, colliders, and mediators in DAGs
+- **Simulate** biased and unbiased inferences
+
+# Define the backdoor criterion
+
+## Choosing variables
+
+Real world datasets have _dozens or hundreds_ of variables.
+
+How do you choose which ones to include in your model?
+
+::: {.fragment}
+
+Spoiler: "all of them" is **not** the answer.
+
+:::
+
+## Purpose of regression
+
+::: {.columns}
+
+::: {.column}
+
+**Inference**
+
+Estimate how $y$ responds to $x$. You care about the _coefficients_.
+
+_How much does soil Pb decline with each mile from Exide?_
+
+:::
+
+::: {.column}
+
+**Prediction**
+
+Estimate $y$ for new observations. You care about the _fitted values_.
+
+_What's the soil Pb at a property we haven't sampled?_
+
+:::
+
+:::
+
+::: {.fragment}
+
+In this class (and EDS 241): focus on **inference**
+
+In EDS 232: focus on **prediction**
+
+:::
+
+## If you care about inference
+
+Then you need a _strategy_ for choosing variables to **include in**, or **exclude from**, your model.
+
+::: {.fragment}
+
+The wrong choice gives you a _biased_ coefficient, even with infinite data.
+
+:::
+
+## Remember Simpson's paradox?
+
+::: {.columns}
+
+::: {.column width="60%"}
+
+```{r}
+#| fig-width: 7
+#| fig-height: 6
+ggplot(coral, aes(peak_sst, percent_bleached)) +
+  geom_point(aes(fill = region), shape = 21, color = "black", size = 2) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "black") +
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  labs(x = "Peak SST (degC)", y = "Percent bleached", fill = "Region") +
+  theme(legend.position = "bottom")
+```
+
+:::
+
+::: {.column width="40%"}
+
+Leaving out **Region** reversed the effect of temperature on bleaching.
+
+Region is a _confounder_. Leaving out a confounder biases your estimated effect.
+
+:::
+
+:::
+
+## The backdoor criterion
+
+More generally, we want to choose variables that _satisfy the backdoor criterion_.
+
+::: {.fragment}
+
+A **backdoor path** is a path from $x$ to $y$ that starts with an arrow _into_ $x$.
+
+:::
+
+::: {.fragment}
+
+A set of variables satisfies the **backdoor criterion** if adjusting for them:
+
+1. **Closes** every backdoor path between $x$ and $y$, and
+2. Doesn't include any variables _caused by_ $x$
+
+:::
+
+::: {.fragment}
+
+Then the coefficient on $x$ is an _unbiased_ estimate of its causal effect on $y$.
+
+:::
+
+## Step 1: make a DAG
+
+::: {.columns}
+
+::: {.column style="width:40%; font-size:0.8em;"}
+
+Question: how does **Pesticide** use affect **Bee** abundance on farms?
+
+- Bigger farms use more pesticide and have fewer bees
+- Pesticide kills wildflowers, which bees feed on
+- Pesticide and bees both increase crop yield
+
+:::
+
+::: {.column width="60%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    x((Pesticide))
+    y((Bees))
+    f((Farm size))
+    w((Wildflowers))
+    c((Crop yield))
+    x --> y
+    x --> w
+    w --> y
+    f --> x
+    f --> y
+    x --> c
+    y --> c
+```
+
+:::
+
+:::
+
+## Step 2: list the paths
+
+Write out every path from **Pesticide** to **Bees**, including arrow direction.
+
+::: {.incremental}
+
+1. Pesticide → Bees
+2. Pesticide → Wildflowers → Bees
+3. Pesticide ← Farm size → Bees
+4. Pesticide → Crop yield ← Bees
+
+:::
+
+::: {.fragment}
+
+Paths 1 and 2 are **causal** (arrows all point toward Bees). Paths 3 and 4 are **non-causal**.
+
+:::
+
+## Step 3: identify the open back doors
+
+::: {.columns}
+
+::: {.column style="width:40%; font-size:0.8em;"}
+
+Path 3 (Pesticide ← Farm size → Bees) starts with an arrow _into_ Pesticide. It's an **open backdoor**.
+
+Path 4 (Pesticide → Crop yield ← Bees) runs into a **collider** (two arrows point into Crop yield). It's **closed**.
+
+:::
+
+::: {.column width="60%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    x((Pesticide))
+    y((Bees))
+    f((Farm size))
+    w((Wildflowers))
+    c((Crop yield))
+    x --> y
+    x --> w
+    w --> y
+    f --> x
+    f --> y
+    x --> c
+    y --> c
+
+    linkStyle 3,4 stroke:#d62728,stroke-width:5px
+    linkStyle 5,6 stroke:#7f7f7f,stroke-width:3px,stroke-dasharray:5 5
+```
+
+:::
+
+:::
+
+## Step 4: adjust appropriately
+
+**Close** open backdoors by _including_ variables.
+
+- Include **Farm size**
+
+**Leave** closed paths closed by _excluding_ variables.
+
+- Exclude **Crop yield**
+
+::: {.fragment}
+
+And **Wildflowers**? It's on a _causal_ path. Include it or not, depending on your question (more on that soon).
+
+:::
+
+::: {.fragment}
+
+$$
+\text{Bees} = \beta_0 + \beta_1 \text{Pesticide} + \beta_2 \text{Farm size} + \epsilon
+$$
+
+:::
+
+# Identify confounders, colliders, and mediators in DAGs
+
+## Confounders, colliders, and mediators
+
+::: {.columns}
+
+::: {.column width="33%"}
+
+**Confounder**
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    z((Z))
+    x((X))
+    y((Y))
+    z --> x
+    z --> y
+    x --> y
+```
+
+Causes $x$ and $y$
+
+:::
+
+::: {.column width="33%"}
+
+**Collider**
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    x((X))
+    y((Y))
+    z((Z))
+    x --> y
+    x --> z
+    y --> z
+```
+
+Caused by $x$ and $y$
+
+:::
+
+::: {.column width="33%"}
+
+**Mediator**
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    x((X))
+    z((Z))
+    y((Y))
+    x --> z
+    z --> y
+```
+
+Caused by $x$, causes $y$
+
+:::
+
+:::
+
+## Confounders
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    r((Region))
+    s((Peak SST))
+    b((Percent<br/>bleached))
+    s --> b
+    r --> s
+    r --> b
+
+    linkStyle 1,2 stroke:#d62728,stroke-width:5px
+```
+
+:::
+
+::: {.column width="60%"}
+
+Peak SST ← Region → Percent bleached is an **open backdoor**.
+
+Region's effect on bleaching leaks into the Peak SST coefficient.
+
+::: {.fragment}
+
+**Close it** by including Region in the model.
+
+:::
+
+:::
+
+:::
+
+## Confounders: with and without
+
+```{r}
+coral_lm <- lm(percent_bleached ~ peak_sst, coral)
+coral_adj_lm <- lm(percent_bleached ~ peak_sst + region, coral)
+coral_pred <- coral |>
+  mutate(
+    unadjusted = predict(coral_lm),
+    adjusted = predict(coral_adj_lm)
+  )
+```
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5.5
+ggplot(coral_pred, aes(peak_sst, percent_bleached)) +
+  geom_point(aes(fill = region), shape = 21, color = "black") +
+  geom_line(aes(y = unadjusted), linewidth = 1.5) +
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  labs(
+    x = "Peak SST (degC)",
+    y = "Percent bleached",
+    title = sprintf("Without Region: %.1f%% / degC", coef(coral_lm)[[2]])
+  ) +
+  theme(legend.position = "none", plot.title = element_text(size = 18))
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5.5
+ggplot(coral_pred, aes(peak_sst, percent_bleached, color = region)) +
+  geom_point(aes(fill = region), shape = 21, color = "black") +
+  geom_line(aes(y = adjusted), linewidth = 1.5) +
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  scale_color_brewer(palette = "RdYlBu", direction = -1) +
+  labs(
+    x = "Peak SST (degC)",
+    y = "Percent bleached",
+    title = sprintf("With Region: %.1f%% / degC", coef(coral_adj_lm)[[2]])
+  ) +
+  theme(legend.position = "none", plot.title = element_text(size = 18))
+```
+
+:::
+
+:::
+
+## Colliders
+
+Why do restaurants in popular locations seem to have worse food?
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    l((Location))
+    f((Food<br/>quality))
+    s((Success))
+    l --> s
+    f --> s
+
+    linkStyle 0,1 stroke:#7f7f7f,stroke-width:3px,stroke-dasharray:5 5
+```
+
+:::
+
+::: {.column width="60%"}
+
+Location and Food quality are _independent_. Either one can make a restaurant successful.
+
+Location → Success ← Food quality is **closed**: Success is a collider.
+
+::: {.fragment}
+
+**Leave it closed** by excluding Success from the model.
+
+:::
+
+:::
+
+:::
+
+## Colliders: with and without
+
+```{r}
+restaurants <- tibble(
+  location = rnorm(1000),
+  food = rnorm(1000)
+) |>
+  mutate(
+    success = if_else(
+      location + food > quantile(location + food, 0.9),
+      "Successful",
+      "Unsuccessful"
+    )
+  )
+restaurants_lm <- lm(food ~ location, restaurants)
+restaurants_adj_lm <- lm(food ~ location + success, restaurants)
+restaurants_pred <- restaurants |>
+  mutate(
+    unadjusted = predict(restaurants_lm),
+    adjusted = predict(restaurants_adj_lm)
+  )
+success_colours <- c(Successful = "goldenrod", Unsuccessful = "grey60")
+```
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5.5
+ggplot(restaurants_pred, aes(location, food)) +
+  geom_point(aes(fill = success), shape = 21, alpha = 0.5) +
+  geom_line(aes(y = unadjusted), linewidth = 1.5) +
+  scale_fill_manual(values = success_colours) +
+  labs(
+    x = "Location popularity",
+    y = "Food quality",
+    title = sprintf("Without Success: %.2f", coef(restaurants_lm)[[2]])
+  ) +
+  theme(legend.position = "none", plot.title = element_text(size = 18))
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5.5
+ggplot(restaurants_pred, aes(location, food)) +
+  geom_point(aes(fill = success), shape = 21, alpha = 0.5) +
+  geom_line(aes(y = adjusted, color = success), linewidth = 1.5) +
+  scale_fill_manual(values = success_colours) +
+  scale_color_manual(values = success_colours) +
+  labs(
+    x = "Location popularity",
+    y = "Food quality",
+    title = sprintf(
+      "With Success: %.2f",
+      coef(restaurants_adj_lm)[["location"]]
+    )
+  ) +
+  theme(legend.position = "none", plot.title = element_text(size = 18))
+```
+
+:::
+
+:::
+
+::: {style="font-size:0.8em"}
+
+A restaurant can succeed by being in a popular location OR having good food OR both. Adjusting for a collider (_success_) **opens** the path and creates a negative relationship between location and food quality that isn't there.
+
+:::
+
+## Mediators
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    d((Distance<br/>to Exide))
+    s((Soil Pb))
+    b((Blood Pb))
+    d --> s
+    s --> b
+```
+
+:::
+
+::: {.column width="60%"}
+
+Distance from Exide affects children's blood Pb _through_ soil Pb.
+
+There's **no backdoor**: no arrows point into Distance.
+
+::: {.fragment}
+
+So it's not about bias. It's about which question you're asking.
+
+:::
+
+:::
+
+:::
+
+## Mediators: with and without
+
+```{r}
+homes <- tibble(distance_mi = runif(300, 0, 3)) |>
+  mutate(
+    soil_pb = rnorm(n(), 400 - 100 * distance_mi, 60),
+    blood_pb = rnorm(n(), 1 + 0.01 * soil_pb, 0.6)
+  )
+homes_lm <- lm(blood_pb ~ distance_mi, homes)
+homes_adj_lm <- lm(blood_pb ~ distance_mi + soil_pb, homes)
+
+# Hold soil Pb at three levels to draw the adjusted model
+soil_levels <- c(Low = 100, Medium = 250, High = 400)
+homes_grid <- expand_grid(
+  distance_mi = c(0, 3),
+  soil_pb = soil_levels
+) |>
+  mutate(
+    soil_level = factor(
+      names(soil_levels)[match(soil_pb, soil_levels)],
+      levels = names(soil_levels)
+    ),
+    blood_pb = predict(homes_adj_lm, newdata = pick(everything()))
+  )
+```
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5.5
+ggplot(homes, aes(distance_mi, blood_pb)) +
+  geom_point(aes(fill = soil_pb), shape = 21) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "black",
+    linewidth = 1.5
+  ) +
+  scale_fill_viridis_c(option = "plasma") +
+  labs(
+    x = "Distance (mi)",
+    y = "Blood Pb (µg/dL)",
+    title = sprintf("Without Soil Pb: %.2f / mi", coef(homes_lm)[[2]]),
+    caption = "Simulated data"
+  ) +
+  theme(legend.position = "none", plot.title = element_text(size = 18))
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5.5
+ggplot(homes, aes(distance_mi, blood_pb)) +
+  geom_point(aes(fill = soil_pb), shape = 21) +
+  geom_line(
+    aes(color = soil_pb, group = soil_level),
+    data = homes_grid,
+    linewidth = 1.5
+  ) +
+  scale_fill_viridis_c(
+    option = "plasma",
+    name = "Soil Pb",
+    limits = range(homes$soil_pb)
+  ) +
+  scale_color_viridis_c(
+    option = "plasma",
+    limits = range(homes$soil_pb),
+    guide = "none"
+  ) +
+  labs(
+    x = "Distance (mi)",
+    y = "Blood Pb (µg/dL)",
+    title = sprintf(
+      "With Soil Pb: %.2f / mi",
+      coef(homes_adj_lm)[["distance_mi"]]
+    ),
+    caption = "Simulated data"
+  ) +
+  theme(plot.title = element_text(size = 18))
+```
+
+:::
+
+:::
+
+## Total vs direct effects
+
+::: {.columns}
+
+::: {.column}
+
+**Exclude the mediator**
+
+The **total effect** of distance: everything that changes when you move farther from Exide.
+
+:::
+
+::: {.column}
+
+**Include the mediator**
+
+The **direct effect** of distance: what changes when you move farther _but hold soil Pb constant_.
+
+:::
+
+:::
+
+::: {.fragment}
+
+Here the direct effect is ~0. Distance only matters _because_ of soil Pb. Neither model is biased, they answer different questions!
+
+:::
+
+## Recap
+
+- **Confounders** open backdoor paths that must be _blocked_. Include them.
+- **Colliders** close paths. _Leave them alone_. Exclude them.
+- **Mediators** need careful thought. Include them for the _direct_ effect, exclude them for the _total_ effect.
+
+# Simulate biased and unbiased inferences
+
+## Simulate blocking an open back door
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    f((Farm size))
+    x((Pesticide))
+    y((Bees))
+    x --> y
+    f --> x
+    f --> y
+
+    linkStyle 1,2 stroke:#d62728,stroke-width:5px
+```
+
+:::
+
+::: {.column width="60%"}
+
+Farm size is a **confounder**.
+
+Pesticide ← Farm size → Bees is an **open backdoor**.
+
+True effect of pesticide: **-3 bees per kg/ha**
+
+:::
+
+:::
+
+## Simulate data according to the DAG
+
+Simulate _causes_ before _effects_. Follow the arrows!
+
+```{r}
+#| echo: true
+set.seed(1)
+n <- 300
+confound <- tibble(
+  farm_size = rnorm(n, mean = 100, sd = 30),
+  pesticide = rnorm(n, mean = 2 + 0.05 * farm_size, sd = 1),
+  bees = rnorm(n, mean = 60 - 3 * pesticide - 0.2 * farm_size, sd = 5)
+)
+```
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+confound_lm <- lm(bees ~ pesticide, confound)
+confound_adj_lm <- lm(bees ~ pesticide + farm_size, confound)
+```
+
+:::
+
+## Adjusting closes the back door
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+plot_estimates(
+  list(
+    `bees ~ pesticide` = confound_lm,
+    `bees ~ pesticide + farm_size` = confound_adj_lm
+  ),
+  true_effect = -3
+)
+```
+
+- **Without** farm size: `r round(coef(confound_lm)[["pesticide"]], 2)`. **Biased**: overestimates the harm.
+- **With** farm size: `r round(coef(confound_adj_lm)[["pesticide"]], 2)`. **Unbiased**.
+
+## Simulate opening a blocked back door
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    x((Pesticide))
+    y((Bees))
+    c((Crop yield))
+    x --> y
+    x --> c
+    y --> c
+
+    linkStyle 1,2 stroke:#7f7f7f,stroke-width:3px,stroke-dasharray:5 5
+```
+
+:::
+
+::: {.column width="60%"}
+
+Crop yield is a **collider**.
+
+Pesticide → Crop yield ← Bees is **closed**.
+
+True effect of pesticide: **-3 bees per kg/ha**
+
+:::
+
+:::
+
+## Simulate data according to the DAG
+
+```{r}
+#| echo: true
+collide <- tibble(
+  pesticide = rnorm(n, mean = 7, sd = 1.5),
+  bees = rnorm(n, mean = 60 - 3 * pesticide, sd = 5),
+  crop_yield = rnorm(n, mean = 2 + 1 * pesticide + 0.2 * bees, sd = 0.5)
+)
+```
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+collide_lm <- lm(bees ~ pesticide, collide)
+collide_adj_lm <- lm(bees ~ pesticide + crop_yield, collide)
+```
+
+:::
+
+## Adjusting opens the closed path
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+plot_estimates(
+  list(
+    `bees ~ pesticide` = collide_lm,
+    `bees ~ pesticide + crop_yield` = collide_adj_lm
+  ),
+  true_effect = -3
+)
+```
+
+- **Without** crop yield: `r round(coef(collide_lm)[["pesticide"]], 2)`. **Unbiased**.
+- **With** crop yield: `r round(coef(collide_adj_lm)[["pesticide"]], 2)`. **Biased**: for a given yield, more pesticide means fewer bees.
+
+## Simulate adjusting for a mediator
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    x((Pesticide))
+    w((Wildflowers))
+    y((Bees))
+    x --> y
+    x --> w
+    w --> y
+```
+
+:::
+
+::: {.column style="width:60%; font-size:0.8em;"}
+
+Wildflowers is a **mediator**. There's no backdoor.
+
+Direct effect of pesticide: **-1 bee per kg/ha**
+
+Indirect effect, through wildflowers: $-4 \times 0.5 = -2$
+
+Total effect: $-1 + -2 =$ **-3 bees per kg/ha**
+
+:::
+
+:::
+
+## Simulate data according to the DAG
+
+```{r}
+#| echo: true
+mediate <- tibble(
+  pesticide = rnorm(n, mean = 7, sd = 1.5),
+  wildflowers = rnorm(n, mean = 50 - 4 * pesticide, sd = 5),
+  bees = rnorm(n, mean = 30 - 1 * pesticide + 0.5 * wildflowers, sd = 3)
+)
+```
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+mediate_lm <- lm(bees ~ pesticide, mediate)
+mediate_adj_lm <- lm(bees ~ pesticide + wildflowers, mediate)
+```
+
+:::
+
+## Adjusting changes the question
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+plot_estimates(
+  list(
+    `bees ~ pesticide` = mediate_lm,
+    `bees ~ pesticide + wildflowers` = mediate_adj_lm
+  ),
+  true_effect = -3,
+  true_label = "Total effect"
+) +
+  geom_vline(xintercept = -1, linetype = "dotted") +
+  annotate("label", x = -1, y = 2.5, label = "Direct effect", size = 6)
+```
+
+- **Without** wildflowers: `r round(coef(mediate_lm)[["pesticide"]], 2)`. The **total effect**.
+- **With** wildflowers: `r round(coef(mediate_adj_lm)[["pesticide"]], 2)`. The **direct effect**.
+
+# Recap
+
+## Choosing variables for inference
+
+**Goal**: choose variables for your model that avoid bias.
+
+::: {.incremental}
+
+1. _Before you write any code_, make a DAG that describes what **you think** the causal relationships are
+2. List the paths and identify the **backdoors**
+3. **Close** the open ones (confounders) and **leave the closed ones alone** (colliders)
+4. Decide whether you want the **total** or **direct** effect (mediators)
+
+:::

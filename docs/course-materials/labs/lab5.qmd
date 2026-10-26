@@ -1,0 +1,42 @@
+---
+title: "Lab 5: Concept maps"
+subtitle: "Reviewing your statistical toolbox"
+---
+
+## Overview
+
+Each week this quarter, you've either learned new tools (e.g., permutation with `sample()`) or new ways to connect tools you already had (e.g., going from one predictor in `lm()` to more than one). Today you'll step back and look at the toolbox as a whole.
+
+Last week, your group brainstormed key terms from one session in Weeks 1-4. Today, you'll team up with the other group from your week to make a **concept map** for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map.
+
+## A guide to making _useful_ concept maps
+
+There are three levels of usefulness, each building on the previous one. Aim to reach the third level!
+
+### Level one: concept list
+
+This is the result of your brainstorm: a list of keywords and concepts for the week. It's an essential first step, and the raw material for building something more useful.
+
+### Level two: hierarchical concepts
+
+Arrange your concepts hierarchically, so core concepts are in the middle and supporting concepts branch off of them. Connect related concepts with lines. This structure shows both priority and relationships. But don't stop here!
+
+### Level three: linking words
+
+This is the easiest step to skip, but it's the **most important**. Linking words turn undefined connections into a useful mental model. This is how you internalize the relationships between, for example, standard deviation, standard error, and $\sigma$.
+
+![A concept map about concept maps, exhibiting hierarchical concepts related by linking words](https://www.morgan.edu/Images/ADMINISTRATION/DIVISION/IT/conceptMap.jpg)
+
+## Instructions
+
+1. Find your group members (e.g., Week 1 Monday) and your counterparts (e.g., Week 1 Wednesday).
+2. Share your keywords with each other and create a combined list. Revise your combined list by adding, editing, or removing terms where helpful. Write each concept on a sticky note. Now you've reached **level one: a concept list**.
+3. As a group, arrange your concepts hierarchically. Identify the most important concepts and the supporting concepts related to them. Move the sticky notes around to reflect the hierarchy. Once you're all happy with the configuration, make a digital version. You can use presentation software (e.g., Google Slides), diagramming tools (e.g., [Lucid](http://lucid.app)), or sketching/notetaking apps. Now you've reached **level two: hierarchical concepts**.
+4. Give each link between concepts one or more linking words. Examples include "leads to", "depends on", "is a type of", and "produces". This is the tricky part, and you'll likely need to rearrange your concepts as you go. Now you've reached **level three: linking words**.
+5. Export your digital concept map to an image or PDF and add it to this [shared presentation](https://docs.google.com/presentation/d/11TfHIxg3y_XozGhwAlNcFsghfdefZS4T_8evlE1yKGc/edit?usp=sharing).
+
+## Tips
+
+1. The goal of a concept map is to _see the forest for the trees_. Now is not the time for in-the-weeds detail. Your map should be a visual explanation of how the tools in your toolbox are related.
+2. You know your linking words work if the two concepts and their link read as a complete thought (e.g., "Lead paint _flakes into_ soil lead").
+3. There's no such thing as a "perfect" or "correct" concept map. A concept map is _useful_ if it helps turn individual pieces of knowledge into a more cohesive whole.
