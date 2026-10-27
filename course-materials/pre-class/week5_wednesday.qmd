@@ -231,6 +231,10 @@ flowchart LR
 
 ## Step 2: list the paths
 
+::: {.columns}
+
+::: {.column style="width:50%; font-size:0.75em;"}
+
 Write out every path from **Pesticide** to **Bees**, including arrow direction.
 
 ::: {.incremental}
@@ -245,6 +249,31 @@ Write out every path from **Pesticide** to **Bees**, including arrow direction.
 ::: {.fragment}
 
 Paths 1 and 2 are **causal** (arrows all point toward Bees). Paths 3 and 4 are **non-causal**.
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    x((Pesticide))
+    y((Bees))
+    f((Farm size))
+    w((Wildflowers))
+    c((Crop yield))
+    x --> y
+    x --> w
+    w --> y
+    f --> x
+    f --> y
+    x --> c
+    y --> c
+```
+
+:::
 
 :::
 
@@ -277,9 +306,6 @@ flowchart LR
     f --> y
     x --> c
     y --> c
-
-    linkStyle 3,4 stroke:#d62728,stroke-width:5px
-    linkStyle 5,6 stroke:#7f7f7f,stroke-width:3px,stroke-dasharray:5 5
 ```
 
 :::

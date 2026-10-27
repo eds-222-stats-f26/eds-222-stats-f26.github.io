@@ -534,6 +534,8 @@ flowchart LR
 </section>
 <section id="step-2-list-the-paths" class="slide level2">
 <h2>Step 2: list the paths</h2>
+<div class="columns">
+<div class="column" style="width:50%; font-size:0.75em;">
 <p>Write out every path from <strong>Pesticide</strong> to <strong>Bees</strong>, including arrow direction.</p>
 <div>
 <ol type="1">
@@ -545,6 +547,34 @@ flowchart LR
 </div>
 <div class="fragment">
 <p>Paths 1 and 2 are <strong>causal</strong> (arrows all point toward Bees). Paths 3 and 4 are <strong>non-causal</strong>.</p>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    x((Pesticide))
+    y((Bees))
+    f((Farm size))
+    w((Wildflowers))
+    c((Crop yield))
+    x --&gt; y
+    x --&gt; w
+    w --&gt; y
+    f --&gt; x
+    f --&gt; y
+    x --&gt; c
+    y --&gt; c
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</div>
 </div>
 </section>
 <section id="step-3-identify-the-open-back-doors" class="slide level2">
@@ -573,9 +603,6 @@ flowchart LR
     f --&gt; y
     x --&gt; c
     y --&gt; c
-
-    linkStyle 3,4 stroke:#d62728,stroke-width:5px
-    linkStyle 5,6 stroke:#7f7f7f,stroke-width:3px,stroke-dasharray:5 5
 </pre>
 </div>
 <p></p></figure><p></p>
@@ -722,7 +749,7 @@ flowchart TB
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-9-1.png" width="576"></p>
+<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-10-1.png" width="576"></p>
 </figure>
 </div>
 </div>
@@ -732,7 +759,7 @@ flowchart TB
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-10-1.png" width="576"></p>
+<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-11-1.png" width="576"></p>
 </figure>
 </div>
 </div>
@@ -782,7 +809,7 @@ flowchart TB
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-13-1.png" width="576"></p>
+<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-14-1.png" width="576"></p>
 </figure>
 </div>
 </div>
@@ -792,7 +819,7 @@ flowchart TB
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-14-1.png" width="576"></p>
+<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-15-1.png" width="576"></p>
 </figure>
 </div>
 </div>
@@ -842,7 +869,7 @@ flowchart TB
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-17-1.png" width="576"></p>
+<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-18-1.png" width="576"></p>
 </figure>
 </div>
 </div>
@@ -852,7 +879,7 @@ flowchart TB
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-18-1.png" width="576"></p>
+<p><img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-19-1.png" width="576"></p>
 </figure>
 </div>
 </div>
@@ -942,7 +969,7 @@ flowchart TB
 <section id="adjusting-closes-the-back-door" class="slide level2">
 <h2>Adjusting closes the back door</h2>
 
-<img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-22-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><ul>
+<img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-23-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><ul>
 <li><strong>Without</strong> farm size: -5.44. <strong>Biased</strong>: overestimates the harm.</li>
 <li><strong>With</strong> farm size: -2.79. <strong>Unbiased</strong>.</li>
 </ul>
@@ -998,7 +1025,7 @@ flowchart TB
 <section id="adjusting-opens-the-closed-path" class="slide level2">
 <h2>Adjusting opens the closed path</h2>
 
-<img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-26-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><ul>
+<img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-27-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><ul>
 <li><strong>Without</strong> crop yield: -2.76. <strong>Unbiased</strong>.</li>
 <li><strong>With</strong> crop yield: -4.53. <strong>Biased</strong>: for a given yield, more pesticide means fewer bees.</li>
 </ul>
@@ -1053,7 +1080,7 @@ flowchart TB
 <section id="adjusting-changes-the-question" class="slide level2">
 <h2>Adjusting changes the question</h2>
 
-<img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-30-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><ul>
+<img data-src="week5_wednesday_files/figure-revealjs/unnamed-chunk-31-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><ul>
 <li><strong>Without</strong> wildflowers: -2.95. The <strong>total effect</strong>.</li>
 <li><strong>With</strong> wildflowers: -0.76. The <strong>direct effect</strong>.</li>
 </ul>

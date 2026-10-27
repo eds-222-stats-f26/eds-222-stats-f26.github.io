@@ -1,0 +1,856 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 6 Monday: Comparing models"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+# Kelp forest fish biomass at Channel Islands sites. MPAs boost biomass, and
+# fished sites recover with distance from port (less fishing pressure).
+islands <- c("San Miguel", "Santa Rosa", "Santa Cruz", "Anacapa")
+kelp <- tibble(
+  island = factor(rep(islands, each = 15), levels = islands),
+  protection = factor(
+    sample(rep(c("Fished", "MPA"), 30)),
+    levels = c("Fished", "MPA")
+  ),
+  dist_port_km = runif(60, 5, 60)
+) |>
+  mutate(
+    mpa = as.numeric(protection == "MPA"),
+    island_effect = c(0, -6, -12, -18)[as.integer(island)],
+    biomass = rnorm(
+      n(),
+      45 + island_effect + 25 * mpa + 0.6 * dist_port_km -
+        0.5 * dist_port_km * mpa,
+      9
+    )
+  )
+
+kelp_null <- lm(biomass ~ 1, kelp)
+kelp_prot <- lm(biomass ~ protection, kelp)
+kelp_island <- lm(biomass ~ island, kelp)
+kelp_add <- lm(biomass ~ protection + dist_port_km, kelp)
+kelp_int <- lm(biomass ~ protection * dist_port_km, kelp)
+
+# Coral bleaching scenario from Week 4 (Simpson's paradox)
+n_per_region <- 40
+coral <- tibble(
+  region = factor(
+    c("Coolest", "Moderate", "Warmest"),
+    levels = c("Coolest", "Moderate", "Warmest")
+  ),
+  sst_mean = c(28, 29, 30),
+  region_effect = c(0, -20, -40)
+) |>
+  slice(rep(1:3, each = n_per_region)) |>
+  mutate(
+    peak_sst = rnorm(n(), sst_mean, 0.5),
+    percent_bleached = -151 + 8 * peak_sst + region_effect + rnorm(n(), 0, 5)
+  )
+coral_lm <- lm(percent_bleached ~ peak_sst + region, coral)
+
+protection_colours <- c(Fished = "#9ecae1", MPA = "#f4a582")
+rss <- function(m) sum(residuals(m)^2)
+fmt <- function(x) format(round(x), big.mark = "{,}")
+
+# Fitted model as a LaTeX equation, e.g. biomass = 41.2 + 12.3 MPA + e
+eq_tex <- function(m, lhs, labels) {
+  b <- coef(m)
+  terms <- map2_chr(b[-1], labels, \(x, label) {
+    sprintf(
+      "%s %.1f \\cdot \\text{%s}",
+      if (x < 0) "-" else "+",
+      abs(x),
+      label
+    )
+  })
+  cat(sprintf(
+    "$$\n\\text{%s} = %.1f %s + \\varepsilon\n$$\n",
+    lhs,
+    b[[1]],
+    paste(terms, collapse = " ")
+  ))
+}
+
+# summary() output without the call, residuals, stars, or R-squared
+print_summary <- function(m) {
+  out <- capture.output(print(summary(m), signif.stars = FALSE))
+  keep <- seq(grep("^Coefficients", out), length(out))
+  keep <- setdiff(keep, grep("^Multiple R-squared", out))
+  cat(paste0("lm(", deparse(formula(m)), ")"), "", out[keep], sep = "\n")
+}
+
+# Points by group (jittered) with each group's fitted value as a horizontal
+# segment and residuals drawn as vertical lines
+plot_groups <- function(m, group, fill_values = NULL, title = NULL) {
+  dat <- kelp |>
+    mutate(
+      group = {{ group }},
+      x = as.integer(group) + runif(n(), -0.2, 0.2),
+      fitted = fitted(m)
+    )
+  fits <- dat |>
+    group_by(group) |>
+    summarize(fitted = mean(fitted), x = as.integer(first(group)))
+  p <- ggplot(dat, aes(x, biomass)) +
+    geom_segment(
+      aes(xend = x, yend = fitted),
+      color = "grey50",
+      linewidth = 0.4
+    ) +
+    geom_segment(
+      aes(x = x - 0.35, xend = x + 0.35, y = fitted, yend = fitted),
+      fits,
+      linewidth = 1.5
+    ) +
+    geom_point(aes(fill = group), shape = 21, size = 2.5) +
+    scale_x_continuous(
+      breaks = seq_along(levels(dat$group)),
+      labels = str_wrap(levels(dat$group), 6)
+    ) +
+    labs(x = NULL, y = "Fish biomass (g/m²)", title = title) +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(size = 18),
+      panel.grid.minor.x = element_blank()
+    )
+  if (is.null(fill_values)) {
+    p + scale_fill_brewer(palette = "Set2")
+  } else {
+    p + scale_fill_manual(values = fill_values)
+  }
+}
+
+# Biomass vs distance from port, with fitted lines per protection status and
+# residuals drawn as vertical lines
+plot_distance <- function(m, title = NULL) {
+  dat <- mutate(kelp, fitted = fitted(m))
+  ggplot(dat, aes(dist_port_km, biomass, color = protection)) +
+    geom_segment(
+      aes(xend = dist_port_km, yend = fitted),
+      color = "grey50",
+      linewidth = 0.4
+    ) +
+    geom_line(aes(y = fitted), linewidth = 1.5) +
+    geom_point(aes(fill = protection), shape = 21, color = "black", size = 2.5) +
+    scale_color_manual(values = protection_colours) +
+    scale_fill_manual(values = protection_colours) +
+    labs(
+      x = "Distance from port (km)",
+      y = "Fish biomass (g/m²)",
+      color = NULL,
+      fill = NULL,
+      title = title
+    ) +
+    theme(legend.position = "bottom", plot.title = element_text(size = 18))
+}
+```
+
+# Comparing models
+
+## Learning objectives
+
+- **Review** categorical predictors
+- **Compute** degrees of freedom from data and model
+- **Compare** simpler and more complex models
+
+## This week
+
+More complex models have **benefits**: they explain more variation.
+
+::: {.fragment}
+
+But they have **costs**: they spend more information.
+
+:::
+
+::: {.fragment}
+
+Bonus: some of the most widely used statistical tests (t-test, ANOVA) are _just comparisons_ between linear models of different complexity.
+
+:::
+
+## Our case study
+
+::: {.columns}
+
+::: {.column width="55%"}
+
+```{r}
+#| fig-width: 7
+#| fig-height: 6
+ggplot(kelp, aes(dist_port_km, biomass)) +
+  geom_point(aes(fill = protection), shape = 21, size = 3) +
+  scale_fill_manual(values = protection_colours) +
+  labs(
+    x = "Distance from port (km)",
+    y = "Fish biomass (g/m²)",
+    fill = NULL,
+    caption = "Simulated data"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+:::
+
+::: {.column style="width:45%; font-size:0.8em;"}
+
+Divers surveyed fish biomass at **60 kelp forest sites** around the Channel Islands.
+
+- `biomass`: fish biomass (g/m²)
+- `protection`: Fished or MPA
+- `island`: San Miguel, Santa Rosa, Santa Cruz, or Anacapa
+- `dist_port_km`: distance from port (km)
+
+:::
+
+:::
+
+# Review categorical predictors
+
+## Dummy variables
+
+Category levels are text. You can't multiply a coefficient by a word!
+
+::: {.fragment}
+
+So we convert categories to **dummy variables**:
+
+- One level becomes the **reference**
+- Every other level gets a dummy variable: **1** if the observation is that level, **0** otherwise
+
+:::
+
+::: {.fragment}
+
+$k$ category levels get $k - 1$ dummy variables.
+
+:::
+
+## Dummy variables
+
+```{r}
+kelp |>
+  slice(c(1, 16, 31, 46, 2, 17)) |>
+  transmute(
+    island,
+    `Santa Rosa` = as.integer(island == "Santa Rosa"),
+    `Santa Cruz` = as.integer(island == "Santa Cruz"),
+    Anacapa = as.integer(island == "Anacapa")
+  ) |>
+  knitr::kable(align = "lccc")
+```
+
+San Miguel is the **reference** level. It doesn't need its own dummy: when all three dummies are 0, it _has_ to be San Miguel.
+
+## 2 categories, represented three ways
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| output: asis
+eq_tex(kelp_prot, "biomass", "MPA")
+```
+
+:::
+
+::: {.columns}
+
+::: {.column width="45%"}
+
+```{r}
+#| fig-width: 5
+#| fig-height: 4.5
+plot_groups(kelp_prot, protection, protection_colours)
+```
+
+:::
+
+::: {.column width="55%"}
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| class-output: small-output
+print_summary(kelp_prot)
+```
+
+:::
+
+:::
+
+:::
+
+::: {style="font-size:0.8em"}
+
+$\beta_0$ is the mean of the reference level (Fished). $\beta_1$ is the _difference_ between MPA and Fished.
+
+:::
+
+## 3+ categories, represented three ways
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| output: asis
+eq_tex(kelp_island, "biomass", c("SantaRosa", "SantaCruz", "Anacapa"))
+```
+
+:::
+
+::: {.columns}
+
+::: {.column width="45%"}
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 4.5
+plot_groups(kelp_island, island)
+```
+
+:::
+
+::: {.column width="55%"}
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| class-output: small-output
+print_summary(kelp_island)
+```
+
+:::
+
+:::
+
+:::
+
+::: {style="font-size:0.8em"}
+
+$\beta_0$ is the mean of the reference level (San Miguel). Each other coefficient is a _difference_ from San Miguel.
+
+:::
+
+## With linear regression, mix and match
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| output: asis
+eq_tex(coral_lm, "bleached", c("SST", "Moderate", "Warmest"))
+```
+
+:::
+
+::: {.columns}
+
+::: {.column width="45%"}
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 4.5
+coral |>
+  mutate(fitted = fitted(coral_lm)) |>
+  ggplot(aes(peak_sst, percent_bleached, color = region)) +
+  geom_point(aes(fill = region), shape = 21, color = "black", size = 2) +
+  geom_line(aes(y = fitted), linewidth = 1.5) +
+  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  scale_color_brewer(palette = "RdYlBu", direction = -1) +
+  labs(x = "Peak SST (degC)", y = "Percent bleached", fill = NULL) +
+  guides(color = "none") +
+  theme(legend.position = "bottom")
+```
+
+:::
+
+::: {.column width="55%"}
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| class-output: small-output
+print_summary(coral_lm)
+```
+
+:::
+
+:::
+
+:::
+
+::: {style="font-size:0.8em"}
+
+Remember the coral reefs? One continuous predictor (peak SST) plus a 3-level category (region): three parallel lines.
+
+:::
+
+# Compute degrees of freedom from data and model
+
+## Degrees of freedom are inference currency
+
+**Data** gives us information. Each observation is one unit.
+
+::: {.fragment}
+
+**Parameters** of a model spend that information. Each coefficient costs one unit.
+
+:::
+
+::: {.fragment}
+
+The difference between the two is our **degrees of freedom**:
+
+$$
+df = n - p
+$$
+
+$n$ is the number of observations and $p$ is the number of parameters (including the intercept!).
+
+:::
+
+## Information-complexity trade off
+
+More parameters spend df to improve fit.
+
+```{r}
+#| fig-width: 14
+#| fig-height: 4.5
+#| fig-align: center
+wiggly <- tibble(x = seq(0, 10, length.out = 20)) |>
+  mutate(y = sin(x / 2) * 3 + rnorm(n(), 0, 0.8))
+wiggly_grid <- tibble(x = seq(0, 10, length.out = 400))
+fit_labels <- c(
+  "1" = "Underfit (p = 2, df = 18)",
+  "3" = "About right (p = 4, df = 16)",
+  "15" = "Overfit (p = 16, df = 4)"
+)
+wiggly_fits <- map(c(1, 3, 15), \(degree) {
+  m <- lm(y ~ poly(x, degree), wiggly)
+  mutate(
+    wiggly_grid,
+    y = predict(m, wiggly_grid),
+    fit = fit_labels[[as.character(degree)]]
+  )
+}) |>
+  list_rbind() |>
+  mutate(fit = factor(fit, levels = fit_labels))
+
+ggplot(wiggly, aes(x, y)) +
+  geom_line(data = wiggly_fits, color = "cornflowerblue", linewidth = 1.5) +
+  geom_point(shape = 21, fill = "grey70", size = 3) +
+  facet_wrap(~fit) +
+  coord_cartesian(ylim = range(wiggly$y) + c(-1, 1)) +
+  theme(strip.text = element_text(size = 18))
+```
+
+- **Too few** parameters: model misses real structure (underfitting)
+- **Too many** parameters: model fits the noise (overfitting)
+
+::: {.fragment}
+
+Every parameter has to **earn** its df.
+
+:::
+
+## Example: one categorical predictor
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| output: asis
+eq_tex(kelp_prot, "biomass", "MPA")
+```
+
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 4.5
+plot_groups(kelp_prot, protection, protection_colours)
+```
+
+:::
+
+::: {.column width="50%"}
+
+- $n = `r nrow(kelp)`$ sites
+- $p = 2$ parameters ($\beta_0$, $\beta_1$)
+- $df = `r nrow(kelp)` - 2 = `r df.residual(kelp_prot)`$
+
+::: {.fragment}
+
+Check `summary()`: _"Residual standard error: `r round(sigma(kelp_prot), 2)` on **`r df.residual(kelp_prot)` degrees of freedom**"_
+
+:::
+
+:::
+
+:::
+
+## Example: add a continuous predictor
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| output: asis
+eq_tex(kelp_add, "biomass", c("MPA", "dist"))
+```
+
+:::
+
+::: {.columns}
+
+::: {.column width="50%"}
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 4.5
+plot_distance(kelp_add)
+```
+
+:::
+
+::: {.column width="50%"}
+
+- $n = `r nrow(kelp)`$ sites
+- $p = 3$ parameters ($\beta_0$, $\beta_1$, $\beta_2$)
+- $df = `r nrow(kelp)` - 3 = `r df.residual(kelp_add)`$
+
+::: {.fragment}
+
+We spent **one more** df on distance from port. Was it worth it?
+
+:::
+
+:::
+
+:::
+
+## Which model is better?
+
+```{r}
+df_compare <- tibble(
+  Model = c("biomass ~ protection", "biomass ~ protection + dist_port_km"),
+  p = c(2, 3),
+  df = c(df.residual(kelp_prot), df.residual(kelp_add)),
+  RSS = c(rss(kelp_prot), rss(kelp_add)),
+  `RSS / df` = RSS / df
+)
+knitr::kable(df_compare, digits = 0, align = "lccrr")
+```
+
+::: {.incremental}
+
+- **Benefit**: the residual sum of squares (RSS) dropped by `r round(rss(kelp_prot) - rss(kelp_add))`
+- **Cost**: one df
+- Leftover noise _per df_ dropped from `r round(rss(kelp_prot) / df.residual(kelp_prot))` to `r round(rss(kelp_add) / df.residual(kelp_add))`. Distance explained more than it cost!
+
+:::
+
+::: {.fragment}
+
+But how much of a drop is _enough_? We need a test statistic.
+
+:::
+
+# Compare simpler and more complex models
+
+## Cost-benefit
+
+Adding a parameter explains more, but at a cost.
+
+::: {.columns}
+
+::: {.column}
+
+**The benefit**
+
+Smaller residuals, more variation explained.
+
+:::
+
+::: {.column}
+
+**The cost**
+
+Spent degrees of freedom. Each parameter has less information behind it.
+
+:::
+
+:::
+
+## Quantify the trade off
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \;/\; (p_{complex} - p_{simple})}{RSS_{complex} \;/\; (n - p_{complex})}
+$$
+
+::: {.incremental}
+
+- **Numerator**: improvement in fit _per df spent_
+- **Denominator**: leftover noise _per df remaining_
+- **Bigger $F$** means the extra parameters were worth it
+
+:::
+
+::: {.fragment}
+
+If the extra parameters are really all 0 (the null hypothesis), $F$ follows an _F distribution_. That gives us a **p-value**.
+
+:::
+
+## Example 1: does protection matter?
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig-align: center
+p_null <- plot_groups(
+  kelp_null,
+  protection,
+  protection_colours,
+  sprintf("biomass ~ 1 (RSS = %.0f)", rss(kelp_null))
+)
+p_prot <- plot_groups(
+  kelp_prot,
+  protection,
+  protection_colours,
+  sprintf("biomass ~ protection (RSS = %.0f)", rss(kelp_prot))
+)
+patchwork::wrap_plots(p_null, p_prot)
+```
+
+Compare an **intercept-only** model (one mean for every site) to a **two-category** model (one mean per group).
+
+## Example 1: mathematically
+
+```{r}
+f_prot <- anova(kelp_null, kelp_prot)
+```
+
+$$
+F = \frac{(`r fmt(rss(kelp_null))` - `r fmt(rss(kelp_prot))`) \;/\; (2 - 1)}{`r fmt(rss(kelp_prot))` \;/\; (`r nrow(kelp)` - 2)} = `r round(f_prot$F[2], 2)`
+$$
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+anova(lm(biomass ~ 1, kelp), lm(biomass ~ protection, kelp))
+```
+
+:::
+
+::: {.fragment}
+
+Do the two categories explain enough variation to justify the cost? **Yes** (p = `r signif(f_prot[["Pr(>F)"]][2], 2)`).
+
+:::
+
+## Example 1: it's a t-test!
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+t.test(biomass ~ protection, kelp, var.equal = TRUE)
+```
+
+:::
+
+```{r}
+prot_t <- t.test(biomass ~ protection, kelp, var.equal = TRUE)
+```
+
+Same p-value. And $t^2 = (`r round(prot_t$statistic, 3)`)^2 = `r round(prot_t$statistic^2, 2)` = F$.
+
+::: {.fragment}
+
+A (two-sample) **t-test** is a comparison between an intercept-only model and a two-category model.
+
+:::
+
+## Example 2: does island matter?
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig-align: center
+p_null <- plot_groups(
+  kelp_null,
+  island,
+  title = sprintf("biomass ~ 1 (RSS = %.0f)", rss(kelp_null))
+)
+p_island <- plot_groups(
+  kelp_island,
+  island,
+  title = sprintf("biomass ~ island (RSS = %.0f)", rss(kelp_island))
+)
+patchwork::wrap_plots(p_null, p_island)
+```
+
+Compare an **intercept-only** model to a **four-category** model. The complex model spends **3** more df.
+
+## Example 2: mathematically
+
+```{r}
+f_island <- anova(kelp_null, kelp_island)
+```
+
+$$
+F = \frac{(`r fmt(rss(kelp_null))` - `r fmt(rss(kelp_island))`) \;/\; (4 - 1)}{`r fmt(rss(kelp_island))` \;/\; (`r nrow(kelp)` - 4)} = `r round(f_island$F[2], 2)`
+$$
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+anova(lm(biomass ~ 1, kelp), lm(biomass ~ island, kelp))
+```
+
+:::
+
+::: {.fragment}
+
+Does island explain enough variation to justify the cost? **Yes** (p = `r signif(f_island[["Pr(>F)"]][2], 2)`).
+
+:::
+
+## Example 2: it's an ANOVA!
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+summary(aov(biomass ~ island, kelp))
+```
+
+:::
+
+Same F, same p-value.
+
+::: {.fragment}
+
+A (one-way) **ANOVA** is a comparison between an intercept-only model and a model with a 3+ category predictor.
+
+:::
+
+::: {.fragment}
+
+ANOVA asks: is _at least one_ group mean different? Not _which_ one.
+
+:::
+
+## Example 3: does the slope vary?
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5.5
+#| fig-align: center
+p_add <- plot_distance(
+  kelp_add,
+  sprintf("Additive (RSS = %.0f)", rss(kelp_add))
+)
+p_int <- plot_distance(
+  kelp_int,
+  sprintf("Interactive (RSS = %.0f)", rss(kelp_int))
+)
+patchwork::wrap_plots(p_add, p_int, guides = "collect") &
+  theme(legend.position = "bottom")
+```
+
+Compare an **additive** model (parallel lines) to an **interactive** model (slopes vary). The complex model spends **1** more df.
+
+## Example 3: mathematically
+
+```{r}
+f_int <- anova(kelp_add, kelp_int)
+```
+
+$$
+F = \frac{(`r fmt(rss(kelp_add))` - `r fmt(rss(kelp_int))`) \;/\; (4 - 3)}{`r fmt(rss(kelp_int))` \;/\; (`r nrow(kelp)` - 4)} = `r round(f_int$F[2], 2)`
+$$
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+anova(
+  lm(biomass ~ protection + dist_port_km, kelp),
+  lm(biomass ~ protection * dist_port_km, kelp)
+)
+```
+
+:::
+
+::: {.fragment}
+
+Does the interaction explain enough variation to justify the cost? **Yes** (p = `r signif(f_int[["Pr(>F)"]][2], 2)`).
+
+:::
+
+## Example 3: look familiar?
+
+When the models differ by **one** parameter, the F-test matches the t-test on that coefficient in `summary()`.
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| class-output: small-output
+coef(summary(kelp_int))
+```
+
+:::
+
+```{r}
+int_t <- coef(summary(kelp_int))["protectionMPA:dist_port_km", "t value"]
+```
+
+$t^2 = (`r round(int_t, 3)`)^2 = `r round(int_t^2, 2)` = F$
+
+::: {.fragment}
+
+The F-test generalizes: it can test **many** parameters at once.
+
+:::
+
+# Recap
+
+## Recap
+
+::: {.incremental}
+
+- More data means more **information** to spend on inference
+- What do we spend it on? **Parameters.** $df = n - p$
+- More complex models explain more variation, but do they explain _enough_ variation to justify their costs?
+- The **F-test** compares the improvement per df spent to the leftover noise per df remaining
+- **t-tests** and **ANOVAs** are F-tests between an intercept-only model and a categorical model
+
+:::
