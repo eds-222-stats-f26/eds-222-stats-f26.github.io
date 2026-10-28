@@ -1078,655 +1078,277 @@
     "text": "Parametric distributions\n\nParametric distributions are mathematical functions governed by parameters.\nWe use them as theoretical stand-ins for populations.\nPDF says how probable observations are, given parameters."
   },
   {
-    "objectID": "course-materials/labs/lab3-solution.html",
-    "href": "course-materials/labs/lab3-solution.html",
+    "objectID": "course-materials/labs/lab3.html",
+    "href": "course-materials/labs/lab3.html",
     "title": "Lab 3: Simulate data and fit a regression model",
     "section": "",
     "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
   },
   {
-    "objectID": "course-materials/labs/lab3-solution.html#before-you-code",
-    "href": "course-materials/labs/lab3-solution.html#before-you-code",
+    "objectID": "course-materials/labs/lab3.html#before-you-code",
+    "href": "course-materials/labs/lab3.html#before-you-code",
     "title": "Lab 3: Simulate data and fit a regression model",
     "section": "",
     "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
   },
   {
-    "objectID": "course-materials/labs/lab3-solution.html#simulate-the-data",
-    "href": "course-materials/labs/lab3-solution.html#simulate-the-data",
+    "objectID": "course-materials/labs/lab3.html#simulate-the-data",
+    "href": "course-materials/labs/lab3.html#simulate-the-data",
     "title": "Lab 3: Simulate data and fit a regression model",
     "section": "Simulate the data",
-    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta_0\\), \\(\\beta_1\\), and \\(\\sigma\\)). Define them here:\n\n# These values chosen to represent the negative relationship between body size and temperature in marine invertebrates (copepods)\nbeta_0 &lt;- 3000\nbeta_1 &lt;- -55\nsigma &lt;- 100\n\n\nGenerate random values\n\nSimulate your predictor variable.\n\n\n\n\n\n\n\nTip\n\n\n\nYou may use any random number generating function to generate your predictor variable. Often, it’s simplest to simulate the predictor variable using the uniform distribution. Here’s an example of generating 5 random numbers between 1 and 2:\n\nrunif(n = 5, min = 1, max = 2)\n\n[1] 1.931593 1.066361 1.499245 1.000259 1.916364\n\n\n\n\n\n# In the range 2-14degC\ntemp_c &lt;- runif(n = 30, min = 2, max = 14)\n\n\nCalculate the expected value of the response.\n\n\n# Expected length in micrometers (um)\nexpected_length_um &lt;- beta_0 + beta_1 * temp_c\n\n\nSimulate the response variable.\n\n\n# The simulated lengths\nlength_um &lt;- rnorm(\n  n = 30,\n  mean = expected_length_um,\n  sd = sigma\n)\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\n# First, put your predictor and response variables into a single data frame.\nsimulated_lengths &lt;- tibble(temp_c, length_um)\n\n# Then, use ggplot to make a scatter plot.\nggplot(simulated_lengths, aes(x = temp_c, y = length_um)) +\n  geom_point()"
+    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta_0\\), \\(\\beta_1\\), and \\(\\sigma\\)). Define them here:\n\nbeta_0 &lt;- ___\nbeta_1 &lt;- ___\nsigma &lt;- ___\n\n\nGenerate random values\n\nSimulate your predictor variable.\n\n\n\n\n\n\n\nTip\n\n\n\nYou may use any random number generating function to generate your predictor variable. Often, it’s simplest to simulate the predictor variable using the uniform distribution. Here’s an example of generating 5 random numbers between 1 and 2:\n\nrunif(n = 5, min = 1, max = 2)\n\n\n\n\n# Edit the following code to simulate your _predictor_ variable\nyour_predictor_variable &lt;- some_random_number_generating_function(\n  n = your_sample_size,\n  any_other_function_parameters_go_here\n)\n\n\nCalculate the expected value of the response.\n\n\n# Edit the following code to calculate the _expected_ value of the response\nexpected_response &lt;- what + goes * here #?\n\n\nSimulate the response variable.\n\n\n# Edit the following code to simulate your _response_ variable\nyour_response_variable &lt;- rnorm(\n  n = your_sample_size,\n  mean = the_expected_value_of_the_response,\n  sd = your_sigma_parameter\n)\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\n# First, put your predictor and response variables into a single data frame.\n\n# Then, use ggplot to make a scatter plot."
   },
   {
-    "objectID": "course-materials/labs/lab3-solution.html#fit-and-interpret-a-regression-model",
-    "href": "course-materials/labs/lab3-solution.html#fit-and-interpret-a-regression-model",
+    "objectID": "course-materials/labs/lab3.html#fit-and-interpret-a-regression-model",
+    "href": "course-materials/labs/lab3.html#fit-and-interpret-a-regression-model",
     "title": "Lab 3: Simulate data and fit a regression model",
     "section": "Fit and interpret a regression model",
-    "text": "Fit and interpret a regression model\n\nFit the model\nUse lm() to fit a regression model to your simulated data.\n\n\n\n\n\n\nTip\n\n\n\nlm() expects a formula stating your predictor and response variables. It should look like: response ~ predictor.\n\n\n\n# Fit and summarize model\nlength_model &lt;- lm(length_um ~ temp_c, data = simulated_lengths)\nsummary(length_model)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-274.89  -83.84   26.07   78.98  157.39 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 2968.796     44.602  66.562  &lt; 2e-16 ***\ntemp_c       -49.188      5.511  -8.925 1.11e-09 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 109.4 on 28 degrees of freedom\nMultiple R-squared:  0.7399,    Adjusted R-squared:  0.7306 \nF-statistic: 79.65 on 1 and 28 DF,  p-value: 1.114e-09\n\nsigma(length_model)\n\n[1] 109.4127\n\n\n\n\nInterpret the model\nRefer back to the worksheet to complete most of this section. When you reach the end (“Test your intuition by modifying your simulation to increase \\(\\sigma\\) and n independently, then re-run it several times.”), come back to this document and use the following code chunks to test your intuition.\nIncrease \\(\\sigma\\)\n\n# Keep your predictor variable the same, but increase sigma by 2x\ndouble_sigma &lt;- 2 * sigma\n\n# Modify the following lines of code to re-run your simulation with the bigger sigma\nexpected_length_um2 &lt;- beta_0 + beta_1 * temp_c\nlength_um2 &lt;- rnorm(\n  n = 30,\n  mean = expected_length_um,\n  sd = double_sigma\n)\nsimulated_lengths2 &lt;- tibble(temp_c, length_um = length_um2)\nlength_model2 &lt;- lm(length_um ~ temp_c, data = simulated_lengths2)\n\n# Get your betas and their standard errors\nsummary(length_model2)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths2)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-312.39  -79.11   -1.71   94.07  359.98 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 3051.100     70.276  43.416  &lt; 2e-16 ***\ntemp_c       -60.184      8.684  -6.931 1.56e-07 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 172.4 on 28 degrees of freedom\nMultiple R-squared:  0.6317,    Adjusted R-squared:  0.6186 \nF-statistic: 48.03 on 1 and 28 DF,  p-value: 1.557e-07\n\n# How do they compare to the population parameters, relative to the original simulation?\n\nMy \\(\\beta\\) estimates only shifted a little bit (consistent with randomness) but the standard errors got much larger. Bigger residuals mean less certainty about the coefficient estimates.\nIncrease n\n\n# Now increase n by 2x. You'll need to create more predictor variable values.\ntemp_c_2n &lt;- c(\n  temp_c,\n  runif(n = 30)\n)\n\n# Modify the following lines of code to re-run your simulation with the bigger n\nexpected_length_um3 &lt;- beta_0 + beta_1 * temp_c_2n\nlength_um3 &lt;- rnorm(\n  n = 60,\n  mean = expected_length_um3,\n  sd = sigma\n)\nsimulated_lengths3 &lt;- tibble(temp_c = temp_c_2n, length_um = length_um3)\nlength_model3 &lt;- lm(length_um ~ temp_c, data = simulated_lengths3)\n\n# Get your betas and their standard errors\nsummary(length_model3)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths3)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-210.040  -64.474    0.891   71.824  185.719 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 2982.626     16.486  180.92   &lt;2e-16 ***\ntemp_c       -54.356      2.874  -18.91   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 94.35 on 58 degrees of freedom\nMultiple R-squared:  0.8605,    Adjusted R-squared:  0.8581 \nF-statistic: 357.7 on 1 and 58 DF,  p-value: &lt; 2.2e-16\n\n# How do they compare to the population parameters, relative to the original simulation?\n\nOnce again, \\(\\beta\\) estimates remained pretty similar, but this time the standard error decreased. Bigger sample size means less uncertainty!"
+    "text": "Fit and interpret a regression model\n\nFit the model\nUse lm() to fit a regression model to your simulated data.\n\n\n\n\n\n\nTip\n\n\n\nlm() expects a formula stating your predictor and response variables. It should look like: response ~ predictor.\n\n\n\nyour_model &lt;- lm(your_model_formula, data = your_simulated_data)\n# Use summary() to get the model coefficient estimates and their standard errors\n# Use sigma() to get the model's sigma estimate\n\n\n\nInterpret the model\nRefer back to the worksheet to complete most of this section. When you reach the end (“Test your intuition by modifying your simulation to increase \\(\\sigma\\) and n independently, then re-run it several times.”), come back to this document and use the following code chunks to test your intuition.\nIncrease \\(\\sigma\\)\n\n# Keep your predictor variable the same, but increase sigma by 2x\ndouble_sigma &lt;- ___\n# Modify the following lines of code to re-run your simulation with the bigger sigma\nexpected_response2 &lt;- what + goes * here #?\nyour_response_variable2 &lt;- rnorm(\n  n = ___,\n  mean = ___,\n  sd = ___\n)\nyour_model2 &lt;- lm(___, data = ___)\n\n# Get your betas and their standard errors\n\n# How do they compare to the population parameters, relative to the original simulation?\n\nIncrease n\n\n# Now increase n by 2x. You'll need to create more predictor variable values.\nyour_predictor_variable_2n &lt;- c(\n  your_predictor_variable,\n  additional_predictor_variable_values\n)\n\n# Modify the following lines of code to re-run your simulation with the bigger n\nexpected_response2 &lt;- what + goes * here #?\nyour_response_variable3 &lt;- rnorm(\n  n = the_bigger_sample_size,\n  mean = the_expected_value_of_the_response,\n  sd = your_sigma_parameter\n)\nyour_model3 &lt;- lm(___, data = ___)\n\n# Get your betas and their standard errors\n\n# How do they compare to the population parameters, relative to the original simulation?"
   },
   {
-    "objectID": "course-materials/labs/lab4.html",
-    "href": "course-materials/labs/lab4.html",
-    "title": "Lab 4: Simulate Simpson’s Paradox",
-    "section": "",
-    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html#before-you-code",
-    "href": "course-materials/labs/lab4.html#before-you-code",
-    "title": "Lab 4: Simulate Simpson’s Paradox",
-    "section": "",
-    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html#simulate-the-data",
-    "href": "course-materials/labs/lab4.html#simulate-the-data",
-    "title": "Lab 4: Simulate Simpson’s Paradox",
-    "section": "Simulate the data",
-    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta\\)s and \\(\\sigma\\)). Define them here:\n\nbeta_0 &lt;- ___ # Intercept\nbeta_1 &lt;- ___ # Coefficient for the first (continuous) predictor\nbeta_2 &lt;- ___ # Coefficient for the second (categorical) predictor\nsigma &lt;- ___ # Standard deviation of the residuals\n\n\nGenerate random values\n\nSimulate your predictor variables.\n\nRemember, for Simpson’s paradox to emerge, there has to be a dependency between the two predictor variables. In this case, you have one categorical and one continuous predictor. Simulate the categorical variable first, then use the level of the category when you simulate the continuous variable. For example, if you use rnorm() to simulate the continuous variable, make the mean depend on the category level. Alternatively, if you use runif(), make the min and max depend on the category level. ifelse() is useful here.\n\n# Sample size\nN &lt;- ___\n# Edit the following code to simulate your _categorical_ predictor variable.\nyour_second_predictor &lt;- ___\n\n# Edit the following code to simulate your _continuous_ predictor variable. Make\n# sure it depends on your second predictor!\nyour_first_predictor &lt;- some_random_number_generating_function(\n  n = N,\n  parameters_that_depend_on = your_second_predictor\n)\n\n\nCalculate the expected value of the response. This is similar to regression with a single predictor, but includes a second term.\n\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\n# Edit the following code to calculate the _expected_ value of the response\nyour_expected_response &lt;- ____\n\n\nSimulate the response variable. This is the same as regression with a single predictor. The expected value incorporates the influence of the multiple predictors. Once you have that number, you just need normally-distributed residuals.\n\n\n# Edit the following code to simulate your _response_ variable\nyour_response_variable &lt;- _____\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\n# First, put the predictors and response in a data frame all together\n\n# Then, use ggplot to make a scatter plot. Think carefully about which\n# aesthetics to use."
-  },
-  {
-    "objectID": "course-materials/labs/lab4.html#fit-and-interpret-regression-models",
-    "href": "course-materials/labs/lab4.html#fit-and-interpret-regression-models",
-    "title": "Lab 4: Simulate Simpson’s Paradox",
-    "section": "Fit and interpret regression models",
-    "text": "Fit and interpret regression models\n\nFit the models\nUse lm() to fit two regression models to your simulated data.\nIn the first model, only include the first predictor.\n\nyour_model1 &lt;- _____\n\nIn the second model, include both predictors.\n\nyour_model2 &lt;- _____\n\n\n\nInterpret the models\nUse summary() on both models. If you’ve simulated the paradox properly, the sign of the coefficient for the first predictor should flip between the models."
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical.html",
-    "href": "course-materials/labs/simulate-categorical.html",
-    "title": "Simulating categorical data",
-    "section": "",
-    "text": "library(tidyverse)\nset.seed(222)\ntheme_set(theme_bw())"
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical.html#simulate-the-predictor-variable",
-    "href": "course-materials/labs/simulate-categorical.html#simulate-the-predictor-variable",
-    "title": "Simulating categorical data",
-    "section": "Simulate the predictor variable",
-    "text": "Simulate the predictor variable\nCreate a variable called x. It should be categorical with 50 values of two levels, “A” and “B”. Simulate it using the sample() function.\nThen, choose a name for the dummy variable.\n\nx &lt;- _____\n_____ &lt;- ifelse(x == \"A\", 0, 1)"
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical.html#choose-your-simulation-parameters",
-    "href": "course-materials/labs/simulate-categorical.html#choose-your-simulation-parameters",
-    "title": "Simulating categorical data",
-    "section": "Choose your simulation parameters",
-    "text": "Choose your simulation parameters\nCreate variables for \\(\\beta_0 = -10\\), \\(\\beta_1 = 20\\), and \\(sigma = 8\\)."
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical.html#calculate-the-expected",
-    "href": "course-materials/labs/simulate-categorical.html#calculate-the-expected",
-    "title": "Simulating categorical data",
-    "section": "Calculate the expected",
-    "text": "Calculate the expected\nCalculate the expected value of \\(y\\).\n\ny_expected &lt;- _____"
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical.html#simulate-the-response",
-    "href": "course-materials/labs/simulate-categorical.html#simulate-the-response",
-    "title": "Simulating categorical data",
-    "section": "Simulate the response",
-    "text": "Simulate the response\nYou have the expected value and \\(\\sigma\\). Use these to simulate \\(y\\).\nThen make a data frame with the predictor and response.\n\ny &lt;- ____(\n  n = ____,\n  mean = _____,\n  sd = _____\n)\n\nsimulated_data &lt;- tibble(\n  _____,\n  _____\n)"
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical.html#fit-a-model",
-    "href": "course-materials/labs/simulate-categorical.html#fit-a-model",
-    "title": "Simulating categorical data",
-    "section": "Fit a model",
-    "text": "Fit a model\nFit a linear model to the response and predictor variables.\n\ncategorical_lm &lt;- lm(_____ ~ _____, data = _____)\n# Verify the model coefficients approximate the simulation parameters\nsummary(categorical_lm)"
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical.html#visualize-the-data-and-model",
-    "href": "course-materials/labs/simulate-categorical.html#visualize-the-data-and-model",
-    "title": "Simulating categorical data",
-    "section": "Visualize the data and model",
-    "text": "Visualize the data and model\nFill in the blanks of the ggplot call to complete the visualization.\nannotate() adds one-off geometries to a ggplot. The following annotations represent \\(\\beta_0\\) and \\(\\beta_1\\).\n\nbetas &lt;- coef(categorical_lm)\n\nggplot(_____, aes(_____, _____)) +\n  geom_point(position = position_jitter(width = 0.2)) +\n  # beta_0 = mean of reference level\n  annotate(\"point\", x = 1, y = betas[1], color = \"cornflowerblue\") +\n  # beta_1 = difference from reference level\n  annotate(\n    \"segment\",\n    x = 1.5,\n    xend = 1.5,\n    y = betas[0],\n    yend = sum(betas),\n    color = \"cornflowerblue\"\n  ) +\n  # beta_0 + beta_1 = mean of second level\n  annotate(\"point\", x = 1, y = sum(betas), color = \"cornflowerblue\")"
-  },
-  {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#learning-objectives",
-    "href": "course-materials/pre-class/week2_wednesday.html#learning-objectives",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#learning-objectives",
+    "href": "course-materials/pre-class/week2_monday_a.html#learning-objectives",
     "title": "EDS 222: Statistics for Environmental Data Science",
     "section": "Learning objectives",
-    "text": "Learning objectives\n\nUse parametric distributions to represent sampling distributions\nRelate mathematical models of inference to their randomization-based counterparts\nSimulate a data generating process to check your understanding"
+    "text": "Learning objectives\n\nApply randomization to inferential questions\nUse permutation to quantify uncertainty for yes/no questions\nUse bootstrapping to quantify uncertainty for how much? questions"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#sampling-is-normal",
-    "href": "course-materials/pre-class/week2_wednesday.html#sampling-is-normal",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method",
+    "href": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sampling is normal",
-    "text": "Sampling is normal\n\nGiven sufficient independent observations, many sampling distributions converge to the normal distribution\nWe can use the normal distribution as a stand-in the entire sampling distribution from just one sample\n\nSample -&gt; Normal distribution -&gt; Sampling distribution"
+    "section": "Statistics is part of the scientific method",
+    "text": "Statistics is part of the scientific method\n\nAsk a question\nFormulate a (scientific) hypothesis\nConduct a study, experimental or observational\nAnalyze data\nInterpret and communicate the results"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#normal-sampling-visualized",
-    "href": "course-materials/pre-class/week2_wednesday.html#normal-sampling-visualized",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method-1",
+    "href": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Normal sampling visualized",
-    "text": "Normal sampling visualized"
+    "section": "Statistics is part of the scientific method",
+    "text": "Statistics is part of the scientific method\n\nWhere did lead from the Exide plant end up?\nWind carried more lead NE than SW.\nGather soil cores to measure lead concentrations across the region.\nSTATS STATS STATS\nInterpret and communicate the results"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#parameterizing-the-sampling-distribution",
-    "href": "course-materials/pre-class/week2_wednesday.html#parameterizing-the-sampling-distribution",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#two-types-of-hypotheses",
+    "href": "course-materials/pre-class/week2_monday_a.html#two-types-of-hypotheses",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Parameterizing the sampling distribution",
-    "text": "Parameterizing the sampling distribution\nRecall a normal distribution’s has two parameters: the mean and the standard deviation\nOur goal is to estimate the mean and standard deviation of the sampling distribution"
+    "section": "Two types of hypotheses",
+    "text": "Two types of hypotheses\n\n\nWhat a scientist means\nHypothesis: a testable, causal explanation for an observation\n\nLead emissions spread via wind.\n\n\nWhat a statistician means\nHypothesis: a quantitative statement about a parameter of the population\n\nThe proportion of homes downwind of the plant with elevated lead levels is greater than those upwind."
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#parameterizing-the-sampling-distribution-1",
-    "href": "course-materials/pre-class/week2_wednesday.html#parameterizing-the-sampling-distribution-1",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#variation-is-natural",
+    "href": "course-materials/pre-class/week2_monday_a.html#variation-is-natural",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Parameterizing the sampling distribution",
-    "text": "Parameterizing the sampling distribution\n\n\n\n\\[\n\\mu = p_1 - p_2\n\\]\n\\[\n\\sigma = \\sqrt{\\frac{p_1 (1 - p_1)}{n_1} + \\frac{p_2 (1 - p_2)}{n_2}}\n\\]\n\n\nLet \\(p_1 = 0.60\\), \\(p_2 = 0.52\\), \\(n_1 = n_2 = 50\\)"
+    "section": "Variation is natural",
+    "text": "Variation is natural\nA statistician knows that a difference in a sample (between proportions, means, etc) is insufficient to evaluate a hypothesis.\nSampling is random!\nThe real question: is the difference bigger than we’d expect from sampling? Or is it consistent with sampling variation?"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#confidence-intervals-two-ways",
-    "href": "course-materials/pre-class/week2_wednesday.html#confidence-intervals-two-ways",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#variation-is-natural-1",
+    "href": "course-materials/pre-class/week2_monday_a.html#variation-is-natural-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Confidence intervals, two ways",
-    "text": "Confidence intervals, two ways\nWith bootstrapping, we resampled the sample to estimate the sampling distribution\nWith a mathematical model, we use the normal distribution to estimate the sampling distribution"
+    "section": "Variation is natural",
+    "text": "Variation is natural"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#bootstrapping-revisited",
-    "href": "course-materials/pre-class/week2_wednesday.html#bootstrapping-revisited",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#assess-the-evidence",
+    "href": "course-materials/pre-class/week2_monday_a.html#assess-the-evidence",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Bootstrapping revisited",
-    "text": "Bootstrapping revisited"
+    "section": "Assess the evidence",
+    "text": "Assess the evidence\nGiven that variation is natural in sampling, how do we assess evidence?\nWe can’t gather new data, so we design statistical experiments based on the sample we have."
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#confidence-interval-using-a-mathematical-model",
-    "href": "course-materials/pre-class/week2_wednesday.html#confidence-interval-using-a-mathematical-model",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-is-a-statistical-experiment-for-yesno-questions",
+    "href": "course-materials/pre-class/week2_monday_a.html#permutation-is-a-statistical-experiment-for-yesno-questions",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Confidence interval using a mathematical model",
-    "text": "Confidence interval using a mathematical model\n\nEstimate the parameters of the normal distribution that approximates the sampling distribution.\n\n\n\\[\n\\mu = \\hat p_1 - \\hat p_2\n\\]\n\\[\n\\sigma = SE = \\sqrt{\\frac{\\hat p_1 (1 - \\hat p_1)}{n_1} + \\frac{\\hat p_2 (1 - \\hat p_2)}{n_2}}\n\\]\n\nWe call our estimate of \\(\\sigma\\) the standard error"
+    "section": "Permutation is a statistical experiment for yes/no questions",
+    "text": "Permutation is a statistical experiment for yes/no questions\nQuestion: Is the proportion of high risk homes higher downwind than upwind?\nLet’s reframe this as:\nQuestion: If there was no relationship between lead risk and wind direction, then how often would our sample be observed?"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#confidence-interval-using-a-mathematical-model-1",
-    "href": "course-materials/pre-class/week2_wednesday.html#confidence-interval-using-a-mathematical-model-1",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue",
+    "href": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Confidence interval using a mathematical model",
-    "text": "Confidence interval using a mathematical model\n\nFind the interval containing x% of the probability (e.g., 95% for a 95% CI)"
+    "section": "Random to the rescue",
+    "text": "Random to the rescue\nWe can simulate the “what if there’s no relationship?” scenario by randomizing the predictor variable.\nRandomization breaks the link between predictor and response, but keeps all the variation from the sample."
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#p-values-two-ways",
-    "href": "course-materials/pre-class/week2_wednesday.html#p-values-two-ways",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#procedure",
+    "href": "course-materials/pre-class/week2_monday_a.html#procedure",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "P-values, two ways",
-    "text": "P-values, two ways\nWith permutation, we shuffled the predictor to estimate the null distribution\nWith a mathematical model, we use the normal distribution to estimate the null distribution"
+    "section": "Procedure",
+    "text": "Procedure\n\\(H_0\\): there is no relationship/effect/etc\n\\(H_A\\): there is a relationship/effect/etc\n\nCalculate the observed value of the statistic (e.g., a difference in proportions)\nShuffle the predictor variable and recalculate the statistic.\nRepeat step 2 until the cows come home (null distribution of the statistic)\nCompare the observed value to the null statistic (p-value)\nReject, or fail to reject, the null hypothesis"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#permutation-revisited",
-    "href": "course-materials/pre-class/week2_wednesday.html#permutation-revisited",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-visualized",
+    "href": "course-materials/pre-class/week2_monday_a.html#permutation-visualized",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation revisited",
-    "text": "Permutation revisited"
+    "section": "Permutation visualized",
+    "text": "Permutation visualized"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#p-value-using-a-mathematical-model",
-    "href": "course-materials/pre-class/week2_wednesday.html#p-value-using-a-mathematical-model",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#compare-the-observed-to-the-null-statistic",
+    "href": "course-materials/pre-class/week2_monday_a.html#compare-the-observed-to-the-null-statistic",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "P-value using a mathematical model",
-    "text": "P-value using a mathematical model\n\nEstimate the parameters of the normal distribution that approximates the null distribution.\n\n\n\\[\n\\mu = 0\n\\]\n\\[\n\\sigma = SE = \\sqrt{\\hat p_{pool} (1 - \\hat p_{pool}) \\left( \\frac{1}{n_1} + \\frac{1}{n_2} \\right) }\n\\]\n\nWhy \\(p_{pool}\\) instead of \\(p_1\\) and \\(p_2\\)?"
+    "section": "Compare the observed to the null statistic",
+    "text": "Compare the observed to the null statistic"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#p-value-using-a-mathematical-model-1",
-    "href": "course-materials/pre-class/week2_wednesday.html#p-value-using-a-mathematical-model-1",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#interpret-the-p-value",
+    "href": "course-materials/pre-class/week2_monday_a.html#interpret-the-p-value",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "P-value using a mathematical model",
-    "text": "P-value using a mathematical model\n\nFind the probability of observing at least \\(\\hat p_1 - \\hat p_2\\), if the null hypothesis is true.\n\np-value = 0.21"
+    "section": "Interpret the p-value",
+    "text": "Interpret the p-value\nA p-value is the probability of seeing the observed sample, if the null hypothesis is true. That’s it.\nIf p is less than some threshold (often 0.05 by default), then we say there is a statistically significant result. This means the sample is improbable under chance alone."
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#conditions-when-mathematical-models-work-well",
-    "href": "course-materials/pre-class/week2_wednesday.html#conditions-when-mathematical-models-work-well",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-the-p-value",
+    "href": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-the-p-value",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Conditions when mathematical models work well",
-    "text": "Conditions when mathematical models work well\nTwo conditions are required for the mathematical model approach to work well:\n\nIndependence\nSample size"
+    "section": "Don’t misinterpret the p-value",
+    "text": "Don’t misinterpret the p-value\nThe following are common misconceptions:\n\nA p-value is the probability that the null hypothesis is true\nA statistically significant result is meaningful by real-world standards\nA statistically non-significant result means there’s no effect"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#independence",
-    "href": "course-materials/pre-class/week2_wednesday.html#independence",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-recap",
+    "href": "course-materials/pre-class/week2_monday_a.html#permutation-recap",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Independence",
-    "text": "Independence\n\nData are independent when observations don’t influence each other.\nControlled experiments are designed to produce independent observations. In observational studies, complete independence is rare.\nCommon sources of dependence include:\n\nGeographic or temporal proximity\nRepeated measures from the same entity\nShared ancestry or social group"
+    "section": "Permutation recap",
+    "text": "Permutation recap\n\nGiven only one sample, how do we estimate the natural variation of the statistic? With randomization!\nPermutation breaks the connection between the predictor and response, simulating the variation of the statistic expected by chance.\nPermutation yields a p-value, which says if your result is statistically significant.\n\nYou are wise enough to hold complexity."
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#sample-size",
-    "href": "course-materials/pre-class/week2_wednesday.html#sample-size",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-is-a-statistical-experiment-for-how-much-questions",
+    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-is-a-statistical-experiment-for-how-much-questions",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sample size",
-    "text": "Sample size\n\nThe normal approximation fails more often for very small samples\nAs a guideline, each group in the sample should have at least 10 expected successes and failures\n\\(p_1 n_1\\), \\((1 - p_1) n_1\\), \\(p_2 n_2\\), and \\((1 - p_2) n_2\\) all \\(\\ge 10\\)\nWhen proportions are close to 0 or 1, this condition gets harder to meet"
+    "section": "Bootstrapping is a statistical experiment for “how much?” questions",
+    "text": "Bootstrapping is a statistical experiment for “how much?” questions\nQuestion: How much higher is the proportion of high risk homes downwind than upwind?\nLet’s reframe this as:\nQuestion: What’s the interval that we confidently think contains the population-level parameter?"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#statistical-thinking-is-not-dark-magic.",
-    "href": "course-materials/pre-class/week2_wednesday.html#statistical-thinking-is-not-dark-magic.",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue-1",
+    "href": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Statistical thinking is not dark magic.",
-    "text": "Statistical thinking is not dark magic.\n\nThe rules and procedures are verifiable through simulation.\nGet in the habit of verifying your understanding through simulation.\nLet’s investigate the claim that the standard error of a difference in proportions is:\n\n\\[\nSE = \\sqrt{\\frac{\\hat p_1 (1 - \\hat p_1)}{n_1} + \\frac{\\hat p_2 (1 - \\hat p_2)}{n_2}}\n\\]"
+    "section": "Random to the rescue",
+    "text": "Random to the rescue\n\nWe can simulate the variation in our statistic by resampling the observations.\nWe’re making the critical assumption that our sample is representative of the population\n\nInstead of getting new samples from the population (too hard!) we get “bootstrapped” samples from the sample itself."
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#simulating-a-data-generating-process",
-    "href": "course-materials/pre-class/week2_wednesday.html#simulating-a-data-generating-process",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#procedure-1",
+    "href": "course-materials/pre-class/week2_monday_a.html#procedure-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Simulating a data generating process",
-    "text": "Simulating a data generating process\n\nThe data generating process (DGP) is a model describing how the sample emerges from the population.\nConsider the difference in proportions between pre- and post-1950 homes having soil Pb &gt; 200. The DGP is:\n\nEach observation is TRUE or FALSE\nObservations within and across groups are independent\nObservations within groups are TRUE with a proportion of \\(p_1\\) and \\(p_2\\), respectively"
+    "section": "Procedure",
+    "text": "Procedure\n\nCalculate the observed value of the statistic (e.g., a difference in proportions)\nResample the observations with replacement and recalculate the statistic.\nRepeat step 2 until the cows come home (sampling distribution)\nFind the range containing a large percentage of the sampling distribution (confidence interval)"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation",
-    "href": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-visualized",
+    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-visualized",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Steps in the simulation",
-    "text": "Steps in the simulation\n\nChoose the parameters for your simulation\n\n\\[\n\\begin{align}\np_1 &= 0.60 \\\\\nn_1 &= 25 \\\\\np_2 &= 0.52 \\\\\nn_2 &= 25\n\\end{align}\n\\]"
+    "section": "Bootstrapping visualized",
+    "text": "Bootstrapping visualized"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation-1",
-    "href": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation-1",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#find-your-confidence-interval",
+    "href": "course-materials/pre-class/week2_monday_a.html#find-your-confidence-interval",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Steps in the simulation",
-    "text": "Steps in the simulation\n\nSimulate a sample using r____() functions and calculate the sample statistic\n\n\nrbinom() for binary TRUE/FALSE variables\n\n\nContinue simulating samples until you reach critical mass (10k usually good)"
+    "section": "Find your confidence interval",
+    "text": "Find your confidence interval"
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation-2",
-    "href": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation-2",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#interpret-your-confidence-interval",
+    "href": "course-materials/pre-class/week2_monday_a.html#interpret-your-confidence-interval",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Steps in the simulation",
-    "text": "Steps in the simulation\n\nCheck your simulation results against the claim\n\n\nDo 95% of sample statistics fall within 1.96 SEs of the population parameter?"
+    "section": "Interpret your confidence interval",
+    "text": "Interpret your confidence interval\nA confidence interval is a range of values that you are confident contains the population parameter.\nBut wait… what exactly are we confident in?\nIf we repeated this procedure 100 times, about 95 of those CIs would contain the population parameter.\nOur confidence is in the procedure’s long-run accuracy."
   },
   {
-    "objectID": "course-materials/pre-class/week2_wednesday.html#lets-do-it-in-r",
-    "href": "course-materials/pre-class/week2_wednesday.html#lets-do-it-in-r",
+    "objectID": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-your-confidence-interval",
+    "href": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-your-confidence-interval",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Let’s do it in R!",
-    "text": "Let’s do it in R!"
+    "section": "Don’t misinterpret your confidence interval",
+    "text": "Don’t misinterpret your confidence interval\nThe following are common misconceptions:\n\nThere’s a 95% chance the 95% CI contains the population parameter\nLarger sample sizes yield more accurate confidence intervals"
   },
   {
-    "objectID": "index.html#course-description",
-    "href": "index.html#course-description",
-    "title": "Statistics for Environmental Data Science",
-    "section": "Course Description",
-    "text": "Course Description\nStatistics is the science of collecting, manipulating, and analyzing empirical data. In this class, we will learn the statistical fundamentals that will enable us to draw conclusions about the environment and its interaction with social and economic systems. We will cover fundamental statistical concepts and tools, and then apply and expand upon those tools to learn some temporal and spatial statistical methods that are particularly helpful in environmental data science. Welcome!\n\nLearning objectives\nThe goal of this course is to enable MEDS students to confidently and competently apply statistical tools to socio-environmental datasets. Essential skills and concepts are:\n\nSummarize data numerically and graphically\nInterpret random variables\nSimulate data to test assumptions\nDescribe models using statistical notation\nDraw DAGs to clarify causal relationships\nQuantify uncertainty to perform inference"
+    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-recap",
+    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-recap",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Bootstrapping recap",
+    "text": "Bootstrapping recap\n\nGiven only one sample, how do we estimate the natural variation of the statistic? With randomization!\nBootstrapping draws “new” samples from the original, simulating the variation of the statistic expected by sampling.\nBootstrapping yields a confidence interval, which describes a range the actual parameter probably falls in.\n\nCIs rigorously communicate uncertainty."
   },
   {
-    "objectID": "index.html#teaching-team",
-    "href": "index.html#teaching-team",
-    "title": "Statistics for Environmental Data Science",
-    "section": "Teaching Team",
-    "text": "Teaching Team\n\n\n\nInstructor\n\nMax Czapanskiy\nEmail: maxczap@ucsb.edu\n\nTeaching Assistant\n\nSloane Stephenson\nEmail: gstephenson@ucsb.edu"
+    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-vs-bootstrapping",
+    "href": "course-materials/pre-class/week2_monday_a.html#permutation-vs-bootstrapping",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Permutation vs bootstrapping",
+    "text": "Permutation vs bootstrapping\n\n\nPermutation simulates a scenario with no relationship to answer “yes/no” questions.\n\n\n\n\n\n\n\n\n\n\nBootstrapping simulates the original scenario to answer “how much?” questions."
   },
   {
-    "objectID": "course-materials/week9.html",
-    "href": "course-materials/week9.html",
-    "title": "Spatio-temporal methods",
+    "objectID": "course-materials/labs/lab4-solution.html",
+    "href": "course-materials/labs/lab4-solution.html",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
     "section": "",
-    "text": "Under construction"
+    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
   },
   {
-    "objectID": "course-materials/week7.html",
-    "href": "course-materials/week7.html",
-    "title": "Logistic regression",
+    "objectID": "course-materials/labs/lab4-solution.html#before-you-code",
+    "href": "course-materials/labs/lab4-solution.html#before-you-code",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
     "section": "",
-    "text": "Under construction"
+    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
   },
   {
-    "objectID": "course-materials/week5.html",
-    "href": "course-materials/week5.html",
-    "title": "Linear model inference",
+    "objectID": "course-materials/labs/lab4-solution.html#simulate-the-data",
+    "href": "course-materials/labs/lab4-solution.html#simulate-the-data",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "Simulate the data",
+    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta\\)s and \\(\\sigma\\)). Define them here:\n\n# These values chosen to represent a scenario where typing faster increases\n# typos, but faster typists on average commit fewer typos. If you ignore the\n# second predictor (who is typing) then an apparent negative relationship\n# emerges, suggesting typing faster reduces typos.\nbeta_0 &lt;- 10 # Intercept\nbeta_1 &lt;- 0.1 # Additional typos per increase in speed\nbeta_2 &lt;- -10 # Difference between typist B and the reference level (typist A)\nsigma &lt;- 3 # Standard deviation of the residuals\n\n\nGenerate random values\n\nSimulate your predictor variables. Remember, for Simpson’s paradox to emerge, there has to be a dependency between the two predictor variables.\n\n\n# Sample size\nN &lt;- 50\n# Typist identities\ntypist &lt;- sample(c(\"A\", \"B\"), N, replace = TRUE)\n# Dummy variable for typist B\ntypistB &lt;- ifelse(typist == \"B\", 1, 0)\n# Typing speed is _greater_ for typist B, who is also less error-prone\ntyping_speed &lt;- rnorm(N, mean = ifelse(typist == \"B\", 100, 45), sd = 15)\n\n\nCalculate the expected value of the response. This is similar to regression with a single predictor, but includes a second term.\n\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\nexpected_typos &lt;- beta_0 + beta_1 * typing_speed + beta_2 * typistB\n\n\nSimulate the response variable. This is the same as regression with a single predictor. The expected value incorporates the influence of the multiple predictors. Once you have that number, you just need normally-distributed residuals.\n\n\ntypos &lt;- rnorm(\n  n = N,\n  mean = expected_typos,\n  sd = sigma\n)\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\nsimulated_typing &lt;- tibble(typing_speed, typos, typist)\n\nggplot(simulated_typing, aes(x = typing_speed, y = typos, fill = typist)) +\n  geom_point(size = 2, shape = 21) +\n  scale_fill_manual(values = c(\"peachpuff\", \"lightskyblue1\"))"
+  },
+  {
+    "objectID": "course-materials/labs/lab4-solution.html#fit-and-interpret-regression-models",
+    "href": "course-materials/labs/lab4-solution.html#fit-and-interpret-regression-models",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "Fit and interpret regression models",
+    "text": "Fit and interpret regression models\n\nFit the models\nUse lm() to fit two regression models to your simulated data.\nIn the first model, only include the first predictor.\n\nspeed_only &lt;- lm(typos ~ typing_speed, data = simulated_typing)\n\nIn the second model, include both predictors.\n\nspeed_typist &lt;- lm(typos ~ typing_speed + typist, data = simulated_typing)\n\n\n\nInterpret the models\nUse summary() on both models. If you’ve simulated the paradox properly, the sign of the coefficient for the first predictor should flip between the models.\n\nsummary(speed_only) # beta_1 ~= -0.04\n\n\nCall:\nlm(formula = typos ~ typing_speed, data = simulated_typing)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-7.0273 -2.4690 -0.5602  1.8565  9.3844 \n\nCoefficients:\n             Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  15.70437    1.31052  11.983 4.91e-16 ***\ntyping_speed -0.04306    0.01665  -2.587   0.0128 *  \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 3.71 on 48 degrees of freedom\nMultiple R-squared:  0.1223,    Adjusted R-squared:  0.104 \nF-statistic:  6.69 on 1 and 48 DF,  p-value: 0.01278\n\nsummary(speed_typist) # beta_1 ~= 0.10\n\n\nCall:\nlm(formula = typos ~ typing_speed + typist, data = simulated_typing)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-4.9963 -1.6735 -0.0618  1.2214 10.0247 \n\nCoefficients:\n              Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)   10.33208    1.35594   7.620 9.46e-10 ***\ntyping_speed   0.09883    0.02724   3.628 0.000701 ***\ntypistB      -10.13145    1.71841  -5.896 3.87e-07 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 2.843 on 47 degrees of freedom\nMultiple R-squared:  0.4955,    Adjusted R-squared:  0.474 \nF-statistic: 23.08 on 2 and 47 DF,  p-value: 1.042e-07"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html",
+    "href": "course-materials/labs/simulate-categorical-solutions.html",
+    "title": "Simulating categorical data",
     "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nLinear regression inference  Linear regression inference exercise (Solutions)\nIMS 24  Linear regression inference\n\n\nLab\nConcept maps\nNone\n\n\nLecture 2\nCausality\nIMS 25  Backdoor criterion  Confounders, Colliders, and Mediators  Simulating inferences"
+    "text": "library(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.1     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.3     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nset.seed(222)\ntheme_set(theme_bw())"
   },
   {
-    "objectID": "course-materials/week5.html#lecture-materials",
-    "href": "course-materials/week5.html#lecture-materials",
-    "title": "Linear model inference",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nLinear regression inference  Linear regression inference exercise (Solutions)\nIMS 24  Linear regression inference\n\n\nLab\nConcept maps\nNone\n\n\nLecture 2\nCausality\nIMS 25  Backdoor criterion  Confounders, Colliders, and Mediators  Simulating inferences"
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-predictor-variable",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-predictor-variable",
+    "title": "Simulating categorical data",
+    "section": "Simulate the predictor variable",
+    "text": "Simulate the predictor variable\nCreate a variable called x. It should be categorical with 50 values of two levels, “A” and “B”. Simulate it using the sample() function.\nThen, choose a name for the dummy variable.\n\nx &lt;- sample(c(\"A\", \"B\"), size = 50, replace = TRUE)\nxB &lt;- ifelse(x == \"A\", 0, 1)"
   },
   {
-    "objectID": "course-materials/week3.html",
-    "href": "course-materials/week3.html",
-    "title": "Linear regression",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model  Lab solutions\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors  Simulating categorical predictors - Solutions\nCategorical predictors  Categorical predictors in R"
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#choose-your-simulation-parameters",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#choose-your-simulation-parameters",
+    "title": "Simulating categorical data",
+    "section": "Choose your simulation parameters",
+    "text": "Choose your simulation parameters\nCreate variables for \\(\\beta_0 = -10\\), \\(\\beta_1 = 20\\), and \\(sigma = 8\\).\n\nbeta_0 &lt;- -10\nbeta_1 &lt;- 20\nsigma &lt;- 8"
   },
   {
-    "objectID": "course-materials/week3.html#lecture-materials",
-    "href": "course-materials/week3.html#lecture-materials",
-    "title": "Linear regression",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model  Lab solutions\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors  Simulating categorical predictors - Solutions\nCategorical predictors  Categorical predictors in R"
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#calculate-the-expected",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#calculate-the-expected",
+    "title": "Simulating categorical data",
+    "section": "Calculate the expected",
+    "text": "Calculate the expected\nCalculate the expected value of \\(y\\).\n\ny_expected &lt;- beta_0 + beta_1 * xB"
   },
   {
-    "objectID": "course-materials/week10.html",
-    "href": "course-materials/week10.html",
-    "title": "Statistics in action!",
-    "section": "",
-    "text": "Under construction"
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-response",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-response",
+    "title": "Simulating categorical data",
+    "section": "Simulate the response",
+    "text": "Simulate the response\nYou have the expected value and \\(\\sigma\\). Use these to simulate \\(y\\).\nThen make a data frame with the predictor and response.\n\ny &lt;- rnorm(\n  n = 50,\n  mean = y_expected,\n  sd = sigma\n)\n\nsimulated_data &lt;- tibble(\n  x,\n  y\n)"
   },
   {
-    "objectID": "course-materials/pre-class/week1_statistical_claims.html",
-    "href": "course-materials/pre-class/week1_statistical_claims.html",
-    "title": "Week 1 Wednesday pre-class",
-    "section": "",
-    "text": "So far this week, you’ve learned about:\nThe three challenges of statistics\nMeasurements and data\nIn class on Wednesday, we’ll discuss these concepts in the context of statistical claims on topics you’re interested in."
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#fit-a-model",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#fit-a-model",
+    "title": "Simulating categorical data",
+    "section": "Fit a model",
+    "text": "Fit a model\nFit a linear model to the response and predictor variables.\n\ncategorical_lm &lt;- lm(y ~ x, data = simulated_data)\n# Verify the model coefficients approximate the simulation parameters\nsummary(categorical_lm)\n\n\nCall:\nlm(formula = y ~ x, data = simulated_data)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-22.397  -3.321   1.011   5.308  17.075 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)   -9.798      1.576  -6.218 1.16e-07 ***\nxB            20.396      2.274   8.968 7.91e-12 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 8.035 on 48 degrees of freedom\nMultiple R-squared:  0.6262,    Adjusted R-squared:  0.6185 \nF-statistic: 80.42 on 1 and 48 DF,  p-value: 7.905e-12"
   },
   {
-    "objectID": "course-materials/pre-class/week1_statistical_claims.html#instructions",
-    "href": "course-materials/pre-class/week1_statistical_claims.html#instructions",
-    "title": "Week 1 Wednesday pre-class",
-    "section": "Instructions",
-    "text": "Instructions\nBefore class, find a statistical claim. Search the areas of environmental science you’re passionate and knowledgeable about. This could be in a news article, a YouTube video, a documentary, etc. It’s important that you find a claim that is presented as having statistical support.\nRespond to the prompts in this Google Form about your claim."
-  },
-  {
-    "objectID": "course-materials/pre-class/week1_statistical_claims.html#example",
-    "href": "course-materials/pre-class/week1_statistical_claims.html#example",
-    "title": "Week 1 Wednesday pre-class",
-    "section": "Example",
-    "text": "Example\nDescribe the claim\nCorals growing near islands with healthy seabird colonies grow more than twice as fast as corals near islands where invasive rats have wiped out the seabirds.\nWhere did you find it?\nAudubon Magazine The Remarkable Healing Power of Seabird Poop for Climate-Stressed Coral Reefs\nWhat challenge of statistics does it fall under?\nGeneralize from treatment to control. The “treatment” is the presence of invasive rats (which extirpate seabirds), the “control” is islands without rats.\nPick the most salient variable in the data. In what ways does it accurately represent what its meant to, and in what ways might it be different? (I.e., assess its validity.)\nCoral growth rate. This was measured using the area of corals from photographs1. The claim about growth rate is really more about mass or volume, however area is a reasonably valid proxy because previous research has established area and mass are highly correlated.\nContinuing with the same variable, what are the limitations on its reliability?\nEstimates of area from photographs are sensitive to the angle of the photo and the judgement of the researcher who traces the photo. Although those factors can affect reliability, the study used photos from divers, which are more reliable than photos taken by aircraft or satellites.\nContinuing with the same variable, how was the sample collected? Were there obstacles to selecting a representative sample?\nThe sample came from twelve islands in the Chagos Archipelago (six had rats, six didn’t). There is potential selection bias because this was an observational study, so the researchers couldn’t randomize which islands got rats and which didn’t. Also, the study only looked at one species of coral. It’s possible other corals are more or less affected by seabird abundance."
-  },
-  {
-    "objectID": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
-    "href": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
-    "title": "Week 1 Wednesday pre-class",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nThis information isn’t directly in the magazine article, but I’m familiar with the methods. This is why it’s important to pick a statistical claim in a scientific field you’re knowledgeable about!↩︎"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nDiscuss final project deliverable\nP-values, two ways\nConfidence intervals, two ways"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Exploratory data analysis",
-    "text": "Exploratory data analysis\n\nIts purpose is to get you started early and give you feedback while your ideas are still taking shape. You are not committing to a question or dataset."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Check in with your peers",
-    "text": "Check in with your peers\nClose your laptops and pull out a sheet of paper. Take 3 minutes to write down:\n\n\nYour question\n\nIf you have one, paraphrase it\nIf you don’t, brainstorm one possible question\n\n\nYour dataset\n\nIf you’ve picked one, what is it and where is it from?\nIf you haven’t, what kind of data would help your question?\n\n\nA challenge you’ve encountered\n\nFraming a question?\nFinding data?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Check in with your peers",
-    "text": "Check in with your peers\nForm pairs. In turns, share your question, data, and challenge.\nTake 10 minutes to provide each other with feedback. For example:\n\nIs the scope of the question feasible? If you had to narrow in on one part, what would it be?\nHow valid are the measurements in the data for the question? What tradeoffs are there between validity and sample size?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation test vs normal approximation",
-    "text": "Permutation test vs normal approximation\nYou are welcome to work in groups of 2-3 for this activity.\nConnect to Workbench and clone the repo https://github.com/eds-222-stats-f26/eds-222-inference (I’ll put the link on Slack).\nComplete the activity in p-values.qmd.\nWe’ll use 30 minutes for this.\nWhen you’re done, call your instructor over before continuing."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Bootstrapping vs normal approximation",
-    "text": "Bootstrapping vs normal approximation\nContinue working in the same groups and the same repo.\nComplete the activity in confidence-interval.qmd.\nWe’ll use 30 minutes for this."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nDebrief the parking lot\nDigging into our statistical claims\nSampling bias experiment"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Activity guide",
-    "text": "Activity guide\n\nCount off into groups.\nShare your prepared statistical claims.\nCollaboratively design a follow-up study.\nEvaluate another group’s study design."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Form groups",
-    "text": "Form groups\n\nCount off 1-10.\nFind your peers with the same number."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Share your claims",
-    "text": "Share your claims\nTake turns sharing your prepared statistical claims.\n\nWhat’s the claim and where did you find it?\nWhat is the relevant challenge of statistics?\nWhat’s the most salient variable?\n\nWhat makes the variable valid?\nHow reliable is the variable?\n\nHow was the sample collected?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Design a follow-up study",
-    "text": "Design a follow-up study\nAs a group, choose one claim to design a follow-up study for. If your claim was chosen, you are now the PI (congrats).\n\nWhat’s the new question?\n\nDoes it fall under the same challenge of statistics, or a new one?\n\nWhat measurement would you need to investigate the question?\n\nEvaluate the validity and reliability of this measurement.\nHow would you get the sample?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Evaluate a study design",
-    "text": "Evaluate a study design\nSend your PI to a new group for study design peer review.\n\nThe PI explains the original claim and the follow up study to the reviewers.\nThe reviewers ask clarifying questions until they understand:\n\nThe context of the new study.\nWhich challenge of statistics is being investigated.\nHow the study design addresses validity, reliability, and potential sampling issues."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sampling distribution",
-    "text": "Sampling distribution\nYou’ve all drawn samples and estimated the total weight of the bag.\nNow, let’s see the sampling distribution - the distribution of your estimates based on your samples."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "What’s our inference?",
-    "text": "What’s our inference?\nTurn to the student next to you. Based on the sampling distribution, what do you think is the total weight of the bag?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#discussion",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#discussion",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Discussion",
-    "text": "Discussion\n\nAs a class, were we too low or too high?\n\nBy how much?\n\nHow would we design a representative sampling strategy?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Preparing for week 2",
-    "text": "Preparing for week 2\nTopic: Foundations of inference\n\nComplete the readings and pre-recorded lectures.\n\n\nHomework 1 will be released tomorrow.\nStart thinking about your final project!\n\nWhat question do you want to investigate?\nWhat data are relevant?\nAn exploratory analysis is due at the end of week 2."
-  },
-  {
-    "objectID": "homework.html",
-    "href": "homework.html",
-    "title": "Homework",
-    "section": "",
-    "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nAssignment\nDate Posted\nDate Due\nRevisions Deadline\n\n\n\n\nHomework 1\n10/1\n10/11\n10/25\n\n\nHomework 2\n10/22\n11/1\n11/15\n\n\nHomework 3\n11/19\n11/29\n12/9"
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html",
-    "href": "course-materials/labs/lab5.html",
-    "title": "Lab 5: Concept maps",
-    "section": "",
-    "text": "Each week this quarter, you’ve either learned new tools (e.g., permutation with sample()) or new ways to connect tools you already had (e.g., going from one predictor in lm() to more than one). Today you’ll step back and look at the toolbox as a whole.\nLast week, your group brainstormed key terms from one session in Weeks 1-4. Today, you’ll team up with the other group from your week to make a concept map for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map."
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html#overview",
-    "href": "course-materials/labs/lab5.html#overview",
-    "title": "Lab 5: Concept maps",
-    "section": "",
-    "text": "Each week this quarter, you’ve either learned new tools (e.g., permutation with sample()) or new ways to connect tools you already had (e.g., going from one predictor in lm() to more than one). Today you’ll step back and look at the toolbox as a whole.\nLast week, your group brainstormed key terms from one session in Weeks 1-4. Today, you’ll team up with the other group from your week to make a concept map for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map."
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html#a-guide-to-making-useful-concept-maps",
-    "href": "course-materials/labs/lab5.html#a-guide-to-making-useful-concept-maps",
-    "title": "Lab 5: Concept maps",
-    "section": "A guide to making useful concept maps",
-    "text": "A guide to making useful concept maps\nThere are three levels of usefulness, each building on the previous one. Aim to reach the third level!\n\nLevel one: concept list\nThis is the result of your brainstorm: a list of keywords and concepts for the week. It’s an essential first step, and the raw material for building something more useful.\n\n\nLevel two: hierarchical concepts\nArrange your concepts hierarchically, so core concepts are in the middle and supporting concepts branch off of them. Connect related concepts with lines. This structure shows both priority and relationships. But don’t stop here!\n\n\nLevel three: linking words\nThis is the easiest step to skip, but it’s the most important. Linking words turn undefined connections into a useful mental model. This is how you internalize the relationships between, for example, standard deviation, standard error, and \\(\\sigma\\).\n\n\n\nA concept map about concept maps, exhibiting hierarchical concepts related by linking words"
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html#instructions",
-    "href": "course-materials/labs/lab5.html#instructions",
-    "title": "Lab 5: Concept maps",
-    "section": "Instructions",
-    "text": "Instructions\n\nFind your group members (e.g., Week 1 Monday) and your counterparts (e.g., Week 1 Wednesday).\nShare your keywords with each other and create a combined list. Revise your combined list by adding, editing, or removing terms where helpful. Write each concept on a sticky note. Now you’ve reached level one: a concept list.\nAs a group, arrange your concepts hierarchically. Identify the most important concepts and the supporting concepts related to them. Move the sticky notes around to reflect the hierarchy. Once you’re all happy with the configuration, make a digital version. You can use presentation software (e.g., Google Slides), diagramming tools (e.g., Lucid), or sketching/notetaking apps. Now you’ve reached level two: hierarchical concepts.\nGive each link between concepts one or more linking words. Examples include “leads to”, “depends on”, “is a type of”, and “produces”. This is the tricky part, and you’ll likely need to rearrange your concepts as you go. Now you’ve reached level three: linking words.\nExport your digital concept map to an image or PDF and add it to this shared presentation."
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html#tips",
-    "href": "course-materials/labs/lab5.html#tips",
-    "title": "Lab 5: Concept maps",
-    "section": "Tips",
-    "text": "Tips\n\nThe goal of a concept map is to see the forest for the trees. Now is not the time for in-the-weeds detail. Your map should be a visual explanation of how the tools in your toolbox are related.\nYou know your linking words work if the two concepts and their link read as a complete thought (e.g., “Lead paint flakes into soil lead”).\nThere’s no such thing as a “perfect” or “correct” concept map. A concept map is useful if it helps turn individual pieces of knowledge into a more cohesive whole."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nDebrief the parking lot\nRandomness and intuition\nSampling distribution and permutation test"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#is-randomness-intuitive",
-    "href": "course-materials/lecture-slides/week2_monday.html#is-randomness-intuitive",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Is randomness intuitive?",
-    "text": "Is randomness intuitive?\nIn this activity, we will compare truly random sequences with pseudo-random sequences.\nSee the handout for instructions."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#what-is-the-takeaway-message",
-    "href": "course-materials/lecture-slides/week2_monday.html#what-is-the-takeaway-message",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "What is the takeaway message?",
-    "text": "What is the takeaway message?\nHow do the results of this activity motivate the practice of statistical thinking?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#how-variable-are-samples-from-the-same-population",
-    "href": "course-materials/lecture-slides/week2_monday.html#how-variable-are-samples-from-the-same-population",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "How variable are samples from the same population?",
-    "text": "How variable are samples from the same population?\nIn this activity, we will:\n\nCollect samples and create a sampling distribution.\nConduct a (micro) permutation test.\n\nSee the handout for instructions."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#sampling-distributions",
-    "href": "course-materials/lecture-slides/week2_monday.html#sampling-distributions",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sampling distributions",
-    "text": "Sampling distributions\n\nForm 8 groups of 4-5 students.\nEach group draws a random sample.\nWe’ll visualize the sampling distribution as a class."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#permutation-test",
-    "href": "course-materials/lecture-slides/week2_monday.html#permutation-test",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation test",
-    "text": "Permutation test\n\nIn your same group, conduct a (micro) permutation test.\n“Micro” because 10k iterations would be too time consuming (thank you, R!).\nWe’ll compare null distributions as a class."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#foundations-of-inference-1",
-    "href": "course-materials/lecture-slides/week2_monday.html#foundations-of-inference-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Foundations of inference",
-    "text": "Foundations of inference\n\nA sample is a random glimpse at a population.\nInference uses that sample to estimate something about the population, with uncertainty.\nWe rely on statistical inference as a check against our cognitivie biases - it’s easy to “see” patterns that are just random chance!"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week3_wednesday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week3_wednesday.html#todays-agenda",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nCategorical predictors worksheet\nAmerican birds\nSimulating categorical predictors"
-  },
-  {
-    "objectID": "course-materials/week1.html",
-    "href": "course-materials/week1.html",
-    "title": "Exploring data",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability  Reliability of Soil Lead Measurements\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
-  },
-  {
-    "objectID": "course-materials/week1.html#lecture-materials",
-    "href": "course-materials/week1.html#lecture-materials",
-    "title": "Exploring data",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability  Reliability of Soil Lead Measurements\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
-  },
-  {
-    "objectID": "course-materials/week1.html#additional-materials",
-    "href": "course-materials/week1.html#additional-materials",
-    "title": "Exploring data",
-    "section": "Additional materials",
-    "text": "Additional materials\nPhilip B. Stark, Andrea Saltelli, Cargo-cult Statistics and Scientific Crisis, Significance, Volume 15, Issue 4, August 2018, Pages 40–43, https://doi.org/10.1111/j.1740-9713.2018.01174.x\nSierra Club interview with mark! Lopez\nWhat we know about California’s largest toxic cleanup: Thousands of L.A. County homes tainted with lead\nJill E. Johnston, Mark Lopez, Stephanie Prieto, Elizabeth Kamai, Bhavna Shamasunder; Get the Lead Out: A Community-Driven Approach to Characterize Urban Soil Lead Levels near a Battery Smelter. Environ. Sci. Technol. 14 April 2026; 60 (14): 11002–11012. https://doi.org/10.1021/acs.est.5c14197"
-  },
-  {
-    "objectID": "course-materials/week2.html",
-    "href": "course-materials/week2.html",
-    "title": "Foundations of inference",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  Foundations of inference  Permutation  Bootstrapping\n\n\nLab\nInvestigating claims using inference  Solutions\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21  Mathematical models for inference  Simulating DGPs in R"
-  },
-  {
-    "objectID": "course-materials/week2.html#lecture-materials",
-    "href": "course-materials/week2.html#lecture-materials",
-    "title": "Foundations of inference",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  Foundations of inference  Permutation  Bootstrapping\n\n\nLab\nInvestigating claims using inference  Solutions\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21  Mathematical models for inference  Simulating DGPs in R"
-  },
-  {
-    "objectID": "course-materials/week2.html#additional-materials",
-    "href": "course-materials/week2.html#additional-materials",
-    "title": "Foundations of inference",
-    "section": "Additional materials",
-    "text": "Additional materials\n\nThe Permutation Test A fun visual example where you take on the role of an alpaca shepherd.\nBootstrapping Main Ideas!!! Part of the StatQuest series of videos (an excellent resource itself)."
-  },
-  {
-    "objectID": "course-materials/week4.html",
-    "href": "course-materials/week4.html",
-    "title": "Multiple regression",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet (Solutions)\nCIR 3  Interactions  Interactions in R"
-  },
-  {
-    "objectID": "course-materials/week4.html#lecture-materials",
-    "href": "course-materials/week4.html#lecture-materials",
-    "title": "Multiple regression",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet (Solutions)\nCIR 3  Interactions  Interactions in R"
-  },
-  {
-    "objectID": "course-materials/week6.html",
-    "href": "course-materials/week6.html",
-    "title": "t-test, ANOVA, F-test",
-    "section": "",
-    "text": "Under construction"
-  },
-  {
-    "objectID": "course-materials/week8.html",
-    "href": "course-materials/week8.html",
-    "title": "Generalized linear models",
-    "section": "",
-    "text": "Under construction"
-  },
-  {
-    "objectID": "final-project.html",
-    "href": "final-project.html",
-    "title": "Final Project",
-    "section": "",
-    "text": "Most of the course material in EDS 222 focuses on a single case study: the Exide battery recycling plant. We will explore data to answer environmental data science questions using statistical thinking. In your final project, you will apply these same skills to a case study of your own choosing. Using real data and appropriate analyses, you will write a technical blog post investigating an environmental question.\nYour technical blog post is a valuable contribution to your professional portfolio. The analysis in your project will demonstrate your competency in statistical thinking and tools. But on its own, an analysis has no impact. Just as importantly, your writing will show that you can think critically about questions and data, and communicate effectively about methods and interpretation.\nIn terms of complexity and detail, it should fall somewhere between a news article and peer-reviewed research. This article on Medium is a good representative. Just be aware that it uses some techniques you won’t see until EDS 241."
-  },
-  {
-    "objectID": "final-project.html#timeline",
-    "href": "final-project.html#timeline",
-    "title": "Final Project",
-    "section": "Timeline",
-    "text": "Timeline\nYou will have multiple deliverables and checkpoints during the quarter that will scaffold your final project. These assignments are ungraded. Their purpose is to provide you with structure and instructor feedback early and often.\n\n\n\nWeek\nDeliverable\nDescription\n\n\n\n\n2\nExploratory analysis\nNumerical and graphical summaries of data relevant to your question.\n\n\n5\nBlog post proposal\nA description of your question and data, with initial ideas for your analysis.\n\n\n9\nBlog post first draft\nA completed first draft of your blog post.\n\n\nFinals\nBlog post final draft\nThe final draft of your blog post."
-  },
-  {
-    "objectID": "final-project.html#rubric",
-    "href": "final-project.html#rubric",
-    "title": "Final Project",
-    "section": "Rubric",
-    "text": "Rubric\nYour final project will be assessed according to the following rubric.\n\nQuestion and data (15%)\nAn analysis means nothing without context! Before you show off your technical aptitude, give your audience motivation to care about your question.\nThe blog post provides context and background for the question\nThe data are explained using text and figures\nThe theorized causal relationships are described with a DAG\n\n\nStatistical model (35%)\nIt is often said, “All models are wrong, but some are useful.” Describe your modeling approach in sufficient detail to understand both its utility as well as its limitations.\nThe statistical model is explained conceptually and using formal statistical notation\nThe choice of model is justified based on the characteristics of the data and model assumptions\nPotential limitations of the model and data are considered\n\n\nInference (35%)\nInterpret your model in the context of your question and data. Remember that confidence intervals and p-values are tools for inference, not goals in of themselves. A robust interpretation of a non-significant result is far more compelling than a superficial treatment of a small p-value.\nHypotheses are stated in plain language and with visualizations\nModel estimates are presented with appropriate uncertainty\nA hypothesis is tested and the evidence is interpreted\n\n\nProfessionalism (15%)\nYour portfolio pieces will feature in your future job applications. This final project is not just about a grade in a class, it’s a part of your job search. You’re going to put a lot of work into this project - let’s make sure hiring managers see the fruits of that labor.\nThe overall appearance of the blog post (e.g., figures, code outputs) is portfolio-quality\nThe writing is comprehensible to a technical audience\nThe project repository is well-organized and appropriately documented"
+    "objectID": "course-materials/labs/simulate-categorical-solutions.html#visualize-the-data-and-model",
+    "href": "course-materials/labs/simulate-categorical-solutions.html#visualize-the-data-and-model",
+    "title": "Simulating categorical data",
+    "section": "Visualize the data and model",
+    "text": "Visualize the data and model\nFill in the blanks of the ggplot call to complete the visualization.\nannotate() adds one-off geometries to a ggplot. The following annotations represent \\(\\beta_0\\) and \\(\\beta_1\\).\n\nbetas &lt;- coef(categorical_lm)\n\nggplot(simulated_data, aes(x, y)) +\n  geom_point(position = position_jitter(width = 0.2)) +\n  # beta_0 = mean of reference level\n  annotate(\"point\", x = 1, y = betas[1], color = \"cornflowerblue\", size = 5) +\n  # beta_1 = difference from reference level\n  annotate(\n    \"segment\",\n    x = 1.5,\n    xend = 1.5,\n    y = betas[1],\n    yend = sum(betas),\n    color = \"cornflowerblue\",\n    linewidth = 3\n  ) +\n  # beta_0 + beta_1 = mean of second level\n  annotate(\"point\", x = 2, y = sum(betas), color = \"cornflowerblue\", size = 5)"
   },
   {
     "objectID": "course-materials/lecture-slides/week1_monday.html#statistics-for-environmental-data-science",
@@ -1995,277 +1617,795 @@
     "text": "Optimal stress\nRemember, there is an optimal level of stress for learning.\nIf you’re outside the optimal, please come to your instructors!\n\nYerkes-Dodson Curve"
   },
   {
-    "objectID": "course-materials/labs/simulate-categorical-solutions.html",
-    "href": "course-materials/labs/simulate-categorical-solutions.html",
-    "title": "Simulating categorical data",
+    "objectID": "final-project.html",
+    "href": "final-project.html",
+    "title": "Final Project",
     "section": "",
-    "text": "library(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.1     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.3     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nset.seed(222)\ntheme_set(theme_bw())"
+    "text": "Most of the course material in EDS 222 focuses on a single case study: the Exide battery recycling plant. We will explore data to answer environmental data science questions using statistical thinking. In your final project, you will apply these same skills to a case study of your own choosing. Using real data and appropriate analyses, you will write a technical blog post investigating an environmental question.\nYour technical blog post is a valuable contribution to your professional portfolio. The analysis in your project will demonstrate your competency in statistical thinking and tools. But on its own, an analysis has no impact. Just as importantly, your writing will show that you can think critically about questions and data, and communicate effectively about methods and interpretation.\nIn terms of complexity and detail, it should fall somewhere between a news article and peer-reviewed research. This article on Medium is a good representative. Just be aware that it uses some techniques you won’t see until EDS 241."
   },
   {
-    "objectID": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-predictor-variable",
-    "href": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-predictor-variable",
-    "title": "Simulating categorical data",
-    "section": "Simulate the predictor variable",
-    "text": "Simulate the predictor variable\nCreate a variable called x. It should be categorical with 50 values of two levels, “A” and “B”. Simulate it using the sample() function.\nThen, choose a name for the dummy variable.\n\nx &lt;- sample(c(\"A\", \"B\"), size = 50, replace = TRUE)\nxB &lt;- ifelse(x == \"A\", 0, 1)"
+    "objectID": "final-project.html#timeline",
+    "href": "final-project.html#timeline",
+    "title": "Final Project",
+    "section": "Timeline",
+    "text": "Timeline\nYou will have multiple deliverables and checkpoints during the quarter that will scaffold your final project. These assignments are ungraded. Their purpose is to provide you with structure and instructor feedback early and often.\n\n\n\nWeek\nDeliverable\nDescription\n\n\n\n\n2\nExploratory analysis\nNumerical and graphical summaries of data relevant to your question.\n\n\n5\nBlog post proposal\nA description of your question and data, with initial ideas for your analysis.\n\n\n9\nBlog post first draft\nA completed first draft of your blog post.\n\n\nFinals\nBlog post final draft\nThe final draft of your blog post."
   },
   {
-    "objectID": "course-materials/labs/simulate-categorical-solutions.html#choose-your-simulation-parameters",
-    "href": "course-materials/labs/simulate-categorical-solutions.html#choose-your-simulation-parameters",
-    "title": "Simulating categorical data",
-    "section": "Choose your simulation parameters",
-    "text": "Choose your simulation parameters\nCreate variables for \\(\\beta_0 = -10\\), \\(\\beta_1 = 20\\), and \\(sigma = 8\\).\n\nbeta_0 &lt;- -10\nbeta_1 &lt;- 20\nsigma &lt;- 8"
+    "objectID": "final-project.html#rubric",
+    "href": "final-project.html#rubric",
+    "title": "Final Project",
+    "section": "Rubric",
+    "text": "Rubric\nYour final project will be assessed according to the following rubric.\n\nQuestion and data (15%)\nAn analysis means nothing without context! Before you show off your technical aptitude, give your audience motivation to care about your question.\nThe blog post provides context and background for the question\nThe data are explained using text and figures\nThe theorized causal relationships are described with a DAG\n\n\nStatistical model (35%)\nIt is often said, “All models are wrong, but some are useful.” Describe your modeling approach in sufficient detail to understand both its utility as well as its limitations.\nThe statistical model is explained conceptually and using formal statistical notation\nThe choice of model is justified based on the characteristics of the data and model assumptions\nPotential limitations of the model and data are considered\n\n\nInference (35%)\nInterpret your model in the context of your question and data. Remember that confidence intervals and p-values are tools for inference, not goals in of themselves. A robust interpretation of a non-significant result is far more compelling than a superficial treatment of a small p-value.\nHypotheses are stated in plain language and with visualizations\nModel estimates are presented with appropriate uncertainty\nA hypothesis is tested and the evidence is interpreted\n\n\nProfessionalism (15%)\nYour portfolio pieces will feature in your future job applications. This final project is not just about a grade in a class, it’s a part of your job search. You’re going to put a lot of work into this project - let’s make sure hiring managers see the fruits of that labor.\nThe overall appearance of the blog post (e.g., figures, code outputs) is portfolio-quality\nThe writing is comprehensible to a technical audience\nThe project repository is well-organized and appropriately documented"
   },
   {
-    "objectID": "course-materials/labs/simulate-categorical-solutions.html#calculate-the-expected",
-    "href": "course-materials/labs/simulate-categorical-solutions.html#calculate-the-expected",
-    "title": "Simulating categorical data",
-    "section": "Calculate the expected",
-    "text": "Calculate the expected\nCalculate the expected value of \\(y\\).\n\ny_expected &lt;- beta_0 + beta_1 * xB"
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-response",
-    "href": "course-materials/labs/simulate-categorical-solutions.html#simulate-the-response",
-    "title": "Simulating categorical data",
-    "section": "Simulate the response",
-    "text": "Simulate the response\nYou have the expected value and \\(\\sigma\\). Use these to simulate \\(y\\).\nThen make a data frame with the predictor and response.\n\ny &lt;- rnorm(\n  n = 50,\n  mean = y_expected,\n  sd = sigma\n)\n\nsimulated_data &lt;- tibble(\n  x,\n  y\n)"
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical-solutions.html#fit-a-model",
-    "href": "course-materials/labs/simulate-categorical-solutions.html#fit-a-model",
-    "title": "Simulating categorical data",
-    "section": "Fit a model",
-    "text": "Fit a model\nFit a linear model to the response and predictor variables.\n\ncategorical_lm &lt;- lm(y ~ x, data = simulated_data)\n# Verify the model coefficients approximate the simulation parameters\nsummary(categorical_lm)\n\n\nCall:\nlm(formula = y ~ x, data = simulated_data)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-22.397  -3.321   1.011   5.308  17.075 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)   -9.798      1.576  -6.218 1.16e-07 ***\nxB            20.396      2.274   8.968 7.91e-12 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 8.035 on 48 degrees of freedom\nMultiple R-squared:  0.6262,    Adjusted R-squared:  0.6185 \nF-statistic: 80.42 on 1 and 48 DF,  p-value: 7.905e-12"
-  },
-  {
-    "objectID": "course-materials/labs/simulate-categorical-solutions.html#visualize-the-data-and-model",
-    "href": "course-materials/labs/simulate-categorical-solutions.html#visualize-the-data-and-model",
-    "title": "Simulating categorical data",
-    "section": "Visualize the data and model",
-    "text": "Visualize the data and model\nFill in the blanks of the ggplot call to complete the visualization.\nannotate() adds one-off geometries to a ggplot. The following annotations represent \\(\\beta_0\\) and \\(\\beta_1\\).\n\nbetas &lt;- coef(categorical_lm)\n\nggplot(simulated_data, aes(x, y)) +\n  geom_point(position = position_jitter(width = 0.2)) +\n  # beta_0 = mean of reference level\n  annotate(\"point\", x = 1, y = betas[1], color = \"cornflowerblue\", size = 5) +\n  # beta_1 = difference from reference level\n  annotate(\n    \"segment\",\n    x = 1.5,\n    xend = 1.5,\n    y = betas[1],\n    yend = sum(betas),\n    color = \"cornflowerblue\",\n    linewidth = 3\n  ) +\n  # beta_0 + beta_1 = mean of second level\n  annotate(\"point\", x = 2, y = sum(betas), color = \"cornflowerblue\", size = 5)"
-  },
-  {
-    "objectID": "course-materials/labs/lab4-solution.html",
-    "href": "course-materials/labs/lab4-solution.html",
-    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "objectID": "course-materials/week8.html",
+    "href": "course-materials/week8.html",
+    "title": "Generalized linear models",
     "section": "",
-    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
+    "text": "Under construction"
   },
   {
-    "objectID": "course-materials/labs/lab4-solution.html#before-you-code",
-    "href": "course-materials/labs/lab4-solution.html#before-you-code",
-    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "objectID": "course-materials/week6.html",
+    "href": "course-materials/week6.html",
+    "title": "t-test, ANOVA, F-test",
     "section": "",
-    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
+    "text": "Under construction"
   },
   {
-    "objectID": "course-materials/labs/lab4-solution.html#simulate-the-data",
-    "href": "course-materials/labs/lab4-solution.html#simulate-the-data",
-    "title": "Lab 4: Simulate Simpson’s Paradox",
-    "section": "Simulate the data",
-    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta\\)s and \\(\\sigma\\)). Define them here:\n\n# These values chosen to represent a scenario where typing faster increases\n# typos, but faster typists on average commit fewer typos. If you ignore the\n# second predictor (who is typing) then an apparent negative relationship\n# emerges, suggesting typing faster reduces typos.\nbeta_0 &lt;- 10 # Intercept\nbeta_1 &lt;- 0.1 # Additional typos per increase in speed\nbeta_2 &lt;- -10 # Difference between typist B and the reference level (typist A)\nsigma &lt;- 3 # Standard deviation of the residuals\n\n\nGenerate random values\n\nSimulate your predictor variables. Remember, for Simpson’s paradox to emerge, there has to be a dependency between the two predictor variables.\n\n\n# Sample size\nN &lt;- 50\n# Typist identities\ntypist &lt;- sample(c(\"A\", \"B\"), N, replace = TRUE)\n# Dummy variable for typist B\ntypistB &lt;- ifelse(typist == \"B\", 1, 0)\n# Typing speed is _greater_ for typist B, who is also less error-prone\ntyping_speed &lt;- rnorm(N, mean = ifelse(typist == \"B\", 100, 45), sd = 15)\n\n\nCalculate the expected value of the response. This is similar to regression with a single predictor, but includes a second term.\n\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\nexpected_typos &lt;- beta_0 + beta_1 * typing_speed + beta_2 * typistB\n\n\nSimulate the response variable. This is the same as regression with a single predictor. The expected value incorporates the influence of the multiple predictors. Once you have that number, you just need normally-distributed residuals.\n\n\ntypos &lt;- rnorm(\n  n = N,\n  mean = expected_typos,\n  sd = sigma\n)\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\nsimulated_typing &lt;- tibble(typing_speed, typos, typist)\n\nggplot(simulated_typing, aes(x = typing_speed, y = typos, fill = typist)) +\n  geom_point(size = 2, shape = 21) +\n  scale_fill_manual(values = c(\"peachpuff\", \"lightskyblue1\"))"
+    "objectID": "course-materials/week4.html",
+    "href": "course-materials/week4.html",
+    "title": "Multiple regression",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet (Solutions)\nCIR 3  Interactions  Interactions in R"
   },
   {
-    "objectID": "course-materials/labs/lab4-solution.html#fit-and-interpret-regression-models",
-    "href": "course-materials/labs/lab4-solution.html#fit-and-interpret-regression-models",
-    "title": "Lab 4: Simulate Simpson’s Paradox",
-    "section": "Fit and interpret regression models",
-    "text": "Fit and interpret regression models\n\nFit the models\nUse lm() to fit two regression models to your simulated data.\nIn the first model, only include the first predictor.\n\nspeed_only &lt;- lm(typos ~ typing_speed, data = simulated_typing)\n\nIn the second model, include both predictors.\n\nspeed_typist &lt;- lm(typos ~ typing_speed + typist, data = simulated_typing)\n\n\n\nInterpret the models\nUse summary() on both models. If you’ve simulated the paradox properly, the sign of the coefficient for the first predictor should flip between the models.\n\nsummary(speed_only) # beta_1 ~= -0.04\n\n\nCall:\nlm(formula = typos ~ typing_speed, data = simulated_typing)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-7.0273 -2.4690 -0.5602  1.8565  9.3844 \n\nCoefficients:\n             Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  15.70437    1.31052  11.983 4.91e-16 ***\ntyping_speed -0.04306    0.01665  -2.587   0.0128 *  \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 3.71 on 48 degrees of freedom\nMultiple R-squared:  0.1223,    Adjusted R-squared:  0.104 \nF-statistic:  6.69 on 1 and 48 DF,  p-value: 0.01278\n\nsummary(speed_typist) # beta_1 ~= 0.10\n\n\nCall:\nlm(formula = typos ~ typing_speed + typist, data = simulated_typing)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-4.9963 -1.6735 -0.0618  1.2214 10.0247 \n\nCoefficients:\n              Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)   10.33208    1.35594   7.620 9.46e-10 ***\ntyping_speed   0.09883    0.02724   3.628 0.000701 ***\ntypistB      -10.13145    1.71841  -5.896 3.87e-07 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 2.843 on 47 degrees of freedom\nMultiple R-squared:  0.4955,    Adjusted R-squared:  0.474 \nF-statistic: 23.08 on 2 and 47 DF,  p-value: 1.042e-07"
+    "objectID": "course-materials/week4.html#lecture-materials",
+    "href": "course-materials/week4.html#lecture-materials",
+    "title": "Multiple regression",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet (Solutions)\nCIR 3  Interactions  Interactions in R"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#learning-objectives",
-    "href": "course-materials/pre-class/week2_monday_a.html#learning-objectives",
+    "objectID": "course-materials/week2.html",
+    "href": "course-materials/week2.html",
+    "title": "Foundations of inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  Foundations of inference  Permutation  Bootstrapping\n\n\nLab\nInvestigating claims using inference  Solutions\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21  Mathematical models for inference  Simulating DGPs in R"
+  },
+  {
+    "objectID": "course-materials/week2.html#lecture-materials",
+    "href": "course-materials/week2.html#lecture-materials",
+    "title": "Foundations of inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  Foundations of inference  Permutation  Bootstrapping\n\n\nLab\nInvestigating claims using inference  Solutions\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21  Mathematical models for inference  Simulating DGPs in R"
+  },
+  {
+    "objectID": "course-materials/week2.html#additional-materials",
+    "href": "course-materials/week2.html#additional-materials",
+    "title": "Foundations of inference",
+    "section": "Additional materials",
+    "text": "Additional materials\n\nThe Permutation Test A fun visual example where you take on the role of an alpaca shepherd.\nBootstrapping Main Ideas!!! Part of the StatQuest series of videos (an excellent resource itself)."
+  },
+  {
+    "objectID": "course-materials/week1.html",
+    "href": "course-materials/week1.html",
+    "title": "Exploring data",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability  Reliability of Soil Lead Measurements\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
+  },
+  {
+    "objectID": "course-materials/week1.html#lecture-materials",
+    "href": "course-materials/week1.html#lecture-materials",
+    "title": "Exploring data",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability  Reliability of Soil Lead Measurements\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
+  },
+  {
+    "objectID": "course-materials/week1.html#additional-materials",
+    "href": "course-materials/week1.html#additional-materials",
+    "title": "Exploring data",
+    "section": "Additional materials",
+    "text": "Additional materials\nPhilip B. Stark, Andrea Saltelli, Cargo-cult Statistics and Scientific Crisis, Significance, Volume 15, Issue 4, August 2018, Pages 40–43, https://doi.org/10.1111/j.1740-9713.2018.01174.x\nSierra Club interview with mark! Lopez\nWhat we know about California’s largest toxic cleanup: Thousands of L.A. County homes tainted with lead\nJill E. Johnston, Mark Lopez, Stephanie Prieto, Elizabeth Kamai, Bhavna Shamasunder; Get the Lead Out: A Community-Driven Approach to Characterize Urban Soil Lead Levels near a Battery Smelter. Environ. Sci. Technol. 14 April 2026; 60 (14): 11002–11012. https://doi.org/10.1021/acs.est.5c14197"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week3_wednesday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week3_wednesday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nCategorical predictors worksheet\nAmerican birds\nSimulating categorical predictors"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDebrief the parking lot\nRandomness and intuition\nSampling distribution and permutation test"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#is-randomness-intuitive",
+    "href": "course-materials/lecture-slides/week2_monday.html#is-randomness-intuitive",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Is randomness intuitive?",
+    "text": "Is randomness intuitive?\nIn this activity, we will compare truly random sequences with pseudo-random sequences.\nSee the handout for instructions."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#what-is-the-takeaway-message",
+    "href": "course-materials/lecture-slides/week2_monday.html#what-is-the-takeaway-message",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What is the takeaway message?",
+    "text": "What is the takeaway message?\nHow do the results of this activity motivate the practice of statistical thinking?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#how-variable-are-samples-from-the-same-population",
+    "href": "course-materials/lecture-slides/week2_monday.html#how-variable-are-samples-from-the-same-population",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "How variable are samples from the same population?",
+    "text": "How variable are samples from the same population?\nIn this activity, we will:\n\nCollect samples and create a sampling distribution.\nConduct a (micro) permutation test.\n\nSee the handout for instructions."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#sampling-distributions",
+    "href": "course-materials/lecture-slides/week2_monday.html#sampling-distributions",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Sampling distributions",
+    "text": "Sampling distributions\n\nForm 8 groups of 4-5 students.\nEach group draws a random sample.\nWe’ll visualize the sampling distribution as a class."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#permutation-test",
+    "href": "course-materials/lecture-slides/week2_monday.html#permutation-test",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Permutation test",
+    "text": "Permutation test\n\nIn your same group, conduct a (micro) permutation test.\n“Micro” because 10k iterations would be too time consuming (thank you, R!).\nWe’ll compare null distributions as a class."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#foundations-of-inference-1",
+    "href": "course-materials/lecture-slides/week2_monday.html#foundations-of-inference-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Foundations of inference",
+    "text": "Foundations of inference\n\nA sample is a random glimpse at a population.\nInference uses that sample to estimate something about the population, with uncertainty.\nWe rely on statistical inference as a check against our cognitivie biases - it’s easy to “see” patterns that are just random chance!"
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html",
+    "href": "course-materials/labs/lab5.html",
+    "title": "Lab 5: Concept maps",
+    "section": "",
+    "text": "Each week this quarter, you’ve either learned new tools (e.g., permutation with sample()) or new ways to connect tools you already had (e.g., going from one predictor in lm() to more than one). Today you’ll step back and look at the toolbox as a whole.\nLast week, your group brainstormed key terms from one session in Weeks 1-4. Today, you’ll team up with the other group from your week to make a concept map for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map."
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html#overview",
+    "href": "course-materials/labs/lab5.html#overview",
+    "title": "Lab 5: Concept maps",
+    "section": "",
+    "text": "Each week this quarter, you’ve either learned new tools (e.g., permutation with sample()) or new ways to connect tools you already had (e.g., going from one predictor in lm() to more than one). Today you’ll step back and look at the toolbox as a whole.\nLast week, your group brainstormed key terms from one session in Weeks 1-4. Today, you’ll team up with the other group from your week to make a concept map for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map."
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html#a-guide-to-making-useful-concept-maps",
+    "href": "course-materials/labs/lab5.html#a-guide-to-making-useful-concept-maps",
+    "title": "Lab 5: Concept maps",
+    "section": "A guide to making useful concept maps",
+    "text": "A guide to making useful concept maps\nThere are three levels of usefulness, each building on the previous one. Aim to reach the third level!\n\nLevel one: concept list\nThis is the result of your brainstorm: a list of keywords and concepts for the week. It’s an essential first step, and the raw material for building something more useful.\n\n\nLevel two: hierarchical concepts\nArrange your concepts hierarchically, so core concepts are in the middle and supporting concepts branch off of them. Connect related concepts with lines. This structure shows both priority and relationships. But don’t stop here!\n\n\nLevel three: linking words\nThis is the easiest step to skip, but it’s the most important. Linking words turn undefined connections into a useful mental model. This is how you internalize the relationships between, for example, standard deviation, standard error, and \\(\\sigma\\).\n\n\n\nA concept map about concept maps, exhibiting hierarchical concepts related by linking words"
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html#instructions",
+    "href": "course-materials/labs/lab5.html#instructions",
+    "title": "Lab 5: Concept maps",
+    "section": "Instructions",
+    "text": "Instructions\n\nFind your group members (e.g., Week 1 Monday) and your counterparts (e.g., Week 1 Wednesday).\nShare your keywords with each other and create a combined list. Revise your combined list by adding, editing, or removing terms where helpful. Write each concept on a sticky note. Now you’ve reached level one: a concept list.\nAs a group, arrange your concepts hierarchically. Identify the most important concepts and the supporting concepts related to them. Move the sticky notes around to reflect the hierarchy. Once you’re all happy with the configuration, make a digital version. You can use presentation software (e.g., Google Slides), diagramming tools (e.g., Lucid), or sketching/notetaking apps. Now you’ve reached level two: hierarchical concepts.\nGive each link between concepts one or more linking words. Examples include “leads to”, “depends on”, “is a type of”, and “produces”. This is the tricky part, and you’ll likely need to rearrange your concepts as you go. Now you’ve reached level three: linking words.\nExport your digital concept map to an image or PDF and add it to this shared presentation."
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html#tips",
+    "href": "course-materials/labs/lab5.html#tips",
+    "title": "Lab 5: Concept maps",
+    "section": "Tips",
+    "text": "Tips\n\nThe goal of a concept map is to see the forest for the trees. Now is not the time for in-the-weeds detail. Your map should be a visual explanation of how the tools in your toolbox are related.\nYou know your linking words work if the two concepts and their link read as a complete thought (e.g., “Lead paint flakes into soil lead”).\nThere’s no such thing as a “perfect” or “correct” concept map. A concept map is useful if it helps turn individual pieces of knowledge into a more cohesive whole."
+  },
+  {
+    "objectID": "homework.html",
+    "href": "homework.html",
+    "title": "Homework",
+    "section": "",
+    "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nAssignment\nDate Posted\nDate Due\nRevisions Deadline\n\n\n\n\nHomework 1\n10/1\n10/11\n10/25\n\n\nHomework 2\n10/22\n11/1\n11/15\n\n\nHomework 3\n11/19\n11/29\n12/9"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDebrief the parking lot\nDigging into our statistical claims\nSampling bias experiment"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Activity guide",
+    "text": "Activity guide\n\nCount off into groups.\nShare your prepared statistical claims.\nCollaboratively design a follow-up study.\nEvaluate another group’s study design."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Form groups",
+    "text": "Form groups\n\nCount off 1-10.\nFind your peers with the same number."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Share your claims",
+    "text": "Share your claims\nTake turns sharing your prepared statistical claims.\n\nWhat’s the claim and where did you find it?\nWhat is the relevant challenge of statistics?\nWhat’s the most salient variable?\n\nWhat makes the variable valid?\nHow reliable is the variable?\n\nHow was the sample collected?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Design a follow-up study",
+    "text": "Design a follow-up study\nAs a group, choose one claim to design a follow-up study for. If your claim was chosen, you are now the PI (congrats).\n\nWhat’s the new question?\n\nDoes it fall under the same challenge of statistics, or a new one?\n\nWhat measurement would you need to investigate the question?\n\nEvaluate the validity and reliability of this measurement.\nHow would you get the sample?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Evaluate a study design",
+    "text": "Evaluate a study design\nSend your PI to a new group for study design peer review.\n\nThe PI explains the original claim and the follow up study to the reviewers.\nThe reviewers ask clarifying questions until they understand:\n\nThe context of the new study.\nWhich challenge of statistics is being investigated.\nHow the study design addresses validity, reliability, and potential sampling issues."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Sampling distribution",
+    "text": "Sampling distribution\nYou’ve all drawn samples and estimated the total weight of the bag.\nNow, let’s see the sampling distribution - the distribution of your estimates based on your samples."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What’s our inference?",
+    "text": "What’s our inference?\nTurn to the student next to you. Based on the sampling distribution, what do you think is the total weight of the bag?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#discussion",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#discussion",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Discussion",
+    "text": "Discussion\n\nAs a class, were we too low or too high?\n\nBy how much?\n\nHow would we design a representative sampling strategy?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Preparing for week 2",
+    "text": "Preparing for week 2\nTopic: Foundations of inference\n\nComplete the readings and pre-recorded lectures.\n\n\nHomework 1 will be released tomorrow.\nStart thinking about your final project!\n\nWhat question do you want to investigate?\nWhat data are relevant?\nAn exploratory analysis is due at the end of week 2."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDiscuss final project deliverable\nP-values, two ways\nConfidence intervals, two ways"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Exploratory data analysis",
+    "text": "Exploratory data analysis\n\nIts purpose is to get you started early and give you feedback while your ideas are still taking shape. You are not committing to a question or dataset."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Check in with your peers",
+    "text": "Check in with your peers\nClose your laptops and pull out a sheet of paper. Take 3 minutes to write down:\n\n\nYour question\n\nIf you have one, paraphrase it\nIf you don’t, brainstorm one possible question\n\n\nYour dataset\n\nIf you’ve picked one, what is it and where is it from?\nIf you haven’t, what kind of data would help your question?\n\n\nA challenge you’ve encountered\n\nFraming a question?\nFinding data?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Check in with your peers",
+    "text": "Check in with your peers\nForm pairs. In turns, share your question, data, and challenge.\nTake 10 minutes to provide each other with feedback. For example:\n\nIs the scope of the question feasible? If you had to narrow in on one part, what would it be?\nHow valid are the measurements in the data for the question? What tradeoffs are there between validity and sample size?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Permutation test vs normal approximation",
+    "text": "Permutation test vs normal approximation\nYou are welcome to work in groups of 2-3 for this activity.\nConnect to Workbench and clone the repo https://github.com/eds-222-stats-f26/eds-222-inference (I’ll put the link on Slack).\nComplete the activity in p-values.qmd.\nWe’ll use 30 minutes for this.\nWhen you’re done, call your instructor over before continuing."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Bootstrapping vs normal approximation",
+    "text": "Bootstrapping vs normal approximation\nContinue working in the same groups and the same repo.\nComplete the activity in confidence-interval.qmd.\nWe’ll use 30 minutes for this."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html",
+    "href": "course-materials/pre-class/week1_statistical_claims.html",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "",
+    "text": "So far this week, you’ve learned about:\nThe three challenges of statistics\nMeasurements and data\nIn class on Wednesday, we’ll discuss these concepts in the context of statistical claims on topics you’re interested in."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#instructions",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#instructions",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Instructions",
+    "text": "Instructions\nBefore class, find a statistical claim. Search the areas of environmental science you’re passionate and knowledgeable about. This could be in a news article, a YouTube video, a documentary, etc. It’s important that you find a claim that is presented as having statistical support.\nRespond to the prompts in this Google Form about your claim."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#example",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#example",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Example",
+    "text": "Example\nDescribe the claim\nCorals growing near islands with healthy seabird colonies grow more than twice as fast as corals near islands where invasive rats have wiped out the seabirds.\nWhere did you find it?\nAudubon Magazine The Remarkable Healing Power of Seabird Poop for Climate-Stressed Coral Reefs\nWhat challenge of statistics does it fall under?\nGeneralize from treatment to control. The “treatment” is the presence of invasive rats (which extirpate seabirds), the “control” is islands without rats.\nPick the most salient variable in the data. In what ways does it accurately represent what its meant to, and in what ways might it be different? (I.e., assess its validity.)\nCoral growth rate. This was measured using the area of corals from photographs1. The claim about growth rate is really more about mass or volume, however area is a reasonably valid proxy because previous research has established area and mass are highly correlated.\nContinuing with the same variable, what are the limitations on its reliability?\nEstimates of area from photographs are sensitive to the angle of the photo and the judgement of the researcher who traces the photo. Although those factors can affect reliability, the study used photos from divers, which are more reliable than photos taken by aircraft or satellites.\nContinuing with the same variable, how was the sample collected? Were there obstacles to selecting a representative sample?\nThe sample came from twelve islands in the Chagos Archipelago (six had rats, six didn’t). There is potential selection bias because this was an observational study, so the researchers couldn’t randomize which islands got rats and which didn’t. Also, the study only looked at one species of coral. It’s possible other corals are more or less affected by seabird abundance."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nThis information isn’t directly in the magazine article, but I’m familiar with the methods. This is why it’s important to pick a statistical claim in a scientific field you’re knowledgeable about!↩︎"
+  },
+  {
+    "objectID": "course-materials/week10.html",
+    "href": "course-materials/week10.html",
+    "title": "Statistics in action!",
+    "section": "",
+    "text": "Under construction"
+  },
+  {
+    "objectID": "course-materials/week3.html",
+    "href": "course-materials/week3.html",
+    "title": "Linear regression",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model  Lab solutions\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors  Simulating categorical predictors - Solutions\nCategorical predictors  Categorical predictors in R"
+  },
+  {
+    "objectID": "course-materials/week3.html#lecture-materials",
+    "href": "course-materials/week3.html#lecture-materials",
+    "title": "Linear regression",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model  Lab solutions\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors  Simulating categorical predictors - Solutions\nCategorical predictors  Categorical predictors in R"
+  },
+  {
+    "objectID": "course-materials/week5.html",
+    "href": "course-materials/week5.html",
+    "title": "Linear model inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nLinear regression inference  Linear regression inference exercise (Solutions)\nIMS 24  Linear regression inference\n\n\nLab\nConcept maps\nNone\n\n\nLecture 2\nCausal inference  Confounders, colliders, and mediators  Final project DAGs\nIMS 25  Backdoor criterion  Confounders, Colliders, and Mediators  Simulating inferences"
+  },
+  {
+    "objectID": "course-materials/week5.html#lecture-materials",
+    "href": "course-materials/week5.html#lecture-materials",
+    "title": "Linear model inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nLinear regression inference  Linear regression inference exercise (Solutions)\nIMS 24  Linear regression inference\n\n\nLab\nConcept maps\nNone\n\n\nLecture 2\nCausal inference  Confounders, colliders, and mediators  Final project DAGs\nIMS 25  Backdoor criterion  Confounders, Colliders, and Mediators  Simulating inferences"
+  },
+  {
+    "objectID": "course-materials/week7.html",
+    "href": "course-materials/week7.html",
+    "title": "Logistic regression",
+    "section": "",
+    "text": "Under construction"
+  },
+  {
+    "objectID": "course-materials/week9.html",
+    "href": "course-materials/week9.html",
+    "title": "Spatio-temporal methods",
+    "section": "",
+    "text": "Under construction"
+  },
+  {
+    "objectID": "index.html#course-description",
+    "href": "index.html#course-description",
+    "title": "Statistics for Environmental Data Science",
+    "section": "Course Description",
+    "text": "Course Description\nStatistics is the science of collecting, manipulating, and analyzing empirical data. In this class, we will learn the statistical fundamentals that will enable us to draw conclusions about the environment and its interaction with social and economic systems. We will cover fundamental statistical concepts and tools, and then apply and expand upon those tools to learn some temporal and spatial statistical methods that are particularly helpful in environmental data science. Welcome!\n\nLearning objectives\nThe goal of this course is to enable MEDS students to confidently and competently apply statistical tools to socio-environmental datasets. Essential skills and concepts are:\n\nSummarize data numerically and graphically\nInterpret random variables\nSimulate data to test assumptions\nDescribe models using statistical notation\nDraw DAGs to clarify causal relationships\nQuantify uncertainty to perform inference"
+  },
+  {
+    "objectID": "index.html#teaching-team",
+    "href": "index.html#teaching-team",
+    "title": "Statistics for Environmental Data Science",
+    "section": "Teaching Team",
+    "text": "Teaching Team\n\n\n\nInstructor\n\nMax Czapanskiy\nEmail: maxczap@ucsb.edu\n\nTeaching Assistant\n\nSloane Stephenson\nEmail: gstephenson@ucsb.edu"
+  },
+  {
+    "objectID": "course-materials/pre-class/week2_wednesday.html#learning-objectives",
+    "href": "course-materials/pre-class/week2_wednesday.html#learning-objectives",
     "title": "EDS 222: Statistics for Environmental Data Science",
     "section": "Learning objectives",
-    "text": "Learning objectives\n\nApply randomization to inferential questions\nUse permutation to quantify uncertainty for yes/no questions\nUse bootstrapping to quantify uncertainty for how much? questions"
+    "text": "Learning objectives\n\nUse parametric distributions to represent sampling distributions\nRelate mathematical models of inference to their randomization-based counterparts\nSimulate a data generating process to check your understanding"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method",
-    "href": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#sampling-is-normal",
+    "href": "course-materials/pre-class/week2_wednesday.html#sampling-is-normal",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Statistics is part of the scientific method",
-    "text": "Statistics is part of the scientific method\n\nAsk a question\nFormulate a (scientific) hypothesis\nConduct a study, experimental or observational\nAnalyze data\nInterpret and communicate the results"
+    "section": "Sampling is normal",
+    "text": "Sampling is normal\n\nGiven sufficient independent observations, many sampling distributions converge to the normal distribution\nWe can use the normal distribution as a stand-in the entire sampling distribution from just one sample\n\nSample -&gt; Normal distribution -&gt; Sampling distribution"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method-1",
-    "href": "course-materials/pre-class/week2_monday_a.html#statistics-is-part-of-the-scientific-method-1",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#normal-sampling-visualized",
+    "href": "course-materials/pre-class/week2_wednesday.html#normal-sampling-visualized",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Statistics is part of the scientific method",
-    "text": "Statistics is part of the scientific method\n\nWhere did lead from the Exide plant end up?\nWind carried more lead NE than SW.\nGather soil cores to measure lead concentrations across the region.\nSTATS STATS STATS\nInterpret and communicate the results"
+    "section": "Normal sampling visualized",
+    "text": "Normal sampling visualized"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#two-types-of-hypotheses",
-    "href": "course-materials/pre-class/week2_monday_a.html#two-types-of-hypotheses",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#parameterizing-the-sampling-distribution",
+    "href": "course-materials/pre-class/week2_wednesday.html#parameterizing-the-sampling-distribution",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Two types of hypotheses",
-    "text": "Two types of hypotheses\n\n\nWhat a scientist means\nHypothesis: a testable, causal explanation for an observation\n\nLead emissions spread via wind.\n\n\nWhat a statistician means\nHypothesis: a quantitative statement about a parameter of the population\n\nThe proportion of homes downwind of the plant with elevated lead levels is greater than those upwind."
+    "section": "Parameterizing the sampling distribution",
+    "text": "Parameterizing the sampling distribution\nRecall a normal distribution’s has two parameters: the mean and the standard deviation\nOur goal is to estimate the mean and standard deviation of the sampling distribution"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#variation-is-natural",
-    "href": "course-materials/pre-class/week2_monday_a.html#variation-is-natural",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#parameterizing-the-sampling-distribution-1",
+    "href": "course-materials/pre-class/week2_wednesday.html#parameterizing-the-sampling-distribution-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Variation is natural",
-    "text": "Variation is natural\nA statistician knows that a difference in a sample (between proportions, means, etc) is insufficient to evaluate a hypothesis.\nSampling is random!\nThe real question: is the difference bigger than we’d expect from sampling? Or is it consistent with sampling variation?"
+    "section": "Parameterizing the sampling distribution",
+    "text": "Parameterizing the sampling distribution\n\n\n\n\\[\n\\mu = p_1 - p_2\n\\]\n\\[\n\\sigma = \\sqrt{\\frac{p_1 (1 - p_1)}{n_1} + \\frac{p_2 (1 - p_2)}{n_2}}\n\\]\n\n\nLet \\(p_1 = 0.60\\), \\(p_2 = 0.52\\), \\(n_1 = n_2 = 50\\)"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#variation-is-natural-1",
-    "href": "course-materials/pre-class/week2_monday_a.html#variation-is-natural-1",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#confidence-intervals-two-ways",
+    "href": "course-materials/pre-class/week2_wednesday.html#confidence-intervals-two-ways",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Variation is natural",
-    "text": "Variation is natural"
+    "section": "Confidence intervals, two ways",
+    "text": "Confidence intervals, two ways\nWith bootstrapping, we resampled the sample to estimate the sampling distribution\nWith a mathematical model, we use the normal distribution to estimate the sampling distribution"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#assess-the-evidence",
-    "href": "course-materials/pre-class/week2_monday_a.html#assess-the-evidence",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#bootstrapping-revisited",
+    "href": "course-materials/pre-class/week2_wednesday.html#bootstrapping-revisited",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Assess the evidence",
-    "text": "Assess the evidence\nGiven that variation is natural in sampling, how do we assess evidence?\nWe can’t gather new data, so we design statistical experiments based on the sample we have."
+    "section": "Bootstrapping revisited",
+    "text": "Bootstrapping revisited"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-is-a-statistical-experiment-for-yesno-questions",
-    "href": "course-materials/pre-class/week2_monday_a.html#permutation-is-a-statistical-experiment-for-yesno-questions",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#confidence-interval-using-a-mathematical-model",
+    "href": "course-materials/pre-class/week2_wednesday.html#confidence-interval-using-a-mathematical-model",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation is a statistical experiment for yes/no questions",
-    "text": "Permutation is a statistical experiment for yes/no questions\nQuestion: Is the proportion of high risk homes higher downwind than upwind?\nLet’s reframe this as:\nQuestion: If there was no relationship between lead risk and wind direction, then how often would our sample be observed?"
+    "section": "Confidence interval using a mathematical model",
+    "text": "Confidence interval using a mathematical model\n\nEstimate the parameters of the normal distribution that approximates the sampling distribution.\n\n\n\\[\n\\mu = \\hat p_1 - \\hat p_2\n\\]\n\\[\n\\sigma = SE = \\sqrt{\\frac{\\hat p_1 (1 - \\hat p_1)}{n_1} + \\frac{\\hat p_2 (1 - \\hat p_2)}{n_2}}\n\\]\n\nWe call our estimate of \\(\\sigma\\) the standard error"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue",
-    "href": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#confidence-interval-using-a-mathematical-model-1",
+    "href": "course-materials/pre-class/week2_wednesday.html#confidence-interval-using-a-mathematical-model-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Random to the rescue",
-    "text": "Random to the rescue\nWe can simulate the “what if there’s no relationship?” scenario by randomizing the predictor variable.\nRandomization breaks the link between predictor and response, but keeps all the variation from the sample."
+    "section": "Confidence interval using a mathematical model",
+    "text": "Confidence interval using a mathematical model\n\nFind the interval containing x% of the probability (e.g., 95% for a 95% CI)"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#procedure",
-    "href": "course-materials/pre-class/week2_monday_a.html#procedure",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#p-values-two-ways",
+    "href": "course-materials/pre-class/week2_wednesday.html#p-values-two-ways",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Procedure",
-    "text": "Procedure\n\\(H_0\\): there is no relationship/effect/etc\n\\(H_A\\): there is a relationship/effect/etc\n\nCalculate the observed value of the statistic (e.g., a difference in proportions)\nShuffle the predictor variable and recalculate the statistic.\nRepeat step 2 until the cows come home (null distribution of the statistic)\nCompare the observed value to the null statistic (p-value)\nReject, or fail to reject, the null hypothesis"
+    "section": "P-values, two ways",
+    "text": "P-values, two ways\nWith permutation, we shuffled the predictor to estimate the null distribution\nWith a mathematical model, we use the normal distribution to estimate the null distribution"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-visualized",
-    "href": "course-materials/pre-class/week2_monday_a.html#permutation-visualized",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#permutation-revisited",
+    "href": "course-materials/pre-class/week2_wednesday.html#permutation-revisited",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation visualized",
-    "text": "Permutation visualized"
+    "section": "Permutation revisited",
+    "text": "Permutation revisited"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#compare-the-observed-to-the-null-statistic",
-    "href": "course-materials/pre-class/week2_monday_a.html#compare-the-observed-to-the-null-statistic",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#p-value-using-a-mathematical-model",
+    "href": "course-materials/pre-class/week2_wednesday.html#p-value-using-a-mathematical-model",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Compare the observed to the null statistic",
-    "text": "Compare the observed to the null statistic"
+    "section": "P-value using a mathematical model",
+    "text": "P-value using a mathematical model\n\nEstimate the parameters of the normal distribution that approximates the null distribution.\n\n\n\\[\n\\mu = 0\n\\]\n\\[\n\\sigma = SE = \\sqrt{\\hat p_{pool} (1 - \\hat p_{pool}) \\left( \\frac{1}{n_1} + \\frac{1}{n_2} \\right) }\n\\]\n\nWhy \\(p_{pool}\\) instead of \\(p_1\\) and \\(p_2\\)?"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#interpret-the-p-value",
-    "href": "course-materials/pre-class/week2_monday_a.html#interpret-the-p-value",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#p-value-using-a-mathematical-model-1",
+    "href": "course-materials/pre-class/week2_wednesday.html#p-value-using-a-mathematical-model-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interpret the p-value",
-    "text": "Interpret the p-value\nA p-value is the probability of seeing the observed sample, if the null hypothesis is true. That’s it.\nIf p is less than some threshold (often 0.05 by default), then we say there is a statistically significant result. This means the sample is improbable under chance alone."
+    "section": "P-value using a mathematical model",
+    "text": "P-value using a mathematical model\n\nFind the probability of observing at least \\(\\hat p_1 - \\hat p_2\\), if the null hypothesis is true.\n\np-value = 0.21"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-the-p-value",
-    "href": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-the-p-value",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#conditions-when-mathematical-models-work-well",
+    "href": "course-materials/pre-class/week2_wednesday.html#conditions-when-mathematical-models-work-well",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Don’t misinterpret the p-value",
-    "text": "Don’t misinterpret the p-value\nThe following are common misconceptions:\n\nA p-value is the probability that the null hypothesis is true\nA statistically significant result is meaningful by real-world standards\nA statistically non-significant result means there’s no effect"
+    "section": "Conditions when mathematical models work well",
+    "text": "Conditions when mathematical models work well\nTwo conditions are required for the mathematical model approach to work well:\n\nIndependence\nSample size"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-recap",
-    "href": "course-materials/pre-class/week2_monday_a.html#permutation-recap",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#independence",
+    "href": "course-materials/pre-class/week2_wednesday.html#independence",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation recap",
-    "text": "Permutation recap\n\nGiven only one sample, how do we estimate the natural variation of the statistic? With randomization!\nPermutation breaks the connection between the predictor and response, simulating the variation of the statistic expected by chance.\nPermutation yields a p-value, which says if your result is statistically significant.\n\nYou are wise enough to hold complexity."
+    "section": "Independence",
+    "text": "Independence\n\nData are independent when observations don’t influence each other.\nControlled experiments are designed to produce independent observations. In observational studies, complete independence is rare.\nCommon sources of dependence include:\n\nGeographic or temporal proximity\nRepeated measures from the same entity\nShared ancestry or social group"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-is-a-statistical-experiment-for-how-much-questions",
-    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-is-a-statistical-experiment-for-how-much-questions",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#sample-size",
+    "href": "course-materials/pre-class/week2_wednesday.html#sample-size",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Bootstrapping is a statistical experiment for “how much?” questions",
-    "text": "Bootstrapping is a statistical experiment for “how much?” questions\nQuestion: How much higher is the proportion of high risk homes downwind than upwind?\nLet’s reframe this as:\nQuestion: What’s the interval that we confidently think contains the population-level parameter?"
+    "section": "Sample size",
+    "text": "Sample size\n\nThe normal approximation fails more often for very small samples\nAs a guideline, each group in the sample should have at least 10 expected successes and failures\n\\(p_1 n_1\\), \\((1 - p_1) n_1\\), \\(p_2 n_2\\), and \\((1 - p_2) n_2\\) all \\(\\ge 10\\)\nWhen proportions are close to 0 or 1, this condition gets harder to meet"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue-1",
-    "href": "course-materials/pre-class/week2_monday_a.html#random-to-the-rescue-1",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#statistical-thinking-is-not-dark-magic.",
+    "href": "course-materials/pre-class/week2_wednesday.html#statistical-thinking-is-not-dark-magic.",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Random to the rescue",
-    "text": "Random to the rescue\n\nWe can simulate the variation in our statistic by resampling the observations.\nWe’re making the critical assumption that our sample is representative of the population\n\nInstead of getting new samples from the population (too hard!) we get “bootstrapped” samples from the sample itself."
+    "section": "Statistical thinking is not dark magic.",
+    "text": "Statistical thinking is not dark magic.\n\nThe rules and procedures are verifiable through simulation.\nGet in the habit of verifying your understanding through simulation.\nLet’s investigate the claim that the standard error of a difference in proportions is:\n\n\\[\nSE = \\sqrt{\\frac{\\hat p_1 (1 - \\hat p_1)}{n_1} + \\frac{\\hat p_2 (1 - \\hat p_2)}{n_2}}\n\\]"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#procedure-1",
-    "href": "course-materials/pre-class/week2_monday_a.html#procedure-1",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#simulating-a-data-generating-process",
+    "href": "course-materials/pre-class/week2_wednesday.html#simulating-a-data-generating-process",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Procedure",
-    "text": "Procedure\n\nCalculate the observed value of the statistic (e.g., a difference in proportions)\nResample the observations with replacement and recalculate the statistic.\nRepeat step 2 until the cows come home (sampling distribution)\nFind the range containing a large percentage of the sampling distribution (confidence interval)"
+    "section": "Simulating a data generating process",
+    "text": "Simulating a data generating process\n\nThe data generating process (DGP) is a model describing how the sample emerges from the population.\nConsider the difference in proportions between pre- and post-1950 homes having soil Pb &gt; 200. The DGP is:\n\nEach observation is TRUE or FALSE\nObservations within and across groups are independent\nObservations within groups are TRUE with a proportion of \\(p_1\\) and \\(p_2\\), respectively"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-visualized",
-    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-visualized",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation",
+    "href": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Bootstrapping visualized",
-    "text": "Bootstrapping visualized"
+    "section": "Steps in the simulation",
+    "text": "Steps in the simulation\n\nChoose the parameters for your simulation\n\n\\[\n\\begin{align}\np_1 &= 0.60 \\\\\nn_1 &= 25 \\\\\np_2 &= 0.52 \\\\\nn_2 &= 25\n\\end{align}\n\\]"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#find-your-confidence-interval",
-    "href": "course-materials/pre-class/week2_monday_a.html#find-your-confidence-interval",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation-1",
+    "href": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation-1",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Find your confidence interval",
-    "text": "Find your confidence interval"
+    "section": "Steps in the simulation",
+    "text": "Steps in the simulation\n\nSimulate a sample using r____() functions and calculate the sample statistic\n\n\nrbinom() for binary TRUE/FALSE variables\n\n\nContinue simulating samples until you reach critical mass (10k usually good)"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#interpret-your-confidence-interval",
-    "href": "course-materials/pre-class/week2_monday_a.html#interpret-your-confidence-interval",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation-2",
+    "href": "course-materials/pre-class/week2_wednesday.html#steps-in-the-simulation-2",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Interpret your confidence interval",
-    "text": "Interpret your confidence interval\nA confidence interval is a range of values that you are confident contains the population parameter.\nBut wait… what exactly are we confident in?\nIf we repeated this procedure 100 times, about 95 of those CIs would contain the population parameter.\nOur confidence is in the procedure’s long-run accuracy."
+    "section": "Steps in the simulation",
+    "text": "Steps in the simulation\n\nCheck your simulation results against the claim\n\n\nDo 95% of sample statistics fall within 1.96 SEs of the population parameter?"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-your-confidence-interval",
-    "href": "course-materials/pre-class/week2_monday_a.html#dont-misinterpret-your-confidence-interval",
+    "objectID": "course-materials/pre-class/week2_wednesday.html#lets-do-it-in-r",
+    "href": "course-materials/pre-class/week2_wednesday.html#lets-do-it-in-r",
     "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Don’t misinterpret your confidence interval",
-    "text": "Don’t misinterpret your confidence interval\nThe following are common misconceptions:\n\nThere’s a 95% chance the 95% CI contains the population parameter\nLarger sample sizes yield more accurate confidence intervals"
+    "section": "Let’s do it in R!",
+    "text": "Let’s do it in R!"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#bootstrapping-recap",
-    "href": "course-materials/pre-class/week2_monday_a.html#bootstrapping-recap",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Bootstrapping recap",
-    "text": "Bootstrapping recap\n\nGiven only one sample, how do we estimate the natural variation of the statistic? With randomization!\nBootstrapping draws “new” samples from the original, simulating the variation of the statistic expected by sampling.\nBootstrapping yields a confidence interval, which describes a range the actual parameter probably falls in.\n\nCIs rigorously communicate uncertainty."
+    "objectID": "course-materials/labs/simulate-categorical.html",
+    "href": "course-materials/labs/simulate-categorical.html",
+    "title": "Simulating categorical data",
+    "section": "",
+    "text": "library(tidyverse)\nset.seed(222)\ntheme_set(theme_bw())"
   },
   {
-    "objectID": "course-materials/pre-class/week2_monday_a.html#permutation-vs-bootstrapping",
-    "href": "course-materials/pre-class/week2_monday_a.html#permutation-vs-bootstrapping",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation vs bootstrapping",
-    "text": "Permutation vs bootstrapping\n\n\nPermutation simulates a scenario with no relationship to answer “yes/no” questions.\n\n\n\n\n\n\n\n\n\n\nBootstrapping simulates the original scenario to answer “how much?” questions."
+    "objectID": "course-materials/labs/simulate-categorical.html#simulate-the-predictor-variable",
+    "href": "course-materials/labs/simulate-categorical.html#simulate-the-predictor-variable",
+    "title": "Simulating categorical data",
+    "section": "Simulate the predictor variable",
+    "text": "Simulate the predictor variable\nCreate a variable called x. It should be categorical with 50 values of two levels, “A” and “B”. Simulate it using the sample() function.\nThen, choose a name for the dummy variable.\n\nx &lt;- _____\n_____ &lt;- ifelse(x == \"A\", 0, 1)"
   },
   {
-    "objectID": "course-materials/labs/lab3.html",
-    "href": "course-materials/labs/lab3.html",
+    "objectID": "course-materials/labs/simulate-categorical.html#choose-your-simulation-parameters",
+    "href": "course-materials/labs/simulate-categorical.html#choose-your-simulation-parameters",
+    "title": "Simulating categorical data",
+    "section": "Choose your simulation parameters",
+    "text": "Choose your simulation parameters\nCreate variables for \\(\\beta_0 = -10\\), \\(\\beta_1 = 20\\), and \\(sigma = 8\\)."
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#calculate-the-expected",
+    "href": "course-materials/labs/simulate-categorical.html#calculate-the-expected",
+    "title": "Simulating categorical data",
+    "section": "Calculate the expected",
+    "text": "Calculate the expected\nCalculate the expected value of \\(y\\).\n\ny_expected &lt;- _____"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#simulate-the-response",
+    "href": "course-materials/labs/simulate-categorical.html#simulate-the-response",
+    "title": "Simulating categorical data",
+    "section": "Simulate the response",
+    "text": "Simulate the response\nYou have the expected value and \\(\\sigma\\). Use these to simulate \\(y\\).\nThen make a data frame with the predictor and response.\n\ny &lt;- ____(\n  n = ____,\n  mean = _____,\n  sd = _____\n)\n\nsimulated_data &lt;- tibble(\n  _____,\n  _____\n)"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#fit-a-model",
+    "href": "course-materials/labs/simulate-categorical.html#fit-a-model",
+    "title": "Simulating categorical data",
+    "section": "Fit a model",
+    "text": "Fit a model\nFit a linear model to the response and predictor variables.\n\ncategorical_lm &lt;- lm(_____ ~ _____, data = _____)\n# Verify the model coefficients approximate the simulation parameters\nsummary(categorical_lm)"
+  },
+  {
+    "objectID": "course-materials/labs/simulate-categorical.html#visualize-the-data-and-model",
+    "href": "course-materials/labs/simulate-categorical.html#visualize-the-data-and-model",
+    "title": "Simulating categorical data",
+    "section": "Visualize the data and model",
+    "text": "Visualize the data and model\nFill in the blanks of the ggplot call to complete the visualization.\nannotate() adds one-off geometries to a ggplot. The following annotations represent \\(\\beta_0\\) and \\(\\beta_1\\).\n\nbetas &lt;- coef(categorical_lm)\n\nggplot(_____, aes(_____, _____)) +\n  geom_point(position = position_jitter(width = 0.2)) +\n  # beta_0 = mean of reference level\n  annotate(\"point\", x = 1, y = betas[1], color = \"cornflowerblue\") +\n  # beta_1 = difference from reference level\n  annotate(\n    \"segment\",\n    x = 1.5,\n    xend = 1.5,\n    y = betas[0],\n    yend = sum(betas),\n    color = \"cornflowerblue\"\n  ) +\n  # beta_0 + beta_1 = mean of second level\n  annotate(\"point\", x = 1, y = sum(betas), color = \"cornflowerblue\")"
+  },
+  {
+    "objectID": "course-materials/labs/lab4.html",
+    "href": "course-materials/labs/lab4.html",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "",
+    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
+  },
+  {
+    "objectID": "course-materials/labs/lab4.html#before-you-code",
+    "href": "course-materials/labs/lab4.html#before-you-code",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "",
+    "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
+  },
+  {
+    "objectID": "course-materials/labs/lab4.html#simulate-the-data",
+    "href": "course-materials/labs/lab4.html#simulate-the-data",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "Simulate the data",
+    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta\\)s and \\(\\sigma\\)). Define them here:\n\nbeta_0 &lt;- ___ # Intercept\nbeta_1 &lt;- ___ # Coefficient for the first (continuous) predictor\nbeta_2 &lt;- ___ # Coefficient for the second (categorical) predictor\nsigma &lt;- ___ # Standard deviation of the residuals\n\n\nGenerate random values\n\nSimulate your predictor variables.\n\nRemember, for Simpson’s paradox to emerge, there has to be a dependency between the two predictor variables. In this case, you have one categorical and one continuous predictor. Simulate the categorical variable first, then use the level of the category when you simulate the continuous variable. For example, if you use rnorm() to simulate the continuous variable, make the mean depend on the category level. Alternatively, if you use runif(), make the min and max depend on the category level. ifelse() is useful here.\n\n# Sample size\nN &lt;- ___\n# Edit the following code to simulate your _categorical_ predictor variable.\nyour_second_predictor &lt;- ___\n\n# Edit the following code to simulate your _continuous_ predictor variable. Make\n# sure it depends on your second predictor!\nyour_first_predictor &lt;- some_random_number_generating_function(\n  n = N,\n  parameters_that_depend_on = your_second_predictor\n)\n\n\nCalculate the expected value of the response. This is similar to regression with a single predictor, but includes a second term.\n\n\\[\ny = \\beta_0 + \\beta_1 x_1 + \\beta_2 x_2\n\\]\n\n# Edit the following code to calculate the _expected_ value of the response\nyour_expected_response &lt;- ____\n\n\nSimulate the response variable. This is the same as regression with a single predictor. The expected value incorporates the influence of the multiple predictors. Once you have that number, you just need normally-distributed residuals.\n\n\n# Edit the following code to simulate your _response_ variable\nyour_response_variable &lt;- _____\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\n# First, put the predictors and response in a data frame all together\n\n# Then, use ggplot to make a scatter plot. Think carefully about which\n# aesthetics to use."
+  },
+  {
+    "objectID": "course-materials/labs/lab4.html#fit-and-interpret-regression-models",
+    "href": "course-materials/labs/lab4.html#fit-and-interpret-regression-models",
+    "title": "Lab 4: Simulate Simpson’s Paradox",
+    "section": "Fit and interpret regression models",
+    "text": "Fit and interpret regression models\n\nFit the models\nUse lm() to fit two regression models to your simulated data.\nIn the first model, only include the first predictor.\n\nyour_model1 &lt;- _____\n\nIn the second model, include both predictors.\n\nyour_model2 &lt;- _____\n\n\n\nInterpret the models\nUse summary() on both models. If you’ve simulated the paradox properly, the sign of the coefficient for the first predictor should flip between the models."
+  },
+  {
+    "objectID": "course-materials/labs/lab3-solution.html",
+    "href": "course-materials/labs/lab3-solution.html",
     "title": "Lab 3: Simulate data and fit a regression model",
     "section": "",
     "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
   },
   {
-    "objectID": "course-materials/labs/lab3.html#before-you-code",
-    "href": "course-materials/labs/lab3.html#before-you-code",
+    "objectID": "course-materials/labs/lab3-solution.html#before-you-code",
+    "href": "course-materials/labs/lab3-solution.html#before-you-code",
     "title": "Lab 3: Simulate data and fit a regression model",
     "section": "",
     "text": "Before you start coding in this document, your group should have completed the sections Design the scenario and Choose your parameters from the handout."
   },
   {
-    "objectID": "course-materials/labs/lab3.html#simulate-the-data",
-    "href": "course-materials/labs/lab3.html#simulate-the-data",
+    "objectID": "course-materials/labs/lab3-solution.html#simulate-the-data",
+    "href": "course-materials/labs/lab3-solution.html#simulate-the-data",
     "title": "Lab 3: Simulate data and fit a regression model",
     "section": "Simulate the data",
-    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta_0\\), \\(\\beta_1\\), and \\(\\sigma\\)). Define them here:\n\nbeta_0 &lt;- ___\nbeta_1 &lt;- ___\nsigma &lt;- ___\n\n\nGenerate random values\n\nSimulate your predictor variable.\n\n\n\n\n\n\n\nTip\n\n\n\nYou may use any random number generating function to generate your predictor variable. Often, it’s simplest to simulate the predictor variable using the uniform distribution. Here’s an example of generating 5 random numbers between 1 and 2:\n\nrunif(n = 5, min = 1, max = 2)\n\n\n\n\n# Edit the following code to simulate your _predictor_ variable\nyour_predictor_variable &lt;- some_random_number_generating_function(\n  n = your_sample_size,\n  any_other_function_parameters_go_here\n)\n\n\nCalculate the expected value of the response.\n\n\n# Edit the following code to calculate the _expected_ value of the response\nexpected_response &lt;- what + goes * here #?\n\n\nSimulate the response variable.\n\n\n# Edit the following code to simulate your _response_ variable\nyour_response_variable &lt;- rnorm(\n  n = your_sample_size,\n  mean = the_expected_value_of_the_response,\n  sd = your_sigma_parameter\n)\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\n# First, put your predictor and response variables into a single data frame.\n\n# Then, use ggplot to make a scatter plot."
+    "text": "Simulate the data\nYou’ve chosen your parameters (\\(\\beta_0\\), \\(\\beta_1\\), and \\(\\sigma\\)). Define them here:\n\n# These values chosen to represent the negative relationship between body size and temperature in marine invertebrates (copepods)\nbeta_0 &lt;- 3000\nbeta_1 &lt;- -55\nsigma &lt;- 100\n\n\nGenerate random values\n\nSimulate your predictor variable.\n\n\n\n\n\n\n\nTip\n\n\n\nYou may use any random number generating function to generate your predictor variable. Often, it’s simplest to simulate the predictor variable using the uniform distribution. Here’s an example of generating 5 random numbers between 1 and 2:\n\nrunif(n = 5, min = 1, max = 2)\n\n[1] 1.931593 1.066361 1.499245 1.000259 1.916364\n\n\n\n\n\n# In the range 2-14degC\ntemp_c &lt;- runif(n = 30, min = 2, max = 14)\n\n\nCalculate the expected value of the response.\n\n\n# Expected length in micrometers (um)\nexpected_length_um &lt;- beta_0 + beta_1 * temp_c\n\n\nSimulate the response variable.\n\n\n# The simulated lengths\nlength_um &lt;- rnorm(\n  n = 30,\n  mean = expected_length_um,\n  sd = sigma\n)\n\nVisualize your simulated data. Verify it’s comparable to your original drawing. If necessary, tweak your parameter values until it represents your scenario reasonably well.\n\n# First, put your predictor and response variables into a single data frame.\nsimulated_lengths &lt;- tibble(temp_c, length_um)\n\n# Then, use ggplot to make a scatter plot.\nggplot(simulated_lengths, aes(x = temp_c, y = length_um)) +\n  geom_point()"
   },
   {
-    "objectID": "course-materials/labs/lab3.html#fit-and-interpret-a-regression-model",
-    "href": "course-materials/labs/lab3.html#fit-and-interpret-a-regression-model",
+    "objectID": "course-materials/labs/lab3-solution.html#fit-and-interpret-a-regression-model",
+    "href": "course-materials/labs/lab3-solution.html#fit-and-interpret-a-regression-model",
     "title": "Lab 3: Simulate data and fit a regression model",
     "section": "Fit and interpret a regression model",
-    "text": "Fit and interpret a regression model\n\nFit the model\nUse lm() to fit a regression model to your simulated data.\n\n\n\n\n\n\nTip\n\n\n\nlm() expects a formula stating your predictor and response variables. It should look like: response ~ predictor.\n\n\n\nyour_model &lt;- lm(your_model_formula, data = your_simulated_data)\n# Use summary() to get the model coefficient estimates and their standard errors\n# Use sigma() to get the model's sigma estimate\n\n\n\nInterpret the model\nRefer back to the worksheet to complete most of this section. When you reach the end (“Test your intuition by modifying your simulation to increase \\(\\sigma\\) and n independently, then re-run it several times.”), come back to this document and use the following code chunks to test your intuition.\nIncrease \\(\\sigma\\)\n\n# Keep your predictor variable the same, but increase sigma by 2x\ndouble_sigma &lt;- ___\n# Modify the following lines of code to re-run your simulation with the bigger sigma\nexpected_response2 &lt;- what + goes * here #?\nyour_response_variable2 &lt;- rnorm(\n  n = ___,\n  mean = ___,\n  sd = ___\n)\nyour_model2 &lt;- lm(___, data = ___)\n\n# Get your betas and their standard errors\n\n# How do they compare to the population parameters, relative to the original simulation?\n\nIncrease n\n\n# Now increase n by 2x. You'll need to create more predictor variable values.\nyour_predictor_variable_2n &lt;- c(\n  your_predictor_variable,\n  additional_predictor_variable_values\n)\n\n# Modify the following lines of code to re-run your simulation with the bigger n\nexpected_response2 &lt;- what + goes * here #?\nyour_response_variable3 &lt;- rnorm(\n  n = the_bigger_sample_size,\n  mean = the_expected_value_of_the_response,\n  sd = your_sigma_parameter\n)\nyour_model3 &lt;- lm(___, data = ___)\n\n# Get your betas and their standard errors\n\n# How do they compare to the population parameters, relative to the original simulation?"
+    "text": "Fit and interpret a regression model\n\nFit the model\nUse lm() to fit a regression model to your simulated data.\n\n\n\n\n\n\nTip\n\n\n\nlm() expects a formula stating your predictor and response variables. It should look like: response ~ predictor.\n\n\n\n# Fit and summarize model\nlength_model &lt;- lm(length_um ~ temp_c, data = simulated_lengths)\nsummary(length_model)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-274.89  -83.84   26.07   78.98  157.39 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 2968.796     44.602  66.562  &lt; 2e-16 ***\ntemp_c       -49.188      5.511  -8.925 1.11e-09 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 109.4 on 28 degrees of freedom\nMultiple R-squared:  0.7399,    Adjusted R-squared:  0.7306 \nF-statistic: 79.65 on 1 and 28 DF,  p-value: 1.114e-09\n\nsigma(length_model)\n\n[1] 109.4127\n\n\n\n\nInterpret the model\nRefer back to the worksheet to complete most of this section. When you reach the end (“Test your intuition by modifying your simulation to increase \\(\\sigma\\) and n independently, then re-run it several times.”), come back to this document and use the following code chunks to test your intuition.\nIncrease \\(\\sigma\\)\n\n# Keep your predictor variable the same, but increase sigma by 2x\ndouble_sigma &lt;- 2 * sigma\n\n# Modify the following lines of code to re-run your simulation with the bigger sigma\nexpected_length_um2 &lt;- beta_0 + beta_1 * temp_c\nlength_um2 &lt;- rnorm(\n  n = 30,\n  mean = expected_length_um,\n  sd = double_sigma\n)\nsimulated_lengths2 &lt;- tibble(temp_c, length_um = length_um2)\nlength_model2 &lt;- lm(length_um ~ temp_c, data = simulated_lengths2)\n\n# Get your betas and their standard errors\nsummary(length_model2)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths2)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-312.39  -79.11   -1.71   94.07  359.98 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 3051.100     70.276  43.416  &lt; 2e-16 ***\ntemp_c       -60.184      8.684  -6.931 1.56e-07 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 172.4 on 28 degrees of freedom\nMultiple R-squared:  0.6317,    Adjusted R-squared:  0.6186 \nF-statistic: 48.03 on 1 and 28 DF,  p-value: 1.557e-07\n\n# How do they compare to the population parameters, relative to the original simulation?\n\nMy \\(\\beta\\) estimates only shifted a little bit (consistent with randomness) but the standard errors got much larger. Bigger residuals mean less certainty about the coefficient estimates.\nIncrease n\n\n# Now increase n by 2x. You'll need to create more predictor variable values.\ntemp_c_2n &lt;- c(\n  temp_c,\n  runif(n = 30)\n)\n\n# Modify the following lines of code to re-run your simulation with the bigger n\nexpected_length_um3 &lt;- beta_0 + beta_1 * temp_c_2n\nlength_um3 &lt;- rnorm(\n  n = 60,\n  mean = expected_length_um3,\n  sd = sigma\n)\nsimulated_lengths3 &lt;- tibble(temp_c = temp_c_2n, length_um = length_um3)\nlength_model3 &lt;- lm(length_um ~ temp_c, data = simulated_lengths3)\n\n# Get your betas and their standard errors\nsummary(length_model3)\n\n\nCall:\nlm(formula = length_um ~ temp_c, data = simulated_lengths3)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-210.040  -64.474    0.891   71.824  185.719 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 2982.626     16.486  180.92   &lt;2e-16 ***\ntemp_c       -54.356      2.874  -18.91   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 94.35 on 58 degrees of freedom\nMultiple R-squared:  0.8605,    Adjusted R-squared:  0.8581 \nF-statistic: 357.7 on 1 and 58 DF,  p-value: &lt; 2.2e-16\n\n# How do they compare to the population parameters, relative to the original simulation?\n\nOnce again, \\(\\beta\\) estimates remained pretty similar, but this time the standard error decreased. Bigger sample size means less uncertainty!"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#todays-plan",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#todays-plan",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s plan",
+    "text": "Today’s plan\n\nReview Monday: inference for regression\nReview causal inference\nHandout: confounders, colliders, and mediators\nGroup activity: a DAG for your final project"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#two-questions-four-tools",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#two-questions-four-tools",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Two questions, four tools",
+    "text": "Two questions, four tools\n\n\n\n\n\n\n\n\n\n\nRandomization\nMathematical model\n\n\n\n\nIs there an effect?\nPermutation: shuffle \\(x\\), refit\nPr(&gt;|t|) in summary()\n\n\nHow big is it?\nBootstrap: resample rows, refit\nconfint()"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#read-the-output",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#read-the-output",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Read the output",
+    "text": "Read the output\n\n\nMonday’s 30 wells: nitrate (mg/L) by farmland within 1 km (%).\n\nsummary(one_sample_lm)\n\n\nCall:\nlm(formula = nitrate ~ ag_pct, data = one_sample)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-4.9072 -0.9275  0.3049  1.0677  5.3920 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept)  3.85554    0.69392   5.556 6.08e-06 ***\nag_pct       0.03724    0.01563   2.382   0.0242 *  \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 1.958 on 28 degrees of freedom\nMultiple R-squared:  0.1685,    Adjusted R-squared:  0.1388 \nF-statistic: 5.675 on 1 and 28 DF,  p-value: 0.02424\n\n\n\n\nconfint(one_sample_lm)\n\n                  2.5 %     97.5 %\n(Intercept) 2.434099126 5.27697527\nag_pct      0.005219117 0.06926359\n\n\nTurn to a neighbor. For the ag_pct coefficient:\n\nWhat are \\(H_0\\) and \\(H_A\\)? What’s the p-value?\nDo we reject \\(H_0\\)?\nInterpret the 95% confidence interval in a sentence."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#interpretations",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#interpretations",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interpretations",
+    "text": "Interpretations\n\n\n\\(H_0: \\beta_1 = 0\\), \\(H_A: \\beta_1 \\ne 0\\). The p-value is 0.024.\nIf farmland had no effect on nitrate, a slope at least as far from 0 as 0.037 would be unlikely (p &lt; 0.05). Reject \\(H_0\\).\nWe are 95% confident that nitrate increases by between 0.005 and 0.069 mg/L for each additional percentage point of farmland."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#true-or-false",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#true-or-false",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "True or false?",
+    "text": "True or false?\n\n\nThe p-value is the probability that \\(H_0\\) is true.\n\nFalse. It’s the probability of a statistic at least this extreme if \\(H_0\\) were true.\n\nIf we repeated the study many times, about 95% of our 95% confidence intervals would contain \\(\\beta_1\\).\n\nTrue. “95% confident” describes the method, not this one interval.\n\nA small p-value means farmland causes higher nitrate.\n\nFalse. That’s what the rest of today is about."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#precise-ne-unbiased",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#precise-ne-unbiased",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Precise \\(\\ne\\) unbiased",
+    "text": "Precise \\(\\ne\\) unbiased\nA small p-value and a narrow confidence interval mean \\(\\hat \\beta_1\\) is precise.\nThey don’t mean it’s unbiased.\n\nIf our model leaves out a confounder, or includes a collider, then \\(\\hat \\beta_1\\) is precisely estimating the wrong thing. More data makes the interval narrower around the wrong value.\n\n\nWhich variables belong in the model? Back to DAGs."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#dag-vocabulary",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#dag-vocabulary",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "DAG vocabulary",
+    "text": "DAG vocabulary\nDirected Acyclic Graph: your theory of what causes what.\n\nNodes: variables (measured or not!)\nArrows: direct causal effects\nPath: any route from \\(x\\) to \\(y\\) along arrows\nCausal path: every arrow points toward \\(y\\)\nBackdoor path: starts with an arrow into \\(x\\)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#open-and-closed-paths",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#open-and-closed-paths",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Open and closed paths",
+    "text": "Open and closed paths\nA path is open if association can flow along it. Each variable on a path either passes it along or blocks it.\n\n\n\n\nMiddle variable\nShape\nNot in model\nIn model\n\n\n\n\nMediator\n\\(x \\rightarrow m \\rightarrow y\\)\nOpen\nClosed\n\n\nConfounder\n\\(x \\leftarrow c \\rightarrow y\\)\nOpen\nClosed\n\n\nCollider\n\\(x \\rightarrow k \\leftarrow y\\)\nClosed\nOpen\n\n\n\n\n\nColliders are the odd one out: adjusting for them opens a path."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#the-backdoor-criterion",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#the-backdoor-criterion",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "The backdoor criterion",
+    "text": "The backdoor criterion\nA set of variables satisfies the backdoor criterion if adjusting for them:\n\nCloses every backdoor path between \\(x\\) and \\(y\\), and\nDoesn’t include any variables caused by \\(x\\)\n\n\nThen the coefficient on \\(x\\) is an unbiased estimate of its causal effect on \\(y\\)."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#confounders-colliders-and-mediators",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#confounders-colliders-and-mediators",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Confounders, colliders, and mediators",
+    "text": "Confounders, colliders, and mediators\n\n\nConfounder\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart TB\n    z((Z))\n    x((X))\n    y((Y))\n    z --&gt; x\n    z --&gt; y\n    x --&gt; y\n\n\n\n\n\n\nCauses \\(x\\) and \\(y\\)\nInclude it\n\nCollider\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart TB\n    x((X))\n    y((Y))\n    z((Z))\n    x --&gt; y\n    x --&gt; z\n    y --&gt; z\n\n\n\n\n\n\nCaused by \\(x\\) and \\(y\\)\nExclude it\n\nMediator\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart TB\n    x((X))\n    z((Z))\n    y((Y))\n    x --&gt; z\n    z --&gt; y\n\n\n\n\n\n\nCaused by \\(x\\), causes \\(y\\)\nIt depends: total or direct effect?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#practice-farmland-and-nitrate",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#practice-farmland-and-nitrate",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Practice: farmland and nitrate",
+    "text": "Practice: farmland and nitrate\n\n\nQuestion: how does Farmland affect groundwater Nitrate?\n\nFlat valley floors (Topography) are easier to farm, and have shallow water tables that collect nitrate\nFarms apply Fertilizer, which leaches into groundwater\nRunoff from farms and nitrate-rich groundwater both feed Algal blooms in nearby streams\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    t((Topography))\n    x((Farmland))\n    f((Fertilizer))\n    y((Nitrate))\n    a((Algal&lt;br/&gt;blooms))\n    t --&gt; x\n    t --&gt; y\n    x --&gt; y\n    x --&gt; f\n    f --&gt; y\n    x --&gt; a\n    y --&gt; a\n\n\n\n\n\n\n\n\n\nWith a neighbor: list every path from Farmland to Nitrate. Which are backdoors? Which are open?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#practice-paths",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#practice-paths",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Practice: paths",
+    "text": "Practice: paths\n\n\n\n\nFarmland → Nitrate (causal)\nFarmland → Fertilizer → Nitrate (causal)\nFarmland ← Topography → Nitrate (open backdoor)\nFarmland → Algal blooms ← Nitrate (non-causal, closed: collider)\n\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    t((Topography))\n    x((Farmland))\n    f((Fertilizer))\n    y((Nitrate))\n    a((Algal&lt;br/&gt;blooms))\n    t --&gt; x\n    t --&gt; y\n    x --&gt; y\n    x --&gt; f\n    f --&gt; y\n    x --&gt; a\n    y --&gt; a\n\n    linkStyle 0,1 stroke:#d62728,stroke-width:5px\n    linkStyle 5,6 stroke:#7f7f7f,stroke-width:3px,stroke-dasharray:5 5"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#practice-adjustment",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#practice-adjustment",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Practice: adjustment",
+    "text": "Practice: adjustment\n\n\nTopography is a confounder. Include it to close path 3.\nAlgal blooms is a collider. Exclude it to keep path 4 closed.\nFertilizer is a mediator. Exclude it for the total effect of farmland, include it for the direct effect.\n\n\n\nFor the total effect:\n\\[\n\\text{Nitrate} = \\beta_0 + \\beta_1 \\text{Farmland} + \\beta_2 \\text{Topography} + \\epsilon\n\\]"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#handout",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#handout",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Handout",
+    "text": "Handout\nConfounders, colliders, and mediators\nThree case studies. Each features one of a confounder, a collider, or a mediator. For each one:\n\nPaths: write out every path from \\(x\\) to \\(y\\)\nBackdoors: which are backdoors? Open or closed?\nAdjustment: which variables do you include or exclude?\nEstimates: draw each model’s coefficient and 95% CI\nVerdict: which model is biased? (Or: which is total, which is direct?)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#debrief",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#debrief",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Debrief",
+    "text": "Debrief\n\n\nWhich case study had the confounder? The collider? The mediator?\nIn which case did the biased model get the sign wrong?\nCould you tell which model was biased from summary() alone? Why not?\nFor the mediator: which effect would a utility designing a rebate program care about?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#dags-in-your-final-project",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#dags-in-your-final-project",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "DAGs in your final project",
+    "text": "DAGs in your final project\nThe rubric for your blog post includes:\n\nThe theorized causal relationships are described with a DAG\n\n\nYour DAG determines your model. Today you’ll draft one for a group member’s project."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#measured-and-unmeasured-variables",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#measured-and-unmeasured-variables",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Measured and unmeasured variables",
+    "text": "Measured and unmeasured variables\nYour DAG should include variables you don’t have data for. They still exist!\n\n\n\n\n\n\n\n%%{init: {\"themeVariables\": {\"fontSize\": \"24px\"}}}%%\nflowchart LR\n    t((Topography))\n    x((Farmland))\n    f((Fertilizer))\n    y((Nitrate))\n    a((Algal&lt;br/&gt;blooms))\n    t --&gt; x\n    t --&gt; y\n    x --&gt; y\n    x --&gt; f\n    f --&gt; y\n    x --&gt; a\n    y --&gt; a\n\n    classDef unmeasured stroke-dasharray:6 4\n    classDef focal stroke-width:4px\n    class f,a unmeasured\n    class x,y focal\n\n\n\n\n\n\n\nBold: predictor and response\nDashed: unmeasured\n\nFertilizer is unmeasured. That’s fine for the total effect: we were going to exclude it anyway.\n\n\nWhat if Topography were unmeasured? Then we can’t close the backdoor, and our estimate is biased. Say so in your limitations!"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#group-activity",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#group-activity",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Group activity",
+    "text": "Group activity\nForm groups of three. Pick one group member’s final project.\n\n\nDraft a DAG with at least 5 variables. They don’t all need to be in your data.\n\nInclude at least one confounder, one mediator, and one collider\nIndicate the response and the most salient predictor\nIndicate which variables are measured and which aren’t\n\nList every path from predictor to response. Identify the open backdoors.\nWrite the model specification, i.e., which variables will be included or excluded"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#share-your-dag",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#share-your-dag",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Share your DAG",
+    "text": "Share your DAG\nAdd one slide for your group to this Google Slides presentation.\nYour slide should include:\n\nThe DAG (measured vs unmeasured, predictor and response marked)\nThe paths, with open backdoors identified\nThe model specification\n\n\nAsk yourselves: does your data let you close every open backdoor? If not, what does that mean for your inference?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week5_wednesday.html#choosing-variables-for-inference",
+    "href": "course-materials/lecture-slides/week5_wednesday.html#choosing-variables-for-inference",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Choosing variables for inference",
+    "text": "Choosing variables for inference\n\nSmall p-values and narrow confidence intervals mean precise, not unbiased\nMake a DAG before you fit a model, including variables you can’t measure\nClose open backdoors (confounders), leave closed paths closed (colliders)\nDecide whether you want the total or direct effect (mediators)\nIf you can’t close a backdoor, say so: it’s a limitation of your analysis"
   },
   {
     "objectID": "course-materials/labs/lab1-solution.html",

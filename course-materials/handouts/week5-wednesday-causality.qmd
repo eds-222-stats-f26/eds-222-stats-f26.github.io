@@ -1,0 +1,708 @@
+---
+format:
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    papersize: letter
+    fontsize: 10pt
+    linestretch: 1.05
+    mainfont: Lora
+    monofont: Roboto Mono
+    monofontoptions:
+      - Scale=0.9
+    geometry:
+      - top=0.75in
+      - bottom=0.6in
+      - left=0.95in
+      - right=0.95in
+    pagestyle: empty
+    number-sections: false
+    include-in-header:
+      text: |
+        \usepackage{titlesec}
+        \usepackage{array}
+        \usepackage{enumitem}
+        \usepackage{unicode-math}
+        \setmathfont{latinmodern-math.otf}
+        \setmathfont[range={up/{latin,Latin,num}}]{Lora}
+        \setmathfont[range={it/{latin,Latin}}]{Lora Italic}
+        \setlength{\parindent}{0pt}
+        \setlength{\parskip}{5pt}
+        \titleformat{\section}{\normalfont\fontsize{15}{18}\selectfont}{}{0pt}{}
+        \titlespacing*{\section}{0pt}{0pt}{6pt}
+        \titleformat{\subsection}{\normalfont\fontsize{12}{15}\selectfont}{}{0pt}{}
+        \titlespacing*{\subsection}{0pt}{10pt}{2pt}
+        \setlist[itemize]{label=\textbullet, leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \setlist[enumerate]{leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \newcommand{\doctitle}[1]{{\fontsize{21}{25}\selectfont #1}\par\vspace{8pt}}
+        \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+        \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+params:
+  key: false
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: ""
+    fig.align: center
+    fig.pos: "H"
+    dev: cairo_pdf
+---
+
+```{r}
+#| label: setup
+library(ggplot2)
+
+key <- isTRUE(params$key)
+
+# ---- Plot style (matches the regression representations handout) ----
+theme_set(
+  theme_bw(base_size = 11) +
+    theme(
+      legend.position = "right",
+      legend.margin = margin(0, 0, 0, 0),
+      plot.margin = margin(4, 6, 2, 4)
+    )
+)
+pts <- function(...) {
+  geom_point(shape = 21, size = 2, color = "grey20", stroke = 0.4, ...)
+}
+
+# ---- DAGs ----
+# nodes: data frame with name, x, y. edges: data frame with from, to.
+# Arrows are trimmed to stop at the edge of each node's label box.
+draw_dag <- function(nodes, edges) {
+  half_w <- function(name) 0.045 * max(nchar(strsplit(name, "\n")[[1]])) + 0.12
+  half_h <- function(name) 0.13 * length(strsplit(name, "\n")[[1]]) + 0.1
+  trim <- function(dx, dy, name) {
+    min(half_w(name) / abs(dx), half_h(name) / abs(dy))
+  }
+  segs <- do.call(
+    rbind,
+    lapply(seq_len(nrow(edges)), \(i) {
+      a <- nodes[nodes$name == edges$from[i], ]
+      b <- nodes[nodes$name == edges$to[i], ]
+      dx <- b$x - a$x
+      dy <- b$y - a$y
+      t0 <- trim(dx, dy, a$name)
+      t1 <- 1 - trim(dx, dy, b$name)
+      data.frame(
+        x = a$x + t0 * dx,
+        y = a$y + t0 * dy,
+        xend = a$x + t1 * dx,
+        yend = a$y + t1 * dy
+      )
+    })
+  )
+  ggplot() +
+    geom_segment(
+      aes(x, y, xend = xend, yend = yend),
+      data = segs,
+      arrow = arrow(length = unit(7, "pt"), type = "closed"),
+      linewidth = 0.6
+    ) +
+    geom_label(
+      aes(x, y, label = name),
+      data = nodes,
+      size = 3.8,
+      label.padding = unit(5, "pt"),
+      label.r = unit(6, "pt"),
+      lineheight = 0.9
+    ) +
+    coord_fixed(clip = "off") +
+    expand_limits(
+      x = range(nodes$x) + c(-0.6, 0.6),
+      y = range(nodes$y) + c(-0.3, 0.3)
+    ) +
+    theme_void()
+}
+
+# Coefficient plot. Blank for students, filled in for the key.
+# truth: named vector of true effect(s), drawn as dashed lines in the key.
+coef_plot <- function(fits, term, limits, xlab, truth) {
+  est <- data.frame(
+    model = factor(names(fits), levels = rev(names(fits))),
+    estimate = sapply(fits, \(f) coef(f)[[term]]),
+    lower = sapply(fits, \(f) confint(f)[term, 1]),
+    upper = sapply(fits, \(f) confint(f)[term, 2])
+  )
+  p <- ggplot(est, aes(estimate, model)) +
+    scale_x_continuous(limits = limits, breaks = scales::breaks_pretty(10)) +
+    scale_y_discrete(expand = expansion(add = 0.6)) +
+    labs(x = xlab, y = NULL) +
+    theme(panel.grid.minor.x = element_blank())
+  if (!key) {
+    return(p + geom_blank())
+  }
+  p +
+    geom_vline(xintercept = truth, linetype = "dashed", color = "grey30") +
+    annotate(
+      "label",
+      x = truth,
+      y = Inf,
+      label = names(truth),
+      vjust = 0,
+      size = 3,
+      label.size = 0
+    ) +
+    coord_cartesian(clip = "off") +
+    theme(plot.margin = margin(14, 6, 2, 4)) +
+    geom_pointrange(
+      aes(xmin = lower, xmax = upper),
+      color = "cornflowerblue",
+      linewidth = 1.2,
+      size = 0.6
+    )
+}
+
+blank_lines <- function(n) {
+  if (!key) cat(rep("\\vspace{0.3in}\n\n", n), sep = "")
+}
+answer <- function(...) if (key) cat(..., sep = "")
+```
+
+\doctitle{Confounders, colliders, and mediators`r if (key) " (answer key)" else ""`}
+
+Each of the following case studies asks how a predictor $x$ affects a response $y$. Each one features a third variable that is a **confounder**, a **collider**, or a **mediator** (one of each, but you have to figure out which is which). For each case study:
+
+1. **Paths.** Use the DAG to write out every path from $x$ to $y$, including the direction of each arrow.
+2. **Backdoors.** Identify the backdoor paths. Is each one open or closed?
+3. **Adjustment.** Decide which variables to include in the model and which to exclude. Is the third variable a confounder, collider, or mediator?
+4. **Estimates.** Two researchers fit two different models to the same data. Use the `summary()` and `confint()` output to draw each model's coefficient estimate for $x$, with its 95% confidence interval, on the blank axes. Then draw a vertical line for the true effect of $x$ on $y$ in a plausible position. If the third variable is a mediator, there's no single true effect. Instead, draw one line for the **total effect** and one for the **direct effect**.
+5. **Verdict.** Which model's estimate is biased, and which is unbiased? If the third variable is a mediator, neither model is biased. Instead, decide which model estimates the total effect and which estimates the direct effect.
+
+Remember the backdoor criterion. A set of variables satisfies it if adjusting for them (1) closes every backdoor path between $x$ and $y$, and (2) doesn't include any variables caused by $x$.
+
+<!-- =========================================================== -->
+<!-- SCENARIO 1: Collider -- catch                                -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: fish-data
+set.seed(2202)
+n <- 50
+fish <- data.frame(price = runif(n, 2, 6))
+fish$effort <- 1 + 1.2 * fish$price + rnorm(n, 0, 1.2)
+fish$abundance <- 40 - 2 * fish$effort + rnorm(n, 0, 5)
+fish$catch <- 1.5 * fish$effort + 0.3 * fish$abundance + rnorm(n, 0, 0.4)
+# Model A (fit below) is unbiased, Model B is biased (adjusts for the collider)
+```
+
+# 1. Fishing effort and rockfish abundance
+
+How much does fishing pressure deplete a rockfish population? A state fisheries agency studied 50 fishing grounds along the coast. Divers surveyed each ground to estimate rockfish abundance, independently of the fishery. Logbooks recorded the fishing **effort** in each ground (hundreds of boat-days per year) and the total **catch** (tonnes per year). Catch depends on both how hard boats fish and how many fish there are to catch. Effort is higher where the market **price** of rockfish is higher.
+
+**Question:** how does fishing effort (`effort`) affect rockfish abundance (`abundance`)?
+
+```{r}
+#| label: fish-dag
+#| fig-width: 5
+#| fig-height: 2
+#| out-width: "60%"
+draw_dag(
+  nodes = data.frame(
+    name = c("Price", "Effort", "Abundance", "Catch"),
+    x = c(0, 1.4, 3, 2.2),
+    y = c(1.2, 1.2, 1.2, 0)
+  ),
+  edges = data.frame(
+    from = c("Price", "Effort", "Effort", "Abundance"),
+    to = c("Effort", "Abundance", "Catch", "Catch")
+  )
+)
+```
+
+## Paths from Effort to Abundance
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "1. Effort $\\rightarrow$ Abundance (causal)\n",
+  "2. Effort $\\rightarrow$ Catch $\\leftarrow$ Abundance\n\n",
+  "Price isn't on any path between Effort and Abundance. ",
+  "Its only arrow points into Effort.\n"
+)
+```
+
+## Backdoor paths
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "There are **no** backdoor paths (no path starts with an arrow into Effort). ",
+  "Path 2 isn't causal, but it's **closed**, because Catch is a collider."
+)
+```
+
+## Adjustment
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Catch is a **collider**. Exclude it so path 2 stays closed. ",
+  "Price doesn't need to be included."
+)
+```
+
+## The data
+
+```{r}
+#| label: fish-data-plot
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "75%"
+ggplot(fish, aes(effort, abundance)) +
+  pts(aes(fill = catch)) +
+  scale_fill_viridis_c(option = "plasma", name = "Catch\n(t/yr)") +
+  labs(
+    x = "Fishing effort (100s of boat-days/yr)",
+    y = "Rockfish abundance\n(fish per 100 m²)"
+  )
+```
+
+\newpage
+
+## Two models
+
+$$\textbf{Model A:}\quad \text{abundance} = \beta_0 + \beta_1 \cdot \text{effort} + \varepsilon$$
+
+$$\textbf{Model B:}\quad \text{abundance} = \beta_0 + \beta_1 \cdot \text{effort} + \beta_2 \cdot \text{catch} + \varepsilon$$
+
+**Model A**
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+fish_a <- lm(abundance ~ effort, data = fish)
+summary(fish_a)
+confint(fish_a)
+```
+
+```{=latex}
+\endgroup
+```
+
+**Model B**
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+fish_b <- lm(abundance ~ effort + catch, data = fish)
+summary(fish_b)
+confint(fish_b)
+```
+
+```{=latex}
+\endgroup
+```
+
+\newpage
+
+## Estimates
+
+`r if (!key) "Draw each model's estimate of $\\beta_1$ and its 95% confidence interval. Then draw a vertical line for the true effect in a plausible position (or, for a mediator, lines for the total and direct effects)."`
+
+```{r}
+#| label: fish-estimates
+#| fig-width: 6
+#| fig-height: 2
+#| out-width: "85%"
+coef_plot(
+  list(`Model A` = fish_a, `Model B` = fish_b),
+  term = "effort",
+  limits = c(-6, 0),
+  truth = c(`True effect` = -2),
+  xlab = "Coefficient on effort (fish per 100 m² per 100 boat-days)"
+)
+```
+
+## Verdict
+
+`r if (!key) "Which model's estimate of $\\beta_1$ is biased, and which is unbiased? (For a mediator: which estimates the total effect, and which estimates the direct effect?) Explain your answer using the paths and backdoors you identified."`
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "**Model A is unbiased.** With no backdoors, the simple model recovers the ",
+  "true effect (the simulation used $-2$).\n\n",
+  "**Model B is biased.** Adjusting for catch opens path 2. Among grounds with ",
+  "the *same* catch, the ones that needed more effort to land it must have ",
+  "fewer fish, so Model B exaggerates how much fishing depletes rockfish. ",
+  "This is why catch is a risky stand-in for abundance in fisheries data."
+)
+```
+
+<!-- =========================================================== -->
+<!-- SCENARIO 2: Confounder -- fire risk                          -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: fire-data
+set.seed(2201)
+n <- 60
+fires <- data.frame(drought = rnorm(n, 0, 1))
+fires$risk <- 5 + 1.5 * fires$drought + rnorm(n, 0, 1.8)
+fires$burned <- pmax(5 + 4 * fires$risk + rnorm(n, 0, 6), 0)
+fires$severity <- 10 -
+  0.5 * fires$burned +
+  9 * fires$risk +
+  3 * fires$drought +
+  rnorm(n, 0, 6)
+# Model A (fit below) is biased (omits the confounder), Model B is unbiased
+```
+
+# 2. Prescribed burns and wildfire severity
+
+Prescribed burns remove dead wood and brush, so they should make later wildfires less severe. A national forest compared 60 management units that burned in wildfires. For each unit, they recorded the percent of the unit treated with prescribed burns in the decade before the wildfire, and the percent that burned at high severity. Managers don't choose units at random. They prioritize units with a high **fire risk** rating, which is based on slope, fuel, and dryness, and is assessed before treatment. Risky units also burn more severely. Regional **drought** raises fire risk, and it also makes wildfires more severe directly.
+
+**Question:** how does prescribed burning (`burned`) affect wildfire severity (`severity`)?
+
+```{r}
+#| label: fire-dag
+#| fig-width: 5
+#| fig-height: 2
+#| out-width: "60%"
+draw_dag(
+  nodes = data.frame(
+    name = c("Drought", "Fire risk", "Prescribed\nburns", "Severity"),
+    x = c(0, 1.5, 0, 3),
+    y = c(1.2, 1.2, 0, 0)
+  ),
+  edges = data.frame(
+    from = c(
+      "Drought",
+      "Drought",
+      "Fire risk",
+      "Fire risk",
+      "Prescribed\nburns"
+    ),
+    to = c("Fire risk", "Severity", "Prescribed\nburns", "Severity", "Severity")
+  )
+)
+```
+
+## Paths from Prescribed burns to Severity
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "1. Prescribed burns $\\rightarrow$ Severity (causal)\n",
+  "2. Prescribed burns $\\leftarrow$ Fire risk $\\rightarrow$ Severity\n",
+  "3. Prescribed burns $\\leftarrow$ Fire risk $\\leftarrow$ Drought $\\rightarrow$ Severity\n"
+)
+```
+
+## Backdoor paths
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Paths 2 and 3 both start with an arrow into Prescribed burns, ",
+  "and neither passes through a collider. Both are **open** backdoors."
+)
+```
+
+## Adjustment
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Fire risk is a **confounder**. Including it closes both backdoors, ",
+  "because both pass through Fire risk. Drought doesn't need to be included ",
+  "(Fire risk already blocks path 3), though including it wouldn't add bias."
+)
+```
+
+## The data
+
+```{r}
+#| label: fire-data-plot
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "75%"
+ggplot(fires, aes(burned, severity)) +
+  pts(aes(fill = risk)) +
+  scale_fill_viridis_c(option = "plasma", name = "Fire\nrisk") +
+  labs(
+    x = "Area treated with prescribed burns (%)",
+    y = "Area burned at\nhigh severity (%)"
+  )
+```
+
+\newpage
+
+## Two models
+
+$$\textbf{Model A:}\quad \text{severity} = \beta_0 + \beta_1 \cdot \text{burned} + \varepsilon$$
+
+$$\textbf{Model B:}\quad \text{severity} = \beta_0 + \beta_1 \cdot \text{burned} + \beta_2 \cdot \text{risk} + \varepsilon$$
+
+**Model A**
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+fire_a <- lm(severity ~ burned, data = fires)
+summary(fire_a)
+confint(fire_a)
+```
+
+```{=latex}
+\endgroup
+```
+
+**Model B**
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+fire_b <- lm(severity ~ burned + risk, data = fires)
+summary(fire_b)
+confint(fire_b)
+```
+
+```{=latex}
+\endgroup
+```
+
+\newpage
+
+## Estimates
+
+`r if (!key) "Draw each model's estimate of $\\beta_1$ and its 95% confidence interval. Then draw a vertical line for the true effect in a plausible position (or, for a mediator, lines for the total and direct effects)."`
+
+```{r}
+#| label: fire-estimates
+#| fig-width: 6
+#| fig-height: 2
+#| out-width: "85%"
+coef_plot(
+  list(`Model A` = fire_a, `Model B` = fire_b),
+  term = "burned",
+  limits = c(-1.5, 2),
+  truth = c(`True effect` = -0.5),
+  xlab = "Coefficient on burned (% high severity per % treated)"
+)
+```
+
+## Verdict
+
+`r if (!key) "Which model's estimate of $\\beta_1$ is biased, and which is unbiased? (For a mediator: which estimates the total effect, and which estimates the direct effect?) Explain your answer using the paths and backdoors you identified."`
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "**Model A is biased.** It omits the confounder, so the open backdoors make ",
+  "prescribed burns look *harmful*. The sign is wrong. Units that were burned ",
+  "were the risky ones, and risky units burn more severely.\n\n",
+  "**Model B is unbiased.** Comparing units with the same fire risk, ",
+  "more prescribed burning means less severe wildfire ",
+  "(the simulation's true effect is $-0.5$)."
+)
+```
+
+<!-- =========================================================== -->
+<!-- SCENARIO 3: Mediator -- installers                           -->
+<!-- =========================================================== -->
+
+\newpage
+
+```{r}
+#| label: solar-data
+set.seed(2203)
+n <- 60
+counties <- data.frame(
+  rebate = runif(n, 0, 10),
+  sun = rnorm(n, 5, 0.6)
+)
+counties$installers <- pmax(2 + 0.8 * counties$rebate + rnorm(n, 0, 2.5), 0)
+counties$solar <- 2 +
+  0.4 * counties$rebate +
+  0.75 * counties$installers +
+  1.5 * (counties$sun - 5) +
+  rnorm(n, 0, 1.5)
+# Model A (fit below) estimates the direct effect, Model B the total effect
+```
+
+# 3. Solar rebates and rooftop solar
+
+Utility rebates make rooftop solar cheaper, which should convince more households to install it. Rebates also attract solar **installers**, who recruit customers door to door. An energy agency compared 60 counties served by different utilities, recording each utility's **rebate** (hundreds of dollars per kW), installers per 100,000 residents, and the percent of homes with rooftop **solar**. Sunnier counties (more peak **sun** hours) also have more rooftop solar.
+
+**Question:** how do rebates (`rebate`) affect rooftop solar adoption (`solar`)?
+
+```{r}
+#| label: solar-dag
+#| fig-width: 5
+#| fig-height: 2
+#| out-width: "60%"
+draw_dag(
+  nodes = data.frame(
+    name = c("Rebate", "Installers", "Solar", "Sun"),
+    x = c(0, 1.5, 3, 3),
+    y = c(0, 1.2, 0, 1.2)
+  ),
+  edges = data.frame(
+    from = c("Rebate", "Rebate", "Installers", "Sun"),
+    to = c("Installers", "Solar", "Solar", "Solar")
+  )
+)
+```
+
+## Paths from Rebate to Solar
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "1. Rebate $\\rightarrow$ Solar (causal)\n",
+  "2. Rebate $\\rightarrow$ Installers $\\rightarrow$ Solar (causal)\n\n",
+  "Sun isn't on any path between Rebate and Solar. ",
+  "Its only arrow points into Solar.\n"
+)
+```
+
+## Backdoor paths
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "There are **no** backdoor paths. Both paths are causal: ",
+  "every arrow points toward Solar."
+)
+```
+
+## Adjustment
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Installers is a **mediator**. It depends on the question. Exclude ",
+  "Installers for the **total effect** of rebates. Include Installers for ",
+  "the **direct effect** (the rebate's effect on adoption *not* through ",
+  "installers). Sun doesn't need to be included."
+)
+```
+
+## The data
+
+```{r}
+#| label: solar-data-plot
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "75%"
+ggplot(counties, aes(rebate, solar)) +
+  pts(aes(fill = installers)) +
+  scale_fill_viridis_c(
+    option = "plasma",
+    name = "Installers\n(per 100k)"
+  ) +
+  labs(x = "Rebate ($100s per kW)", y = "Homes with\nrooftop solar (%)")
+```
+
+\newpage
+
+## Two models
+
+$$\textbf{Model A:}\quad \text{solar} = \beta_0 + \beta_1 \cdot \text{rebate} + \beta_2 \cdot \text{installers} + \varepsilon$$
+
+$$\textbf{Model B:}\quad \text{solar} = \beta_0 + \beta_1 \cdot \text{rebate} + \varepsilon$$
+
+**Model A**
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+solar_a <- lm(solar ~ rebate + installers, data = counties)
+summary(solar_a)
+confint(solar_a)
+```
+
+```{=latex}
+\endgroup
+```
+
+**Model B**
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+solar_b <- lm(solar ~ rebate, data = counties)
+summary(solar_b)
+confint(solar_b)
+```
+
+```{=latex}
+\endgroup
+```
+
+\newpage
+
+## Estimates
+
+`r if (!key) "Draw each model's estimate of $\\beta_1$ and its 95% confidence interval. Then draw a vertical line for the true effect in a plausible position (or, for a mediator, lines for the total and direct effects)."`
+
+```{r}
+#| label: solar-estimates
+#| fig-width: 6
+#| fig-height: 2
+#| out-width: "85%"
+coef_plot(
+  list(`Model A` = solar_a, `Model B` = solar_b),
+  term = "rebate",
+  limits = c(-0.5, 1.5),
+  truth = c(Direct = 0.4, Total = 0.4 + 0.8 * 0.75),
+  xlab = "Coefficient on rebate (% of homes per $100/kW)"
+)
+```
+
+## Verdict
+
+`r if (!key) "Which model's estimate of $\\beta_1$ is biased, and which is unbiased? (For a mediator: which estimates the total effect, and which estimates the direct effect?) Explain your answer using the paths and backdoors you identified."`
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "**Neither model is biased.** They answer different questions.\n\n",
+  "**Model A estimates the direct effect.** Holding the number of installers ",
+  "constant, each extra $100/kW of rebate raises adoption by about 0.4 ",
+  "percentage points, because solar is cheaper.\n\n",
+  "**Model B estimates the total effect.** Each extra $100/kW raises adoption ",
+  "by about 1 percentage point: 0.4 directly, plus $0.8 \\times 0.75 = 0.6$ ",
+  "through installers."
+)
+```

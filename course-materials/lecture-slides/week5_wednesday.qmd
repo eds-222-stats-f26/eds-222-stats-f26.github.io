@@ -1,0 +1,490 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 5 Wednesday: Causal inference"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        </style>
+execute:
+  echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+# Same simulated nitrate population and sample as Monday
+beta_0 <- 4
+beta_1 <- 0.035
+sigma <- 2
+
+ag_pct <- runif(1e4, 0, 80)
+nitrate_hat <- beta_0 + beta_1 * ag_pct
+nitrate <- rnorm(1e4, nitrate_hat, sigma)
+simulated_population <- tibble(ag_pct, nitrate_hat, nitrate)
+
+one_sample <- slice_sample(simulated_population, n = 30)
+one_sample_lm <- lm(nitrate ~ ag_pct, one_sample)
+beta_1_hat <- coef(one_sample_lm)[["ag_pct"]]
+lm_pvalue <- coef(summary(one_sample_lm))["ag_pct", "Pr(>|t|)"]
+lm_ci <- confint(one_sample_lm)["ag_pct", ]
+```
+
+# Causal inference
+
+## Today's plan
+
+1. Review Monday: inference for regression
+2. Review causal inference
+3. Handout: confounders, colliders, and mediators
+4. Group activity: a DAG for your final project
+
+# Review: regression inference
+
+## Two questions, four tools
+
+::: {style="font-size:0.8em"}
+
+| | Randomization | Mathematical model |
+|---|:---:|:---:|
+| **Is there an effect?** | Permutation: shuffle $x$, refit | `Pr(>|t|)` in `summary()` |
+| **How big is it?** | Bootstrap: resample rows, refit | `confint()` |
+
+:::
+
+## Read the output
+
+::: {.columns style="font-size:0.75em"}
+
+::: {.column width="60%"}
+
+Monday's 30 wells: nitrate (mg/L) by farmland within 1 km (%).
+
+```{r}
+#| echo: true
+#| class-output: small-output
+summary(one_sample_lm)
+```
+
+:::
+
+::: {.column width="40%"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+confint(one_sample_lm)
+```
+
+Turn to a neighbor. For the `ag_pct` coefficient:
+
+1. What are $H_0$ and $H_A$? What's the p-value?
+2. Do we reject $H_0$?
+3. Interpret the 95% confidence interval in a sentence.
+
+:::
+
+:::
+
+## Interpretations
+
+::: {.incremental}
+
+- $H_0: \beta_1 = 0$, $H_A: \beta_1 \ne 0$. The p-value is `r signif(lm_pvalue, 2)`.
+- If farmland had no effect on nitrate, a slope at least as far from 0 as `r round(beta_1_hat, 3)` would be unlikely (p < 0.05). **Reject** $H_0$.
+- We are 95% confident that nitrate increases by between `r round(lm_ci[1], 3)` and `r round(lm_ci[2], 3)` mg/L for each additional percentage point of farmland.
+
+:::
+
+## True or false?
+
+::: {.incremental}
+
+1. The p-value is the probability that $H_0$ is true.
+   - **False.** It's the probability of a statistic at least this extreme _if_ $H_0$ were true.
+2. If we repeated the study many times, about 95% of our 95% confidence intervals would contain $\beta_1$.
+   - **True.** "95% confident" describes the method, not this one interval.
+3. A small p-value means farmland _causes_ higher nitrate.
+   - **False.** That's what the rest of today is about.
+
+:::
+
+## Precise $\ne$ unbiased
+
+A small p-value and a narrow confidence interval mean $\hat \beta_1$ is **precise**.
+
+They don't mean it's **unbiased**.
+
+::: {.fragment}
+
+If our model leaves out a confounder, or includes a collider, then $\hat \beta_1$ is precisely estimating the **wrong thing**. More data makes the interval narrower around the wrong value.
+
+:::
+
+::: {.fragment}
+
+Which variables belong in the model? Back to DAGs.
+
+:::
+
+# Review: causal inference
+
+## DAG vocabulary
+
+**D**irected **A**cyclic **G**raph: _your_ theory of what causes what.
+
+- **Nodes**: variables (measured or not!)
+- **Arrows**: direct causal effects
+- **Path**: any route from $x$ to $y$ along arrows
+- **Causal path**: every arrow points toward $y$
+- **Backdoor path**: starts with an arrow _into_ $x$
+
+## Open and closed paths
+
+A path is **open** if association can flow along it. Each variable on a path either passes it along or blocks it.
+
+::: {style="font-size:0.8em"}
+
+| Middle variable | Shape | Not in model | In model |
+|---|:---:|:---:|:---:|
+| **Mediator** | $x \rightarrow m \rightarrow y$ | Open | Closed |
+| **Confounder** | $x \leftarrow c \rightarrow y$ | Open | Closed |
+| **Collider** | $x \rightarrow k \leftarrow y$ | Closed | Open |
+
+:::
+
+::: {.fragment}
+
+Colliders are the odd one out: adjusting for them **opens** a path.
+
+:::
+
+## The backdoor criterion
+
+A set of variables satisfies the **backdoor criterion** if adjusting for them:
+
+1. **Closes** every backdoor path between $x$ and $y$, and
+2. Doesn't include any variables _caused by_ $x$
+
+::: {.fragment}
+
+Then the coefficient on $x$ is an _unbiased_ estimate of its causal effect on $y$.
+
+:::
+
+## Confounders, colliders, and mediators
+
+::: {.columns}
+
+::: {.column width="33%"}
+
+**Confounder**
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    z((Z))
+    x((X))
+    y((Y))
+    z --> x
+    z --> y
+    x --> y
+```
+
+Causes $x$ and $y$
+
+**Include it**
+
+:::
+
+::: {.column width="33%"}
+
+**Collider**
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    x((X))
+    y((Y))
+    z((Z))
+    x --> y
+    x --> z
+    y --> z
+```
+
+Caused by $x$ and $y$
+
+**Exclude it**
+
+:::
+
+::: {.column width="33%"}
+
+**Mediator**
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart TB
+    x((X))
+    z((Z))
+    y((Y))
+    x --> z
+    z --> y
+```
+
+Caused by $x$, causes $y$
+
+**It depends**: total or direct effect?
+
+:::
+
+:::
+
+## Practice: farmland and nitrate
+
+::: {.columns}
+
+::: {.column style="width:45%; font-size:0.75em;"}
+
+Question: how does **Farmland** affect groundwater **Nitrate**?
+
+- Flat valley floors (**Topography**) are easier to farm, and have shallow water tables that collect nitrate
+- Farms apply **Fertilizer**, which leaches into groundwater
+- Runoff from farms and nitrate-rich groundwater both feed **Algal blooms** in nearby streams
+
+:::
+
+::: {.column width="55%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    t((Topography))
+    x((Farmland))
+    f((Fertilizer))
+    y((Nitrate))
+    a((Algal<br/>blooms))
+    t --> x
+    t --> y
+    x --> y
+    x --> f
+    f --> y
+    x --> a
+    y --> a
+```
+
+:::
+
+:::
+
+::: {style="font-size:0.75em"}
+
+With a neighbor: list every path from Farmland to Nitrate. Which are backdoors? Which are open?
+
+:::
+
+## Practice: paths
+
+::: {.columns}
+
+::: {.column style="width:45%; font-size:0.75em;"}
+
+::: {.incremental}
+
+1. Farmland → Nitrate (causal)
+2. Farmland → Fertilizer → Nitrate (causal)
+3. Farmland ← Topography → Nitrate (**open** backdoor)
+4. Farmland → Algal blooms ← Nitrate (non-causal, **closed**: collider)
+
+:::
+
+:::
+
+::: {.column width="55%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    t((Topography))
+    x((Farmland))
+    f((Fertilizer))
+    y((Nitrate))
+    a((Algal<br/>blooms))
+    t --> x
+    t --> y
+    x --> y
+    x --> f
+    f --> y
+    x --> a
+    y --> a
+
+    linkStyle 0,1 stroke:#d62728,stroke-width:5px
+    linkStyle 5,6 stroke:#7f7f7f,stroke-width:3px,stroke-dasharray:5 5
+```
+
+:::
+
+:::
+
+## Practice: adjustment
+
+::: {.incremental}
+
+- **Topography** is a confounder. _Include_ it to close path 3.
+- **Algal blooms** is a collider. _Exclude_ it to keep path 4 closed.
+- **Fertilizer** is a mediator. _Exclude_ it for the total effect of farmland, _include_ it for the direct effect.
+
+:::
+
+::: {.fragment}
+
+For the total effect:
+
+$$
+\text{Nitrate} = \beta_0 + \beta_1 \text{Farmland} + \beta_2 \text{Topography} + \epsilon
+$$
+
+:::
+
+# Handout: confounders, colliders, and mediators
+
+## Handout
+
+[Confounders, colliders, and mediators](../handouts/week5-wednesday-causality.pdf)
+
+Three case studies. Each features _one_ of a confounder, a collider, or a mediator. For each one:
+
+1. **Paths**: write out every path from $x$ to $y$
+2. **Backdoors**: which are backdoors? Open or closed?
+3. **Adjustment**: which variables do you include or exclude?
+4. **Estimates**: draw each model's coefficient and 95% CI
+5. **Verdict**: which model is biased? (Or: which is total, which is direct?)
+
+## Debrief
+
+::: {.incremental}
+
+- Which case study had the confounder? The collider? The mediator?
+- In which case did the biased model get the **sign** wrong?
+- Could you tell which model was biased from `summary()` alone? Why not?
+- For the mediator: which effect would a utility designing a rebate program care about?
+
+:::
+
+# Your final project
+
+## DAGs in your final project
+
+The rubric for your blog post includes:
+
+> **The theorized causal relationships are described with a DAG**
+
+::: {.fragment}
+
+Your DAG determines your model. Today you'll draft one for a group member's project.
+
+:::
+
+## Measured and unmeasured variables
+
+Your DAG should include variables you **don't** have data for. They still exist!
+
+::: {.columns}
+
+::: {.column width="55%"}
+
+```{mermaid}
+%%{init: {"themeVariables": {"fontSize": "24px"}}}%%
+flowchart LR
+    t((Topography))
+    x((Farmland))
+    f((Fertilizer))
+    y((Nitrate))
+    a((Algal<br/>blooms))
+    t --> x
+    t --> y
+    x --> y
+    x --> f
+    f --> y
+    x --> a
+    y --> a
+
+    classDef unmeasured stroke-dasharray:6 4
+    classDef focal stroke-width:4px
+    class f,a unmeasured
+    class x,y focal
+```
+
+:::
+
+::: {.column style="width:45%; font-size:0.75em;"}
+
+Bold: **predictor** and **response**
+
+Dashed: **unmeasured**
+
+::: {.fragment}
+
+Fertilizer is unmeasured. That's fine for the total effect: we were going to exclude it anyway.
+
+:::
+
+::: {.fragment}
+
+What if **Topography** were unmeasured? Then we _can't_ close the backdoor, and our estimate is biased. Say so in your limitations!
+
+:::
+
+:::
+
+:::
+
+## Group activity
+
+Form **groups of three**. Pick **one** group member's final project.
+
+::: {style="font-size:0.8em"}
+
+1. **Draft a DAG** with at least 5 variables. They don't all need to be in your data.
+   - Include at least one **confounder**, one **mediator**, and one **collider**
+   - Indicate the **response** and the most salient **predictor**
+   - Indicate which variables are **measured** and which aren't
+2. **List every path** from predictor to response. Identify the **open backdoors**.
+3. **Write the model specification**, i.e., which variables will be included or excluded
+
+:::
+
+## Share your DAG
+
+Add one slide for your group to [this Google Slides presentation](https://docs.google.com/presentation/d/1Dyvvy0Kax23bO3JzQvtBlms3Wrf3xXvCqKzD6zeGS00/edit?usp=sharing).
+
+Your slide should include:
+
+- The **DAG** (measured vs unmeasured, predictor and response marked)
+- The **paths**, with open backdoors identified
+- The **model** specification
+
+::: {.fragment}
+
+Ask yourselves: does your data let you close every open backdoor? If not, what does that mean for your inference?
+
+:::
+
+# Recap
+
+## Choosing variables for inference
+
+- Small p-values and narrow confidence intervals mean **precise**, not **unbiased**
+- Make a DAG _before_ you fit a model, including variables you can't measure
+- **Close** open backdoors (confounders), **leave closed paths closed** (colliders)
+- Decide whether you want the **total** or **direct** effect (mediators)
+- If you can't close a backdoor, say so: it's a **limitation** of your analysis
