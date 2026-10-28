@@ -9,7 +9,7 @@ subtitle: "Week 5 (October 26 - 30)"
 |---------|--------|---------|
 | Lecture 1 | [Linear regression inference](lecture-slides/week5_monday.qmd) <br/> [Linear regression inference exercise](labs/week5-monday-inference.qmd) ([Solutions](labs/week5-monday-inference-solutions.qmd)) | IMS 24 <br/> [Linear regression inference](https://youtu.be/U4VR5kFZOww) |
 | Lab | [Concept maps](labs/lab5.qmd) | None |
-| Lecture 2 | Causal inference <br/> [Confounders, colliders, and mediators](handouts/week5-wednesday-causality.pdf) <br/> [Final project DAGs](https://docs.google.com/presentation/d/1Dyvvy0Kax23bO3JzQvtBlms3Wrf3xXvCqKzD6zeGS00/edit?usp=sharing) | IMS 25 <br/> [Backdoor criterion](https://youtu.be/4FofBuU-XSU) <br/> [Confounders, Colliders, and Mediators](https://youtu.be/jpUy9aFmMko) <br/> [Simulating inferences](https://youtu.be/3qN_LkTc74k) |
+| Lecture 2 | [Causal inference](lecture-slides/week5_wednesday.qmd) <br/> [Confounders, colliders, and mediators](handouts/week5-wednesday-causality.pdf) <br/> [Final project DAGs](https://docs.google.com/presentation/d/1Dyvvy0Kax23bO3JzQvtBlms3Wrf3xXvCqKzD6zeGS00/edit?usp=sharing) | IMS 25 <br/> [Backdoor criterion](https://youtu.be/4FofBuU-XSU) <br/> [Confounders, Colliders, and Mediators](https://youtu.be/jpUy9aFmMko) <br/> [Simulating inferences](https://youtu.be/3qN_LkTc74k) |
 : {.hover .bordered tbl-colwidths="[30,30,40]"} 
 
 
