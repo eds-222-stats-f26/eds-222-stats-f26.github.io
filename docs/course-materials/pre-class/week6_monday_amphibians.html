@@ -397,15 +397,15 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">EDS 222: Statistics for Environmental Data Science</h1>
-  <p class="subtitle">Week 6 Monday: Comparing models</p>
+  <p class="subtitle">Week 6 Monday: ANOVA</p>
 
 <div class="quarto-title-authors">
 </div>
 
 </section>
 <section>
-<section id="comparing-models" class="title-slide slide level1 center">
-<h1>Comparing models</h1>
+<section id="anova" class="title-slide slide level1 center">
+<h1>ANOVA</h1>
 
 </section>
 <section id="learning-objectives" class="slide level2">
@@ -416,40 +416,20 @@
 <li><strong>Compare</strong> simpler and more complex models</li>
 </ul>
 </section>
-<section id="this-week" class="slide level2">
-<h2>This week</h2>
-<p>More complex models have <strong>benefits</strong>: they explain more variation.</p>
-<div class="fragment">
-<p>But they have <strong>costs</strong>: they spend more information.</p>
-</div>
-<div class="fragment">
-<p>Bonus: some of the most widely used statistical tests (t-test, ANOVA) are <em>just comparisons</em> between linear models of different complexity.</p>
-</div>
-</section>
-<section id="our-case-study" class="slide level2">
-<h2>Our case study</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-1-1.png" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:45%; font-size:0.8em;">
-<p>Divers surveyed fish biomass at <strong>60 kelp forest sites</strong> around the Channel Islands.</p>
+<section id="are-urban-frogs-smaller" class="slide level2">
+<h2>Are urban frogs smaller?</h2>
+<p>Cities build stormwater ponds to manage runoff. Amphibians breed in them. But are they <em>good</em> habitat?</p>
+<p>Jennette et al.&nbsp;(2019) measured female wood frogs breeding in rural, suburban, and urban ponds.</p>
 <ul>
-<li><code>biomass</code>: fish biomass (g/m²)</li>
-<li><code>protection</code>: Fished or MPA</li>
-<li><code>island</code>: San Miguel, Santa Rosa, Santa Cruz, or Anacapa</li>
-<li><code>dist_port_km</code>: distance from port (km)</li>
+<li><strong>Snout-vent length (SVL)</strong>: body length in mm, a measure of size</li>
+<li><strong>Age</strong>: years, estimated from growth rings in toe bones</li>
 </ul>
-</div>
-</div>
-</section></section>
+<p>Smaller frogs lay fewer eggs, so if urban frogs are smaller <em>at the same age</em>, urban habitat may be lower quality.</p>
+</section>
+<section id="meet-the-wood-frogs" class="slide level2">
+<h2>Meet the wood frogs</h2>
+
+<img data-src="week6_monday_amphibians_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section></section>
 <section>
 <section id="review-categorical-predictors" class="title-slide slide level1 center">
 <h1>Review categorical predictors</h1>
@@ -457,331 +437,225 @@
 </section>
 <section id="dummy-variables" class="slide level2">
 <h2>Dummy variables</h2>
-<p>Category levels are text. You can’t multiply a coefficient by a word!</p>
-<div class="fragment">
-<p>So we convert categories to <strong>dummy variables</strong>:</p>
-<ul>
-<li>One level becomes the <strong>reference</strong></li>
-<li>Every other level gets a dummy variable: <strong>1</strong> if the observation is that level, <strong>0</strong> otherwise</li>
-</ul>
-</div>
-<div class="fragment">
-<p><span class="math inline">\(k\)</span> category levels get <span class="math inline">\(k - 1\)</span> dummy variables.</p>
-</div>
-</section>
-<section id="dummy-variables-1" class="slide level2">
-<h2>Dummy variables</h2>
-<div class="cell">
-<div class="cell-output-display">
+<p>Category levels are text. You can’t multiply a coefficient by a word.</p>
+<p>So we use <strong>dummy variables</strong>: one level becomes the <strong>reference</strong>, every other level gets a 0/1 variable.</p>
+<div class="columns" style="font-size:0.8em">
+<div class="column">
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th style="text-align: left;">island</th>
-<th style="text-align: center;">Santa Rosa</th>
-<th style="text-align: center;">Santa Cruz</th>
-<th style="text-align: center;">Anacapa</th>
+<th>Habitat</th>
+<th style="text-align: center;">Suburban</th>
+<th style="text-align: center;">Urban</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">San Miguel</td>
-<td style="text-align: center;">0</td>
+<td>Rural</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Santa Rosa</td>
+<td>Suburban</td>
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Santa Cruz</td>
+<td>Urban</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Anacapa</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">San Miguel</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Santa Rosa</td>
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">0</td>
 </tr>
 </tbody>
 </table>
+</div><div class="column">
+<p><span class="math inline">\(k\)</span> levels get <span class="math inline">\(k - 1\)</span> dummy variables</p>
+<p>Here: 3 levels, 2 dummies. Rural is the reference.</p>
 </div>
-</div>
-<p>San Miguel is the <strong>reference</strong> level. It doesn’t need its own dummy: when all three dummies are 0, it <em>has</em> to be San Miguel.</p>
-</section>
-<section id="categories-represented-three-ways" class="slide level2">
-<h2>2 categories, represented three ways</h2>
-<div style="font-size:0.75em">
-<p><span class="math display">\[
-\text{biomass} = 52.4 + 13.4 \cdot \text{MPA} + \varepsilon
-\]</span></p>
-</div>
-<div class="columns">
-<div class="column" style="width:45%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-4-1.png" width="480"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:55%;">
-<div style="font-size:0.75em">
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb1-1"><a></a>lm(biomass ~ protection)</span>
-<span id="cb1-2"><a></a></span>
-<span id="cb1-3"><a></a>Coefficients:</span>
-<span id="cb1-4"><a></a>              Estimate Std. Error t value Pr(&gt;|t|)</span>
-<span id="cb1-5"><a></a>(Intercept)     52.372      2.791  18.762  &lt; 2e-16</span>
-<span id="cb1-6"><a></a>protectionMPA   13.434      3.948   3.403  0.00121</span>
-<span id="cb1-7"><a></a></span>
-<span id="cb1-8"><a></a>Residual standard error: 15.29 on 58 degrees of freedom</span>
-<span id="cb1-9"><a></a>F-statistic: 11.58 on 1 and 58 DF,  p-value: 0.001213</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div style="font-size:0.8em">
-<p><span class="math inline">\(\beta_0\)</span> is the mean of the reference level (Fished). <span class="math inline">\(\beta_1\)</span> is the <em>difference</em> between MPA and Fished.</p>
 </div>
 </section>
-<section id="categories-represented-three-ways-1" class="slide level2">
-<h2>3+ categories, represented three ways</h2>
-<div style="font-size:0.75em">
+<section id="three-categories-equation" class="slide level2">
+<h2>Three categories: equation</h2>
+<div style="font-size:0.8em">
 <p><span class="math display">\[
-\text{biomass} = 72.5 - 10.2 \cdot \text{SantaRosa} - 17.7 \cdot \text{SantaCruz} - 25.9 \cdot \text{Anacapa} + \varepsilon
+\begin{align}
+\text{SVL} &amp;= \beta_0 + \beta_1 (\text{Habitat} = \text{Suburban}) \\
+&amp;\quad + \beta_2 (\text{Habitat} = \text{Urban}) + \epsilon \\
+\epsilon &amp;\sim Normal(0, \sigma)
+\end{align}
 \]</span></p>
 </div>
-<div class="columns">
-<div class="column" style="width:45%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-7-1.png" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:55%;">
-<div style="font-size:0.75em">
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb2-1"><a></a>lm(biomass ~ island)</span>
-<span id="cb2-2"><a></a></span>
-<span id="cb2-3"><a></a>Coefficients:</span>
-<span id="cb2-4"><a></a>                 Estimate Std. Error t value Pr(&gt;|t|)</span>
-<span id="cb2-5"><a></a>(Intercept)        72.538      3.582  20.249  &lt; 2e-16</span>
-<span id="cb2-6"><a></a>islandSanta Rosa  -10.156      5.066  -2.005 0.049836</span>
-<span id="cb2-7"><a></a>islandSanta Cruz  -17.706      5.066  -3.495 0.000935</span>
-<span id="cb2-8"><a></a>islandAnacapa     -25.934      5.066  -5.119  3.9e-06</span>
-<span id="cb2-9"><a></a></span>
-<span id="cb2-10"><a></a>Residual standard error: 13.87 on 56 degrees of freedom</span>
-<span id="cb2-11"><a></a>F-statistic:   9.5 on 3 and 56 DF,  p-value: 3.608e-05</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div style="font-size:0.8em">
-<p><span class="math inline">\(\beta_0\)</span> is the mean of the reference level (San Miguel). Each other coefficient is a <em>difference</em> from San Miguel.</p>
-</div>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Habitat</th>
+<th>Expected SVL</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Rural</td>
+<td><span class="math inline">\(\beta_0\)</span></td>
+</tr>
+<tr class="even">
+<td>Suburban</td>
+<td><span class="math inline">\(\beta_0 + \beta_1\)</span></td>
+</tr>
+<tr class="odd">
+<td>Urban</td>
+<td><span class="math inline">\(\beta_0 + \beta_2\)</span></td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="with-linear-regression-mix-and-match" class="slide level2">
-<h2>With linear regression, mix and match</h2>
-<div style="font-size:0.75em">
-<p><span class="math display">\[
-\text{bleached} = -159.5 + 8.3 \cdot \text{SST} - 19.4 \cdot \text{Moderate} - 42.7 \cdot \text{Warmest} + \varepsilon
-\]</span></p>
-</div>
-<div class="columns">
-<div class="column" style="width:45%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-10-1.png" width="528"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:55%;">
-<div style="font-size:0.75em">
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb3-1"><a></a>lm(percent_bleached ~ peak_sst + region)</span>
-<span id="cb3-2"><a></a></span>
-<span id="cb3-3"><a></a>Coefficients:</span>
-<span id="cb3-4"><a></a>                Estimate Std. Error t value Pr(&gt;|t|)</span>
-<span id="cb3-5"><a></a>(Intercept)    -159.4792    26.5348  -6.010 2.19e-08</span>
-<span id="cb3-6"><a></a>peak_sst          8.3186     0.9499   8.757 1.91e-14</span>
-<span id="cb3-7"><a></a>regionModerate  -19.3726     1.4396 -13.457  &lt; 2e-16</span>
-<span id="cb3-8"><a></a>regionWarmest   -42.7263     2.2512 -18.979  &lt; 2e-16</span>
-<span id="cb3-9"><a></a></span>
-<span id="cb3-10"><a></a>Residual standard error: 4.767 on 116 degrees of freedom</span>
-<span id="cb3-11"><a></a>F-statistic: 215.5 on 3 and 116 DF,  p-value: &lt; 2.2e-16</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div style="font-size:0.8em">
-<p>Remember the coral reefs? One continuous predictor (peak SST) plus a 3-level category (region): three parallel lines.</p>
+<section id="three-categories-visual" class="slide level2">
+<h2>Three categories: visual</h2>
+
+<img data-src="week6_monday_amphibians_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"></section>
+<section id="is-the-categorical-variable-useful" class="slide level2">
+<h2>Is the categorical variable useful?</h2>
+<p>Coefficients describe relationships between levels - but is the <strong>categorical variable as a whole</strong> useful?</p>
+<div class="fragment">
+<p>Frame this question as:</p>
+<p>Does a model <strong>with</strong> the categorical variable explain significantly more variance than a model <strong>without</strong> it?</p>
 </div>
 </section></section>
 <section>
-<section id="compute-degrees-of-freedom-from-data-and-model" class="title-slide slide level1 center">
-<h1>Compute degrees of freedom from data and model</h1>
+<section id="compute-degrees-of-freedom" class="title-slide slide level1 center">
+<h1>Compute degrees of freedom</h1>
 
 </section>
 <section id="degrees-of-freedom-are-inference-currency" class="slide level2">
 <h2>Degrees of freedom are inference currency</h2>
-<p><strong>Data</strong> gives us information. Each observation is one unit.</p>
-<div class="fragment">
-<p><strong>Parameters</strong> of a model spend that information. Each coefficient costs one unit.</p>
-</div>
-<div class="fragment">
-<p>The difference between the two is our <strong>degrees of freedom</strong>:</p>
+<p><strong>Data</strong> give us information: <span class="math inline">\(n\)</span> observations</p>
+<p><strong>Parameters</strong> spend that information: <span class="math inline">\(p\)</span> coefficients</p>
+<p>What’s left over is our <strong>degrees of freedom</strong></p>
 <p><span class="math display">\[
 df = n - p
 \]</span></p>
-<p><span class="math inline">\(n\)</span> is the number of observations and <span class="math inline">\(p\)</span> is the number of parameters (including the intercept!).</p>
+<div class="fragment">
+<p>Leftover df are what we use to estimate the noise, <span class="math inline">\(\sigma\)</span>. Fewer df, less certain <span class="math inline">\(\hat \sigma\)</span>, wider CIs, bigger p-values.</p>
 </div>
 </section>
-<section id="information-complexity-trade-off" class="slide level2">
-<h2>Information-complexity trade off</h2>
-<p>More parameters spend df to improve fit.</p>
-
-<img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1344"><ul>
-<li><strong>Too few</strong> parameters: model misses real structure (underfitting)</li>
-<li><strong>Too many</strong> parameters: model fits the noise (overfitting)</li>
+<section id="the-information-complexity-trade-off" class="slide level2">
+<h2>The information-complexity trade off</h2>
+<p>More parameters spend <span class="math inline">\(df\)</span> to improve fit.</p>
+<ul>
+<li><strong>Too few</strong> parameters: the model misses real structure (underfitting)</li>
+<li><strong>Too many</strong> parameters: the model fits the noise (overfitting)</li>
 </ul>
 <div class="fragment">
-<p>Every parameter has to <strong>earn</strong> its df.</p>
+<p>Every parameter has to <em>earn</em> its df.</p>
 </div>
 </section>
-<section id="example-one-categorical-predictor" class="slide level2">
-<h2>Example: one categorical predictor</h2>
-<div style="font-size:0.75em">
+<section id="example-intercept-only" class="slide level2">
+<h2>Example: intercept only</h2>
+<div style="font-size:0.8em">
+<p>Rural, suburban, and urban frogs: <code>svl ~ 1</code></p>
 <p><span class="math display">\[
-\text{biomass} = 52.4 + 13.4 \cdot \text{MPA} + \varepsilon
+\begin{align}
+\text{SVL} &amp;= \beta_0 + \epsilon \\
+\epsilon &amp;\sim Normal(0, \sigma)
+\end{align}
+\]</span></p>
+<div class="columns">
+<div class="column" style="width:40%;">
+<ul>
+<li><span class="math inline">\(n\)</span> = 104 frogs</li>
+<li><span class="math inline">\(p\)</span> = 1 coefficient (<span class="math inline">\(\beta_0\)</span>)</li>
+<li><span class="math inline">\(df\)</span> = 104 - 1 = 103</li>
+</ul>
+<div class="fragment">
+<p>Residual sum of squares:</p>
+<p><span class="math display">\[
+\begin{align}
+RSS &amp;= \sum (y_i - \hat y_i)^2 \\
+&amp;= 1263.5
+\end{align}
 \]</span></p>
 </div>
-<div class="columns">
-<div class="column" style="width:50%;">
+</div><div class="column" style="width:60%;">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-14-1.png" width="528"></p>
+<p><img data-src="week6_monday_amphibians_files/figure-revealjs/unnamed-chunk-4-1.png" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-</div><div class="column" style="width:50%;">
-<ul>
-<li><span class="math inline">\(n = 60\)</span> sites</li>
-<li><span class="math inline">\(p = 2\)</span> parameters (<span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span>)</li>
-<li><span class="math inline">\(df = 60 - 2 = 58\)</span></li>
-</ul>
-<div class="fragment">
-<p>Check <code>summary()</code>: <em>“Residual standard error: 15.29 on <strong>58 degrees of freedom</strong>”</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="example-add-a-continuous-predictor" class="slide level2">
-<h2>Example: add a continuous predictor</h2>
-<div style="font-size:0.75em">
+<section id="example-three-categories" class="slide level2">
+<h2>Example: three categories</h2>
+<div style="font-size:0.8em">
+<p>Same frogs: <code>svl ~ habitat</code></p>
 <p><span class="math display">\[
-\text{biomass} = 36.2 + 10.2 \cdot \text{MPA} + 0.5 \cdot \text{dist} + \varepsilon
+\begin{align}
+\text{SVL} &amp;= \beta_0 + \beta_1 (\text{Habitat} = \text{Suburban}) + \beta_2 (\text{Habitat} = \text{Urban}) + \epsilon \\
+\epsilon &amp;\sim Normal(0, \sigma)
+\end{align}
+\]</span></p>
+<div class="columns">
+<div class="column" style="width:40%;">
+<ul>
+<li><span class="math inline">\(n\)</span> = 104 frogs</li>
+<li><span class="math inline">\(p\)</span> = 3 coefficients (<span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>)</li>
+<li><span class="math inline">\(df\)</span> = 104 - 3 = 101</li>
+</ul>
+<div class="fragment">
+<p>Residual sum of squares:</p>
+<p><span class="math display">\[
+\begin{align}
+RSS &amp;= \sum (y_i - \hat y_i)^2 \\
+&amp;= 1207.7
+\end{align}
 \]</span></p>
 </div>
-<div class="columns">
-<div class="column" style="width:50%;">
+</div><div class="column" style="width:60%;">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-16-1.png" width="528"></p>
+<p><img data-src="week6_monday_amphibians_files/figure-revealjs/unnamed-chunk-5-1.png" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-</div><div class="column" style="width:50%;">
-<ul>
-<li><span class="math inline">\(n = 60\)</span> sites</li>
-<li><span class="math inline">\(p = 3\)</span> parameters (<span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>)</li>
-<li><span class="math inline">\(df = 60 - 3 = 57\)</span></li>
-</ul>
-<div class="fragment">
-<p>We spent <strong>one more</strong> df on distance from port. Was it worth it?</p>
 </div>
 </div>
 </div>
 </section>
 <section id="which-model-is-better" class="slide level2">
 <h2>Which model is better?</h2>
-<div class="cell">
-<div class="cell-output-display">
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th style="text-align: left;">Model</th>
-<th style="text-align: center;">p</th>
-<th style="text-align: center;">df</th>
-<th style="text-align: right;">RSS</th>
-<th style="text-align: right;">RSS / df</th>
+<th>Model</th>
+<th style="text-align: center;"><span class="math inline">\(p\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(df\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(RSS\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">biomass ~ protection</td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">58</td>
-<td style="text-align: right;">13558</td>
-<td style="text-align: right;">234</td>
+<td><code>svl ~ 1</code></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">103</td>
+<td style="text-align: center;">1263.5</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">biomass ~ protection + dist_port_km</td>
+<td><code>svl ~ habitat</code></td>
 <td style="text-align: center;">3</td>
-<td style="text-align: center;">57</td>
-<td style="text-align: right;">10213</td>
-<td style="text-align: right;">179</td>
+<td style="text-align: center;">101</td>
+<td style="text-align: center;">1207.7</td>
 </tr>
 </tbody>
 </table>
-</div>
-</div>
-<div>
-<ul>
-<li class="fragment"><strong>Benefit</strong>: the residual sum of squares (RSS) dropped by 3345</li>
-<li class="fragment"><strong>Cost</strong>: one df</li>
-<li class="fragment">Leftover noise <em>per df</em> dropped from 234 to 179. Distance explained more than it cost!</li>
-</ul>
-</div>
+<p>Spending 2 df on habitat cut the RSS by 4.4%.</p>
 <div class="fragment">
-<p>But how much of a drop is <em>enough</em>? We need a test statistic.</p>
+<p>Was it worth it? Adding <em>any</em> predictor reduces RSS a little, even pure noise. We need a way to say how much is <em>enough</em>.</p>
 </div>
 </section></section>
 <section>
@@ -791,190 +665,100 @@ df = n - p
 </section>
 <section id="cost-benefit" class="slide level2">
 <h2>Cost-benefit</h2>
-<p>Adding a parameter explains more, but at a cost.</p>
+<p>Adding parameters explains more, but at a cost.</p>
 <div class="columns">
 <div class="column">
-<p><strong>The benefit</strong></p>
-<p>Smaller residuals, more variation explained.</p>
-</div><div class="column">
-<p><strong>The cost</strong></p>
-<p>Spent degrees of freedom. Each parameter has less information behind it.</p>
-</div>
-</div>
-</section>
-<section id="quantify-the-trade-off" class="slide level2">
-<h2>Quantify the trade off</h2>
-<p><span class="math display">\[
-F = \frac{(RSS_{simple} - RSS_{complex}) \;/\; (p_{complex} - p_{simple})}{RSS_{complex} \;/\; (n - p_{complex})}
-\]</span></p>
-<div>
+<p><strong>Benefit</strong></p>
 <ul>
-<li class="fragment"><strong>Numerator</strong>: improvement in fit <em>per df spent</em></li>
-<li class="fragment"><strong>Denominator</strong>: leftover noise <em>per df remaining</em></li>
-<li class="fragment"><strong>Bigger <span class="math inline">\(F\)</span></strong> means the extra parameters were worth it</li>
+<li>Smaller residuals</li>
+<li>More variation explained</li>
+</ul>
+</div><div class="column">
+<p><strong>Cost</strong></p>
+<ul>
+<li>Spent degrees of freedom</li>
+<li>Less information behind each parameter</li>
 </ul>
 </div>
-<div class="fragment">
-<p>If the extra parameters are really all 0 (the null hypothesis), <span class="math inline">\(F\)</span> follows an <em>F distribution</em>. That gives us a <strong>p-value</strong>.</p>
 </div>
 </section>
-<section id="example-1-does-protection-matter" class="slide level2">
-<h2>Example 1: does protection matter?</h2>
-
-<img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-18-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Compare an <strong>intercept-only</strong> model (one mean for every site) to a <strong>two-category</strong> model (one mean per group).</p>
-</section>
-<section id="example-1-mathematically" class="slide level2">
-<h2>Example 1: mathematically</h2>
+<section id="quantify-the-trade-off-the-f-statistic" class="slide level2">
+<h2>Quantify the trade off: the F statistic</h2>
 <p><span class="math display">\[
-F = \frac{(16{,}265 - 13{,}558) \;/\; (2 - 1)}{13{,}558 \;/\; (60 - 2)} = 11.58
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+\]</span></p>
+<ul>
+<li><strong>Numerator</strong>: improvement in fit per df spent</li>
+<li><strong>Denominator</strong>: leftover noise per df remaining</li>
+</ul>
+<div class="fragment">
+<p>If the extra parameters only fit noise, <span class="math inline">\(F \approx 1\)</span>. Bigger <span class="math inline">\(F\)</span> means the extra parameters were worth it.</p>
+</div>
+</section>
+<section id="example-intercept-only-vs-three-categories" class="slide level2">
+<h2>Example: intercept-only vs three categories</h2>
+
+<img data-src="week6_monday_amphibians_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1344"><p>Does habitat explain enough of the variation to justify spending 2 df?</p>
+</section>
+<section id="intercept-only-vs-three-categories-math" class="slide level2">
+<h2>Intercept-only vs three categories: math</h2>
+<p><span class="math display">\[
+\begin{align}
+F &amp;= \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})} \\
+F &amp;= \frac{(1263.5 - 1207.7) \ / \ (3 - 1)}{1207.7 \ / \ (104 - 3)} = 2.34
+\end{align}
 \]</span></p>
 <div style="font-size:0.8em">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="fu">anova</span>(<span class="fu">lm</span>(biomass <span class="sc">~</span> <span class="dv">1</span>, kelp), <span class="fu">lm</span>(biomass <span class="sc">~</span> protection, kelp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="fu">anova</span>(<span class="fu">lm</span>(svl <span class="sc">~</span> <span class="dv">1</span>, wood_frogs), <span class="fu">lm</span>(svl <span class="sc">~</span> habitat, wood_frogs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb5-1"><a></a>Analysis of Variance Table</span>
-<span id="cb5-2"><a></a></span>
-<span id="cb5-3"><a></a>Model 1: biomass ~ 1</span>
-<span id="cb5-4"><a></a>Model 2: biomass ~ protection</span>
-<span id="cb5-5"><a></a>  Res.Df   RSS Df Sum of Sq      F   Pr(&gt;F)   </span>
-<span id="cb5-6"><a></a>1     59 16265                                </span>
-<span id="cb5-7"><a></a>2     58 13558  1    2707.3 11.582 0.001213 **</span>
-<span id="cb5-8"><a></a>---</span>
-<span id="cb5-9"><a></a>Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb2-1"><a></a>Analysis of Variance Table</span>
+<span id="cb2-2"><a></a></span>
+<span id="cb2-3"><a></a>Model 1: svl ~ 1</span>
+<span id="cb2-4"><a></a>Model 2: svl ~ habitat</span>
+<span id="cb2-5"><a></a>  Res.Df    RSS Df Sum of Sq      F Pr(&gt;F)</span>
+<span id="cb2-6"><a></a>1    103 1263.5                           </span>
+<span id="cb2-7"><a></a>2    101 1207.7  2    55.894 2.3373 0.1018</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-</div>
-<div class="fragment">
-<p>Do the two categories explain enough variation to justify the cost? <strong>Yes</strong> (p = 0.0012).</p>
 </div>
 </section>
-<section id="example-1-its-a-t-test" class="slide level2">
-<h2>Example 1: it’s a t-test!</h2>
+<section id="this-has-a-special-name-anova" class="slide level2">
+<h2>This has a special name: ANOVA</h2>
+<p><strong>AN</strong>alysis <strong>O</strong>f <strong>VA</strong>riance. With one categorical predictor, it’s <em>one-way</em> ANOVA.</p>
 <div style="font-size:0.8em">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a><span class="fu">t.test</span>(biomass <span class="sc">~</span> protection, kelp, <span class="at">var.equal =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="fu">anova</span>(<span class="fu">lm</span>(svl <span class="sc">~</span> habitat, wood_frogs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb7-1"><a></a></span>
-<span id="cb7-2"><a></a>    Two Sample t-test</span>
-<span id="cb7-3"><a></a></span>
-<span id="cb7-4"><a></a>data:  biomass by protection</span>
-<span id="cb7-5"><a></a>t = -3.4032, df = 58, p-value = 0.001213</span>
-<span id="cb7-6"><a></a>alternative hypothesis: true difference in means between group Fished and group MPA is not equal to 0</span>
-<span id="cb7-7"><a></a>95 percent confidence interval:</span>
-<span id="cb7-8"><a></a> -21.336482  -5.532399</span>
-<span id="cb7-9"><a></a>sample estimates:</span>
-<span id="cb7-10"><a></a>mean in group Fished    mean in group MPA </span>
-<span id="cb7-11"><a></a>            52.37154             65.80598 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb4-1"><a></a>Analysis of Variance Table</span>
+<span id="cb4-2"><a></a></span>
+<span id="cb4-3"><a></a>Response: svl</span>
+<span id="cb4-4"><a></a>           Df  Sum Sq Mean Sq F value Pr(&gt;F)</span>
+<span id="cb4-5"><a></a>habitat     2   55.89  27.947  2.3373 0.1018</span>
+<span id="cb4-6"><a></a>Residuals 101 1207.65  11.957               </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
-<p>Same p-value. And <span class="math inline">\(t^2 = (-3.403)^2 = 11.58 = F\)</span>.</p>
-<div class="fragment">
-<p>A (two-sample) <strong>t-test</strong> is a comparison between an intercept-only model and a two-category model.</p>
-</div>
+<ul>
+<li><strong>habitat</strong> row: the effect of the <code>habitat</code> categorical variable.</li>
+<li><strong>Residuals</strong> row: the remaining variation in the residuals.</li>
+</ul>
 </section>
-<section id="example-2-does-island-matter" class="slide level2">
-<h2>Example 2: does island matter?</h2>
+<section id="where-does-the-p-value-come-from" class="slide level2">
+<h2>Where does the p-value come from?</h2>
+<p>If <span class="math inline">\(H_0\)</span> is true (all habitat means are equal), <span class="math inline">\(F\)</span> follows an <strong>F distribution</strong> with <span class="math inline">\((p_{complex} - p_{simple}, \ n - p_{complex})\)</span> df.</p>
 
-<img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-23-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Compare an <strong>intercept-only</strong> model to a <strong>four-category</strong> model. The complex model spends <strong>3</strong> more df.</p>
+<img data-src="week6_monday_amphibians_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Only the right tail counts: extra parameters can only <em>reduce</em> RSS.</p>
 </section>
-<section id="example-2-mathematically" class="slide level2">
-<h2>Example 2: mathematically</h2>
-<p><span class="math display">\[
-F = \frac{(16{,}265 - 10{,}779) \;/\; (4 - 1)}{10{,}779 \;/\; (60 - 4)} = 9.5
-\]</span></p>
-<div style="font-size:0.8em">
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="fu">anova</span>(<span class="fu">lm</span>(biomass <span class="sc">~</span> <span class="dv">1</span>, kelp), <span class="fu">lm</span>(biomass <span class="sc">~</span> island, kelp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb9-1"><a></a>Analysis of Variance Table</span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a>Model 1: biomass ~ 1</span>
-<span id="cb9-4"><a></a>Model 2: biomass ~ island</span>
-<span id="cb9-5"><a></a>  Res.Df   RSS Df Sum of Sq      F    Pr(&gt;F)    </span>
-<span id="cb9-6"><a></a>1     59 16265                                  </span>
-<span id="cb9-7"><a></a>2     56 10779  3    5485.8 9.4997 3.608e-05 ***</span>
-<span id="cb9-8"><a></a>---</span>
-<span id="cb9-9"><a></a>Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
+<section id="interpret-the-anova" class="slide level2">
+<h2>Interpret the ANOVA</h2>
+<p><span class="math inline">\(H_0\)</span>: <span class="math inline">\(\mu_{rural} = \mu_{suburban} = \mu_{urban}\)</span></p>
+<p><span class="math inline">\(H_A\)</span>: at least one habitat mean differs</p>
+<div class="fragment">
+<p><em>If</em> habitat had no relationship with size, we’d see an F at least this large in 10.2% of samples. Fail to reject <span class="math inline">\(H_0\)</span>.</p>
 </div>
 <div class="fragment">
-<p>Does island explain enough variation to justify the cost? <strong>Yes</strong> (p = 3.6^{-5}).</p>
-</div>
-</section>
-<section id="example-2-its-an-anova" class="slide level2">
-<h2>Example 2: it’s an ANOVA!</h2>
-<div style="font-size:0.8em">
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="fu">summary</span>(<span class="fu">aov</span>(biomass <span class="sc">~</span> island, kelp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb11-1"><a></a>            Df Sum Sq Mean Sq F value   Pr(&gt;F)    </span>
-<span id="cb11-2"><a></a>island       3   5486  1828.6     9.5 3.61e-05 ***</span>
-<span id="cb11-3"><a></a>Residuals   56  10779   192.5                     </span>
-<span id="cb11-4"><a></a>---</span>
-<span id="cb11-5"><a></a>Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</div>
-<p>Same F, same p-value.</p>
-<div class="fragment">
-<p>A (one-way) <strong>ANOVA</strong> is a comparison between an intercept-only model and a model with a 3+ category predictor.</p>
-</div>
-<div class="fragment">
-<p>ANOVA asks: is <em>at least one</em> group mean different? Not <em>which</em> one.</p>
-</div>
-</section>
-<section id="example-3-does-the-slope-vary" class="slide level2">
-<h2>Example 3: does the slope vary?</h2>
-
-<img data-src="week6_monday_files/figure-revealjs/unnamed-chunk-27-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Compare an <strong>additive</strong> model (parallel lines) to an <strong>interactive</strong> model (slopes vary). The complex model spends <strong>1</strong> more df.</p>
-</section>
-<section id="example-3-mathematically" class="slide level2">
-<h2>Example 3: mathematically</h2>
-<p><span class="math display">\[
-F = \frac{(10{,}213 - 6{,}917) \;/\; (4 - 3)}{6{,}917 \;/\; (60 - 4)} = 26.69
-\]</span></p>
-<div style="font-size:0.8em">
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="fu">anova</span>(</span>
-<span id="cb12-2"><a></a>  <span class="fu">lm</span>(biomass <span class="sc">~</span> protection <span class="sc">+</span> dist_port_km, kelp),</span>
-<span id="cb12-3"><a></a>  <span class="fu">lm</span>(biomass <span class="sc">~</span> protection <span class="sc">*</span> dist_port_km, kelp)</span>
-<span id="cb12-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb13-1"><a></a>Analysis of Variance Table</span>
-<span id="cb13-2"><a></a></span>
-<span id="cb13-3"><a></a>Model 1: biomass ~ protection + dist_port_km</span>
-<span id="cb13-4"><a></a>Model 2: biomass ~ protection * dist_port_km</span>
-<span id="cb13-5"><a></a>  Res.Df     RSS Df Sum of Sq      F    Pr(&gt;F)    </span>
-<span id="cb13-6"><a></a>1     57 10213.4                                  </span>
-<span id="cb13-7"><a></a>2     56  6916.5  1    3296.9 26.693 3.289e-06 ***</span>
-<span id="cb13-8"><a></a>---</span>
-<span id="cb13-9"><a></a>Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</div>
-<div class="fragment">
-<p>Does the interaction explain enough variation to justify the cost? <strong>Yes</strong> (p = 3.3^{-6}).</p>
-</div>
-</section>
-<section id="example-3-look-familiar" class="slide level2">
-<h2>Example 3: look familiar?</h2>
-<p>When the models differ by <strong>one</strong> parameter, the F-test matches the t-test on that coefficient in <code>summary()</code>.</p>
-<div style="font-size:0.8em">
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource small-output number-lines code-with-copy"><code class="sourceCode"><span id="cb14-1"><a></a>                            Estimate Std. Error   t value     Pr(&gt;|t|)</span>
-<span id="cb14-2"><a></a>(Intercept)                19.663911  4.9006987  4.012471 1.800943e-04</span>
-<span id="cb14-3"><a></a>protectionMPA              45.526423  7.4443126  6.115598 9.852300e-08</span>
-<span id="cb14-4"><a></a>dist_port_km                1.038368  0.1416210  7.332023 9.781439e-10</span>
-<span id="cb14-5"><a></a>protectionMPA:dist_port_km -1.022088  0.1978278 -5.166553 3.288604e-06</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</div>
-<p><span class="math inline">\(t^2 = (-5.167)^2 = 26.69 = F\)</span></p>
-<div class="fragment">
-<p>The F-test generalizes: it can test <strong>many</strong> parameters at once.</p>
+<p>But we pooled frogs of all ages, and frogs keep growing as they age. Age differences are hiding in the residuals, inflating the denominator of <span class="math inline">\(F\)</span>. Could accounting for age change the answer? You’ll find out in lab.</p>
 </div>
 </section></section>
 <section>
@@ -984,15 +768,20 @@ F = \frac{(10{,}213 - 6{,}917) \;/\; (4 - 3)}{6{,}917 \;/\; (60 - 4)} = 26.69
 </section>
 <section id="recap-1" class="slide level2">
 <h2>Recap</h2>
-<div>
-<ul>
-<li class="fragment">More data means more <strong>information</strong> to spend on inference</li>
-<li class="fragment">What do we spend it on? <strong>Parameters.</strong> <span class="math inline">\(df = n - p\)</span></li>
-<li class="fragment">More complex models explain more variation, but do they explain <em>enough</em> variation to justify their costs?</li>
-<li class="fragment">The <strong>F-test</strong> compares the improvement per df spent to the leftover noise per df remaining</li>
-<li class="fragment"><strong>t-tests</strong> and <strong>ANOVAs</strong> are F-tests between an intercept-only model and a categorical model</li>
-</ul>
+<p>More data means more information (df) to spend on inference.</p>
+<p>What do we spend it on? Parameters.</p>
+<p>More complex models explain more variation, but do they explain <em>enough</em> variation to justify their costs? The <strong>F statistic</strong> answers that.</p>
+<div class="fragment">
+<p>ANOVA isn’t a separate tool from linear models. It’s a comparison between two linear models.</p>
 </div>
+<div class="fragment">
+<p><strong>In lab</strong>: Does habitat matter once we account for age?</p>
+</div>
+</section>
+<section id="references" class="slide level2">
+<h2>References</h2>
+<p>Jennette, M. A., Snodgrass, J. W., &amp; Forester, D. C. (2019). Variation in age, body size, and reproductive traits among urban and rural amphibian populations. <em>Urban Ecosystems</em>, 22, 137–147. <a href="https://doi.org/10.1007/s11252-018-0801-7" class="uri">https://doi.org/10.1007/s11252-018-0801-7</a></p>
+<p>Whitehurst, M. (2021). Life in Urban Environments: The Impact of Urbanization on Life-History Traits in Amphibian Species. <em>QUBES Educational Resources</em>. <a href="https://doi.org/10.25334/872X-7X06" class="uri">https://doi.org/10.25334/872X-7X06</a> (CC BY-SA 4.0)</p>
 
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">

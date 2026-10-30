@@ -1,0 +1,1219 @@
+---
+format:
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    papersize: letter
+    fontsize: 10pt
+    linestretch: 1.05
+    mainfont: Lora
+    monofont: Roboto Mono
+    monofontoptions:
+      - Scale=0.9
+    geometry:
+      - top=0.75in
+      - bottom=0.6in
+      - left=0.95in
+      - right=0.95in
+    pagestyle: empty
+    number-sections: false
+    include-in-header:
+      text: |
+        \usepackage{titlesec}
+        \usepackage{array}
+        \usepackage{booktabs}
+        \usepackage{enumitem}
+        \usepackage{unicode-math}
+        \setmathfont{latinmodern-math.otf}
+        \setmathfont[range={up/{latin,Latin,num}}]{Lora}
+        \setmathfont[range={it/{latin,Latin}}]{Lora Italic}
+        \setlength{\parindent}{0pt}
+        \setlength{\parskip}{5pt}
+        \titleformat{\section}{\normalfont\fontsize{15}{18}\selectfont}{}{0pt}{}
+        \titlespacing*{\section}{0pt}{0pt}{6pt}
+        \titleformat{\subsection}{\normalfont\fontsize{12}{15}\selectfont}{}{0pt}{}
+        \titlespacing*{\subsection}{0pt}{10pt}{2pt}
+        \setlist[itemize]{label=\textbullet, leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \setlist[enumerate]{leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \newcommand{\doctitle}[1]{{\fontsize{21}{25}\selectfont #1}\par\vspace{8pt}}
+        \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+        \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+params:
+  key: true
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: ""
+    fig.align: center
+    fig.pos: "H"
+    dev: cairo_pdf
+---
+
+```{r}
+#| label: setup
+library(ggplot2)
+
+key <- isTRUE(params$key)
+
+# Wide enough that coef() output doesn't wrap
+options(width = 100)
+
+# ---- Plot style (matches the causality handout) ----
+theme_set(
+  theme_bw(base_size = 11) +
+    theme(
+      legend.position = "right",
+      legend.margin = margin(0, 0, 0, 0),
+      plot.margin = margin(4, 6, 2, 4)
+    )
+)
+
+# Shapes and line types instead of colour, so figures work in black and white
+group_shapes <- c(16, 17, 15)
+group_linetypes <- c("solid", "dotted", "dotdash")
+
+# ---- Simulation ----
+# One categorical predictor: n observations per level, normal noise
+sim_groups <- function(seed, levels, means, sd, n) {
+  set.seed(seed)
+  group <- factor(rep(levels, each = n), levels = levels)
+  data.frame(
+    group = group,
+    y = round(rnorm(length(group), rep(means, each = n), sd), 1)
+  )
+}
+
+# Two categorical predictors with additive effects: n observations per
+# combination. means is a matrix with rows for levels of a and columns for
+# levels of b.
+sim_two_way <- function(seed, a, b, means, sd, n) {
+  set.seed(seed)
+  d <- expand.grid(
+    rep = seq_len(n),
+    a = factor(a, levels = a),
+    b = factor(b, levels = b)
+  )
+  d$y <- round(
+    rnorm(nrow(d), means[cbind(as.integer(d$a), as.integer(d$b))], sd),
+    1
+  )
+  d[, c("a", "b", "y")]
+}
+
+# One categorical and one continuous predictor: n observations per level. x is
+# uniform on a range that can differ by level, and every level shares one slope.
+sim_covariate <- function(
+  seed,
+  levels,
+  x_min,
+  x_max,
+  intercept,
+  slope,
+  effects,
+  sd,
+  n
+) {
+  set.seed(seed)
+  group <- factor(rep(levels, each = n), levels = levels)
+  x <- round(
+    runif(length(group), rep(x_min, each = n), rep(x_max, each = n)),
+    1
+  )
+  y <- round(
+    intercept +
+      slope * x +
+      rep(effects, each = n) +
+      rnorm(length(group), 0, sd),
+    1
+  )
+  data.frame(group, x, y)
+}
+
+# ---- Helpers ----
+rss <- function(m) sum(residuals(m)^2)
+fmt <- function(x, digits = 1) {
+  formatC(x, format = "f", digits = digits, big.mark = ",")
+}
+fmt_p <- function(p) {
+  if (p < 0.001) "< 0.001" else formatC(p, format = "f", digits = 3)
+}
+# p-value for a sentence: "p < 0.001" or "p = 0.220"
+p_text <- function(p) {
+  if (p < 0.001) "p < 0.001" else paste("p =", fmt_p(p))
+}
+
+# A blank to fill in, or the answer in the key
+fill <- function(x) if (key) as.character(x) else "\\rule{1.4cm}{0.4pt}"
+
+blank_lines <- function(n) {
+  if (!key) cat(rep("\\vspace{0.3in}\n\n", n), sep = "")
+}
+answer <- function(...) if (key) cat(..., sep = "")
+
+# Null and alternative hypotheses: labelled blanks for students, filled in for
+# the key
+hypotheses <- function(h0, ha) {
+  if (key) {
+    cat("$H_0$: ", h0, "\n\n$H_A$: ", ha, "\n\n", sep = "")
+  } else {
+    cat("$H_0$:\n\n\\vspace{0.25in}\n\n$H_A$:\n\n\\vspace{0.25in}\n\n")
+  }
+}
+
+# Decision at alpha = 0.05, for a sentence
+decision <- function(p) {
+  if (p < 0.05) "We reject $H_0$." else "We fail to reject $H_0$."
+}
+
+# One-factor model's prediction for each level of the first factor, as text
+simple_text <- function(m, d) {
+  levels_a <- levels(d$a)
+  newdata <- setNames(
+    data.frame(factor(levels_a, levels = levels_a)),
+    names(model.frame(m))[2]
+  )
+  paste(paste0(levels_a, " = ", fmt(predict(m, newdata))), collapse = "; ")
+}
+
+# Additive model's prediction for every combination of two factors, as text
+prediction_text <- function(m, d) {
+  combos <- unique(d[, c("a", "b")])
+  newdata <- setNames(combos, names(model.frame(m))[2:3])
+  preds <- predict(m, newdata)
+  paste(
+    paste0(combos$a, ", ", combos$b, " = ", fmt(preds)),
+    collapse = "; "
+  )
+}
+
+# Code in a LaTeX table cell
+tex_code <- function(x) {
+  x <- gsub("_", "\\_", x, fixed = TRUE)
+  x <- gsub("~", "\\textasciitilde{}", x, fixed = TRUE)
+  paste0("\\texttt{", x, "}")
+}
+
+# Centered LaTeX table. header and each row are character vectors of cells.
+latex_table <- function(header, rows, align) {
+  row_tex <- vapply(rows, \(r) paste(r, collapse = " & "), character(1))
+  cat(
+    "\\begin{center}",
+    "\\renewcommand{\\arraystretch}{1.5}",
+    paste0("\\begin{tabular}{", align, "}"),
+    "\\toprule",
+    paste(paste(header, collapse = " & "), "\\\\"),
+    "\\midrule",
+    paste(row_tex, "\\\\"),
+    "\\bottomrule",
+    "\\end{tabular}",
+    "\\end{center}",
+    sep = "\n"
+  )
+  cat("\n\n")
+}
+
+# F statistic comparing two nested models, worked out in LaTeX
+f_by_hand <- function(simple, complex) {
+  n <- nobs(complex)
+  p_s <- length(coef(simple))
+  p_c <- length(coef(complex))
+  f <- ((rss(simple) - rss(complex)) / (p_c - p_s)) /
+    (rss(complex) / (n - p_c))
+  sprintf(
+    "$$F = \\frac{(%s - %s) \\ / \\ (%d - %d)}{%s \\ / \\ (%d - %d)} = %s$$\n\n",
+    fmt(rss(simple)),
+    fmt(rss(complex)),
+    p_c,
+    p_s,
+    fmt(rss(complex)),
+    n,
+    p_c,
+    fmt(f, 2)
+  )
+}
+
+# Table of models with p and df to fill in, RSS given
+model_table <- function(models) {
+  rows <- lapply(names(models), \(label) {
+    m <- models[[label]]
+    c(
+      tex_code(label),
+      fill(length(coef(m))),
+      fill(df.residual(m)),
+      fmt(rss(m))
+    )
+  })
+  latex_table(c("Model", "$p$", "$df$", "$RSS$"), rows, "lccr")
+}
+
+# Dummy variable table for a factor, blank cells for students
+dummy_table <- function(levels, name) {
+  dummies <- levels[-1]
+  rows <- lapply(levels, \(lev) {
+    c(lev, vapply(dummies, \(d) fill(as.integer(lev == d)), character(1)))
+  })
+  latex_table(
+    c(name, dummies),
+    rows,
+    paste0("l", strrep("c", length(dummies)))
+  )
+}
+
+# Points by group. The key adds the intercept-only model (dashed, the overall
+# mean) and each category's mean (solid), labelled with its coefficients.
+group_plot <- function(d, xlab, ylab) {
+  p <- ggplot(d, aes(group, y)) +
+    geom_point(
+      aes(shape = group),
+      size = 2,
+      colour = "grey20",
+      position = position_jitter(width = 0.12, height = 0, seed = 1)
+    ) +
+    scale_shape_manual(values = group_shapes, guide = "none") +
+    labs(x = xlab, y = ylab)
+  if (!key) {
+    return(p)
+  }
+  means <- aggregate(y ~ group, d, mean)
+  means$label <- c(
+    "beta[0]",
+    paste0("beta[0] + beta[", seq_len(nrow(means) - 1), "]")
+  )
+  p +
+    scale_x_discrete(expand = expansion(add = c(0.6, 1.5))) +
+    geom_hline(yintercept = mean(d$y), linetype = "dashed") +
+    annotate(
+      "text",
+      x = nrow(means) + 0.35,
+      y = mean(d$y),
+      label = "Intercept only",
+      hjust = 0,
+      vjust = -0.5,
+      size = 3.5
+    ) +
+    geom_segment(
+      aes(
+        x = as.integer(group) - 0.3,
+        xend = as.integer(group) + 0.3,
+        y = y,
+        yend = y
+      ),
+      data = means,
+      linewidth = 1.2
+    ) +
+    geom_text(
+      aes(x = as.integer(group) + 0.35, y = y, label = label),
+      data = means,
+      parse = TRUE,
+      hjust = 0,
+      size = 3.5
+    )
+}
+
+# Continuous predictor on x, shapes by group. The key adds the model with only
+# the continuous predictor (grey dashed) and the model with both (one line type
+# per group).
+covariate_plot <- function(d, xlab, ylab, colour_lab) {
+  p <- ggplot(d, aes(x, y)) +
+    geom_point(aes(shape = group), size = 2, colour = "grey20") +
+    scale_shape_manual(values = group_shapes) +
+    scale_linetype_manual(values = group_linetypes) +
+    labs(x = xlab, y = ylab, shape = colour_lab, linetype = colour_lab)
+  if (!key) {
+    return(p)
+  }
+  d$both <- fitted(lm(y ~ x + group, d))
+  p +
+    geom_smooth(
+      method = "lm",
+      formula = y ~ x,
+      se = FALSE,
+      colour = "grey50",
+      linetype = "dashed",
+      linewidth = 0.8
+    ) +
+    geom_line(aes(y = both, linetype = group), data = d, linewidth = 0.9)
+}
+
+# Two categorical predictors: first on x, point shapes by the second. The
+# key adds the simpler model's prediction for each level of the first predictor
+# (dashed black segment across the category) and the additive model's
+# prediction for each combination (solid segment over its points).
+two_way_plot <- function(d, xlab, ylab, colour_lab) {
+  dodge_width <- 0.4
+  p <- ggplot(d, aes(a, y, shape = b)) +
+    geom_point(
+      position = position_jitterdodge(
+        jitter.width = 0.15,
+        dodge.width = dodge_width,
+        seed = 1
+      ),
+      colour = "grey20",
+      size = 1.8
+    ) +
+    scale_shape_manual(values = c(16, 2)) +
+    labs(x = xlab, y = ylab, shape = colour_lab)
+  if (!key) {
+    return(p)
+  }
+  simple <- aggregate(y ~ a, d, mean)
+  additive <- unique(cbind(d[, c("a", "b")], y = fitted(lm(y ~ a + b, d))))
+  # Centre of each dodged group of points
+  n_b <- nlevels(d$b)
+  additive$x <- as.integer(additive$a) +
+    (as.integer(additive$b) - (n_b + 1) / 2) * dodge_width / n_b
+  half <- dodge_width / n_b / 2
+  p +
+    geom_segment(
+      aes(
+        x = as.integer(a) - 0.3,
+        xend = as.integer(a) + 0.3,
+        y = y,
+        yend = y
+      ),
+      data = simple,
+      inherit.aes = FALSE,
+      colour = "black",
+      linetype = "dashed",
+      linewidth = 0.8
+    ) +
+    geom_segment(
+      aes(x = x - half, xend = x + half, y = y, yend = y),
+      data = additive,
+      linewidth = 1.2
+    )
+}
+```
+
+```{r}
+#| label: data
+
+# 1A: soil lead differs among land uses (0.01 < p < 0.05)
+yards <- sim_groups(
+  4,
+  c("Residential", "Highway", "Industrial"),
+  c(200, 250, 290),
+  100,
+  8
+)
+names(yards) <- c("land_use", "lead")
+
+# 1B: row crops raise nitrate slightly (0.05 < p < 0.1)
+wells <- sim_groups(
+  24,
+  c("Rangeland", "Orchard", "Row crops"),
+  c(3, 3.5, 4.3),
+  1.6,
+  8
+)
+names(wells) <- c("land_use", "nitrate")
+
+# 2A: winter raises PM2.5 a little, by the same amount in every region
+# (0.05 < p < 0.1)
+air <- sim_two_way(
+  3,
+  c("Rural", "Suburban", "Urban"),
+  c("Summer", "Winter"),
+  outer(c(8, 9, 10), c(0, 2), "+"),
+  3,
+  4
+)
+names(air) <- c("region", "season", "pm")
+
+# 2B: watering adds a few bee visits (0.01 < p < 0.05)
+bees <- sim_two_way(
+  8,
+  c("Meadow", "Orchard", "Garden"),
+  c("Dry", "Watered"),
+  outer(c(20, 14, 26), c(0, 2.5), "+"),
+  5,
+  4
+)
+names(bees) <- c("habitat", "water", "visits")
+
+# 3A: surrounding land use matters for bird richness, even for parks of the
+# same size (0.01 < p < 0.05)
+parks <- sim_covariate(
+  16,
+  c("Residential", "Commercial", "Industrial"),
+  2,
+  20,
+  10,
+  0.8,
+  c(0, -1.5, -3),
+  3,
+  8
+)
+names(parks) <- c("land_use", "area", "richness")
+
+# 3B: neighborhoods differ in canopy, which explains most of their temperature
+# differences (0.05 < p < 0.1)
+sites <- sim_covariate(
+  27,
+  c("Residential", "Commercial", "Industrial"),
+  c(30, 10, 0),
+  c(60, 35, 20),
+  45,
+  -0.25,
+  c(0, 0.8, 1.6),
+  2,
+  8
+)
+names(sites) <- c("neighborhood", "canopy", "temp")
+
+# Models
+park_area <- lm(richness ~ area, parks)
+park_both <- lm(richness ~ area + land_use, parks)
+site_canopy <- lm(temp ~ canopy, sites)
+site_both <- lm(temp ~ canopy + neighborhood, sites)
+yard_null <- lm(lead ~ 1, yards)
+yard_lm <- lm(lead ~ land_use, yards)
+well_null <- lm(nitrate ~ 1, wells)
+well_lm <- lm(nitrate ~ land_use, wells)
+air_region <- lm(pm ~ region, air)
+air_both <- lm(pm ~ region + season, air)
+bee_habitat <- lm(visits ~ habitat, bees)
+bee_both <- lm(visits ~ habitat + water, bees)
+
+# Plotting copies with generic column names for the plot helpers
+as_groups <- function(d) setNames(d, c("group", "y"))
+as_covariate <- function(d) setNames(d, c("group", "x", "y"))
+as_two_way <- function(d) setNames(d, c("a", "b", "y"))
+```
+
+\doctitle{Comparing models with ANOVA`r if (key) " (answer key)" else ""`}
+
+Each part has two scenarios with the same tasks. We'll work through scenario **A** together as a class. Then you'll work through scenario **B** in your group.
+
+Every question in this handout compares a **simpler** model to a more **complex** model. Refer back to this box as you go.
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+$$
+
+- $RSS$: residual sum of squares, $\sum (y_i - \hat y_i)^2$. The variation the model leaves unexplained.
+- $p$: number of coefficients the model estimates, including the intercept
+- $n$: number of observations
+- $df = n - p$: degrees of freedom left over after fitting the model
+- **Numerator**: improvement in fit per df spent. **Denominator**: leftover noise per df remaining.
+
+\vspace{2pt}\hrule
+
+# Part 1: Three levels
+
+For each scenario:
+
+1. **Data.** Look at the data in the figure.
+2. **Dummy variables.** Fill in the dummy variable table.
+3. **Full model.** Write the equation for the full model. What does each coefficient mean?
+4. **Draw the means.** Use the coefficients to draw the intercept-only model and each category's mean on the figure.
+5. **Degrees of freedom and F.** Use $n$ and the RSS values to fill in $p$ and $df$ for each model. Then calculate $F$.
+6. **Interpretation.** State $H_0$ and $H_A$. Then interpret the p-value for your $F$ in a sentence.
+
+<!-- =========================================================== -->
+<!-- 1A: Soil lead                                               -->
+<!-- =========================================================== -->
+
+# 1A. Soil lead (together)
+
+Lead from old gasoline and industrial emissions settles into soil, where children can be exposed. A county health department sampled soil **lead** (ppm) in `r nrow(yards) / 3` yards near each of three land uses (**land_use**): residential streets, a highway, and an industrial site.
+
+```{r}
+#| fig-width: 5
+#| fig-height: 2.8
+#| out-width: "60%"
+group_plot(as_groups(yards), "Land use", "Soil lead (ppm)")
+```
+
+## Dummy variables
+
+```{r}
+#| results: asis
+dummy_table(levels(yards$land_use), "Land use")
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{lead} = \\beta_0 + \\beta_1 (\\text{land use} = \\text{Highway}) + ",
+  "\\beta_2 (\\text{land use} = \\text{Industrial}) + \\varepsilon$\n\n",
+  "$\\beta_0$ is the mean soil lead in residential yards (the reference). ",
+  "$\\beta_1$ is the difference between highway and residential yards. ",
+  "$\\beta_2$ is the difference between industrial and residential yards.\n"
+)
+```
+
+## Draw the means
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(lead ~ 1, yards))
+coef(lm(lead ~ land_use, yards))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Intercept only: one line at the overall mean, ",
+  fmt(coef(yard_null)[[1]]),
+  " ppm. Residential: $\\beta_0 = ",
+  fmt(coef(yard_lm)[[1]]),
+  "$. Highway: $\\beta_0 + \\beta_1 = ",
+  fmt(sum(coef(yard_lm)[1:2])),
+  "$. Industrial: $\\beta_0 + \\beta_2 = ",
+  fmt(sum(coef(yard_lm)[c(1, 3)])),
+  "$ ppm.\n"
+)
+```
+
+## Degrees of freedom and F ($n$ = `r nobs(yard_lm)`)
+
+```{r}
+#| results: asis
+model_table(list(`lead ~ 1` = yard_null, `lead ~ land_use` = yard_lm))
+blank_lines(3)
+answer(f_by_hand(yard_null, yard_lm))
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\mu_{residential} = \\mu_{highway} = \\mu_{industrial}$ (equivalently, $\\beta_1 = \\beta_2 = 0$)",
+  "at least one land use has a different mean soil lead"
+)
+```
+
+The p-value for this $F$ is `r p_text(anova(yard_null, yard_lm)$"Pr(>F)"[2])`. Interpret it in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ land use had no relationship with soil lead, we'd see an $F$ at ",
+  "least this large with probability ",
+  p_text(anova(yard_null, yard_lm)$`Pr(>F)`[2]),
+  ". ",
+  decision(anova(yard_null, yard_lm)$`Pr(>F)`[2]),
+  " Land use explains enough of the variation in soil lead to justify ",
+  "spending 2 df.\n"
+)
+```
+
+<!-- =========================================================== -->
+<!-- 1B: Groundwater nitrate                                     -->
+<!-- =========================================================== -->
+
+\newpage
+
+# 1B. Groundwater nitrate (in groups)
+
+Fertilizer applied to crops can leach into groundwater as nitrate, contaminating drinking water wells. A water agency measured **nitrate** (mg/L) in `r nrow(wells) / 3` wells under each of three land uses (**land_use**): rangeland, orchards, and row crops.
+
+```{r}
+#| fig-width: 5
+#| fig-height: 2.8
+#| out-width: "60%"
+group_plot(as_groups(wells), "Land use", "Nitrate (mg/L)")
+```
+
+## Dummy variables
+
+```{r}
+#| results: asis
+dummy_table(levels(wells$land_use), "Land use")
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{nitrate} = \\beta_0 + \\beta_1 (\\text{land use} = \\text{Orchard}) + ",
+  "\\beta_2 (\\text{land use} = \\text{Row crops}) + \\varepsilon$\n\n",
+  "$\\beta_0$ is the mean nitrate under rangeland (the reference). ",
+  "$\\beta_1$ is the difference between orchards and rangeland. ",
+  "$\\beta_2$ is the difference between row crops and rangeland.\n"
+)
+```
+
+\newpage
+
+## Draw the means
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(nitrate ~ 1, wells))
+coef(lm(nitrate ~ land_use, wells))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Intercept only: one line at the overall mean, ",
+  fmt(coef(well_null)[[1]]),
+  " mg/L. Rangeland: $\\beta_0 = ",
+  fmt(coef(well_lm)[[1]]),
+  "$. Orchard: $\\beta_0 + \\beta_1 = ",
+  fmt(sum(coef(well_lm)[1:2])),
+  "$. Row crops: $\\beta_0 + \\beta_2 = ",
+  fmt(sum(coef(well_lm)[c(1, 3)])),
+  "$ mg/L.\n"
+)
+```
+
+## Degrees of freedom and F ($n$ = `r nobs(well_lm)`)
+
+```{r}
+#| results: asis
+model_table(list(`nitrate ~ 1` = well_null, `nitrate ~ land_use` = well_lm))
+blank_lines(3)
+answer(f_by_hand(well_null, well_lm))
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\mu_{rangeland} = \\mu_{orchard} = \\mu_{row\\ crops}$ (equivalently, $\\beta_1 = \\beta_2 = 0$)",
+  "at least one land use has a different mean nitrate"
+)
+```
+
+The p-value for this $F$ is `r p_text(anova(well_null, well_lm)$"Pr(>F)"[2])`. Interpret it in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ land use had no relationship with nitrate, we'd see an $F$ at least ",
+  "this large with probability ",
+  p_text(anova(well_null, well_lm)$`Pr(>F)`[2]),
+  ". ",
+  decision(anova(well_null, well_lm)$`Pr(>F)`[2]),
+  " Row crops look a little higher in the figure, but the differences ",
+  "among land uses are small relative to the variation among wells.\n"
+)
+```
+
+\newpage
+
+# Part 2: Two categorical predictors
+
+Now there are two categorical predictors. The question is whether the second one explains enough variation to justify its cost _after_ accounting for the first. For each scenario:
+
+1. **Data.** Look at the data in the figure.
+2. **Full model.** Write the equation for the model with both predictors. What does each coefficient mean?
+3. **Draw the models.** Use the coefficients to draw the simpler model's prediction for each level of the first predictor, and the model with both predictors' prediction for each combination of the two. Draw each prediction as a horizontal line segment, like in Part 1.
+4. **Degrees of freedom and F.** Use $n$ and the RSS values to fill in $p$ and $df$ for each model. Then calculate $F$ for adding the second predictor.
+5. **Interpretation.** State $H_0$ and $H_A$. Then interpret the p-value for your $F$ in a sentence.
+
+<!-- =========================================================== -->
+<!-- 2A: Air quality                                             -->
+<!-- =========================================================== -->
+
+# 2A. Air quality (together)
+
+Fine particulate matter (PM2.5) damages lungs and hearts. In winter, wood smoke and temperature inversions can trap it near the ground. An air district measured PM2.5 (**pm**, µg/m³) on `r nrow(air) / 6` days for each combination of **region** (rural, suburban, or urban) and **season** (summer or winter). Does season matter after accounting for region?
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.8
+#| out-width: "65%"
+two_way_plot(as_two_way(air), "Region", "PM2.5 (µg/m³)", "Season")
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{pm} = \\beta_0 + \\beta_1 (\\text{region} = \\text{Suburban}) + ",
+  "\\beta_2 (\\text{region} = \\text{Urban}) + ",
+  "\\beta_3 (\\text{season} = \\text{Winter}) + \\varepsilon$\n\n",
+  "$\\beta_0$ is the expected PM2.5 in rural regions in summer. $\\beta_1$ and ",
+  "$\\beta_2$ are the differences between suburban (or urban) and rural ",
+  "regions _in the same season_. $\\beta_3$ is the difference between winter ",
+  "and summer, the same in every region.\n"
+)
+```
+
+## Draw the models
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(pm ~ region, air))
+coef(lm(pm ~ region + season, air))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Simpler model (dashed): one prediction per region, ",
+  simple_text(air_region, as_two_way(air)),
+  " µg/m³. Model with both: each prediction is $\\beta_0$ plus the ",
+  "coefficients for its region and season, ",
+  prediction_text(air_both, as_two_way(air)),
+  " µg/m³. In every region, the winter segment is $\\beta_3$ above the ",
+  "summer segment.\n"
+)
+```
+
+## Degrees of freedom and F ($n$ = `r nobs(air_both)`)
+
+```{r}
+#| results: asis
+model_table(list(`pm ~ region` = air_region, `pm ~ region + season` = air_both))
+blank_lines(3)
+answer(
+  "Adding season costs 1 df.\n\n",
+  f_by_hand(air_region, air_both)
+)
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\beta_3 = 0$ (season has no relationship with PM2.5 within each region)",
+  "$\\beta_3 \\neq 0$"
+)
+```
+
+The p-value for this $F$ is `r p_text(anova(air_region, air_both)$"Pr(>F)"[2])`. Interpret it in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ season had no relationship with PM2.5 within each region, we'd see ",
+  "an $F$ at least this large with probability ",
+  p_text(anova(air_region, air_both)$`Pr(>F)`[2]),
+  ". ",
+  decision(anova(air_region, air_both)$`Pr(>F)`[2]),
+  " Winter PM2.5 averaged ",
+  fmt(coef(air_both)[["seasonWinter"]]),
+  " µg/m³ higher than summer, but that's small relative to the day-to-day ",
+  "variation within each region.\n"
+)
+```
+
+<!-- =========================================================== -->
+<!-- 2B: Bees and watering                                       -->
+<!-- =========================================================== -->
+
+\newpage
+
+# 2B. Bees and watering (in groups)
+
+Watered flowers may produce more nectar, attracting more bees. A pollinator team counted bee **visits** per hour to `r nrow(bees) / 6` flower patches for each combination of **habitat** (meadow, orchard, or garden) and **water** (dry or watered). Does watering matter after accounting for habitat?
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.8
+#| out-width: "65%"
+two_way_plot(as_two_way(bees), "Habitat", "Bee visits per hour", "Water")
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{visits} = \\beta_0 + \\beta_1 (\\text{habitat} = \\text{Orchard}) + ",
+  "\\beta_2 (\\text{habitat} = \\text{Garden}) + ",
+  "\\beta_3 (\\text{water} = \\text{Watered}) + \\varepsilon$\n\n",
+  "$\\beta_0$ is the expected visits to dry meadow patches. $\\beta_1$ and ",
+  "$\\beta_2$ are the differences between orchard (or garden) and meadow ",
+  "patches _with the same watering_. $\\beta_3$ is the difference between ",
+  "watered and dry patches, the same in every habitat.\n"
+)
+```
+
+## Draw the models
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(visits ~ habitat, bees))
+coef(lm(visits ~ habitat + water, bees))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Simpler model (dashed): one prediction per habitat, ",
+  simple_text(bee_habitat, as_two_way(bees)),
+  " visits per hour. Model with both: each prediction is $\\beta_0$ plus ",
+  "the coefficients for its habitat and watering, ",
+  prediction_text(bee_both, as_two_way(bees)),
+  " visits per hour. In every habitat, the watered segment is $\\beta_3$ ",
+  "above the dry segment.\n"
+)
+```
+
+\newpage
+
+## Degrees of freedom and F ($n$ = `r nobs(bee_both)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `visits ~ habitat` = bee_habitat,
+  `visits ~ habitat + water` = bee_both
+))
+blank_lines(3)
+answer(
+  "Adding watering costs 1 df.\n\n",
+  f_by_hand(bee_habitat, bee_both)
+)
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\beta_3 = 0$ (watering has no relationship with bee visits within each habitat)",
+  "$\\beta_3 \\neq 0$"
+)
+```
+
+The p-value for this $F$ is `r p_text(anova(bee_habitat, bee_both)$"Pr(>F)"[2])`. Interpret it in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ watering had no relationship with bee visits within each habitat, ",
+  "we'd see an $F$ at least this large with probability ",
+  p_text(anova(bee_habitat, bee_both)$`Pr(>F)`[2]),
+  ". ",
+  decision(anova(bee_habitat, bee_both)$`Pr(>F)`[2]),
+  " Watered patches get ",
+  fmt(coef(bee_both)[["waterWatered"]]),
+  " more visits per hour than dry patches in the same habitat.\n"
+)
+```
+
+\newpage
+
+# Part 3: Three levels plus a continuous predictor
+
+Now the second predictor is continuous instead of categorical. The question is whether the categorical predictor explains enough variation to justify its cost _after_ accounting for the continuous predictor. For each scenario:
+
+1. **Full model.** Write the model equation with both predictors. What does each coefficient mean?
+2. **Draw the models.** Use the coefficients to draw the model with only the continuous predictor (one line) and the model with both predictors (three parallel lines) on the figure.
+3. **Degrees of freedom.** Fill in $p$ and $df$ for each model.
+4. **F by hand.** Use the RSS values to calculate $F$ for adding the categorical predictor.
+5. **Check.** Compare your $F$ to the `anova()` output.
+6. **Conclusion.** State your conclusion in a sentence, using the p-value.
+
+<!-- =========================================================== -->
+<!-- 3A: Birds in city parks                                     -->
+<!-- =========================================================== -->
+
+# 3A. Birds in city parks (together)
+
+City parks can be refuges for birds, and bigger parks usually hold more species. Does what surrounds a park matter too? A city surveyed bird species **richness** in `r nrow(parks) / 3` parks in each of three surrounding land uses (**land_use**): residential, commercial, and industrial. It also recorded each park's **area** (ha).
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "70%"
+covariate_plot(
+  as_covariate(parks),
+  "Park area (ha)",
+  "Bird species richness",
+  "Land use"
+)
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{richness} = \\beta_0 + \\beta_1 \\text{area} + ",
+  "\\beta_2 (\\text{land use} = \\text{Commercial}) + ",
+  "\\beta_3 (\\text{land use} = \\text{Industrial}) + \\varepsilon$\n\n",
+  "$\\beta_1$ is the change in richness per hectare, the same slope for every ",
+  "land use. $\\beta_2$ and $\\beta_3$ are the differences between commercial ",
+  "(or industrial) parks and residential parks _of the same area_. ",
+  "$\\beta_0$ is the expected richness of a residential park with area 0, ",
+  "which only sets the height of the lines.\n"
+)
+```
+
+## Draw the models
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(richness ~ area, parks))
+coef(lm(richness ~ area + land_use, parks))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Model with only area (dashed): intercept ",
+  fmt(coef(park_area)[[1]]),
+  " and slope ",
+  fmt(coef(park_area)[[2]], 2),
+  ". Model with both: every line has slope $\\beta_1 = ",
+  fmt(coef(park_both)[[2]], 2),
+  "$. The intercepts are Residential: $\\beta_0 = ",
+  fmt(coef(park_both)[[1]]),
+  "$; Commercial: $\\beta_0 + \\beta_2 = ",
+  fmt(sum(coef(park_both)[c(1, 3)])),
+  "$; Industrial: $\\beta_0 + \\beta_3 = ",
+  fmt(sum(coef(park_both)[c(1, 4)])),
+  "$.\n"
+)
+```
+
+## Degrees of freedom ($n$ = `r nobs(park_both)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `richness ~ area` = park_area,
+  `richness ~ area + land_use` = park_both
+))
+```
+
+## F by hand
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "Adding land use costs 2 df (two dummy variables).\n\n",
+  f_by_hand(park_area, park_both)
+)
+```
+
+## Check
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+anova(lm(richness ~ area, parks), lm(richness ~ area + land_use, parks))
+```
+
+```{=latex}
+\endgroup
+```
+
+## Conclusion
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ land use had no relationship with richness among parks of the same ",
+  "size, we'd see an $F$ at least this large with probability ",
+  p_text(anova(park_area, park_both)$`Pr(>F)`[2]),
+  ". ",
+  decision(anova(park_area, park_both)$`Pr(>F)`[2]),
+  " Compared to residential parks of the same area, ",
+  "commercial parks have ",
+  fmt(-coef(park_both)[["land_useCommercial"]]),
+  " fewer species and industrial parks have ",
+  fmt(-coef(park_both)[["land_useIndustrial"]]),
+  " fewer.\n"
+)
+```
+
+<!-- =========================================================== -->
+<!-- 3B: Urban heat                                              -->
+<!-- =========================================================== -->
+
+\newpage
+
+# 3B. Urban heat (in groups)
+
+Pavement and rooftops soak up summer sun, while trees shade the ground. A city measured summer surface temperature (**temp**, °C) at `r nrow(sites) / 3` sites in each of three **neighborhood** types: residential, commercial, and industrial. It also recorded the tree **canopy** cover (%) around each site. Does neighborhood type matter _after_ accounting for canopy?
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "70%"
+covariate_plot(
+  as_covariate(sites),
+  "Tree canopy (%)",
+  "Surface temperature (°C)",
+  "Neighborhood"
+)
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{temp} = \\beta_0 + \\beta_1 \\text{canopy} + ",
+  "\\beta_2 (\\text{neighborhood} = \\text{Commercial}) + ",
+  "\\beta_3 (\\text{neighborhood} = \\text{Industrial}) + \\varepsilon$\n\n",
+  "$\\beta_1$ is the change in temperature per percentage point of canopy, ",
+  "the same slope in every neighborhood. $\\beta_2$ and $\\beta_3$ are the ",
+  "differences between commercial (or industrial) and residential sites ",
+  "_with the same canopy_. $\\beta_0$ is the expected temperature of a ",
+  "residential site with no canopy.\n"
+)
+```
+
+## Draw the models
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(temp ~ canopy, sites))
+coef(lm(temp ~ canopy + neighborhood, sites))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Model with only canopy (dashed): intercept ",
+  fmt(coef(site_canopy)[[1]]),
+  " and slope ",
+  fmt(coef(site_canopy)[[2]], 2),
+  ". Model with both: every line has slope $\\beta_1 = ",
+  fmt(coef(site_both)[[2]], 2),
+  "$. The intercepts are Residential: $\\beta_0 = ",
+  fmt(coef(site_both)[[1]]),
+  "$; Commercial: $\\beta_0 + \\beta_2 = ",
+  fmt(sum(coef(site_both)[c(1, 3)])),
+  "$; Industrial: $\\beta_0 + \\beta_3 = ",
+  fmt(sum(coef(site_both)[c(1, 4)])),
+  "$.\n"
+)
+```
+
+## Degrees of freedom ($n$ = `r nobs(site_both)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `temp ~ canopy` = site_canopy,
+  `temp ~ canopy + neighborhood` = site_both
+))
+```
+
+## F by hand
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "Adding neighborhood costs 2 df.\n\n",
+  f_by_hand(site_canopy, site_both)
+)
+```
+
+## Check
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+anova(lm(temp ~ canopy, sites), lm(temp ~ canopy + neighborhood, sites))
+```
+
+```{=latex}
+\endgroup
+```
+
+## Conclusion
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ neighborhood type had no relationship with temperature among sites ",
+  "with the same canopy, we'd see an $F$ at least this large with ",
+  "probability ",
+  p_text(anova(site_canopy, site_both)$`Pr(>F)`[2]),
+  ". ",
+  decision(anova(site_canopy, site_both)$`Pr(>F)`[2]),
+  " Industrial sites are hotter in the figure, but they also have the ",
+  "least canopy. Once canopy is in the model, the evidence that ",
+  "neighborhood type matters is weak.\n"
+)
+```

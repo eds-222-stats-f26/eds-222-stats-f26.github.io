@@ -1,0 +1,576 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 6 Monday: ANOVA"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+# Female wood frogs from breeding ponds along an urbanization gradient in
+# Baltimore County, MD (Jennette et al. 2019)
+wood_frogs <- read_csv("../data/female-wood-frogs.csv") |>
+  mutate(
+    habitat = factor(
+      str_to_title(POP),
+      levels = c("Rural", "Suburban", "Urban")
+    )
+  ) |>
+  select(habitat, svl = SVL, age = Age)
+
+
+pop_colours <- c(
+  Rural = "forestgreen",
+  Suburban = "goldenrod",
+  Urban = "grey40"
+)
+
+# Residual sum of squares
+rss <- function(m) sum(residuals(m)^2)
+
+# Points by group, with each observation's residual drawn to the fitted value.
+# Fixed seed so the jitter matches when comparing two models side by side.
+plot_residuals <- function(frogs, model, title) {
+  set.seed(222)
+  frogs |>
+    mutate(
+      fit = fitted(model),
+      x = as.numeric(habitat) + runif(n(), -0.2, 0.2)
+    ) |>
+    ggplot(aes(x, svl)) +
+    geom_segment(aes(xend = x, yend = fit), colour = "grey60") +
+    geom_point(aes(fill = habitat), shape = 21, size = 3, alpha = 0.8) +
+    geom_segment(
+      aes(x = x - 0.3, xend = x + 0.3, y = fit, yend = fit),
+      frogs |>
+        mutate(fit = fitted(model)) |>
+        distinct(habitat, fit) |>
+        mutate(x = as.numeric(habitat)),
+      linewidth = 1.5
+    ) +
+    scale_x_continuous(
+      breaks = seq_along(levels(frogs$habitat)),
+      labels = levels(frogs$habitat)
+    ) +
+    scale_fill_manual(values = pop_colours, guide = "none") +
+    labs(
+      x = NULL,
+      y = "SVL (mm)",
+      title = title,
+      subtitle = sprintf("RSS = %.1f", rss(model))
+    )
+}
+```
+
+# ANOVA
+
+## Learning objectives
+
+- **Review** categorical predictors
+- **Compute** degrees of freedom from data and model
+- **Compare** simpler and more complex models
+
+## Are urban frogs smaller?
+
+Cities build stormwater ponds to manage runoff. Amphibians breed in them. But are they _good_ habitat?
+
+Jennette et al. (2019) measured female wood frogs breeding in rural, suburban, and urban ponds.
+
+- **Snout-vent length (SVL)**: body length in mm, a measure of size
+- **Age**: years, estimated from growth rings in toe bones
+
+Smaller frogs lay fewer eggs, so if urban frogs are smaller _at the same age_, urban habitat may be lower quality.
+
+## Meet the wood frogs
+
+```{r}
+#| fig-width: 10
+#| fig-align: center
+
+ggplot(wood_frogs, aes(habitat, svl, fill = habitat)) +
+  geom_jitter(shape = 21, size = 3, width = 0.15, alpha = 0.8) +
+  scale_fill_manual(values = pop_colours, guide = "none") +
+  labs(
+    x = NULL,
+    y = "SVL (mm)",
+    title = sprintf("Female wood frogs (n = %d)", nrow(wood_frogs))
+  )
+```
+
+# Review categorical predictors
+
+## Dummy variables
+
+Category levels are text. You can't multiply a coefficient by a word.
+
+So we use **dummy variables**: one level becomes the **reference**, every other level gets a 0/1 variable.
+
+::: {.columns style="font-size:0.8em"}
+
+::: {.column}
+
+| Habitat | Suburban | Urban |
+|------------|:--------:|:-----:|
+| Rural      | 0        | 0     |
+| Suburban   | 1        | 0     |
+| Urban      | 0        | 1     |
+
+:::
+
+::: {.column}
+
+$k$ levels get $k - 1$ dummy variables
+
+Here: 3 levels, 2 dummies. Rural is the reference.
+
+:::
+
+:::
+
+## Three categories: equation
+
+::: {style="font-size:0.8em"}
+$$
+\begin{align}
+\text{SVL} &= \beta_0 + \beta_1 (\text{Habitat} = \text{Suburban}) \\
+&\quad + \beta_2 (\text{Habitat} = \text{Urban}) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+:::
+
+| Habitat | Expected SVL |
+|------------|-----------|
+| Rural      | $\beta_0$ |
+| Suburban   | $\beta_0 + \beta_1$ |
+| Urban      | $\beta_0 + \beta_2$ |
+
+## Three categories: visual
+
+```{r}
+#| fig-width: 10
+#| fig-align: center
+
+three_lm <- lm(svl ~ habitat, wood_frogs)
+three_means <- tibble(
+  habitat = factor(
+    levels(wood_frogs$habitat),
+    levels = levels(wood_frogs$habitat)
+  )
+) |>
+  mutate(svl = predict(three_lm, newdata = pick(everything())))
+ref_mean <- three_means$svl[1]
+
+ggplot(wood_frogs, aes(habitat, svl)) +
+  geom_jitter(
+    aes(fill = habitat),
+    shape = 21,
+    size = 3,
+    width = 0.15,
+    alpha = 0.5
+  ) +
+  geom_hline(yintercept = ref_mean, linetype = "dashed") +
+  geom_segment(
+    aes(xend = habitat, y = ref_mean, yend = svl),
+    three_means[-1, ],
+    arrow = arrow(length = unit(0.3, "cm")),
+    linewidth = 1.2
+  ) +
+  geom_point(data = three_means, size = 5, shape = "diamond") +
+  annotate(
+    "text",
+    x = 0.6,
+    y = ref_mean + 0.6,
+    label = "beta[0]",
+    parse = TRUE,
+    size = 7
+  ) +
+  annotate(
+    "text",
+    x = 2.15,
+    y = three_means$svl[2],
+    hjust = 0,
+    label = "beta[1]",
+    parse = TRUE,
+    size = 7
+  ) +
+  annotate(
+    "text",
+    x = 3.15,
+    y = three_means$svl[3] + 0.6,
+    hjust = 0,
+    label = "beta[2]",
+    parse = TRUE,
+    size = 7
+  ) +
+  scale_fill_manual(values = pop_colours, guide = "none") +
+  labs(x = NULL, y = "SVL (mm)")
+```
+
+## Is the categorical variable useful?
+
+Coefficients describe relationships between levels - but is the **categorical variable as a whole** useful?
+
+::: {.fragment}
+
+Frame this question as:
+
+Does a model **with** the categorical variable explain significantly more variance than a model **without** it?
+
+:::
+
+# Compute degrees of freedom
+
+## Degrees of freedom are inference currency
+
+**Data** give us information: $n$ observations
+
+**Parameters** spend that information: $p$ coefficients
+
+What's left over is our **degrees of freedom**
+
+$$
+df = n - p
+$$
+
+::: {.fragment}
+
+Leftover df are what we use to estimate the noise, $\sigma$. Fewer df, less certain $\hat \sigma$, wider CIs, bigger p-values.
+
+:::
+
+## The information-complexity trade off
+
+More parameters spend $df$ to improve fit.
+
+- **Too few** parameters: the model misses real structure (underfitting)
+- **Too many** parameters: the model fits the noise (overfitting)
+
+::: {.fragment}
+
+Every parameter has to _earn_ its df.
+
+:::
+
+## Example: intercept only
+
+```{r}
+null_lm <- lm(svl ~ 1, wood_frogs)
+pop_only_lm <- lm(svl ~ habitat, wood_frogs)
+```
+
+::: {style="font-size:0.8em"}
+
+Rural, suburban, and urban frogs: `svl ~ 1`
+
+$$
+\begin{align}
+\text{SVL} &= \beta_0 + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+- $n$ = `r nrow(wood_frogs)` frogs
+- $p$ = 1 coefficient ($\beta_0$)
+- $df$ = `r nrow(wood_frogs)` - 1 = `r df.residual(null_lm)`
+
+::: {.fragment}
+
+Residual sum of squares:
+
+$$
+\begin{align}
+RSS &= \sum (y_i - \hat y_i)^2 \\
+&= `r round(rss(null_lm), 1)`
+\end{align}
+$$
+
+:::
+
+:::
+
+::: {.column width="60%"}
+
+```{r}
+#| fig-width: 7
+#| fig-height: 4
+
+plot_residuals(wood_frogs, null_lm, NULL)
+```
+
+:::
+
+:::
+
+:::
+
+## Example: three categories
+
+::: {style="font-size:0.8em"}
+
+Same frogs: `svl ~ habitat`
+
+$$
+\begin{align}
+\text{SVL} &= \beta_0 + \beta_1 (\text{Habitat} = \text{Suburban}) + \beta_2 (\text{Habitat} = \text{Urban}) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{align}
+$$
+
+::: {.columns}
+
+::: {.column width="40%"}
+
+- $n$ = `r nrow(wood_frogs)` frogs
+- $p$ = 3 coefficients ($\beta_0$, $\beta_1$, $\beta_2$)
+- $df$ = `r nrow(wood_frogs)` - 3 = `r df.residual(pop_only_lm)`
+
+::: {.fragment}
+
+Residual sum of squares:
+
+$$
+\begin{align}
+RSS &= \sum (y_i - \hat y_i)^2 \\
+&= `r round(rss(pop_only_lm), 1)`
+\end{align}
+$$
+
+:::
+
+:::
+
+::: {.column width="60%"}
+
+```{r}
+#| fig-width: 7
+#| fig-height: 4
+
+plot_residuals(wood_frogs, pop_only_lm, NULL)
+```
+
+:::
+
+:::
+
+:::
+
+## Which model is better?
+
+| Model | $p$ | $df$ | $RSS$ |
+|-------|:---:|:----:|:-----:|
+| `svl ~ 1` | 1 | `r df.residual(null_lm)` | `r round(rss(null_lm), 1)` |
+| `svl ~ habitat` | 3 | `r df.residual(pop_only_lm)` | `r round(rss(pop_only_lm), 1)` |
+
+Spending 2 df on habitat cut the RSS by `r scales::percent(1 - rss(pop_only_lm) / rss(null_lm), 0.1)`.
+
+::: {.fragment}
+
+Was it worth it? Adding _any_ predictor reduces RSS a little, even pure noise. We need a way to say how much is _enough_.
+
+:::
+
+# Compare simpler and more complex models
+
+## Cost-benefit
+
+Adding parameters explains more, but at a cost.
+
+::: {.columns}
+
+::: {.column}
+
+**Benefit**
+
+- Smaller residuals
+- More variation explained
+
+:::
+
+::: {.column}
+
+**Cost**
+
+- Spent degrees of freedom
+- Less information behind each parameter
+
+:::
+
+:::
+
+## Quantify the trade off: the F statistic
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+$$
+
+- **Numerator**: improvement in fit per df spent
+- **Denominator**: leftover noise per df remaining
+
+::: {.fragment}
+
+If the extra parameters only fit noise, $F \approx 1$. Bigger $F$ means the extra parameters were worth it.
+
+:::
+
+## Example: intercept-only vs three categories
+
+```{r}
+#| fig-width: 14
+#| fig-height: 6
+#| fig-align: center
+
+p1 <- plot_residuals(wood_frogs, null_lm, "Simple: svl ~ 1")
+p2 <- plot_residuals(wood_frogs, pop_only_lm, "Complex: svl ~ habitat")
+patchwork::wrap_plots(p1, p2)
+```
+
+Does habitat explain enough of the variation to justify spending 2 df?
+
+## Intercept-only vs three categories: math
+
+```{r}
+n_three <- nrow(wood_frogs)
+f_three <- ((rss(null_lm) - rss(pop_only_lm)) / 2) /
+  (rss(pop_only_lm) / (n_three - 3))
+p_three <- pf(f_three, 2, n_three - 3, lower.tail = FALSE)
+```
+
+$$
+\begin{align}
+F &= \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})} \\
+F &= \frac{(`r round(rss(null_lm), 1)` - `r round(rss(pop_only_lm), 1)`) \ / \ (3 - 1)}{`r round(rss(pop_only_lm), 1)` \ / \ (`r n_three` - 3)} = `r round(f_three, 2)`
+\end{align}
+$$
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+
+anova(lm(svl ~ 1, wood_frogs), lm(svl ~ habitat, wood_frogs))
+```
+
+:::
+
+## This has a special name: ANOVA
+
+**AN**alysis **O**f **VA**riance. With one categorical predictor, it's _one-way_ ANOVA.
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| echo: true
+#| class-output: small-output
+
+anova(lm(svl ~ habitat, wood_frogs))
+```
+
+:::
+
+- **habitat** row: the effect of the `habitat` categorical variable.
+- **Residuals** row: the remaining variation in the residuals.
+
+## Where does the p-value come from?
+
+If $H_0$ is true (all habitat means are equal), $F$ follows an **F distribution** with $(p_{complex} - p_{simple}, \ n - p_{complex})$ df.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4.5
+#| fig-align: center
+
+f_dist <- tibble(f = seq(0, max(6, f_three + 2), by = 0.01)) |>
+  mutate(density = df(f, 2, n_three - 3))
+
+ggplot(f_dist, aes(f, density)) +
+  geom_area(
+    data = filter(f_dist, f >= f_three),
+    fill = "steelblue",
+    alpha = 0.5
+  ) +
+  geom_line() +
+  geom_vline(xintercept = f_three, linewidth = 1) +
+  annotate(
+    "text",
+    x = f_three + 0.2,
+    y = 0.8,
+    label = "Observed F",
+    hjust = 0,
+    size = 6
+  ) +
+  labs(
+    x = sprintf("F (2, %d df)", n_three - 3),
+    y = NULL,
+    title = sprintf("p = %.4f", p_three)
+  ) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+```
+
+Only the right tail counts: extra parameters can only _reduce_ RSS.
+
+## Interpret the ANOVA
+
+$H_0$: $\mu_{rural} = \mu_{suburban} = \mu_{urban}$
+
+$H_A$: at least one habitat mean differs
+
+::: {.fragment}
+
+_If_ habitat had no relationship with size, we'd see an F at least this large in `r scales::percent(p_three, 0.1)` of samples. `r if (p_three < 0.05) "Reject" else "Fail to reject"` $H_0$.
+
+:::
+
+::: {.fragment}
+
+But we pooled frogs of all ages, and frogs keep growing as they age. Age differences are hiding in the residuals, inflating the denominator of $F$. Could accounting for age change the answer? You'll find out in lab.
+
+:::
+
+# Recap
+
+## Recap
+
+More data means more information (df) to spend on inference.
+
+What do we spend it on? Parameters.
+
+More complex models explain more variation, but do they explain _enough_ variation to justify their costs? The **F statistic** answers that.
+
+::: {.fragment}
+
+ANOVA isn't a separate tool from linear models. It's a comparison between two linear models.
+
+:::
+
+::: {.fragment}
+
+**In lab**: Does habitat matter once we account for age?
+
+:::
+
+## References
+
+Jennette, M. A., Snodgrass, J. W., & Forester, D. C. (2019). Variation in age, body size, and reproductive traits among urban and rural amphibian populations. _Urban Ecosystems_, 22, 137–147. <https://doi.org/10.1007/s11252-018-0801-7>
+
+Whitehurst, M. (2021). Life in Urban Environments: The Impact of Urbanization on Life-History Traits in Amphibian Species. _QUBES Educational Resources_. <https://doi.org/10.25334/872X-7X06> (CC BY-SA 4.0)

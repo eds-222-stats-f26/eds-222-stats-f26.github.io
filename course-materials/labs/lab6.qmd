@@ -1,0 +1,229 @@
+---
+title: "Lab 6: Urban toads"
+subtitle: "Comparing models with F-tests"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab6.qmd
+execute:
+  eval: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Overview
+
+Cities build stormwater ponds to manage runoff, and amphibians breed in them. Are these ponds _good_ habitat? If urban habitat is lower quality, urban amphibians should grow more slowly and be smaller _at the same age_ than rural amphibians. Smaller females lay fewer eggs, so size matters for population persistence.
+
+Jennette et al. (2019) measured female American toads (_Anaxyrus americanus_) breeding in rural, suburban, and urban ponds in Baltimore County, Maryland.
+
+- **habitat**: rural, suburban, or urban
+- **svl**: snout-vent length (mm), a measure of body size
+- **weight**: somatic dry weight
+- **age**: years, estimated from growth rings in toe bones (skeletochronology)
+
+In the pre-class slides, you compared the sizes of wood frogs among habitats. Today you'll ask the same question for toads, then ask one more: does habitat matter once we account for age? Each question is a comparison between a simpler and a more complex model.
+
+```{r}
+#| message: false
+
+# The CSV file is in /courses/EDS222/data
+toads <- read_csv(____) |>
+  mutate(
+    habitat = str_to_title(POP) # Convert to title case
+  ) |>
+  select(habitat, svl = SVL, weight = Weight, age = Age)
+```
+
+## Part 1: Explore
+
+Make a plot of toad size (SVL) by habitat.
+
+```{r}
+
+```
+
+How many toads are in each habitat? Which habitat is the reference level?
+
+```{r}
+
+```
+
+**Answer**:
+
+## Part 2: One-way ANOVA
+
+### State the hypotheses
+
+**Question**: Does toad size differ among habitats?
+
+$H_0$:
+
+$H_A$:
+
+### Fit the models
+
+Fit the simpler model (intercept-only) and the more complex model (habitat).
+
+```{r}
+null_lm <- lm(_____, toads)
+habitat_lm <- lm(_____, toads)
+summary(habitat_lm)
+```
+
+Interpret each coefficient of `habitat_lm` in a sentence.
+
+**Answer**:
+
+### Calculate F by hand
+
+Recall the F statistic:
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+$$
+
+- $RSS$: residual sum of squares, $\sum (y_i - \hat y_i)^2$. The variation the model leaves unexplained.
+- $p$: number of coefficients the model estimates, including the intercept
+- $n$: number of observations
+
+Calculate each piece, then F.
+
+
+::: {.callout-tip}
+
+Use the `residuals()` function to get the residuals from a model.
+
+$p$ is the number of coefficients. You can get a list of the coefficients using `coef()`.
+
+:::
+
+
+```{r}
+rss_simple <- _____
+rss_complex <- _____
+p_simple <- _____
+p_complex <- _____
+n <- _____
+
+f_stat <- _____
+f_stat
+```
+
+### Check your work
+
+Compare your F statistic to R's.
+
+```{r}
+anova(____, ____) # compare the simpler and more complex models
+```
+
+### Interpret
+
+What do you conclude? Use the p-value in your answer.
+
+**Answer**:
+
+## Part 3: Account for age
+
+### What's hiding in the residuals?
+
+Toads keep growing after they mature. Plot SVL against age, colored by habitat.
+
+
+::: {.callout-tip}
+
+Use `geom_jitter()` instead of `geom_point()` so the points don't fall on top of each other.
+
+:::
+
+
+```{r}
+
+```
+
+What fraction of the variation in SVL does age explain on its own? Compare to habitat.
+
+```{r}
+age_lm <- lm(_____, toads)
+summary(age_lm)$r.squared
+summary(habitat_lm)$r.squared
+```
+
+**Answer**:
+
+### Why does that matter for our F-test?
+
+Look at the denominator of F.
+
+Explain in your own words how leaving age out of the model affects the F statistic for habitat.
+
+**Answer**:
+
+### Compare models
+
+**Question**: Does habitat explain enough variation to justify its cost, _after_ accounting for age?
+
+Fit the additive model. Compare it to the age-only model.
+
+```{r}
+additive_lm <- lm(_____, toads)
+anova(_____, _____)
+```
+
+**Answer**:
+
+### Interpret
+
+What do you conclude? Use the p-value in your answer.
+
+**Answer**:
+
+Interpret the urban coefficient in a sentence.
+
+```{r}
+summary(additive_lm)
+```
+
+**Answer**:
+
+## Part 4: Check assumptions
+
+Linear models assume the residuals have constant variance. Check the additive model: the spread of residuals should be similar across habitats. Plot the residuals by habitat using both jittered points and boxplots.
+
+```{r}
+
+```
+
+Are the assumptions reasonable?
+
+**Answer**:
+
+## Part 5: Statistical vs biological significance
+
+The urban coefficient is statistically significant. Is it _biologically_ meaningful? Express the urban effect as a percentage of average rural size, and compare it to the growth from one extra year of age.
+
+```{r}
+
+```
+
+**Answer**:
+
+Jennette et al. found no difference in the _ages_ of breeding adults among habitats, but urban toads were smaller at every age. Which life stage does that point to as the problem in urban habitats: adults, or larvae and juveniles? Why?
+
+**Answer**:
+
+## References
+
+Jennette, M. A., Snodgrass, J. W., & Forester, D. C. (2019). Variation in age, body size, and reproductive traits among urban and rural amphibian populations. _Urban Ecosystems_, 22, 137–147. <https://doi.org/10.1007/s11252-018-0801-7>
+
+This lab is adapted from Whitehurst, M. (2021). Life in Urban Environments: The Impact of Urbanization on Life-History Traits in Amphibian Species. _QUBES Educational Resources_. <https://doi.org/10.25334/872X-7X06>, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). This adaptation is shared under the same license.

@@ -3,4 +3,11 @@ title: "t-test, ANOVA, F-test"
 subtitle: "Week 6 (November 2 - 6)"
 ---
 
-**_Under construction_**
+## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Class Materials {#lecture-materials}
+
+| Session | In-class | Pre-class |
+|---------|--------|---------|
+| Lecture 1 | ANOVA <br/> [ANOVA handout](handouts/week6-monday-anova.qmd) | [ANOVA](https://youtu.be/VrZ8uKBEIs8) |
+| Lab | [Urban toads](labs/lab6.qmd) | [How retention ponds manage stormwater runoff](https://www.youtube.com/watch?v=22JlYQkOY24) (Optional) |
+| Lecture 2 | Model comparison | Model comparison |
+: {.hover .bordered tbl-colwidths="[30,30,40]"}
