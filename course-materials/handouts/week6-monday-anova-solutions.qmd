@@ -538,17 +538,12 @@ dummy_table(levels(yards$land_use), "Land use")
 
 ## Full model
 
-```{r}
-#| results: asis
-blank_lines(3)
-answer(
-  "$\\text{lead} = \\beta_0 + \\beta_1 (\\text{land use} = \\text{Highway}) + ",
-  "\\beta_2 (\\text{land use} = \\text{Industrial}) + \\varepsilon$\n\n",
-  "$\\beta_0$ is the mean soil lead in residential yards (the reference). ",
-  "$\\beta_1$ is the difference between highway and residential yards. ",
-  "$\\beta_2$ is the difference between industrial and residential yards.\n"
-)
-```
+$$
+\begin{aligned}
+\text{lead} &= \beta_0 + \beta_1 \left(\text{land use = Highway} \right) + \beta_2 \left(\text{land use = Industrial} \right) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{aligned}
+$$
 
 ## Draw the means
 
@@ -566,20 +561,7 @@ coef(lm(lead ~ land_use, yards))
 \endgroup
 ```
 
-```{r}
-#| results: asis
-answer(
-  "Intercept only: one line at the overall mean, ",
-  fmt(coef(yard_null)[[1]]),
-  " ppm. Residential: $\\beta_0 = ",
-  fmt(coef(yard_lm)[[1]]),
-  "$. Highway: $\\beta_0 + \\beta_1 = ",
-  fmt(sum(coef(yard_lm)[1:2])),
-  "$. Industrial: $\\beta_0 + \\beta_2 = ",
-  fmt(sum(coef(yard_lm)[c(1, 3)])),
-  "$ ppm.\n"
-)
-```
+See figure above
 
 ## Degrees of freedom and F ($n$ = `r nobs(yard_lm)`)
 
@@ -594,29 +576,13 @@ answer(f_by_hand(yard_null, yard_lm))
 
 State $H_0$ and $H_A$.
 
-```{r}
-#| results: asis
-hypotheses(
-  "$\\mu_{residential} = \\mu_{highway} = \\mu_{industrial}$ (equivalently, $\\beta_1 = \\beta_2 = 0$)",
-  "at least one land use has a different mean soil lead"
-)
-```
+$H_0$: $\beta_1 = \beta_2 = 0$
+
+$H_A$: at least one $\beta$ is different than 0.
 
 The p-value for this $F$ is `r p_text(anova(yard_null, yard_lm)$"Pr(>F)"[2])`. Interpret it in a sentence.
 
-```{r}
-#| results: asis
-blank_lines(2)
-answer(
-  "_If_ land use had no relationship with soil lead, we'd see an $F$ at ",
-  "least this large with probability ",
-  p_text(anova(yard_null, yard_lm)$`Pr(>F)`[2]),
-  ". ",
-  decision(anova(yard_null, yard_lm)$`Pr(>F)`[2]),
-  " Land use explains enough of the variation in soil lead to justify ",
-  "spending 2 df.\n"
-)
-```
+_If_ land use had no relationship with soil lead, we'd see an $F$ at least this large with probability 0.017, so we reject $H_0$ and conclude there is evidence for soil lead varying by land use.
 
 <!-- =========================================================== -->
 <!-- 1B: Groundwater nitrate                                     -->
@@ -656,17 +622,12 @@ dummy_table(levels(wells$land_use), "Land use")
 
 ## Full model
 
-```{r}
-#| results: asis
-blank_lines(1)
-answer(
-  "$\\text{nitrate} = \\beta_0 + \\beta_1 (\\text{land use} = \\text{Orchard}) + ",
-  "\\beta_2 (\\text{land use} = \\text{Row crops}) + \\varepsilon$\n\n",
-  "$\\beta_0$ is the mean nitrate under rangeland (the reference). ",
-  "$\\beta_1$ is the difference between orchards and rangeland. ",
-  "$\\beta_2$ is the difference between row crops and rangeland.\n"
-)
-```
+$$
+\begin{aligned}
+\text{nitrate} &= \beta_0 + \beta_1 \left(\text{land use = Orchard} \right) + \beta_2 \left(\text{land use = Row crops} \right) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{aligned}
+$$
 
 ## Draw the means
 
@@ -684,20 +645,7 @@ coef(lm(nitrate ~ land_use, wells))
 \endgroup
 ```
 
-```{r}
-#| results: asis
-answer(
-  "Intercept only: one line at the overall mean, ",
-  fmt(coef(well_null)[[1]]),
-  " mg/L. Rangeland: $\\beta_0 = ",
-  fmt(coef(well_lm)[[1]]),
-  "$. Orchard: $\\beta_0 + \\beta_1 = ",
-  fmt(sum(coef(well_lm)[1:2])),
-  "$. Row crops: $\\beta_0 + \\beta_2 = ",
-  fmt(sum(coef(well_lm)[c(1, 3)])),
-  "$ mg/L.\n"
-)
-```
+See figure above
 
 ## Degrees of freedom and F ($n$ = `r nobs(well_lm)`)
 
@@ -710,29 +658,15 @@ answer(f_by_hand(well_null, well_lm))
 
 ## Interpretation
 
-```{r}
-#| results: asis
-hypotheses(
-  "$\\mu_{rangeland} = \\mu_{orchard} = \\mu_{row\\ crops}$ (equivalently, $\\beta_1 = \\beta_2 = 0$)",
-  "at least one land use has a different mean nitrate"
-)
-```
+State $H_0$ and $H_A$.
+
+$H_0$: $\beta_1 = \beta_2 = 0$
+
+$H_A$: at least one $\beta$ is different than 0.
 
 The p-value for this $F$ is `r p_text(anova(well_null, well_lm)$"Pr(>F)"[2])`. Interpret it in a sentence.
 
-```{r}
-#| results: asis
-blank_lines(2)
-answer(
-  "_If_ land use had no relationship with nitrate, we'd see an $F$ at least ",
-  "this large with probability ",
-  p_text(anova(well_null, well_lm)$`Pr(>F)`[2]),
-  ". ",
-  decision(anova(well_null, well_lm)$`Pr(>F)`[2]),
-  " Row crops look a little higher in the figure, but the differences ",
-  "among land uses are small relative to the variation among wells.\n"
-)
-```
+_If_ land use had no relationship with nitrate, we'd see an $F$ at least this large with probability 0.061, so we fail to reject $H_0$. There is not enough evidence to conclude that nitrate varies by land use.
 
 \newpage
 
@@ -757,19 +691,12 @@ two_way_plot(as_two_way(air), "Region", "PM2.5 (µg/m³)", "Season")
 
 ## Full model
 
-```{r}
-#| results: asis
-blank_lines(1)
-answer(
-  "$\\text{pm} = \\beta_0 + \\beta_1 (\\text{region} = \\text{Suburban}) + ",
-  "\\beta_2 (\\text{region} = \\text{Urban}) + ",
-  "\\beta_3 (\\text{season} = \\text{Winter}) + \\varepsilon$\n\n",
-  "$\\beta_0$ is the expected PM2.5 in rural regions in summer. $\\beta_1$ and ",
-  "$\\beta_2$ are the differences between suburban (or urban) and rural ",
-  "regions _in the same season_. $\\beta_3$ is the difference between winter ",
-  "and summer, the same in every region.\n"
-)
-```
+$$
+\begin{aligned}
+\text{pm} &= \beta_0 + \beta_1 \left(\text{region = Suburban} \right) + \beta_2 \left(\text{region = Urban} \right) + \beta_3 \left(\text{season = Winter} \right) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{aligned}
+$$
 
 ## Draw the models
 
@@ -787,18 +714,7 @@ coef(lm(pm ~ region + season, air))
 \endgroup
 ```
 
-```{r}
-#| results: asis
-answer(
-  "Simpler model (dashed): one prediction per region, ",
-  simple_text(air_region, as_two_way(air)),
-  " µg/m³. Model with both: each prediction is $\\beta_0$ plus the ",
-  "coefficients for its region and season, ",
-  prediction_text(air_both, as_two_way(air)),
-  " µg/m³. In every region, the winter segment is $\\beta_3$ above the ",
-  "summer segment.\n"
-)
-```
+See figure above
 
 ## Degrees of freedom and F ($n$ = `r nobs(air_both)`)
 
@@ -814,31 +730,15 @@ answer(
 
 ## Interpretation
 
-```{r}
-#| results: asis
-hypotheses(
-  "$\\beta_3 = 0$ (season has no relationship with PM2.5 within each region)",
-  "$\\beta_3 \\neq 0$"
-)
-```
+State $H_0$ and $H_A$.
+
+$H_0$: $\beta_3 = 0$
+
+$H_A$: $\beta_3$ is different than 0.
 
 The p-value for this $F$ is `r p_text(anova(air_region, air_both)$"Pr(>F)"[2])`. Interpret it in a sentence.
 
-```{r}
-#| results: asis
-blank_lines(2)
-answer(
-  "_If_ season had no relationship with PM2.5 within each region, we'd see ",
-  "an $F$ at least this large with probability ",
-  p_text(anova(air_region, air_both)$`Pr(>F)`[2]),
-  ". ",
-  decision(anova(air_region, air_both)$`Pr(>F)`[2]),
-  " Winter PM2.5 averaged ",
-  fmt(coef(air_both)[["seasonWinter"]]),
-  " µg/m³ higher than summer, but that's small relative to the day-to-day ",
-  "variation within each region.\n"
-)
-```
+_If_ season had no relationship with PM2.5 within each region, we'd see an $F$ at least this large with probability 0.099, so we fail to reject $H_0$. There is not enough evidence to conclude that PM2.5 varies by season after accounting for region.
 
 <!-- =========================================================== -->
 <!-- 2B: Bees and watering                                       -->
@@ -859,19 +759,12 @@ two_way_plot(as_two_way(bees), "Habitat", "Bee visits per hour", "Water")
 
 ## Full model
 
-```{r}
-#| results: asis
-blank_lines(1)
-answer(
-  "$\\text{visits} = \\beta_0 + \\beta_1 (\\text{habitat} = \\text{Orchard}) + ",
-  "\\beta_2 (\\text{habitat} = \\text{Garden}) + ",
-  "\\beta_3 (\\text{water} = \\text{Watered}) + \\varepsilon$\n\n",
-  "$\\beta_0$ is the expected visits to dry meadow patches. $\\beta_1$ and ",
-  "$\\beta_2$ are the differences between orchard (or garden) and meadow ",
-  "patches _with the same watering_. $\\beta_3$ is the difference between ",
-  "watered and dry patches, the same in every habitat.\n"
-)
-```
+$$
+\begin{aligned}
+\text{visits} &= \beta_0 + \beta_1 \left(\text{habitat = Orchard} \right) + \beta_2 \left(\text{habitat = Garden} \right) + \beta_3 \left(\text{water = Watered} \right) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{aligned}
+$$
 
 ## Draw the models
 
@@ -889,18 +782,7 @@ coef(lm(visits ~ habitat + water, bees))
 \endgroup
 ```
 
-```{r}
-#| results: asis
-answer(
-  "Simpler model (dashed): one prediction per habitat, ",
-  simple_text(bee_habitat, as_two_way(bees)),
-  " visits per hour. Model with both: each prediction is $\\beta_0$ plus ",
-  "the coefficients for its habitat and watering, ",
-  prediction_text(bee_both, as_two_way(bees)),
-  " visits per hour. In every habitat, the watered segment is $\\beta_3$ ",
-  "above the dry segment.\n"
-)
-```
+See figure above
 
 ## Degrees of freedom and F ($n$ = `r nobs(bee_both)`)
 
@@ -919,30 +801,15 @@ answer(
 
 ## Interpretation
 
-```{r}
-#| results: asis
-hypotheses(
-  "$\\beta_3 = 0$ (watering has no relationship with bee visits within each habitat)",
-  "$\\beta_3 \\neq 0$"
-)
-```
+State $H_0$ and $H_A$.
+
+$H_0$: $\beta_3 = 0$
+
+$H_A$: $\beta_3$ is different than 0.
 
 The p-value for this $F$ is `r p_text(anova(bee_habitat, bee_both)$"Pr(>F)"[2])`. Interpret it in a sentence.
 
-```{r}
-#| results: asis
-blank_lines(2)
-answer(
-  "_If_ watering had no relationship with bee visits within each habitat, ",
-  "we'd see an $F$ at least this large with probability ",
-  p_text(anova(bee_habitat, bee_both)$`Pr(>F)`[2]),
-  ". ",
-  decision(anova(bee_habitat, bee_both)$`Pr(>F)`[2]),
-  " Watered patches get ",
-  fmt(coef(bee_both)[["waterWatered"]]),
-  " more visits per hour than dry patches in the same habitat.\n"
-)
-```
+_If_ watering had no relationship with bee visits within each habitat, we'd see an $F$ at least this large with probability 0.013, so we reject $H_0$ and conclude there is evidence for bee visits varying with watering after accounting for habitat.
 
 \newpage
 
@@ -972,20 +839,12 @@ covariate_plot(
 
 ## Full model
 
-```{r}
-#| results: asis
-blank_lines(1)
-answer(
-  "$\\text{richness} = \\beta_0 + \\beta_1 \\text{area} + ",
-  "\\beta_2 (\\text{land use} = \\text{Commercial}) + ",
-  "\\beta_3 (\\text{land use} = \\text{Industrial}) + \\varepsilon$\n\n",
-  "$\\beta_1$ is the change in richness per hectare, the same slope for every ",
-  "land use. $\\beta_2$ and $\\beta_3$ are the differences between commercial ",
-  "(or industrial) parks and residential parks _of the same area_. ",
-  "$\\beta_0$ is the expected richness of a residential park with area 0, ",
-  "which only sets the height of the lines.\n"
-)
-```
+$$
+\begin{aligned}
+\text{richness} &= \beta_0 + \beta_1 \text{area} + \beta_2 \left(\text{land use = Commercial} \right) + \beta_3 \left(\text{land use = Industrial} \right) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{aligned}
+$$
 
 ## Draw the models
 
@@ -1003,24 +862,7 @@ coef(lm(richness ~ area + land_use, parks))
 \endgroup
 ```
 
-```{r}
-#| results: asis
-answer(
-  "Model with only area (dashed): intercept ",
-  fmt(coef(park_area)[[1]]),
-  " and slope ",
-  fmt(coef(park_area)[[2]], 2),
-  ". Model with both: every line has slope $\\beta_1 = ",
-  fmt(coef(park_both)[[2]], 2),
-  "$. The intercepts are Residential: $\\beta_0 = ",
-  fmt(coef(park_both)[[1]]),
-  "$; Commercial: $\\beta_0 + \\beta_2 = ",
-  fmt(sum(coef(park_both)[c(1, 3)])),
-  "$; Industrial: $\\beta_0 + \\beta_3 = ",
-  fmt(sum(coef(park_both)[c(1, 4)])),
-  "$.\n"
-)
-```
+See figure above
 
 ## Degrees of freedom and F ($n$ = `r nobs(park_both)`)
 
@@ -1039,33 +881,15 @@ answer(
 
 ## Interpretation
 
-```{r}
-#| results: asis
-hypotheses(
-  "$\\beta_2 = \\beta_3 = 0$ (land use has no relationship with richness among parks of the same area)",
-  "$\\beta_2 \\neq 0$ or $\\beta_3 \\neq 0$"
-)
-```
+State $H_0$ and $H_A$.
+
+$H_0$: $\beta_2 = \beta_3 = 0$
+
+$H_A$: at least one of $\beta_2$ and $\beta_3$ is different than 0.
 
 The p-value for this $F$ is `r p_text(anova(park_area, park_both)$"Pr(>F)"[2])`. Interpret it in a sentence.
 
-```{r}
-#| results: asis
-blank_lines(2)
-answer(
-  "_If_ land use had no relationship with richness among parks of the same ",
-  "size, we'd see an $F$ at least this large with probability ",
-  p_text(anova(park_area, park_both)$`Pr(>F)`[2]),
-  ". ",
-  decision(anova(park_area, park_both)$`Pr(>F)`[2]),
-  " Compared to residential parks of the same area, ",
-  "commercial parks have ",
-  fmt(-coef(park_both)[["land_useCommercial"]]),
-  " fewer species and industrial parks have ",
-  fmt(-coef(park_both)[["land_useIndustrial"]]),
-  " fewer.\n"
-)
-```
+_If_ land use had no relationship with richness among parks of the same area, we'd see an $F$ at least this large with probability 0.043, so we reject $H_0$ and conclude there is evidence for bird richness varying by land use after accounting for park area.
 
 <!-- =========================================================== -->
 <!-- 3B: Urban heat                                              -->
@@ -1091,20 +915,12 @@ covariate_plot(
 
 ## Full model
 
-```{r}
-#| results: asis
-blank_lines(1)
-answer(
-  "$\\text{temp} = \\beta_0 + \\beta_1 \\text{canopy} + ",
-  "\\beta_2 (\\text{neighborhood} = \\text{Commercial}) + ",
-  "\\beta_3 (\\text{neighborhood} = \\text{Industrial}) + \\varepsilon$\n\n",
-  "$\\beta_1$ is the change in temperature per percentage point of canopy, ",
-  "the same slope in every neighborhood. $\\beta_2$ and $\\beta_3$ are the ",
-  "differences between commercial (or industrial) and residential sites ",
-  "_with the same canopy_. $\\beta_0$ is the expected temperature of a ",
-  "residential site with no canopy.\n"
-)
-```
+$$
+\begin{aligned}
+\text{temp} &= \beta_0 + \beta_1 \text{canopy} + \beta_2 \left(\text{neighborhood = Commercial} \right) + \beta_3 \left(\text{neighborhood = Industrial} \right) + \epsilon \\
+\epsilon &\sim Normal(0, \sigma)
+\end{aligned}
+$$
 
 ## Draw the models
 
@@ -1122,24 +938,7 @@ coef(lm(temp ~ canopy + neighborhood, sites))
 \endgroup
 ```
 
-```{r}
-#| results: asis
-answer(
-  "Model with only canopy (dashed): intercept ",
-  fmt(coef(site_canopy)[[1]]),
-  " and slope ",
-  fmt(coef(site_canopy)[[2]], 2),
-  ". Model with both: every line has slope $\\beta_1 = ",
-  fmt(coef(site_both)[[2]], 2),
-  "$. The intercepts are Residential: $\\beta_0 = ",
-  fmt(coef(site_both)[[1]]),
-  "$; Commercial: $\\beta_0 + \\beta_2 = ",
-  fmt(sum(coef(site_both)[c(1, 3)])),
-  "$; Industrial: $\\beta_0 + \\beta_3 = ",
-  fmt(sum(coef(site_both)[c(1, 4)])),
-  "$.\n"
-)
-```
+See figure above
 
 ## Degrees of freedom and F ($n$ = `r nobs(site_both)`)
 
@@ -1158,28 +957,12 @@ answer(
 
 ## Interpretation
 
-```{r}
-#| results: asis
-hypotheses(
-  "$\\beta_2 = \\beta_3 = 0$ (neighborhood type has no relationship with temperature among sites with the same canopy)",
-  "$\\beta_2 \\neq 0$ or $\\beta_3 \\neq 0$"
-)
-```
+State $H_0$ and $H_A$.
+
+$H_0$: $\beta_2 = \beta_3 = 0$
+
+$H_A$: at least one of $\beta_2$ and $\beta_3$ is different than 0.
 
 The p-value for this $F$ is `r p_text(anova(site_canopy, site_both)$"Pr(>F)"[2])`. Interpret it in a sentence.
 
-```{r}
-#| results: asis
-blank_lines(2)
-answer(
-  "_If_ neighborhood type had no relationship with temperature among sites ",
-  "with the same canopy, we'd see an $F$ at least this large with ",
-  "probability ",
-  p_text(anova(site_canopy, site_both)$`Pr(>F)`[2]),
-  ". ",
-  decision(anova(site_canopy, site_both)$`Pr(>F)`[2]),
-  " Industrial sites are hotter in the figure, but they also have the ",
-  "least canopy. Once canopy is in the model, the evidence that ",
-  "neighborhood type matters is weak.\n"
-)
-```
+_If_ neighborhood type had no relationship with temperature among sites with the same canopy, we'd see an $F$ at least this large with probability 0.091, so we fail to reject $H_0$. There is not enough evidence to conclude that temperature varies by neighborhood type after accounting for canopy.
