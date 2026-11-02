@@ -508,12 +508,11 @@ $$
 
 For each scenario:
 
-1. **Data.** Look at the data in the figure.
-2. **Dummy variables.** Fill in the dummy variable table.
-3. **Full model.** Write the equation for the full model. What does each coefficient mean?
-4. **Draw the means.** Use the coefficients to draw the intercept-only model and each category's mean on the figure.
-5. **Degrees of freedom and F.** Use $n$ and the RSS values to fill in $p$ and $df$ for each model. Then calculate $F$.
-6. **Interpretation.** State $H_0$ and $H_A$. Then interpret the p-value for your $F$ in a sentence.
+1. **Dummy variables.** Fill in the dummy variable table.
+2. **Full model.** Write the equation for the full model. 
+3. **Draw the means.** Use the coefficients to draw the intercept-only model and each category's mean on the figure.
+4. **Degrees of freedom and F.** Fill in $p$ and $df$ for each model, then calculate $F$.
+5. **Interpretation.** State $H_0$ and $H_A$. Then interpret the p-value for your $F$ in a sentence.
 
 <!-- =========================================================== -->
 <!-- 1A: Soil lead                                               -->
@@ -629,11 +628,19 @@ answer(
 
 Fertilizer applied to crops can leach into groundwater as nitrate, contaminating drinking water wells. A water agency measured **nitrate** (mg/L) in `r nrow(wells) / 3` wells under each of three land uses (**land_use**): rangeland, orchards, and row crops.
 
+```{=latex}
+\noindent\begin{minipage}[c]{0.6\textwidth}
+```
+
 ```{r}
 #| fig-width: 5
 #| fig-height: 2.8
-#| out-width: "60%"
+#| out-width: "100%"
 group_plot(as_groups(wells), "Land use", "Nitrate (mg/L)")
+```
+
+```{=latex}
+\end{minipage}\hfill\begin{minipage}[c]{0.38\textwidth}
 ```
 
 ## Dummy variables
@@ -643,11 +650,15 @@ group_plot(as_groups(wells), "Land use", "Nitrate (mg/L)")
 dummy_table(levels(wells$land_use), "Land use")
 ```
 
+```{=latex}
+\end{minipage}
+```
+
 ## Full model
 
 ```{r}
 #| results: asis
-blank_lines(3)
+blank_lines(1)
 answer(
   "$\\text{nitrate} = \\beta_0 + \\beta_1 (\\text{land use} = \\text{Orchard}) + ",
   "\\beta_2 (\\text{land use} = \\text{Row crops}) + \\varepsilon$\n\n",
@@ -656,8 +667,6 @@ answer(
   "$\\beta_2$ is the difference between row crops and rangeland.\n"
 )
 ```
-
-\newpage
 
 ## Draw the means
 
@@ -695,13 +704,11 @@ answer(
 ```{r}
 #| results: asis
 model_table(list(`nitrate ~ 1` = well_null, `nitrate ~ land_use` = well_lm))
-blank_lines(3)
+blank_lines(2)
 answer(f_by_hand(well_null, well_lm))
 ```
 
 ## Interpretation
-
-State $H_0$ and $H_A$.
 
 ```{r}
 #| results: asis
@@ -731,13 +738,7 @@ answer(
 
 # Part 2: Two categorical predictors
 
-Now there are two categorical predictors. The question is whether the second one explains enough variation to justify its cost _after_ accounting for the first. For each scenario:
-
-1. **Data.** Look at the data in the figure.
-2. **Full model.** Write the equation for the model with both predictors. What does each coefficient mean?
-3. **Draw the models.** Use the coefficients to draw the simpler model's prediction for each level of the first predictor, and the model with both predictors' prediction for each combination of the two. Draw each prediction as a horizontal line segment, like in Part 1.
-4. **Degrees of freedom and F.** Use $n$ and the RSS values to fill in $p$ and $df$ for each model. Then calculate $F$ for adding the second predictor.
-5. **Interpretation.** State $H_0$ and $H_A$. Then interpret the p-value for your $F$ in a sentence.
+Now there are two categorical predictors. Does the second one justify its cost _after_ accounting for the first? Same tasks as Part 1, minus the dummy table.
 
 <!-- =========================================================== -->
 <!-- 2A: Air quality                                             -->
@@ -745,12 +746,12 @@ Now there are two categorical predictors. The question is whether the second one
 
 # 2A. Air quality (together)
 
-Fine particulate matter (PM2.5) damages lungs and hearts. In winter, wood smoke and temperature inversions can trap it near the ground. An air district measured PM2.5 (**pm**, µg/m³) on `r nrow(air) / 6` days for each combination of **region** (rural, suburban, or urban) and **season** (summer or winter). Does season matter after accounting for region?
+Fine particulate matter (PM2.5) damages lungs and hearts, and winter wood smoke can trap it near the ground. An air district measured PM2.5 (**pm**, µg/m³) on `r nrow(air) / 6` days for each combination of **region** (rural, suburban, or urban) and **season** (summer or winter). Does season matter after accounting for region?
 
 ```{r}
 #| fig-width: 5.5
-#| fig-height: 2.8
-#| out-width: "65%"
+#| fig-height: 2
+#| out-width: "60%"
 two_way_plot(as_two_way(air), "Region", "PM2.5 (µg/m³)", "Season")
 ```
 
@@ -758,7 +759,7 @@ two_way_plot(as_two_way(air), "Region", "PM2.5 (µg/m³)", "Season")
 
 ```{r}
 #| results: asis
-blank_lines(3)
+blank_lines(1)
 answer(
   "$\\text{pm} = \\beta_0 + \\beta_1 (\\text{region} = \\text{Suburban}) + ",
   "\\beta_2 (\\text{region} = \\text{Urban}) + ",
@@ -804,7 +805,7 @@ answer(
 ```{r}
 #| results: asis
 model_table(list(`pm ~ region` = air_region, `pm ~ region + season` = air_both))
-blank_lines(3)
+blank_lines(2)
 answer(
   "Adding season costs 1 df.\n\n",
   f_by_hand(air_region, air_both)
@@ -812,8 +813,6 @@ answer(
 ```
 
 ## Interpretation
-
-State $H_0$ and $H_A$.
 
 ```{r}
 #| results: asis
@@ -853,8 +852,8 @@ Watered flowers may produce more nectar, attracting more bees. A pollinator team
 
 ```{r}
 #| fig-width: 5.5
-#| fig-height: 2.8
-#| out-width: "65%"
+#| fig-height: 2
+#| out-width: "60%"
 two_way_plot(as_two_way(bees), "Habitat", "Bee visits per hour", "Water")
 ```
 
@@ -862,7 +861,7 @@ two_way_plot(as_two_way(bees), "Habitat", "Bee visits per hour", "Water")
 
 ```{r}
 #| results: asis
-blank_lines(3)
+blank_lines(1)
 answer(
   "$\\text{visits} = \\beta_0 + \\beta_1 (\\text{habitat} = \\text{Orchard}) + ",
   "\\beta_2 (\\text{habitat} = \\text{Garden}) + ",
@@ -903,8 +902,6 @@ answer(
 )
 ```
 
-\newpage
-
 ## Degrees of freedom and F ($n$ = `r nobs(bee_both)`)
 
 ```{r}
@@ -913,7 +910,7 @@ model_table(list(
   `visits ~ habitat` = bee_habitat,
   `visits ~ habitat + water` = bee_both
 ))
-blank_lines(3)
+blank_lines(2)
 answer(
   "Adding watering costs 1 df.\n\n",
   f_by_hand(bee_habitat, bee_both)
@@ -921,8 +918,6 @@ answer(
 ```
 
 ## Interpretation
-
-State $H_0$ and $H_A$.
 
 ```{r}
 #| results: asis
@@ -953,14 +948,7 @@ answer(
 
 # Part 3: Three levels plus a continuous predictor
 
-Now the second predictor is continuous instead of categorical. The question is whether the categorical predictor explains enough variation to justify its cost _after_ accounting for the continuous predictor. For each scenario:
-
-1. **Full model.** Write the model equation with both predictors. What does each coefficient mean?
-2. **Draw the models.** Use the coefficients to draw the model with only the continuous predictor (one line) and the model with both predictors (three parallel lines) on the figure.
-3. **Degrees of freedom.** Fill in $p$ and $df$ for each model.
-4. **F by hand.** Use the RSS values to calculate $F$ for adding the categorical predictor.
-5. **Check.** Compare your $F$ to the `anova()` output.
-6. **Conclusion.** State your conclusion in a sentence, using the p-value.
+Now the second predictor is continuous. Does the categorical predictor justify its cost _after_ accounting for the continuous one? Same tasks as Part 2.
 
 <!-- =========================================================== -->
 <!-- 3A: Birds in city parks                                     -->
@@ -972,8 +960,8 @@ City parks can be refuges for birds, and bigger parks usually hold more species.
 
 ```{r}
 #| fig-width: 6
-#| fig-height: 3
-#| out-width: "70%"
+#| fig-height: 2.1
+#| out-width: "60%"
 covariate_plot(
   as_covariate(parks),
   "Park area (ha)",
@@ -986,7 +974,7 @@ covariate_plot(
 
 ```{r}
 #| results: asis
-blank_lines(3)
+blank_lines(1)
 answer(
   "$\\text{richness} = \\beta_0 + \\beta_1 \\text{area} + ",
   "\\beta_2 (\\text{land use} = \\text{Commercial}) + ",
@@ -1034,7 +1022,7 @@ answer(
 )
 ```
 
-## Degrees of freedom ($n$ = `r nobs(park_both)`)
+## Degrees of freedom and F ($n$ = `r nobs(park_both)`)
 
 ```{r}
 #| results: asis
@@ -1042,35 +1030,24 @@ model_table(list(
   `richness ~ area` = park_area,
   `richness ~ area + land_use` = park_both
 ))
-```
-
-## F by hand
-
-```{r}
-#| results: asis
-blank_lines(3)
+blank_lines(2)
 answer(
   "Adding land use costs 2 df (two dummy variables).\n\n",
   f_by_hand(park_area, park_both)
 )
 ```
 
-## Check
-
-```{=latex}
-\begingroup\footnotesize
-```
+## Interpretation
 
 ```{r}
-#| echo: true
-anova(lm(richness ~ area, parks), lm(richness ~ area + land_use, parks))
+#| results: asis
+hypotheses(
+  "$\\beta_2 = \\beta_3 = 0$ (land use has no relationship with richness among parks of the same area)",
+  "$\\beta_2 \\neq 0$ or $\\beta_3 \\neq 0$"
+)
 ```
 
-```{=latex}
-\endgroup
-```
-
-## Conclusion
+The p-value for this $F$ is `r p_text(anova(park_area, park_both)$"Pr(>F)"[2])`. Interpret it in a sentence.
 
 ```{r}
 #| results: asis
@@ -1102,8 +1079,8 @@ Pavement and rooftops soak up summer sun, while trees shade the ground. A city m
 
 ```{r}
 #| fig-width: 6
-#| fig-height: 3
-#| out-width: "70%"
+#| fig-height: 2.1
+#| out-width: "60%"
 covariate_plot(
   as_covariate(sites),
   "Tree canopy (%)",
@@ -1116,7 +1093,7 @@ covariate_plot(
 
 ```{r}
 #| results: asis
-blank_lines(3)
+blank_lines(1)
 answer(
   "$\\text{temp} = \\beta_0 + \\beta_1 \\text{canopy} + ",
   "\\beta_2 (\\text{neighborhood} = \\text{Commercial}) + ",
@@ -1164,7 +1141,7 @@ answer(
 )
 ```
 
-## Degrees of freedom ($n$ = `r nobs(site_both)`)
+## Degrees of freedom and F ($n$ = `r nobs(site_both)`)
 
 ```{r}
 #| results: asis
@@ -1172,35 +1149,24 @@ model_table(list(
   `temp ~ canopy` = site_canopy,
   `temp ~ canopy + neighborhood` = site_both
 ))
-```
-
-## F by hand
-
-```{r}
-#| results: asis
-blank_lines(3)
+blank_lines(2)
 answer(
   "Adding neighborhood costs 2 df.\n\n",
   f_by_hand(site_canopy, site_both)
 )
 ```
 
-## Check
-
-```{=latex}
-\begingroup\footnotesize
-```
+## Interpretation
 
 ```{r}
-#| echo: true
-anova(lm(temp ~ canopy, sites), lm(temp ~ canopy + neighborhood, sites))
+#| results: asis
+hypotheses(
+  "$\\beta_2 = \\beta_3 = 0$ (neighborhood type has no relationship with temperature among sites with the same canopy)",
+  "$\\beta_2 \\neq 0$ or $\\beta_3 \\neq 0$"
+)
 ```
 
-```{=latex}
-\endgroup
-```
-
-## Conclusion
+The p-value for this $F$ is `r p_text(anova(site_canopy, site_both)$"Pr(>F)"[2])`. Interpret it in a sentence.
 
 ```{r}
 #| results: asis

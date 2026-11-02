@@ -1,0 +1,1698 @@
+---
+format:
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    papersize: letter
+    fontsize: 10pt
+    linestretch: 1.05
+    mainfont: Lora
+    monofont: Roboto Mono
+    monofontoptions:
+      - Scale=0.9
+    geometry:
+      - top=0.75in
+      - bottom=0.6in
+      - left=0.95in
+      - right=0.95in
+    pagestyle: empty
+    number-sections: false
+    include-in-header:
+      text: |
+        \usepackage{titlesec}
+        \usepackage{array}
+        \usepackage{booktabs}
+        \usepackage{enumitem}
+        \usepackage{unicode-math}
+        \setmathfont{latinmodern-math.otf}
+        \setmathfont[range={up/{latin,Latin,num}}]{Lora}
+        \setmathfont[range={it/{latin,Latin}}]{Lora Italic}
+        \setlength{\parindent}{0pt}
+        \setlength{\parskip}{5pt}
+        \titleformat{\section}{\normalfont\fontsize{15}{18}\selectfont}{}{0pt}{}
+        \titlespacing*{\section}{0pt}{0pt}{6pt}
+        \titleformat{\subsection}{\normalfont\fontsize{12}{15}\selectfont}{}{0pt}{}
+        \titlespacing*{\subsection}{0pt}{10pt}{2pt}
+        \setlist[itemize]{label=\textbullet, leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \setlist[enumerate]{leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \newcommand{\doctitle}[1]{{\fontsize{21}{25}\selectfont #1}\par\vspace{8pt}}
+        \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+        \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+params:
+  key: true
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: ""
+    fig.align: center
+    fig.pos: "H"
+    dev: cairo_pdf
+---
+
+```{r}
+#| label: setup
+library(ggplot2)
+
+key <- isTRUE(params$key)
+
+# Wide enough that coef() output doesn't wrap
+options(width = 100)
+
+# ---- Plot style (matches the Monday handout) ----
+theme_set(
+  theme_bw(base_size = 11) +
+    theme(
+      legend.position = "right",
+      legend.margin = margin(0, 0, 0, 0),
+      plot.margin = margin(4, 6, 2, 4)
+    )
+)
+
+# Shapes, line types, and greys instead of colour, so figures work in black and
+# white
+two_shapes <- c(16, 2)
+two_linetypes <- c("solid", "dashed")
+model_colours <- c(Additive = "grey60", Interaction = "black")
+
+# ---- Simulation ----
+# Two categorical predictors: n observations per combination. means is a matrix
+# with rows for levels of a and columns for levels of b.
+sim_two_way <- function(seed, a, b, means, sd, n) {
+  set.seed(seed)
+  d <- expand.grid(
+    rep = seq_len(n),
+    a = factor(a, levels = a),
+    b = factor(b, levels = b)
+  )
+  d$y <- round(
+    rnorm(nrow(d), means[cbind(as.integer(d$a), as.integer(d$b))], sd),
+    1
+  )
+  d[, c("a", "b", "y")]
+}
+
+# One categorical and one continuous predictor: n observations per level, with
+# an intercept and slope for each level
+sim_cat_cont <- function(
+  seed,
+  levels,
+  x_min,
+  x_max,
+  intercepts,
+  slopes,
+  sd,
+  n
+) {
+  set.seed(seed)
+  group <- factor(rep(levels, each = n), levels = levels)
+  x <- round(runif(length(group), x_min, x_max), 1)
+  y <- round(
+    intercepts[group] + slopes[group] * x + rnorm(length(group), 0, sd),
+    1
+  )
+  data.frame(group, x, y)
+}
+
+# Two continuous predictors: y = b[1] + b[2] x + b[3] z + b[4] x z + noise
+sim_cont_cont <- function(seed, n, x_range, z_range, b, sd) {
+  set.seed(seed)
+  x <- round(runif(n, x_range[1], x_range[2]), 1)
+  z <- round(runif(n, z_range[1], z_range[2]), 1)
+  y <- round(b[1] + b[2] * x + b[3] * z + b[4] * x * z + rnorm(n, 0, sd), 1)
+  data.frame(x, z, y)
+}
+
+# ---- Helpers ----
+rss <- function(m) sum(residuals(m)^2)
+fmt <- function(x, digits = 1) {
+  formatC(x, format = "f", digits = digits, big.mark = ",")
+}
+fmt_p <- function(p) {
+  if (p < 0.001) "< 0.001" else formatC(p, format = "f", digits = 3)
+}
+# p-value for a sentence: "p < 0.001" or "p = 0.220"
+p_text <- function(p) {
+  if (p < 0.001) "p < 0.001" else paste("p =", fmt_p(p))
+}
+# Slopes to two significant figures, so small slopes stay distinguishable
+fmt_slope <- function(x) format(signif(x, 2), scientific = FALSE)
+# p-value for adding the interaction
+p_int <- function(additive, interaction) {
+  anova(additive, interaction)[2, "Pr(>F)"]
+}
+
+# A blank to fill in, or the answer in the key
+fill <- function(x) if (key) as.character(x) else "\\rule{1.4cm}{0.4pt}"
+
+blank_lines <- function(n) {
+  if (!key) cat(rep("\\vspace{0.3in}\n\n", n), sep = "")
+}
+answer <- function(...) if (key) cat(..., sep = "")
+
+# Null and alternative hypotheses: labelled blanks for students, filled in for
+# the key
+hypotheses <- function(h0, ha) {
+  if (key) {
+    cat("$H_0$: ", h0, "\n\n$H_A$: ", ha, "\n\n", sep = "")
+  } else {
+    cat("$H_0$:\n\n\\vspace{0.25in}\n\n$H_A$:\n\n\\vspace{0.25in}\n\n")
+  }
+}
+
+# Decision at alpha = 0.05, for a sentence
+decision <- function(p) {
+  if (p < 0.05) "We reject $H_0$." else "We fail to reject $H_0$."
+}
+
+# Code in a LaTeX table cell
+tex_code <- function(x) {
+  x <- gsub("_", "\\_", x, fixed = TRUE)
+  x <- gsub("~", "\\textasciitilde{}", x, fixed = TRUE)
+  paste0("\\texttt{", x, "}")
+}
+
+# Centered LaTeX table. header and each row are character vectors of cells.
+latex_table <- function(header, rows, align) {
+  row_tex <- vapply(rows, \(r) paste(r, collapse = " & "), character(1))
+  cat(
+    "\\begin{center}",
+    "\\renewcommand{\\arraystretch}{1.5}",
+    paste0("\\begin{tabular}{", align, "}"),
+    "\\toprule",
+    paste(paste(header, collapse = " & "), "\\\\"),
+    "\\midrule",
+    paste(row_tex, "\\\\"),
+    "\\bottomrule",
+    "\\end{tabular}",
+    "\\end{center}",
+    sep = "\n"
+  )
+  cat("\n\n")
+}
+
+# Table of models with p and df to fill in, RSS given
+model_table <- function(models) {
+  rows <- lapply(names(models), \(label) {
+    m <- models[[label]]
+    c(
+      tex_code(label),
+      fill(length(coef(m))),
+      fill(df.residual(m)),
+      fmt(rss(m))
+    )
+  })
+  latex_table(c("Model", "$p$", "$df$", "$RSS$"), rows, "lccr")
+}
+
+# Variables table for the study designs: blank rows for students, filled in
+# for the key
+variables_table <- function(rows) {
+  if (!key) {
+    rows <- rep(list(rep("\\rule{2.4cm}{0.4pt}", 3)), length(rows))
+  }
+  latex_table(
+    c("Variable", "Categorical or continuous?", "Predictor or response?"),
+    rows,
+    "lcc"
+  )
+}
+
+# Blank box to sketch in (students) or an example figure (key)
+sketch_box <- function() {
+  if (!key) {
+    cat(
+      "\\begin{center}\\fbox{\\parbox[c][2.3in][c]{4.5in}{\\hfill}}\\end{center}\n\n"
+    )
+  }
+}
+
+# Additive model's prediction for each combination of two factors, as text
+two_way_text <- function(m, d) {
+  combos <- unique(d[, c("a", "b")])
+  newdata <- setNames(combos, names(model.frame(m))[2:3])
+  paste(
+    paste0(combos$a, ", ", combos$b, " = ", fmt(predict(m, newdata))),
+    collapse = "; "
+  )
+}
+
+# Intercept and slope of each group's line, as text. m has the continuous
+# predictor second and the group (two levels) third.
+cat_cont_text <- function(m, levels) {
+  b <- coef(m)
+  slope_2 <- if (length(b) == 4) b[2] + b[4] else b[2]
+  sprintf(
+    "%s: intercept %s, slope %s; %s: intercept %s, slope %s",
+    levels[1],
+    fmt(b[1]),
+    fmt_slope(b[2]),
+    levels[2],
+    fmt(b[1] + b[3]),
+    fmt_slope(slope_2)
+  )
+}
+
+# Intercept and slope of the line at each reference value of z, as text. m has
+# x second and z third.
+cont_cont_text <- function(m, z_ref, z_unit) {
+  b <- coef(m)
+  b4 <- if (length(b) == 4) b[4] else 0
+  paste(
+    sprintf(
+      "at %s %s: intercept %s, slope %s",
+      z_ref,
+      z_unit,
+      fmt(b[1] + b[3] * z_ref),
+      fmt_slope(b[2] + b4 * z_ref)
+    ),
+    collapse = "; "
+  )
+}
+
+# ---- Figures ----
+# Two categorical predictors: first on x, point shapes by the second. models
+# chooses which predictions to draw over each combination's points: the
+# interaction model (solid segments, the combination means) and/or the additive
+# model (dashed segments).
+two_way_plot <- function(
+  d,
+  xlab,
+  ylab,
+  shape_lab,
+  models = if (key) names(model_colours) else character(0)
+) {
+  dodge_width <- 0.4
+  means <- aggregate(y ~ a + b, d, mean)
+  n_b <- nlevels(d$b)
+  centre <- function(df) {
+    as.integer(df$a) + (as.integer(df$b) - (n_b + 1) / 2) * dodge_width / n_b
+  }
+  half <- dodge_width / n_b / 2
+  means$x <- centre(means)
+  p <- ggplot(d, aes(a, y, shape = b)) +
+    geom_point(
+      position = position_jitterdodge(
+        jitter.width = 0.15,
+        dodge.width = dodge_width,
+        seed = 1
+      ),
+      colour = "grey30",
+      size = 1.8
+    ) +
+    scale_shape_manual(values = two_shapes) +
+    labs(x = xlab, y = ylab, shape = shape_lab)
+  if ("Interaction" %in% models) {
+    p <- p +
+      geom_segment(
+        aes(x = x - half, xend = x + half, y = y, yend = y),
+        data = means,
+        inherit.aes = FALSE,
+        linewidth = 1.2
+      )
+  }
+  if ("Additive" %in% models) {
+    add <- unique(cbind(d[, c("a", "b")], y = fitted(lm(y ~ a + b, d))))
+    add$x <- centre(add)
+    p <- p +
+      geom_segment(
+        aes(x = x - half, xend = x + half, y = y, yend = y),
+        data = add,
+        inherit.aes = FALSE,
+        linetype = "dashed",
+        linewidth = 0.8
+      )
+  }
+  p
+}
+
+# One categorical (two levels) and one continuous predictor: point shapes by
+# group. models chooses which fitted lines to draw: additive (grey) and/or
+# interaction (black), one line type per group.
+cat_cont_plot <- function(
+  d,
+  xlab,
+  ylab,
+  group_lab,
+  models = if (key) names(model_colours) else character(0)
+) {
+  p <- ggplot(d, aes(x, y)) +
+    geom_point(aes(shape = group), colour = "grey30", size = 2) +
+    scale_shape_manual(values = two_shapes) +
+    scale_linetype_manual(values = two_linetypes) +
+    scale_colour_manual(values = model_colours) +
+    labs(
+      x = xlab,
+      y = ylab,
+      shape = group_lab,
+      linetype = group_lab,
+      colour = "Model"
+    )
+  fits <- list(
+    Additive = lm(y ~ x + group, d),
+    Interaction = lm(y ~ x * group, d)
+  )
+  for (name in models) {
+    d$fit <- fitted(fits[[name]])
+    d$model <- name
+    p <- p +
+      geom_line(
+        aes(y = fit, linetype = group, colour = model),
+        data = d,
+        linewidth = 0.9
+      )
+  }
+  p
+}
+
+# Two continuous predictors: x on the x axis, point shapes for z below or above
+# its median. Fitted lines are drawn at reference values of z: additive (grey)
+# and/or interaction (black), one line type per reference value.
+cont_cont_plot <- function(
+  d,
+  xlab,
+  ylab,
+  z_lab,
+  z_ref,
+  z_unit,
+  models = if (key) names(model_colours) else character(0)
+) {
+  d$z_bin <- factor(
+    ifelse(d$z < median(d$z), "Below median", "Above median"),
+    levels = c("Below median", "Above median")
+  )
+  p <- ggplot(d, aes(x, y)) +
+    geom_point(aes(shape = z_bin), colour = "grey30", size = 2) +
+    scale_shape_manual(values = two_shapes) +
+    scale_linetype_manual(values = two_linetypes) +
+    scale_colour_manual(values = model_colours) +
+    labs(
+      x = xlab,
+      y = ylab,
+      shape = z_lab,
+      linetype = paste0(z_lab, "\n(model)"),
+      colour = "Model"
+    )
+  fits <- list(
+    Additive = lm(y ~ x + z, d),
+    Interaction = lm(y ~ x * z, d)
+  )
+  grid <- expand.grid(x = range(d$x), z = z_ref)
+  grid$z_label <- factor(
+    paste(grid$z, z_unit),
+    levels = paste(z_ref, z_unit)
+  )
+  for (name in models) {
+    grid$fit <- predict(fits[[name]], grid)
+    grid$model <- name
+    p <- p +
+      geom_line(
+        aes(x, fit, linetype = z_label, colour = model, group = z_label),
+        data = grid,
+        linewidth = 0.9
+      )
+  }
+  p
+}
+
+# DAG: nodes is a data frame with name, x, y. edges has from, to. Arrows stop
+# at the edge of each node's label box. (From the causality handout.)
+draw_dag <- function(nodes, edges) {
+  half_w <- function(name) 0.045 * max(nchar(strsplit(name, "\n")[[1]])) + 0.12
+  half_h <- function(name) 0.13 * length(strsplit(name, "\n")[[1]]) + 0.1
+  trim <- function(dx, dy, name) {
+    min(half_w(name) / abs(dx), half_h(name) / abs(dy))
+  }
+  segs <- do.call(
+    rbind,
+    lapply(seq_len(nrow(edges)), \(i) {
+      a <- nodes[nodes$name == edges$from[i], ]
+      b <- nodes[nodes$name == edges$to[i], ]
+      dx <- b$x - a$x
+      dy <- b$y - a$y
+      t0 <- trim(dx, dy, a$name)
+      t1 <- 1 - trim(dx, dy, b$name)
+      data.frame(
+        x = a$x + t0 * dx,
+        y = a$y + t0 * dy,
+        xend = a$x + t1 * dx,
+        yend = a$y + t1 * dy
+      )
+    })
+  )
+  ggplot() +
+    geom_segment(
+      aes(x, y, xend = xend, yend = yend),
+      data = segs,
+      arrow = arrow(length = unit(7, "pt"), type = "closed"),
+      linewidth = 0.6
+    ) +
+    geom_label(
+      aes(x, y, label = name),
+      data = nodes,
+      size = 3.8,
+      label.padding = unit(5, "pt"),
+      label.r = unit(6, "pt"),
+      lineheight = 0.9
+    ) +
+    coord_fixed(clip = "off") +
+    expand_limits(
+      x = range(nodes$x) + c(-0.6, 0.6),
+      y = range(nodes$y) + c(-0.3, 0.3)
+    ) +
+    theme_void()
+}
+
+# Two predictors pointing at one response
+two_arrow_dag <- function(x1, x2, y) {
+  draw_dag(
+    data.frame(name = c(x1, x2, y), x = c(0, 0, 2.4), y = c(0.6, -0.6, 0)),
+    data.frame(from = c(x1, x2), to = c(y, y))
+  )
+}
+```
+
+```{r}
+#| label: data
+
+# 1A: burning helps seedlings only in ungrazed plots (interaction)
+plots <- sim_two_way(
+  1,
+  c("Unburned", "Burned"),
+  c("Ungrazed", "Grazed"),
+  matrix(c(20, 32, 15, 16), 2),
+  4,
+  6
+)
+names(plots) <- c("burn", "graze", "height")
+
+# 1B: warming and nutrients act independently on kelp growth (additive)
+tanks <- sim_two_way(
+  1,
+  c("Ambient", "Warm"),
+  c("Ambient", "Enriched"),
+  matrix(c(10, 7, 14, 11), 2),
+  2.5,
+  6
+)
+names(tanks) <- c("warming", "nutrients", "growth")
+
+# 2A: shaded streams warm less per degree of air temperature (interaction)
+streams <- sim_cat_cont(
+  1,
+  c("Open", "Shaded"),
+  15,
+  35,
+  c(2, 6),
+  c(0.8, 0.5),
+  1.5,
+  12
+)
+names(streams) <- c("canopy", "air", "water")
+
+# 2B: organic farms yield less, but nitrogen helps both by the same amount
+# (additive)
+farms <- sim_cat_cont(
+  1,
+  c("Conventional", "Organic"),
+  0,
+  200,
+  c(3, 2.4),
+  c(0.02, 0.02),
+  0.6,
+  12
+)
+names(farms) <- c("farm", "nitrogen", "yield")
+
+# 3A: phosphorus feeds more algae in warmer lakes (interaction)
+lakes <- sim_cont_cont(2, 24, c(5, 50), c(10, 25), c(2, 0.1, 0.2, 0.03), 3)
+names(lakes) <- c("phosphorus", "temp", "chl")
+
+# 3B: rainfall and soil nitrogen each speed tree growth, independently
+# (additive)
+trees <- sim_cont_cont(2, 24, c(400, 1200), c(0.5, 3), c(5, 0.02, 4, 0), 4)
+names(trees) <- c("rain", "nitrogen", "growth")
+
+# Models: first predictor only, additive, interaction
+plot_1 <- lm(height ~ burn, plots)
+plot_add <- lm(height ~ burn + graze, plots)
+plot_int <- lm(height ~ burn * graze, plots)
+tank_1 <- lm(growth ~ warming, tanks)
+tank_add <- lm(growth ~ warming + nutrients, tanks)
+tank_int <- lm(growth ~ warming * nutrients, tanks)
+stream_1 <- lm(water ~ air, streams)
+stream_add <- lm(water ~ air + canopy, streams)
+stream_int <- lm(water ~ air * canopy, streams)
+farm_1 <- lm(yield ~ nitrogen, farms)
+farm_add <- lm(yield ~ nitrogen + farm, farms)
+farm_int <- lm(yield ~ nitrogen * farm, farms)
+lake_1 <- lm(chl ~ phosphorus, lakes)
+lake_add <- lm(chl ~ phosphorus + temp, lakes)
+lake_int <- lm(chl ~ phosphorus * temp, lakes)
+tree_1 <- lm(growth ~ rain, trees)
+tree_add <- lm(growth ~ rain + nitrogen, trees)
+tree_int <- lm(growth ~ rain * nitrogen, trees)
+
+# Plotting copies with generic column names for the plot helpers
+as_two_way <- function(d) setNames(d, c("a", "b", "y"))
+as_cat_cont <- function(d) setNames(d, c("group", "x", "y"))
+as_cont_cont <- function(d) setNames(d, c("x", "z", "y"))
+```
+
+\doctitle{Additive and interaction models`r if (key) " (answer key)" else ""`}
+
+Each of Parts 1--3 has two scenarios with the same tasks. We'll work through scenario **A** together as a class. Then you'll work through scenario **B** in your group. In Part 4, you'll design studies of your own.
+
+Every scenario asks the same question: does the effect of one predictor **depend on** the other? The **additive** model says no: each predictor's effect is the same at every value of the other. The **interaction** model adds one more coefficient that lets the effect of one predictor change with the other. Does that coefficient earn its df?
+
+\vspace{4pt}\hrule\vspace{6pt}
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+$$
+
+- $RSS$: residual sum of squares, $\sum (y_i - \hat y_i)^2$. The variation the model leaves unexplained.
+- $p$: number of coefficients the model estimates, including the intercept
+- $n$: number of observations
+- $df = n - p$: degrees of freedom left over after fitting the model
+
+\vspace{2pt}\hrule
+
+# Part 1: Two categorical predictors
+
+For each scenario:
+
+1. **Data.** Look at the data in the figure.
+2. **Full model.** Write the equation for the interaction model. What does the interaction coefficient mean?
+3. **Draw the models.** Use the coefficients to draw each model's prediction for each combination as a horizontal segment: the interaction model (solid) and the additive model (dashed). How are they different?
+4. **Degrees of freedom.** Fill in $p$ and $df$ for each model. How many df does the interaction cost?
+5. **F test.** Find the $F$ statistic and p-value for the interaction in the `anova()` table.
+6. **Interpretation.** State $H_0$ and $H_A$. Then interpret the $F$ test in a sentence about the system, not the coefficients.
+
+<!-- =========================================================== -->
+<!-- 1A: Fire and grazing                                        -->
+<!-- =========================================================== -->
+
+# 1A. Fire and grazing (together)
+
+Land managers use prescribed burns to clear dead vegetation and give native seedlings room to grow. But cattle also graze many of these lands. A range ecologist measured seedling **height** (cm) in `r nrow(plots) / 4` plots for each combination of **burn** (unburned or burned) and **graze** (ungrazed or grazed). Does the effect of burning depend on grazing?
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.8
+#| out-width: "65%"
+two_way_plot(as_two_way(plots), "Burn", "Seedling height (cm)", "Graze")
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{height} = \\beta_0 + \\beta_1 (\\text{burn} = \\text{Burned}) + ",
+  "\\beta_2 (\\text{graze} = \\text{Grazed}) + ",
+  "\\beta_3 (\\text{burn} = \\text{Burned})(\\text{graze} = \\text{Grazed}) + ",
+  "\\varepsilon$\n\n",
+  "$\\beta_3$ is how much the effect of burning changes in grazed plots, ",
+  "compared to ungrazed plots.\n"
+)
+```
+
+## Draw the models
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(height ~ burn + graze, plots))
+coef(lm(height ~ burn * graze, plots))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Interaction model (solid): ",
+  two_way_text(plot_int, as_two_way(plots)),
+  " cm. These are the means of each combination. Additive model (dashed): ",
+  two_way_text(plot_add, as_two_way(plots)),
+  " cm. In the additive model, burning adds the same amount in grazed and ",
+  "ungrazed plots. The interaction model lets the effect of burning differ: ",
+  "burning makes a big difference in ungrazed plots and almost none in ",
+  "grazed plots.\n"
+)
+```
+
+\newpage
+
+## Degrees of freedom ($n$ = `r nobs(plot_int)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `height ~ burn` = plot_1,
+  `height ~ burn + graze` = plot_add,
+  `height ~ burn * graze` = plot_int
+))
+```
+
+How many df does the interaction cost?
+
+```{r}
+#| results: asis
+blank_lines(1)
+answer("1 df: the interaction adds one coefficient, $\\beta_3$.\n")
+```
+
+## F test
+
+The $F$ statistic and p-value for adding the interaction are in the `burn:graze` row.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+anova(lm(height ~ burn * graze, plots))
+```
+
+```{=latex}
+\endgroup
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\beta_3 = 0$ (the effect of burning is the same in grazed and ungrazed plots)",
+  "$\\beta_3 \\neq 0$"
+)
+```
+
+Interpret the $F$ test for the interaction in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ the effect of burning didn't depend on grazing, we'd see an $F$ at ",
+  "least this large with probability ",
+  p_text(p_int(plot_add, plot_int)),
+  ". ",
+  decision(p_int(plot_add, plot_int)),
+  " Burning helps seedlings grow, but only where cattle don't graze.\n"
+)
+```
+
+<!-- =========================================================== -->
+<!-- 1B: Warming and nutrients                                   -->
+<!-- =========================================================== -->
+
+\newpage
+
+# 1B. Warming and nutrients (in groups)
+
+Marine heatwaves stress kelp forests, while nutrient-rich upwelling can boost kelp growth. Can nutrients offset warming? A lab grew kelp in `r nrow(tanks) / 4` tanks for each combination of **warming** (ambient or warm water) and **nutrients** (ambient or enriched), and measured **growth** (cm/week). Does the effect of warming depend on nutrients?
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.8
+#| out-width: "65%"
+two_way_plot(
+  as_two_way(tanks),
+  "Warming",
+  "Kelp growth (cm/week)",
+  "Nutrients"
+)
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{growth} = \\beta_0 + \\beta_1 (\\text{warming} = \\text{Warm}) + ",
+  "\\beta_2 (\\text{nutrients} = \\text{Enriched}) + ",
+  "\\beta_3 (\\text{warming} = \\text{Warm})(\\text{nutrients} = \\text{Enriched}) + ",
+  "\\varepsilon$\n\n",
+  "$\\beta_3$ is how much the effect of warming changes with enriched ",
+  "nutrients, compared to ambient nutrients.\n"
+)
+```
+
+## Draw the models
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(growth ~ warming + nutrients, tanks))
+coef(lm(growth ~ warming * nutrients, tanks))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Interaction model (solid): ",
+  two_way_text(tank_int, as_two_way(tanks)),
+  " cm/week. Additive model (dashed): ",
+  two_way_text(tank_add, as_two_way(tanks)),
+  " cm/week. The two models' predictions are close: warming lowers growth ",
+  "by about the same amount at both nutrient levels.\n"
+)
+```
+
+\newpage
+
+## Degrees of freedom ($n$ = `r nobs(tank_int)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `growth ~ warming` = tank_1,
+  `growth ~ warming + nutrients` = tank_add,
+  `growth ~ warming * nutrients` = tank_int
+))
+```
+
+How many df does the interaction cost?
+
+```{r}
+#| results: asis
+blank_lines(1)
+answer("1 df: the interaction adds one coefficient, $\\beta_3$.\n")
+```
+
+## F test
+
+The $F$ statistic and p-value for adding the interaction are in the `warming:nutrients` row.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+anova(lm(growth ~ warming * nutrients, tanks))
+```
+
+```{=latex}
+\endgroup
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\beta_3 = 0$ (the effect of warming is the same at both nutrient levels)",
+  "$\\beta_3 \\neq 0$"
+)
+```
+
+Interpret the $F$ test for the interaction in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ the effect of warming didn't depend on nutrients, we'd see an $F$ ",
+  "at least this large with probability ",
+  p_text(p_int(tank_add, tank_int)),
+  ". ",
+  decision(p_int(tank_add, tank_int)),
+  " Warming slows kelp growth and nutrients speed it up, but nutrients don't ",
+  "change how much warming hurts. Nutrients offset warming by adding growth, ",
+  "not by protecting kelp from heat.\n"
+)
+```
+
+\newpage
+
+# Part 2: One categorical and one continuous predictor
+
+Now one predictor is continuous. In the additive model, the groups get parallel lines: the same slope, different intercepts. The interaction model gives each group its own slope. For each scenario:
+
+1. **Data.** Look at the data in the figure.
+2. **Full model.** Write the equation for the interaction model. What does the interaction coefficient mean?
+3. **Draw the models.** Use the coefficients to draw the additive model (two parallel lines) and the interaction model (two lines with different slopes) on the figure.
+4. **Degrees of freedom.** Fill in $p$ and $df$ for each model. How many df does the interaction cost?
+5. **F test.** Find the $F$ statistic and p-value for the interaction in the `anova()` table.
+6. **Interpretation.** State $H_0$ and $H_A$. Then interpret the $F$ test in a sentence about the system, not the coefficients.
+
+<!-- =========================================================== -->
+<!-- 2A: Stream temperature                                      -->
+<!-- =========================================================== -->
+
+# 2A. Stream temperature (together)
+
+Trout need cold water. As summers get hotter, streams warm too, but trees along the banks shade the water. A watershed council measured summer **water** temperature (°C) and **air** temperature (°C) at `r nrow(streams) / 2` stream reaches with each type of **canopy** (open banks or shaded by trees). Does the effect of air temperature on water temperature depend on shade?
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "70%"
+cat_cont_plot(
+  as_cat_cont(streams),
+  "Air temperature (°C)",
+  "Water temperature (°C)",
+  "Canopy"
+)
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{water} = \\beta_0 + \\beta_1 \\text{air} + ",
+  "\\beta_2 (\\text{canopy} = \\text{Shaded}) + ",
+  "\\beta_3 \\text{air} \\times (\\text{canopy} = \\text{Shaded}) + ",
+  "\\varepsilon$\n\n",
+  "$\\beta_1$ is the slope for open reaches. $\\beta_3$ is how much the ",
+  "slope changes for shaded reaches: the shaded slope is $\\beta_1 + \\beta_3$.\n"
+)
+```
+
+## Draw the models
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(water ~ air + canopy, streams))
+coef(lm(water ~ air * canopy, streams))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Additive model (grey): ",
+  cat_cont_text(stream_add, c("Open", "Shaded")),
+  ". Interaction model (black): ",
+  cat_cont_text(stream_int, c("Open", "Shaded")),
+  ".\n"
+)
+```
+
+\newpage
+
+## Degrees of freedom ($n$ = `r nobs(stream_int)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `water ~ air` = stream_1,
+  `water ~ air + canopy` = stream_add,
+  `water ~ air * canopy` = stream_int
+))
+```
+
+How many df does the interaction cost?
+
+```{r}
+#| results: asis
+blank_lines(1)
+answer("1 df: the interaction adds one coefficient, $\\beta_3$.\n")
+```
+
+## F test
+
+The $F$ statistic and p-value for adding the interaction are in the `air:canopy` row.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+anova(lm(water ~ air * canopy, streams))
+```
+
+```{=latex}
+\endgroup
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\beta_3 = 0$ (water temperature rises with air temperature at the same rate in open and shaded reaches)",
+  "$\\beta_3 \\neq 0$"
+)
+```
+
+Interpret the $F$ test for the interaction in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ the effect of air temperature didn't depend on shade, we'd see an ",
+  "$F$ at least this large with probability ",
+  p_text(p_int(stream_add, stream_int)),
+  ". ",
+  decision(p_int(stream_add, stream_int)),
+  " Open reaches warm by ",
+  fmt(coef(stream_int)[["air"]], 2),
+  " °C for every 1 °C of air temperature, but shaded reaches warm by only ",
+  fmt(sum(coef(stream_int)[c("air", "air:canopyShaded")]), 2),
+  " °C. Shade matters more the hotter the summer.\n"
+)
+```
+
+<!-- =========================================================== -->
+<!-- 2B: Fertilizer and farm type                                -->
+<!-- =========================================================== -->
+
+\newpage
+
+# 2B. Fertilizer and farm type (in groups)
+
+Organic farms often yield less than conventional farms. Does nitrogen fertilizer close the gap? An agricultural extension office measured wheat **yield** (t/ha) and the **nitrogen** applied (kg/ha) on `r nrow(farms) / 2` fields of each **farm** type (conventional or organic). Does the effect of nitrogen on yield depend on farm type?
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "70%"
+cat_cont_plot(
+  as_cat_cont(farms),
+  "Nitrogen applied (kg/ha)",
+  "Wheat yield (t/ha)",
+  "Farm"
+)
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{yield} = \\beta_0 + \\beta_1 \\text{nitrogen} + ",
+  "\\beta_2 (\\text{farm} = \\text{Organic}) + ",
+  "\\beta_3 \\text{nitrogen} \\times (\\text{farm} = \\text{Organic}) + ",
+  "\\varepsilon$\n\n",
+  "$\\beta_1$ is the slope for conventional farms. $\\beta_3$ is how much ",
+  "the slope changes for organic farms: the organic slope is ",
+  "$\\beta_1 + \\beta_3$.\n"
+)
+```
+
+## Draw the models
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(yield ~ nitrogen + farm, farms))
+coef(lm(yield ~ nitrogen * farm, farms))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Additive model (grey): ",
+  cat_cont_text(farm_add, c("Conventional", "Organic")),
+  ". Interaction model (black): ",
+  cat_cont_text(farm_int, c("Conventional", "Organic")),
+  ".\n"
+)
+```
+
+\newpage
+
+## Degrees of freedom ($n$ = `r nobs(farm_int)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `yield ~ nitrogen` = farm_1,
+  `yield ~ nitrogen + farm` = farm_add,
+  `yield ~ nitrogen * farm` = farm_int
+))
+```
+
+How many df does the interaction cost?
+
+```{r}
+#| results: asis
+blank_lines(1)
+answer("1 df: the interaction adds one coefficient, $\\beta_3$.\n")
+```
+
+## F test
+
+The $F$ statistic and p-value for adding the interaction are in the `nitrogen:farm` row.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+anova(lm(yield ~ nitrogen * farm, farms))
+```
+
+```{=latex}
+\endgroup
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\beta_3 = 0$ (yield rises with nitrogen at the same rate on conventional and organic farms)",
+  "$\\beta_3 \\neq 0$"
+)
+```
+
+Interpret the $F$ test for the interaction in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ the effect of nitrogen didn't depend on farm type, we'd see an $F$ ",
+  "at least this large with probability ",
+  p_text(p_int(farm_add, farm_int)),
+  ". ",
+  decision(p_int(farm_add, farm_int)),
+  " Nitrogen raises yield by about the same amount on both farm types, so ",
+  "adding nitrogen doesn't close the gap between organic and conventional ",
+  "farms.\n"
+)
+```
+
+\newpage
+
+# Part 3: Two continuous predictors
+
+Now both predictors are continuous. The figure shows the first predictor on the x axis, with point shapes for whether the second predictor is below or above its median. To draw a model, pick a value of the second predictor and draw the line for the first. In the additive model, those lines are parallel. In the interaction model, the slope of the first predictor changes with the second. For each scenario:
+
+1. **Data.** Look at the data in the figure.
+2. **Full model.** Write the equation for the interaction model. What does the interaction coefficient mean?
+3. **Draw the models.** Use the coefficients to draw each model's line at the two given values of the second predictor.
+4. **Degrees of freedom.** Fill in $p$ and $df$ for each model. How many df does the interaction cost?
+5. **F test.** Find the $F$ statistic and p-value for the interaction in the `anova()` table.
+6. **Interpretation.** State $H_0$ and $H_A$. Then interpret the $F$ test in a sentence about the system, not the coefficients.
+
+<!-- =========================================================== -->
+<!-- 3A: Algae blooms                                            -->
+<!-- =========================================================== -->
+
+# 3A. Algae blooms (together)
+
+Phosphorus from fertilizer and wastewater feeds algae blooms in lakes, and warm water can make blooms worse. A state agency measured **phosphorus** (µg/L), summer water temperature (**temp**, °C), and chlorophyll (**chl**, µg/L), a measure of algae, in `r nrow(lakes)` lakes. Does the effect of phosphorus on algae depend on temperature?
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "70%"
+cont_cont_plot(
+  as_cont_cont(lakes),
+  "Phosphorus (µg/L)",
+  "Chlorophyll (µg/L)",
+  "Temperature",
+  c(12, 23),
+  "°C"
+)
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{chl} = \\beta_0 + \\beta_1 \\text{phosphorus} + ",
+  "\\beta_2 \\text{temp} + \\beta_3 \\text{phosphorus} \\times \\text{temp} + ",
+  "\\varepsilon$\n\n",
+  "The slope for phosphorus is $\\beta_1 + \\beta_3 \\text{temp}$. ",
+  "$\\beta_3$ is how much the phosphorus slope changes for each 1 °C of ",
+  "temperature.\n"
+)
+```
+
+## Draw the models
+
+Draw each model's line at 12 °C and at 23 °C.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(chl ~ phosphorus + temp, lakes))
+coef(lm(chl ~ phosphorus * temp, lakes))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Additive model (grey): ",
+  cont_cont_text(lake_add, c(12, 23), "°C"),
+  ". Interaction model (black): ",
+  cont_cont_text(lake_int, c(12, 23), "°C"),
+  ".\n"
+)
+```
+
+\newpage
+
+## Degrees of freedom ($n$ = `r nobs(lake_int)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `chl ~ phosphorus` = lake_1,
+  `chl ~ phosphorus + temp` = lake_add,
+  `chl ~ phosphorus * temp` = lake_int
+))
+```
+
+How many df does the interaction cost?
+
+```{r}
+#| results: asis
+blank_lines(1)
+answer("1 df: the interaction adds one coefficient, $\\beta_3$.\n")
+```
+
+## F test
+
+The $F$ statistic and p-value for adding the interaction are in the `phosphorus:temp` row.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+anova(lm(chl ~ phosphorus * temp, lakes))
+```
+
+```{=latex}
+\endgroup
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\beta_3 = 0$ (the effect of phosphorus on algae is the same at every temperature)",
+  "$\\beta_3 \\neq 0$"
+)
+```
+
+Interpret the $F$ test for the interaction in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ the effect of phosphorus didn't depend on temperature, we'd see an ",
+  "$F$ at least this large with probability ",
+  p_text(p_int(lake_add, lake_int)),
+  ". ",
+  decision(p_int(lake_add, lake_int)),
+  " Phosphorus feeds more algae in warmer lakes: each µg/L of phosphorus ",
+  "adds ",
+  fmt(
+    coef(lake_int)[["phosphorus"]] + coef(lake_int)[["phosphorus:temp"]] * 12,
+    2
+  ),
+  " µg/L of chlorophyll at 12 °C, but ",
+  fmt(
+    coef(lake_int)[["phosphorus"]] + coef(lake_int)[["phosphorus:temp"]] * 23,
+    2
+  ),
+  " µg/L at 23 °C.\n"
+)
+```
+
+<!-- =========================================================== -->
+<!-- 3B: Tree growth                                             -->
+<!-- =========================================================== -->
+
+\newpage
+
+# 3B. Tree growth (in groups)
+
+Trees need both water and nutrients to grow. A forester measured annual height **growth** (cm/yr) of young pines at `r nrow(trees)` sites, along with annual rainfall (**rain**, mm) and soil **nitrogen** (g/kg). Does the effect of rainfall on growth depend on soil nitrogen?
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+#| out-width: "70%"
+cont_cont_plot(
+  as_cont_cont(trees),
+  "Annual rainfall (mm)",
+  "Height growth (cm/yr)",
+  "Soil nitrogen",
+  c(1, 2.5),
+  "g/kg"
+)
+```
+
+## Full model
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$\\text{growth} = \\beta_0 + \\beta_1 \\text{rain} + ",
+  "\\beta_2 \\text{nitrogen} + \\beta_3 \\text{rain} \\times \\text{nitrogen} + ",
+  "\\varepsilon$\n\n",
+  "The slope for rainfall is $\\beta_1 + \\beta_3 \\text{nitrogen}$. ",
+  "$\\beta_3$ is how much the rainfall slope changes for each 1 g/kg of soil ",
+  "nitrogen.\n"
+)
+```
+
+## Draw the models
+
+Draw each model's line at 1 g/kg and at 2.5 g/kg of soil nitrogen.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+coef(lm(growth ~ rain + nitrogen, trees))
+coef(lm(growth ~ rain * nitrogen, trees))
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+answer(
+  "Additive model (grey): ",
+  cont_cont_text(tree_add, c(1, 2.5), "g/kg"),
+  ". Interaction model (black): ",
+  cont_cont_text(tree_int, c(1, 2.5), "g/kg"),
+  ".\n"
+)
+```
+
+\newpage
+
+## Degrees of freedom ($n$ = `r nobs(tree_int)`)
+
+```{r}
+#| results: asis
+model_table(list(
+  `growth ~ rain` = tree_1,
+  `growth ~ rain + nitrogen` = tree_add,
+  `growth ~ rain * nitrogen` = tree_int
+))
+```
+
+How many df does the interaction cost?
+
+```{r}
+#| results: asis
+blank_lines(1)
+answer("1 df: the interaction adds one coefficient, $\\beta_3$.\n")
+```
+
+## F test
+
+The $F$ statistic and p-value for adding the interaction are in the `rain:nitrogen` row.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```{r}
+#| echo: true
+anova(lm(growth ~ rain * nitrogen, trees))
+```
+
+```{=latex}
+\endgroup
+```
+
+## Interpretation
+
+State $H_0$ and $H_A$.
+
+```{r}
+#| results: asis
+hypotheses(
+  "$\\beta_3 = 0$ (the effect of rainfall on growth is the same at every level of soil nitrogen)",
+  "$\\beta_3 \\neq 0$"
+)
+```
+
+Interpret the $F$ test for the interaction in a sentence.
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "_If_ the effect of rainfall didn't depend on soil nitrogen, we'd see an ",
+  "$F$ at least this large with probability ",
+  p_text(p_int(tree_add, tree_int)),
+  ". ",
+  decision(p_int(tree_add, tree_int)),
+  " Rainfall and soil nitrogen each speed growth, and the effect of rainfall ",
+  "is about the same whatever the soil nitrogen. The additive model is ",
+  "enough.\n"
+)
+```
+
+\newpage
+
+# Part 4: Design the study
+
+Researchers rarely hand you a predictor and a response. Each client below describes a problem in their own words. For each one:
+
+1. **Variables.** Fill in the table: what are the variables, is each one categorical or continuous, and is each one a predictor or the response?
+2. **DAG.** Draw a DAG of the variables.
+3. **Models and hypotheses.** Write the equations for the simpler (additive) model and the more complex (interaction) model. State $H_0$ and $H_A$ for the client's question.
+4. **Sketch.** Sketch data and model fits that would support the client's hypothesis. Label your axes.
+
+<!-- =========================================================== -->
+<!-- 4.1: Urchins and kelp                                       -->
+<!-- =========================================================== -->
+
+## 4.1. Urchins and kelp
+
+> "Sea urchins have been mowing down our kelp forests, so for the last three years our divers have been removing urchins from some reefs and leaving others alone. Some of our reefs are inside marine protected areas, where sheephead and lobsters, which eat urchins, are common. Others are outside, where they're fished. We count kelp plants per square meter on every reef. I suspect removal makes a much bigger difference outside the protected areas, since inside them the predators are already keeping urchins in check. Is that right?"
+
+### Variables
+
+```{r}
+#| results: asis
+variables_table(list(
+  c("Kelp density (plants/m²)", "Continuous", "Response"),
+  c("Urchin removal (removed or not)", "Categorical", "Predictor"),
+  c("Protection (inside or outside MPA)", "Categorical", "Predictor")
+))
+```
+
+### DAG
+
+```{r}
+#| results: asis
+blank_lines(4)
+```
+
+```{r}
+#| fig-width: 4.5
+#| fig-height: 1.6
+#| out-width: "55%"
+if (key) {
+  two_arrow_dag("Urchin\nremoval", "MPA", "Kelp\ndensity")
+}
+```
+
+### Models and hypotheses
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Simpler: $\\text{kelp} = \\beta_0 + \\beta_1 (\\text{removal} = \\text{Removed}) + ",
+  "\\beta_2 (\\text{MPA} = \\text{Outside}) + \\varepsilon$\n\n",
+  "More complex: add $\\beta_3 (\\text{removal} = \\text{Removed})",
+  "(\\text{MPA} = \\text{Outside})$\n\n"
+)
+hypotheses(
+  "$\\beta_3 = 0$ (removal has the same effect inside and outside MPAs)",
+  "$\\beta_3 > 0$ (removal helps more outside MPAs). A two-sided $\\beta_3 \\neq 0$ is also fine."
+)
+```
+
+### Sketch
+
+```{r}
+#| results: asis
+sketch_box()
+```
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.6
+#| out-width: "60%"
+if (key) {
+  kelp <- sim_two_way(
+    3,
+    c("Not removed", "Removed"),
+    c("Inside", "Outside"),
+    matrix(c(8, 10, 2, 9), 2),
+    1.5,
+    5
+  )
+  two_way_plot(
+    kelp,
+    "Urchin removal",
+    "Kelp (plants/m²)",
+    "MPA",
+    models = "Interaction"
+  )
+}
+```
+
+```{r}
+#| results: asis
+answer(
+  "Removal raises kelp a lot outside MPAs and only a little inside, so the ",
+  "difference between removed and not removed is bigger outside.\n"
+)
+```
+
+<!-- =========================================================== -->
+<!-- 4.2: Street trees                                           -->
+<!-- =========================================================== -->
+
+\newpage
+
+## 4.2. Street trees
+
+> "The city plants a few thousand street trees a year. In some neighborhoods we pay residents to water new trees through their first summers, and in others we can't afford to. Our crews measure each tree's trunk growth every fall. We also have summer temperatures for every neighborhood from the heat-island study, and some neighborhoods run 8 degrees hotter than others. Council wants to know whether the watering program is worth expanding. My hunch is that watering matters most in the hottest neighborhoods, which would tell us where to spend the money first."
+
+### Variables
+
+```{r}
+#| results: asis
+variables_table(list(
+  c("Trunk growth (cm/yr)", "Continuous", "Response"),
+  c("Watering program (yes or no)", "Categorical", "Predictor"),
+  c("Summer temperature (°C)", "Continuous", "Predictor")
+))
+```
+
+### DAG
+
+```{r}
+#| results: asis
+blank_lines(4)
+```
+
+```{r}
+#| fig-width: 4.5
+#| fig-height: 1.6
+#| out-width: "55%"
+if (key) {
+  two_arrow_dag("Watering", "Summer\ntemperature", "Trunk\ngrowth")
+}
+```
+
+### Models and hypotheses
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Simpler: $\\text{growth} = \\beta_0 + \\beta_1 \\text{temp} + ",
+  "\\beta_2 (\\text{watering} = \\text{Yes}) + \\varepsilon$\n\n",
+  "More complex: add $\\beta_3 \\text{temp} \\times (\\text{watering} = \\text{Yes})$\n\n"
+)
+hypotheses(
+  "$\\beta_3 = 0$ (watering helps by the same amount at every temperature)",
+  "$\\beta_3 > 0$ (watering helps more in hotter neighborhoods). A two-sided $\\beta_3 \\neq 0$ is also fine."
+)
+```
+
+### Sketch
+
+```{r}
+#| results: asis
+sketch_box()
+```
+
+```{r}
+#| fig-width: 6
+#| fig-height: 2.6
+#| out-width: "65%"
+if (key) {
+  street <- sim_cat_cont(
+    3,
+    c("No", "Yes"),
+    26,
+    34,
+    c(3.5, 1.2),
+    c(-0.08, 0.02),
+    0.2,
+    12
+  )
+  cat_cont_plot(
+    street,
+    "Summer temperature (°C)",
+    "Trunk growth (cm/yr)",
+    "Watering",
+    models = "Interaction"
+  )
+}
+```
+
+```{r}
+#| results: asis
+answer(
+  "Growth drops in hotter neighborhoods without watering, but stays about ",
+  "the same with watering, so the gap between the lines widens with ",
+  "temperature.\n"
+)
+```
+
+<!-- =========================================================== -->
+<!-- 4.3: Nitrate in wells                                       -->
+<!-- =========================================================== -->
+
+\newpage
+
+## 4.3. Nitrate in wells
+
+> "We test nitrate in about forty drinking water wells every spring. Some of them sit in the middle of farm country and some are surrounded mostly by oak woodland, and we've mapped the percent cropland within a kilometer of each well. The numbers jump around a lot from year to year, and it seems like they jump the most after wet winters. My theory is that heavy winter rain flushes fertilizer down into the aquifer, but only where there's cropland to flush it from. If that's right, we'd know which wells to test more often after a big storm year."
+
+### Variables
+
+```{r}
+#| results: asis
+variables_table(list(
+  c("Nitrate (mg/L)", "Continuous", "Response"),
+  c("Winter rainfall (mm)", "Continuous", "Predictor"),
+  c("Cropland within 1 km (\\%)", "Continuous", "Predictor")
+))
+```
+
+### DAG
+
+```{r}
+#| results: asis
+blank_lines(4)
+```
+
+```{r}
+#| fig-width: 4.5
+#| fig-height: 1.6
+#| out-width: "55%"
+if (key) {
+  two_arrow_dag("Winter\nrainfall", "Cropland", "Nitrate")
+}
+```
+
+### Models and hypotheses
+
+```{r}
+#| results: asis
+blank_lines(2)
+answer(
+  "Simpler: $\\text{nitrate} = \\beta_0 + \\beta_1 \\text{rain} + ",
+  "\\beta_2 \\text{cropland} + \\varepsilon$\n\n",
+  "More complex: add $\\beta_3 \\text{rain} \\times \\text{cropland}$\n\n"
+)
+hypotheses(
+  "$\\beta_3 = 0$ (rain raises nitrate by the same amount whatever the cropland)",
+  "$\\beta_3 > 0$ (rain raises nitrate more where there's more cropland). A two-sided $\\beta_3 \\neq 0$ is also fine."
+)
+```
+
+### Sketch
+
+```{r}
+#| results: asis
+sketch_box()
+```
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3.2
+#| out-width: "65%"
+if (key) {
+  wells <- sim_cont_cont(3, 40, c(200, 800), c(0, 80), c(1, 0, 0.01, 0.0002), 1)
+  cont_cont_plot(
+    wells,
+    "Winter rainfall (mm)",
+    "Nitrate (mg/L)",
+    "Cropland",
+    c(10, 70),
+    "%",
+    models = "Interaction"
+  )
+}
+```
+
+```{r}
+#| results: asis
+answer(
+  "Nitrate barely changes with rainfall where there's little cropland, but ",
+  "rises steeply with rainfall where there's a lot, so the lines fan out.\n"
+)
+```

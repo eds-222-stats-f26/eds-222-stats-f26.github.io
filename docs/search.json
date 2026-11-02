@@ -1344,6 +1344,545 @@
     "text": "Visualize the data and model\nFill in the blanks of the ggplot call to complete the visualization.\nannotate() adds one-off geometries to a ggplot. The following annotations represent \\(\\beta_0\\) and \\(\\beta_1\\).\n\nbetas &lt;- coef(categorical_lm)\n\nggplot(simulated_data, aes(x, y)) +\n  geom_point(position = position_jitter(width = 0.2)) +\n  # beta_0 = mean of reference level\n  annotate(\"point\", x = 1, y = betas[1], color = \"cornflowerblue\", size = 5) +\n  # beta_1 = difference from reference level\n  annotate(\n    \"segment\",\n    x = 1.5,\n    xend = 1.5,\n    y = betas[1],\n    yend = sum(betas),\n    color = \"cornflowerblue\",\n    linewidth = 3\n  ) +\n  # beta_0 + beta_1 = mean of second level\n  annotate(\"point\", x = 2, y = sum(betas), color = \"cornflowerblue\", size = 5)"
   },
   {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week6_monday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDescribe questions ANOVA can answer\nCompare models using ANOVA\nApply ANOVA across scenarios"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#forever-chemicals",
+    "href": "course-materials/lecture-slides/week6_monday.html#forever-chemicals",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Forever chemicals",
+    "text": "Forever chemicals\n\nPFAS (per- and polyfluoroalkyl substances) enter the environment through multiple pathways, but do not break down like most chemicals."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#do-pfas-affect-developing-nervous-systems",
+    "href": "course-materials/lecture-slides/week6_monday.html#do-pfas-affect-developing-nervous-systems",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Do PFAS affect developing nervous systems?",
+    "text": "Do PFAS affect developing nervous systems?\nAlbers et al. (2024) raised zebrafish embryos in water with one of three PFAS: PFOA, PFOS, or PFHxS.\n\nZebrafish (Danio rerio) are a model vertebrate for toxicology: they develop fast and their embryos are transparent. Credit: Powers Scientific"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#some-effects-you-can-see",
+    "href": "course-materials/lecture-slides/week6_monday.html#some-effects-you-can-see",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Some effects you can see",
+    "text": "Some effects you can see\n\nSpine curvature (A) and un- or underinflated swim bladders (B) in 120-hour-old embryos (Albers et al. 2024)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#some-effects-you-cant",
+    "href": "course-materials/lecture-slides/week6_monday.html#some-effects-you-cant",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Some effects you can’t",
+    "text": "Some effects you can’t\nNeurological effects show up in behavior.\n\n\nAt 120 hours, each larva sat in its own well in a dark chamber\nThe lights switched on and off every 3 minutes for 24 minutes, startling the fish\nA camera tracked each larva 30 times per second\nLarvae that were dead or had visible deformities were excluded, so a bent spine can’t explain slow swimming\n\n\n\nOne response: total swim distance (mm) during the test."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#swim-distance-by-pfhxs-concentration",
+    "href": "course-materials/lecture-slides/week6_monday.html#swim-distance-by-pfhxs-concentration",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Swim distance by PFHxS concentration",
+    "text": "Swim distance by PFHxS concentration\n\n\n\nConcentrations were measured in the exposure water. Red asterisks: concentrations that differ from the control (more on that later) (Albers et al. 2024)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#the-model",
+    "href": "course-materials/lecture-slides/week6_monday.html#the-model",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "The model",
+    "text": "The model\nTreat concentration as a categorical predictor with six levels. The control is the reference level.\n\n\\[\n\\begin{aligned}\n\\text{distance} = \\beta_0 &+ \\beta_1 (\\text{PFHxS} = 6.4) + \\beta_2 (\\text{PFHxS} = 8.7) + \\beta_3 (\\text{PFHxS} = 10.2) \\\\\n&+ \\beta_4 (\\text{PFHxS} = 11.5) + \\beta_5 (\\text{PFHxS} = 14.4) + \\varepsilon\n\\end{aligned}\n\\]\n\n\n\n\\(\\beta_0\\): mean swim distance of control fish\n\\(\\beta_1, \\dots, \\beta_5\\): difference between each concentration and the control\nWhy categorical? The pattern isn’t a straight line: a big jump at 6.4 ppm, then roughly flat"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#which-coefficient-answers-the-question",
+    "href": "course-materials/lecture-slides/week6_monday.html#which-coefficient-answers-the-question",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Which coefficient answers the question?",
+    "text": "Which coefficient answers the question?\n\nDoes PFHxS concentration affect fish neurology?\n\n\n\n\\(\\beta_1\\) only compares 6.4 ppm to the control. \\(\\beta_5\\) only compares 14.4 ppm to the control.\nEach coefficient is one comparison. The question is about all of them at once:\n\n\\(H_0\\): \\(\\beta_1 = \\beta_2 = \\beta_3 = \\beta_4 = \\beta_5 = 0\\) (every concentration has the same mean)\n\\(H_A\\): at least one \\(\\beta_k \\neq 0\\)"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#why-not-check-all-five-p-values",
+    "href": "course-materials/lecture-slides/week6_monday.html#why-not-check-all-five-p-values",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Why not check all five p-values?",
+    "text": "Why not check all five p-values?\n\n\nEach test has a 5% chance of a false positive when there is no effect\nWith five tests, the chance that at least one has p &lt; 0.05 is closer to \\(1 - 0.95^5 \\approx 23\\%\\)\nPicking whichever level looks best is cherry-picking\nThe five tests also depend on the reference level. Change the reference and you get five different tests of the same model.\n\n\n\nWe need one test for the whole predictor."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#when-to-use-anova",
+    "href": "course-materials/lecture-slides/week6_monday.html#when-to-use-anova",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "When to use ANOVA",
+    "text": "When to use ANOVA\n\n\nThe response is continuous (swim distance in mm)\nThe question is about a whole predictor, not one coefficient: “Does concentration matter at all?”\nThat predictor costs more than one coefficient, like a categorical variable with 3+ levels (6 levels → 5 dummy variables)\n\n\n\nANOVA asks: is the variance explained by the additional parameters worth the cost?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#one-test-for-the-whole-predictor",
+    "href": "course-materials/lecture-slides/week6_monday.html#one-test-for-the-whole-predictor",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "One test for the whole predictor",
+    "text": "One test for the whole predictor\nCompare two models:\n\n\n\n\n\n\n\n\n\nModel\nSays\nCoefficients\n\n\n\n\ndistance ~ 1\nConcentration doesn’t matter: one mean for all the fish\n1\n\n\ndistance ~ pfhxs\nEach concentration has its own mean\n6\n\n\n\n\n\n\nThe complex model always fits better (lower \\(RSS\\)). It spends 5 more coefficients to do it.\nDoes concentration explain enough variation to justify spending 5 df?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#compare-the-models",
+    "href": "course-materials/lecture-slides/week6_monday.html#compare-the-models",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Compare the models",
+    "text": "Compare the models\n\n\\(n = 435\\) larvae\n\n\n\n\nModel\n\\(p\\)\n\\(df = n - p\\)\n\\(RSS\\) (millions of mm²)\n\n\n\n\ndistance ~ 1\n1\n434\n214.43\n\n\ndistance ~ pfhxs\n6\n429\n143.50\n\n\n\n\n\n\\[\n\\begin{aligned}\nF &= \\frac{(RSS_{simple} - RSS_{complex}) \\ / \\ (p_{complex} - p_{simple})}{RSS_{complex} \\ / \\ (n - p_{complex})} \\\\[6pt]\n&= \\frac{(214.43 - 143.50) \\ / \\ (6 - 1)}{143.50 \\ / \\ (435 - 6)}\n= \\frac{14.19}{0.3345}\n\\approx 42.4\n\\end{aligned}\n\\]"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#how-surprising-is-f-42.4",
+    "href": "course-materials/lecture-slides/week6_monday.html#how-surprising-is-f-42.4",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "How surprising is F = 42.4?",
+    "text": "How surprising is F = 42.4?\nUnder \\(H_0\\), the \\(F\\) statistic follows an F-distribution (rather than normal)."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#interpretation",
+    "href": "course-materials/lecture-slides/week6_monday.html#interpretation",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Interpretation",
+    "text": "Interpretation\n\nIf the means were not different across groups (i.e., if PFHxS had no effect on swim distance), then the probability of observin an F-statistic as large as 42.4 is extremely small. So we reject \\(H_0\\) and conclude there is evidence that PFHxS affects swim distance.\n\n\nThis means two things:\n\nAt least one group mean differs from at least one other.\nThe variation between groups is large relative to the variation within groups."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#how-to-compare-models-with-anova",
+    "href": "course-materials/lecture-slides/week6_monday.html#how-to-compare-models-with-anova",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "How to compare models with ANOVA",
+    "text": "How to compare models with ANOVA\n\n\nState your hypotheses\nDesign your complex and simpler models\nCalculate the F-statistic using \\(df\\) and \\(RSS\\) to quantify the information-complexity tradeoff\nDerive your p-value for your F-statistic using the F-distribution or permutation"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#state-your-hypotheses",
+    "href": "course-materials/lecture-slides/week6_monday.html#state-your-hypotheses",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "State your hypotheses",
+    "text": "State your hypotheses\n\nDoes PFHxS concentration affect zebrafish swim distance?\n\n\n\n\\(H_0\\): \\(\\beta_1 = \\beta_2 = \\beta_3 = \\beta_4 = \\beta_5 = 0\\)\n\nEvery concentration has the same mean swim distance as the control\n\n\\(H_A\\): at least one \\(\\beta_k \\neq 0\\)\n\nAt least one concentration has a different mean"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#design-your-models",
+    "href": "course-materials/lecture-slides/week6_monday.html#design-your-models",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Design your models",
+    "text": "Design your models\n\n\n\n\n\n\n\n\n\n\nModel\nRole\nSays\n\\(p\\)\n\n\n\n\ndistance ~ 1\nSimpler\nOne mean for all the fish (\\(H_0\\))\n1\n\n\ndistance ~ pfhxs\nComplex\nEach concentration has its own mean\n6\n\n\n\n\n\n\nThe simpler model is the complex model with \\(\\beta_1, \\dots, \\beta_5\\) set to 0, so the models are nested\nThey differ by \\(6 - 1 = 5\\) coefficients: exactly the ones \\(H_0\\) says are 0"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#calculate-f",
+    "href": "course-materials/lecture-slides/week6_monday.html#calculate-f",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Calculate \\(F\\)",
+    "text": "Calculate \\(F\\)\n\\(n = 435\\) larvae\n\n\n\n\nModel\n\\(p\\)\n\\(df = n - p\\)\n\\(RSS\\) (millions of mm²)\n\n\n\n\ndistance ~ 1\n1\n434\n214.43\n\n\ndistance ~ pfhxs\n6\n429\n143.50\n\n\n\n\n\n\\[\nF = \\frac{(214.43 - 143.50) \\ / \\ (6 - 1)}{143.50 \\ / \\ (435 - 6)}\n= \\frac{14.19}{0.3345}\n\\approx 42.4\n\\]\n\n\n\nNumerator: each df spent on concentration removes 14.19 million mm² of unexplained variation\nDenominator: each remaining df holds 0.3345 million mm² of noise\nEach df spent on concentration buys about 42 times more than a df of noise"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#derive-the-p-value",
+    "href": "course-materials/lecture-slides/week6_monday.html#derive-the-p-value",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Derive the p-value",
+    "text": "Derive the p-value\n\nMathematical model: The F-statistic follows an F-distribution.\n\n\n\n\n\n\n\n\n\n\n\n\nPermutation: shuffle concentration labels across fish, refit both models, and recompute \\(F\\). Repeat many times.\n\nAlbers et al. (2024) ran 10 million permutations. None gave an \\(F\\) as large as 42.4 (reported \\(p = 0\\)).\n\nEither way: if PFHxS had no effect, an \\(F\\) this large would almost never happen. Reject \\(H_0\\)."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week6_monday.html#references",
+    "href": "course-materials/lecture-slides/week6_monday.html#references",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "References",
+    "text": "References\n\n\n\n\n\n\n\n\nAlbers, Janice, John Mylroie, Ashley Kimble, Catherine Steward, Kacy Chapman, Mitchell Wilbanks, Edward Perkins, and Natàlia Garcia-Reyero. 2024. “Per- and Polyfluoroalkyl Substances: Impacts on Morphology, Behavior and Lipid Levels in Zebrafish Embryos.” Toxics 12 (3): 192. https://doi.org/10.3390/toxics12030192."
+  },
+  {
+    "objectID": "index.html#course-description",
+    "href": "index.html#course-description",
+    "title": "Statistics for Environmental Data Science",
+    "section": "Course Description",
+    "text": "Course Description\nStatistics is the science of collecting, manipulating, and analyzing empirical data. In this class, we will learn the statistical fundamentals that will enable us to draw conclusions about the environment and its interaction with social and economic systems. We will cover fundamental statistical concepts and tools, and then apply and expand upon those tools to learn some temporal and spatial statistical methods that are particularly helpful in environmental data science. Welcome!\n\nLearning objectives\nThe goal of this course is to enable MEDS students to confidently and competently apply statistical tools to socio-environmental datasets. Essential skills and concepts are:\n\nSummarize data numerically and graphically\nInterpret random variables\nSimulate data to test assumptions\nDescribe models using statistical notation\nDraw DAGs to clarify causal relationships\nQuantify uncertainty to perform inference"
+  },
+  {
+    "objectID": "index.html#teaching-team",
+    "href": "index.html#teaching-team",
+    "title": "Statistics for Environmental Data Science",
+    "section": "Teaching Team",
+    "text": "Teaching Team\n\n\n\nInstructor\n\nMax Czapanskiy\nEmail: maxczap@ucsb.edu\n\nTeaching Assistant\n\nSloane Stephenson\nEmail: gstephenson@ucsb.edu"
+  },
+  {
+    "objectID": "course-materials/week9.html",
+    "href": "course-materials/week9.html",
+    "title": "Spatio-temporal methods",
+    "section": "",
+    "text": "Under construction"
+  },
+  {
+    "objectID": "course-materials/week7.html",
+    "href": "course-materials/week7.html",
+    "title": "Logistic regression",
+    "section": "",
+    "text": "Under construction"
+  },
+  {
+    "objectID": "course-materials/week5.html",
+    "href": "course-materials/week5.html",
+    "title": "Linear model inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nLinear regression inference  Linear regression inference exercise (Solutions)\nIMS 24  Linear regression inference\n\n\nLab\nConcept maps\nNone\n\n\nLecture 2\nCausal inference  Confounders, colliders, and mediators  Final project DAGs\nIMS 25  Backdoor criterion  Confounders, Colliders, and Mediators  Simulating inferences"
+  },
+  {
+    "objectID": "course-materials/week5.html#lecture-materials",
+    "href": "course-materials/week5.html#lecture-materials",
+    "title": "Linear model inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nLinear regression inference  Linear regression inference exercise (Solutions)\nIMS 24  Linear regression inference\n\n\nLab\nConcept maps\nNone\n\n\nLecture 2\nCausal inference  Confounders, colliders, and mediators  Final project DAGs\nIMS 25  Backdoor criterion  Confounders, Colliders, and Mediators  Simulating inferences"
+  },
+  {
+    "objectID": "course-materials/week3.html",
+    "href": "course-materials/week3.html",
+    "title": "Linear regression",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model  Lab solutions\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors  Simulating categorical predictors - Solutions\nCategorical predictors  Categorical predictors in R"
+  },
+  {
+    "objectID": "course-materials/week3.html#lecture-materials",
+    "href": "course-materials/week3.html#lecture-materials",
+    "title": "Linear regression",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model  Lab solutions\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors  Simulating categorical predictors - Solutions\nCategorical predictors  Categorical predictors in R"
+  },
+  {
+    "objectID": "course-materials/week10.html",
+    "href": "course-materials/week10.html",
+    "title": "Statistics in action!",
+    "section": "",
+    "text": "Under construction"
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html",
+    "href": "course-materials/pre-class/week1_statistical_claims.html",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "",
+    "text": "So far this week, you’ve learned about:\nThe three challenges of statistics\nMeasurements and data\nIn class on Wednesday, we’ll discuss these concepts in the context of statistical claims on topics you’re interested in."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#instructions",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#instructions",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Instructions",
+    "text": "Instructions\nBefore class, find a statistical claim. Search the areas of environmental science you’re passionate and knowledgeable about. This could be in a news article, a YouTube video, a documentary, etc. It’s important that you find a claim that is presented as having statistical support.\nRespond to the prompts in this Google Form about your claim."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#example",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#example",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Example",
+    "text": "Example\nDescribe the claim\nCorals growing near islands with healthy seabird colonies grow more than twice as fast as corals near islands where invasive rats have wiped out the seabirds.\nWhere did you find it?\nAudubon Magazine The Remarkable Healing Power of Seabird Poop for Climate-Stressed Coral Reefs\nWhat challenge of statistics does it fall under?\nGeneralize from treatment to control. The “treatment” is the presence of invasive rats (which extirpate seabirds), the “control” is islands without rats.\nPick the most salient variable in the data. In what ways does it accurately represent what its meant to, and in what ways might it be different? (I.e., assess its validity.)\nCoral growth rate. This was measured using the area of corals from photographs1. The claim about growth rate is really more about mass or volume, however area is a reasonably valid proxy because previous research has established area and mass are highly correlated.\nContinuing with the same variable, what are the limitations on its reliability?\nEstimates of area from photographs are sensitive to the angle of the photo and the judgement of the researcher who traces the photo. Although those factors can affect reliability, the study used photos from divers, which are more reliable than photos taken by aircraft or satellites.\nContinuing with the same variable, how was the sample collected? Were there obstacles to selecting a representative sample?\nThe sample came from twelve islands in the Chagos Archipelago (six had rats, six didn’t). There is potential selection bias because this was an observational study, so the researchers couldn’t randomize which islands got rats and which didn’t. Also, the study only looked at one species of coral. It’s possible other corals are more or less affected by seabird abundance."
+  },
+  {
+    "objectID": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
+    "href": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
+    "title": "Week 1 Wednesday pre-class",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nThis information isn’t directly in the magazine article, but I’m familiar with the methods. This is why it’s important to pick a statistical claim in a scientific field you’re knowledgeable about!↩︎"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDiscuss final project deliverable\nP-values, two ways\nConfidence intervals, two ways"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Exploratory data analysis",
+    "text": "Exploratory data analysis\n\nIts purpose is to get you started early and give you feedback while your ideas are still taking shape. You are not committing to a question or dataset."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Check in with your peers",
+    "text": "Check in with your peers\nClose your laptops and pull out a sheet of paper. Take 3 minutes to write down:\n\n\nYour question\n\nIf you have one, paraphrase it\nIf you don’t, brainstorm one possible question\n\n\nYour dataset\n\nIf you’ve picked one, what is it and where is it from?\nIf you haven’t, what kind of data would help your question?\n\n\nA challenge you’ve encountered\n\nFraming a question?\nFinding data?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Check in with your peers",
+    "text": "Check in with your peers\nForm pairs. In turns, share your question, data, and challenge.\nTake 10 minutes to provide each other with feedback. For example:\n\nIs the scope of the question feasible? If you had to narrow in on one part, what would it be?\nHow valid are the measurements in the data for the question? What tradeoffs are there between validity and sample size?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Permutation test vs normal approximation",
+    "text": "Permutation test vs normal approximation\nYou are welcome to work in groups of 2-3 for this activity.\nConnect to Workbench and clone the repo https://github.com/eds-222-stats-f26/eds-222-inference (I’ll put the link on Slack).\nComplete the activity in p-values.qmd.\nWe’ll use 30 minutes for this.\nWhen you’re done, call your instructor over before continuing."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
+    "href": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Bootstrapping vs normal approximation",
+    "text": "Bootstrapping vs normal approximation\nContinue working in the same groups and the same repo.\nComplete the activity in confidence-interval.qmd.\nWe’ll use 30 minutes for this."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDebrief the parking lot\nDigging into our statistical claims\nSampling bias experiment"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Activity guide",
+    "text": "Activity guide\n\nCount off into groups.\nShare your prepared statistical claims.\nCollaboratively design a follow-up study.\nEvaluate another group’s study design."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Form groups",
+    "text": "Form groups\n\nCount off 1-10.\nFind your peers with the same number."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Share your claims",
+    "text": "Share your claims\nTake turns sharing your prepared statistical claims.\n\nWhat’s the claim and where did you find it?\nWhat is the relevant challenge of statistics?\nWhat’s the most salient variable?\n\nWhat makes the variable valid?\nHow reliable is the variable?\n\nHow was the sample collected?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Design a follow-up study",
+    "text": "Design a follow-up study\nAs a group, choose one claim to design a follow-up study for. If your claim was chosen, you are now the PI (congrats).\n\nWhat’s the new question?\n\nDoes it fall under the same challenge of statistics, or a new one?\n\nWhat measurement would you need to investigate the question?\n\nEvaluate the validity and reliability of this measurement.\nHow would you get the sample?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Evaluate a study design",
+    "text": "Evaluate a study design\nSend your PI to a new group for study design peer review.\n\nThe PI explains the original claim and the follow up study to the reviewers.\nThe reviewers ask clarifying questions until they understand:\n\nThe context of the new study.\nWhich challenge of statistics is being investigated.\nHow the study design addresses validity, reliability, and potential sampling issues."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Sampling distribution",
+    "text": "Sampling distribution\nYou’ve all drawn samples and estimated the total weight of the bag.\nNow, let’s see the sampling distribution - the distribution of your estimates based on your samples."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What’s our inference?",
+    "text": "What’s our inference?\nTurn to the student next to you. Based on the sampling distribution, what do you think is the total weight of the bag?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#discussion",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#discussion",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Discussion",
+    "text": "Discussion\n\nAs a class, were we too low or too high?\n\nBy how much?\n\nHow would we design a representative sampling strategy?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
+    "href": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Preparing for week 2",
+    "text": "Preparing for week 2\nTopic: Foundations of inference\n\nComplete the readings and pre-recorded lectures.\n\n\nHomework 1 will be released tomorrow.\nStart thinking about your final project!\n\nWhat question do you want to investigate?\nWhat data are relevant?\nAn exploratory analysis is due at the end of week 2."
+  },
+  {
+    "objectID": "homework.html",
+    "href": "homework.html",
+    "title": "Homework",
+    "section": "",
+    "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nAssignment\nDate Posted\nDate Due\nRevisions Deadline\n\n\n\n\nHomework 1\n10/1\n10/11\n10/25\n\n\nHomework 2\n10/22\n11/1\n11/15\n\n\nHomework 3\n11/19\n11/29\n12/9"
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html",
+    "href": "course-materials/labs/lab5.html",
+    "title": "Lab 5: Concept maps",
+    "section": "",
+    "text": "Each week this quarter, you’ve either learned new tools (e.g., permutation with sample()) or new ways to connect tools you already had (e.g., going from one predictor in lm() to more than one). Today you’ll step back and look at the toolbox as a whole.\nLast week, your group brainstormed key terms from one session in Weeks 1-4. Today, you’ll team up with the other group from your week to make a concept map for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map."
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html#overview",
+    "href": "course-materials/labs/lab5.html#overview",
+    "title": "Lab 5: Concept maps",
+    "section": "",
+    "text": "Each week this quarter, you’ve either learned new tools (e.g., permutation with sample()) or new ways to connect tools you already had (e.g., going from one predictor in lm() to more than one). Today you’ll step back and look at the toolbox as a whole.\nLast week, your group brainstormed key terms from one session in Weeks 1-4. Today, you’ll team up with the other group from your week to make a concept map for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map."
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html#a-guide-to-making-useful-concept-maps",
+    "href": "course-materials/labs/lab5.html#a-guide-to-making-useful-concept-maps",
+    "title": "Lab 5: Concept maps",
+    "section": "A guide to making useful concept maps",
+    "text": "A guide to making useful concept maps\nThere are three levels of usefulness, each building on the previous one. Aim to reach the third level!\n\nLevel one: concept list\nThis is the result of your brainstorm: a list of keywords and concepts for the week. It’s an essential first step, and the raw material for building something more useful.\n\n\nLevel two: hierarchical concepts\nArrange your concepts hierarchically, so core concepts are in the middle and supporting concepts branch off of them. Connect related concepts with lines. This structure shows both priority and relationships. But don’t stop here!\n\n\nLevel three: linking words\nThis is the easiest step to skip, but it’s the most important. Linking words turn undefined connections into a useful mental model. This is how you internalize the relationships between, for example, standard deviation, standard error, and \\(\\sigma\\).\n\n\n\nA concept map about concept maps, exhibiting hierarchical concepts related by linking words"
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html#instructions",
+    "href": "course-materials/labs/lab5.html#instructions",
+    "title": "Lab 5: Concept maps",
+    "section": "Instructions",
+    "text": "Instructions\n\nFind your group members (e.g., Week 1 Monday) and your counterparts (e.g., Week 1 Wednesday).\nShare your keywords with each other and create a combined list. Revise your combined list by adding, editing, or removing terms where helpful. Write each concept on a sticky note. Now you’ve reached level one: a concept list.\nAs a group, arrange your concepts hierarchically. Identify the most important concepts and the supporting concepts related to them. Move the sticky notes around to reflect the hierarchy. Once you’re all happy with the configuration, make a digital version. You can use presentation software (e.g., Google Slides), diagramming tools (e.g., Lucid), or sketching/notetaking apps. Now you’ve reached level two: hierarchical concepts.\nGive each link between concepts one or more linking words. Examples include “leads to”, “depends on”, “is a type of”, and “produces”. This is the tricky part, and you’ll likely need to rearrange your concepts as you go. Now you’ve reached level three: linking words.\nExport your digital concept map to an image or PDF and add it to this shared presentation."
+  },
+  {
+    "objectID": "course-materials/labs/lab5.html#tips",
+    "href": "course-materials/labs/lab5.html#tips",
+    "title": "Lab 5: Concept maps",
+    "section": "Tips",
+    "text": "Tips\n\nThe goal of a concept map is to see the forest for the trees. Now is not the time for in-the-weeds detail. Your map should be a visual explanation of how the tools in your toolbox are related.\nYou know your linking words work if the two concepts and their link read as a complete thought (e.g., “Lead paint flakes into soil lead”).\nThere’s no such thing as a “perfect” or “correct” concept map. A concept map is useful if it helps turn individual pieces of knowledge into a more cohesive whole."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nDebrief the parking lot\nRandomness and intuition\nSampling distribution and permutation test"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#is-randomness-intuitive",
+    "href": "course-materials/lecture-slides/week2_monday.html#is-randomness-intuitive",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Is randomness intuitive?",
+    "text": "Is randomness intuitive?\nIn this activity, we will compare truly random sequences with pseudo-random sequences.\nSee the handout for instructions."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#what-is-the-takeaway-message",
+    "href": "course-materials/lecture-slides/week2_monday.html#what-is-the-takeaway-message",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "What is the takeaway message?",
+    "text": "What is the takeaway message?\nHow do the results of this activity motivate the practice of statistical thinking?"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#how-variable-are-samples-from-the-same-population",
+    "href": "course-materials/lecture-slides/week2_monday.html#how-variable-are-samples-from-the-same-population",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "How variable are samples from the same population?",
+    "text": "How variable are samples from the same population?\nIn this activity, we will:\n\nCollect samples and create a sampling distribution.\nConduct a (micro) permutation test.\n\nSee the handout for instructions."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#sampling-distributions",
+    "href": "course-materials/lecture-slides/week2_monday.html#sampling-distributions",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Sampling distributions",
+    "text": "Sampling distributions\n\nForm 8 groups of 4-5 students.\nEach group draws a random sample.\nWe’ll visualize the sampling distribution as a class."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#permutation-test",
+    "href": "course-materials/lecture-slides/week2_monday.html#permutation-test",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Permutation test",
+    "text": "Permutation test\n\nIn your same group, conduct a (micro) permutation test.\n“Micro” because 10k iterations would be too time consuming (thank you, R!).\nWe’ll compare null distributions as a class."
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week2_monday.html#foundations-of-inference-1",
+    "href": "course-materials/lecture-slides/week2_monday.html#foundations-of-inference-1",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Foundations of inference",
+    "text": "Foundations of inference\n\nA sample is a random glimpse at a population.\nInference uses that sample to estimate something about the population, with uncertainty.\nWe rely on statistical inference as a check against our cognitivie biases - it’s easy to “see” patterns that are just random chance!"
+  },
+  {
+    "objectID": "course-materials/lecture-slides/week3_wednesday.html#todays-agenda",
+    "href": "course-materials/lecture-slides/week3_wednesday.html#todays-agenda",
+    "title": "EDS 222: Statistics for Environmental Data Science",
+    "section": "Today’s agenda",
+    "text": "Today’s agenda\n\nCategorical predictors worksheet\nAmerican birds\nSimulating categorical predictors"
+  },
+  {
+    "objectID": "course-materials/week1.html",
+    "href": "course-materials/week1.html",
+    "title": "Exploring data",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability  Reliability of Soil Lead Measurements\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
+  },
+  {
+    "objectID": "course-materials/week1.html#lecture-materials",
+    "href": "course-materials/week1.html#lecture-materials",
+    "title": "Exploring data",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability  Reliability of Soil Lead Measurements\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
+  },
+  {
+    "objectID": "course-materials/week1.html#additional-materials",
+    "href": "course-materials/week1.html#additional-materials",
+    "title": "Exploring data",
+    "section": "Additional materials",
+    "text": "Additional materials\nPhilip B. Stark, Andrea Saltelli, Cargo-cult Statistics and Scientific Crisis, Significance, Volume 15, Issue 4, August 2018, Pages 40–43, https://doi.org/10.1111/j.1740-9713.2018.01174.x\nSierra Club interview with mark! Lopez\nWhat we know about California’s largest toxic cleanup: Thousands of L.A. County homes tainted with lead\nJill E. Johnston, Mark Lopez, Stephanie Prieto, Elizabeth Kamai, Bhavna Shamasunder; Get the Lead Out: A Community-Driven Approach to Characterize Urban Soil Lead Levels near a Battery Smelter. Environ. Sci. Technol. 14 April 2026; 60 (14): 11002–11012. https://doi.org/10.1021/acs.est.5c14197"
+  },
+  {
+    "objectID": "course-materials/week2.html",
+    "href": "course-materials/week2.html",
+    "title": "Foundations of inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  Foundations of inference  Permutation  Bootstrapping\n\n\nLab\nInvestigating claims using inference  Solutions\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21  Mathematical models for inference  Simulating DGPs in R"
+  },
+  {
+    "objectID": "course-materials/week2.html#lecture-materials",
+    "href": "course-materials/week2.html#lecture-materials",
+    "title": "Foundations of inference",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  Foundations of inference  Permutation  Bootstrapping\n\n\nLab\nInvestigating claims using inference  Solutions\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21  Mathematical models for inference  Simulating DGPs in R"
+  },
+  {
+    "objectID": "course-materials/week2.html#additional-materials",
+    "href": "course-materials/week2.html#additional-materials",
+    "title": "Foundations of inference",
+    "section": "Additional materials",
+    "text": "Additional materials\n\nThe Permutation Test A fun visual example where you take on the role of an alpaca shepherd.\nBootstrapping Main Ideas!!! Part of the StatQuest series of videos (an excellent resource itself)."
+  },
+  {
+    "objectID": "course-materials/week4.html",
+    "href": "course-materials/week4.html",
+    "title": "Multiple regression",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet (Solutions)\nCIR 3  Interactions  Interactions in R"
+  },
+  {
+    "objectID": "course-materials/week4.html#lecture-materials",
+    "href": "course-materials/week4.html#lecture-materials",
+    "title": "Multiple regression",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet (Solutions)\nCIR 3  Interactions  Interactions in R"
+  },
+  {
+    "objectID": "course-materials/week6.html",
+    "href": "course-materials/week6.html",
+    "title": "t-test, ANOVA, F-test",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nANOVA  ANOVA handout\nANOVA\n\n\nLab\nUrban toads\nHow retention ponds manage stormwater runoff (Optional)\n\n\nLecture 2\nModel comparison\nModel comparison"
+  },
+  {
+    "objectID": "course-materials/week6.html#lecture-materials",
+    "href": "course-materials/week6.html#lecture-materials",
+    "title": "t-test, ANOVA, F-test",
+    "section": "",
+    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nANOVA  ANOVA handout\nANOVA\n\n\nLab\nUrban toads\nHow retention ponds manage stormwater runoff (Optional)\n\n\nLecture 2\nModel comparison\nModel comparison"
+  },
+  {
+    "objectID": "course-materials/week8.html",
+    "href": "course-materials/week8.html",
+    "title": "Generalized linear models",
+    "section": "",
+    "text": "Under construction"
+  },
+  {
+    "objectID": "final-project.html",
+    "href": "final-project.html",
+    "title": "Final Project",
+    "section": "",
+    "text": "Most of the course material in EDS 222 focuses on a single case study: the Exide battery recycling plant. We will explore data to answer environmental data science questions using statistical thinking. In your final project, you will apply these same skills to a case study of your own choosing. Using real data and appropriate analyses, you will write a technical blog post investigating an environmental question.\nYour technical blog post is a valuable contribution to your professional portfolio. The analysis in your project will demonstrate your competency in statistical thinking and tools. But on its own, an analysis has no impact. Just as importantly, your writing will show that you can think critically about questions and data, and communicate effectively about methods and interpretation.\nIn terms of complexity and detail, it should fall somewhere between a news article and peer-reviewed research. This article on Medium is a good representative. Just be aware that it uses some techniques you won’t see until EDS 241."
+  },
+  {
+    "objectID": "final-project.html#timeline",
+    "href": "final-project.html#timeline",
+    "title": "Final Project",
+    "section": "Timeline",
+    "text": "Timeline\nYou will have multiple deliverables and checkpoints during the quarter that will scaffold your final project. These assignments are ungraded. Their purpose is to provide you with structure and instructor feedback early and often.\n\n\n\nWeek\nDeliverable\nDescription\n\n\n\n\n2\nExploratory analysis\nNumerical and graphical summaries of data relevant to your question.\n\n\n5\nBlog post proposal\nA description of your question and data, with initial ideas for your analysis.\n\n\n9\nBlog post first draft\nA completed first draft of your blog post.\n\n\nFinals\nBlog post final draft\nThe final draft of your blog post."
+  },
+  {
+    "objectID": "final-project.html#rubric",
+    "href": "final-project.html#rubric",
+    "title": "Final Project",
+    "section": "Rubric",
+    "text": "Rubric\nYour final project will be assessed according to the following rubric.\n\nQuestion and data (15%)\nAn analysis means nothing without context! Before you show off your technical aptitude, give your audience motivation to care about your question.\nThe blog post provides context and background for the question\nThe data are explained using text and figures\nThe theorized causal relationships are described with a DAG\n\n\nStatistical model (35%)\nIt is often said, “All models are wrong, but some are useful.” Describe your modeling approach in sufficient detail to understand both its utility as well as its limitations.\nThe statistical model is explained conceptually and using formal statistical notation\nThe choice of model is justified based on the characteristics of the data and model assumptions\nPotential limitations of the model and data are considered\n\n\nInference (35%)\nInterpret your model in the context of your question and data. Remember that confidence intervals and p-values are tools for inference, not goals in of themselves. A robust interpretation of a non-significant result is far more compelling than a superficial treatment of a small p-value.\nHypotheses are stated in plain language and with visualizations\nModel estimates are presented with appropriate uncertainty\nA hypothesis is tested and the evidence is interpreted\n\n\nProfessionalism (15%)\nYour portfolio pieces will feature in your future job applications. This final project is not just about a grade in a class, it’s a part of your job search. You’re going to put a lot of work into this project - let’s make sure hiring managers see the fruits of that labor.\nThe overall appearance of the blog post (e.g., figures, code outputs) is portfolio-quality\nThe writing is comprehensible to a technical audience\nThe project repository is well-organized and appropriately documented"
+  },
+  {
     "objectID": "course-materials/lecture-slides/week1_monday.html#statistics-for-environmental-data-science",
     "href": "course-materials/lecture-slides/week1_monday.html#statistics-for-environmental-data-science",
     "title": "EDS 222: Statistics for Environmental Data Science",
@@ -1608,405 +2147,6 @@
     "title": "EDS 222: Statistics for Environmental Data Science",
     "section": "Optimal stress",
     "text": "Optimal stress\nRemember, there is an optimal level of stress for learning.\nIf you’re outside the optimal, please come to your instructors!\n\nYerkes-Dodson Curve"
-  },
-  {
-    "objectID": "final-project.html",
-    "href": "final-project.html",
-    "title": "Final Project",
-    "section": "",
-    "text": "Most of the course material in EDS 222 focuses on a single case study: the Exide battery recycling plant. We will explore data to answer environmental data science questions using statistical thinking. In your final project, you will apply these same skills to a case study of your own choosing. Using real data and appropriate analyses, you will write a technical blog post investigating an environmental question.\nYour technical blog post is a valuable contribution to your professional portfolio. The analysis in your project will demonstrate your competency in statistical thinking and tools. But on its own, an analysis has no impact. Just as importantly, your writing will show that you can think critically about questions and data, and communicate effectively about methods and interpretation.\nIn terms of complexity and detail, it should fall somewhere between a news article and peer-reviewed research. This article on Medium is a good representative. Just be aware that it uses some techniques you won’t see until EDS 241."
-  },
-  {
-    "objectID": "final-project.html#timeline",
-    "href": "final-project.html#timeline",
-    "title": "Final Project",
-    "section": "Timeline",
-    "text": "Timeline\nYou will have multiple deliverables and checkpoints during the quarter that will scaffold your final project. These assignments are ungraded. Their purpose is to provide you with structure and instructor feedback early and often.\n\n\n\nWeek\nDeliverable\nDescription\n\n\n\n\n2\nExploratory analysis\nNumerical and graphical summaries of data relevant to your question.\n\n\n5\nBlog post proposal\nA description of your question and data, with initial ideas for your analysis.\n\n\n9\nBlog post first draft\nA completed first draft of your blog post.\n\n\nFinals\nBlog post final draft\nThe final draft of your blog post."
-  },
-  {
-    "objectID": "final-project.html#rubric",
-    "href": "final-project.html#rubric",
-    "title": "Final Project",
-    "section": "Rubric",
-    "text": "Rubric\nYour final project will be assessed according to the following rubric.\n\nQuestion and data (15%)\nAn analysis means nothing without context! Before you show off your technical aptitude, give your audience motivation to care about your question.\nThe blog post provides context and background for the question\nThe data are explained using text and figures\nThe theorized causal relationships are described with a DAG\n\n\nStatistical model (35%)\nIt is often said, “All models are wrong, but some are useful.” Describe your modeling approach in sufficient detail to understand both its utility as well as its limitations.\nThe statistical model is explained conceptually and using formal statistical notation\nThe choice of model is justified based on the characteristics of the data and model assumptions\nPotential limitations of the model and data are considered\n\n\nInference (35%)\nInterpret your model in the context of your question and data. Remember that confidence intervals and p-values are tools for inference, not goals in of themselves. A robust interpretation of a non-significant result is far more compelling than a superficial treatment of a small p-value.\nHypotheses are stated in plain language and with visualizations\nModel estimates are presented with appropriate uncertainty\nA hypothesis is tested and the evidence is interpreted\n\n\nProfessionalism (15%)\nYour portfolio pieces will feature in your future job applications. This final project is not just about a grade in a class, it’s a part of your job search. You’re going to put a lot of work into this project - let’s make sure hiring managers see the fruits of that labor.\nThe overall appearance of the blog post (e.g., figures, code outputs) is portfolio-quality\nThe writing is comprehensible to a technical audience\nThe project repository is well-organized and appropriately documented"
-  },
-  {
-    "objectID": "course-materials/week8.html",
-    "href": "course-materials/week8.html",
-    "title": "Generalized linear models",
-    "section": "",
-    "text": "Under construction"
-  },
-  {
-    "objectID": "course-materials/week6.html",
-    "href": "course-materials/week6.html",
-    "title": "t-test, ANOVA, F-test",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nANOVA  ANOVA handout\nANOVA\n\n\nLab\nUrban toads\nHow retention ponds manage stormwater runoff (Optional)\n\n\nLecture 2\nModel comparison\nModel comparison"
-  },
-  {
-    "objectID": "course-materials/week6.html#lecture-materials",
-    "href": "course-materials/week6.html#lecture-materials",
-    "title": "t-test, ANOVA, F-test",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nANOVA  ANOVA handout\nANOVA\n\n\nLab\nUrban toads\nHow retention ponds manage stormwater runoff (Optional)\n\n\nLecture 2\nModel comparison\nModel comparison"
-  },
-  {
-    "objectID": "course-materials/week4.html",
-    "href": "course-materials/week4.html",
-    "title": "Multiple regression",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet (Solutions)\nCIR 3  Interactions  Interactions in R"
-  },
-  {
-    "objectID": "course-materials/week4.html#lecture-materials",
-    "href": "course-materials/week4.html#lecture-materials",
-    "title": "Multiple regression",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nMultiple regression  Multiple regression worksheet  American birds (revisited)\nIMS 8  Visualization and DAGs  Modeling multiple predictors\n\n\nLab\nSimulate Simpson’s Paradox\nSimulating data reviewed\n\n\nLecture 2\nInteractions  Moving between representations worksheet (Solutions)\nCIR 3  Interactions  Interactions in R"
-  },
-  {
-    "objectID": "course-materials/week2.html",
-    "href": "course-materials/week2.html",
-    "title": "Foundations of inference",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  Foundations of inference  Permutation  Bootstrapping\n\n\nLab\nInvestigating claims using inference  Solutions\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21  Mathematical models for inference  Simulating DGPs in R"
-  },
-  {
-    "objectID": "course-materials/week2.html#lecture-materials",
-    "href": "course-materials/week2.html#lecture-materials",
-    "title": "Foundations of inference",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nFoundations of inference\nIMS 11-13  Foundations of inference  Permutation  Bootstrapping\n\n\nLab\nInvestigating claims using inference  Solutions\nRead the documentation for the replicate() function\n\n\nLecture 2\nMathematical models for inference\nIMS 16-17, 19-21  Mathematical models for inference  Simulating DGPs in R"
-  },
-  {
-    "objectID": "course-materials/week2.html#additional-materials",
-    "href": "course-materials/week2.html#additional-materials",
-    "title": "Foundations of inference",
-    "section": "Additional materials",
-    "text": "Additional materials\n\nThe Permutation Test A fun visual example where you take on the role of an alpaca shepherd.\nBootstrapping Main Ideas!!! Part of the StatQuest series of videos (an excellent resource itself)."
-  },
-  {
-    "objectID": "course-materials/week1.html",
-    "href": "course-materials/week1.html",
-    "title": "Exploring data",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability  Reliability of Soil Lead Measurements\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
-  },
-  {
-    "objectID": "course-materials/week1.html#lecture-materials",
-    "href": "course-materials/week1.html#lecture-materials",
-    "title": "Exploring data",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nWelcome to 222!\nNone\n\n\nLab\nValidity and Reliability  Reliability of Soil Lead Measurements\nNone\n\n\nLecture 2\nSampling\nROS 1-1.4, 2-2.2  IMS 1-2  Sampling  Sampling in R  Statistical claims"
-  },
-  {
-    "objectID": "course-materials/week1.html#additional-materials",
-    "href": "course-materials/week1.html#additional-materials",
-    "title": "Exploring data",
-    "section": "Additional materials",
-    "text": "Additional materials\nPhilip B. Stark, Andrea Saltelli, Cargo-cult Statistics and Scientific Crisis, Significance, Volume 15, Issue 4, August 2018, Pages 40–43, https://doi.org/10.1111/j.1740-9713.2018.01174.x\nSierra Club interview with mark! Lopez\nWhat we know about California’s largest toxic cleanup: Thousands of L.A. County homes tainted with lead\nJill E. Johnston, Mark Lopez, Stephanie Prieto, Elizabeth Kamai, Bhavna Shamasunder; Get the Lead Out: A Community-Driven Approach to Characterize Urban Soil Lead Levels near a Battery Smelter. Environ. Sci. Technol. 14 April 2026; 60 (14): 11002–11012. https://doi.org/10.1021/acs.est.5c14197"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week3_wednesday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week3_wednesday.html#todays-agenda",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nCategorical predictors worksheet\nAmerican birds\nSimulating categorical predictors"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week2_monday.html#todays-agenda",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nDebrief the parking lot\nRandomness and intuition\nSampling distribution and permutation test"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#is-randomness-intuitive",
-    "href": "course-materials/lecture-slides/week2_monday.html#is-randomness-intuitive",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Is randomness intuitive?",
-    "text": "Is randomness intuitive?\nIn this activity, we will compare truly random sequences with pseudo-random sequences.\nSee the handout for instructions."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#what-is-the-takeaway-message",
-    "href": "course-materials/lecture-slides/week2_monday.html#what-is-the-takeaway-message",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "What is the takeaway message?",
-    "text": "What is the takeaway message?\nHow do the results of this activity motivate the practice of statistical thinking?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#how-variable-are-samples-from-the-same-population",
-    "href": "course-materials/lecture-slides/week2_monday.html#how-variable-are-samples-from-the-same-population",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "How variable are samples from the same population?",
-    "text": "How variable are samples from the same population?\nIn this activity, we will:\n\nCollect samples and create a sampling distribution.\nConduct a (micro) permutation test.\n\nSee the handout for instructions."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#sampling-distributions",
-    "href": "course-materials/lecture-slides/week2_monday.html#sampling-distributions",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sampling distributions",
-    "text": "Sampling distributions\n\nForm 8 groups of 4-5 students.\nEach group draws a random sample.\nWe’ll visualize the sampling distribution as a class."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#permutation-test",
-    "href": "course-materials/lecture-slides/week2_monday.html#permutation-test",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation test",
-    "text": "Permutation test\n\nIn your same group, conduct a (micro) permutation test.\n“Micro” because 10k iterations would be too time consuming (thank you, R!).\nWe’ll compare null distributions as a class."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_monday.html#foundations-of-inference-1",
-    "href": "course-materials/lecture-slides/week2_monday.html#foundations-of-inference-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Foundations of inference",
-    "text": "Foundations of inference\n\nA sample is a random glimpse at a population.\nInference uses that sample to estimate something about the population, with uncertainty.\nWe rely on statistical inference as a check against our cognitivie biases - it’s easy to “see” patterns that are just random chance!"
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html",
-    "href": "course-materials/labs/lab5.html",
-    "title": "Lab 5: Concept maps",
-    "section": "",
-    "text": "Each week this quarter, you’ve either learned new tools (e.g., permutation with sample()) or new ways to connect tools you already had (e.g., going from one predictor in lm() to more than one). Today you’ll step back and look at the toolbox as a whole.\nLast week, your group brainstormed key terms from one session in Weeks 1-4. Today, you’ll team up with the other group from your week to make a concept map for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map."
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html#overview",
-    "href": "course-materials/labs/lab5.html#overview",
-    "title": "Lab 5: Concept maps",
-    "section": "",
-    "text": "Each week this quarter, you’ve either learned new tools (e.g., permutation with sample()) or new ways to connect tools you already had (e.g., going from one predictor in lm() to more than one). Today you’ll step back and look at the toolbox as a whole.\nLast week, your group brainstormed key terms from one session in Weeks 1-4. Today, you’ll team up with the other group from your week to make a concept map for that week. For example, the Week 1 Monday group joins the Week 1 Wednesday group to make the Week 1 concept map."
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html#a-guide-to-making-useful-concept-maps",
-    "href": "course-materials/labs/lab5.html#a-guide-to-making-useful-concept-maps",
-    "title": "Lab 5: Concept maps",
-    "section": "A guide to making useful concept maps",
-    "text": "A guide to making useful concept maps\nThere are three levels of usefulness, each building on the previous one. Aim to reach the third level!\n\nLevel one: concept list\nThis is the result of your brainstorm: a list of keywords and concepts for the week. It’s an essential first step, and the raw material for building something more useful.\n\n\nLevel two: hierarchical concepts\nArrange your concepts hierarchically, so core concepts are in the middle and supporting concepts branch off of them. Connect related concepts with lines. This structure shows both priority and relationships. But don’t stop here!\n\n\nLevel three: linking words\nThis is the easiest step to skip, but it’s the most important. Linking words turn undefined connections into a useful mental model. This is how you internalize the relationships between, for example, standard deviation, standard error, and \\(\\sigma\\).\n\n\n\nA concept map about concept maps, exhibiting hierarchical concepts related by linking words"
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html#instructions",
-    "href": "course-materials/labs/lab5.html#instructions",
-    "title": "Lab 5: Concept maps",
-    "section": "Instructions",
-    "text": "Instructions\n\nFind your group members (e.g., Week 1 Monday) and your counterparts (e.g., Week 1 Wednesday).\nShare your keywords with each other and create a combined list. Revise your combined list by adding, editing, or removing terms where helpful. Write each concept on a sticky note. Now you’ve reached level one: a concept list.\nAs a group, arrange your concepts hierarchically. Identify the most important concepts and the supporting concepts related to them. Move the sticky notes around to reflect the hierarchy. Once you’re all happy with the configuration, make a digital version. You can use presentation software (e.g., Google Slides), diagramming tools (e.g., Lucid), or sketching/notetaking apps. Now you’ve reached level two: hierarchical concepts.\nGive each link between concepts one or more linking words. Examples include “leads to”, “depends on”, “is a type of”, and “produces”. This is the tricky part, and you’ll likely need to rearrange your concepts as you go. Now you’ve reached level three: linking words.\nExport your digital concept map to an image or PDF and add it to this shared presentation."
-  },
-  {
-    "objectID": "course-materials/labs/lab5.html#tips",
-    "href": "course-materials/labs/lab5.html#tips",
-    "title": "Lab 5: Concept maps",
-    "section": "Tips",
-    "text": "Tips\n\nThe goal of a concept map is to see the forest for the trees. Now is not the time for in-the-weeds detail. Your map should be a visual explanation of how the tools in your toolbox are related.\nYou know your linking words work if the two concepts and their link read as a complete thought (e.g., “Lead paint flakes into soil lead”).\nThere’s no such thing as a “perfect” or “correct” concept map. A concept map is useful if it helps turn individual pieces of knowledge into a more cohesive whole."
-  },
-  {
-    "objectID": "homework.html",
-    "href": "homework.html",
-    "title": "Homework",
-    "section": "",
-    "text": "Important: 11:59 PM submission deadline\n\n\n\nAll assignments are due at 11:59 PM on the dates listed in the table, below.\n\n\n\n\n\nAssignment\nDate Posted\nDate Due\nRevisions Deadline\n\n\n\n\nHomework 1\n10/1\n10/11\n10/25\n\n\nHomework 2\n10/22\n11/1\n11/15\n\n\nHomework 3\n11/19\n11/29\n12/9"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#todays-agenda",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nDebrief the parking lot\nDigging into our statistical claims\nSampling bias experiment"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#activity-guide",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Activity guide",
-    "text": "Activity guide\n\nCount off into groups.\nShare your prepared statistical claims.\nCollaboratively design a follow-up study.\nEvaluate another group’s study design."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#form-groups",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Form groups",
-    "text": "Form groups\n\nCount off 1-10.\nFind your peers with the same number."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#share-your-claims",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Share your claims",
-    "text": "Share your claims\nTake turns sharing your prepared statistical claims.\n\nWhat’s the claim and where did you find it?\nWhat is the relevant challenge of statistics?\nWhat’s the most salient variable?\n\nWhat makes the variable valid?\nHow reliable is the variable?\n\nHow was the sample collected?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#design-a-follow-up-study",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Design a follow-up study",
-    "text": "Design a follow-up study\nAs a group, choose one claim to design a follow-up study for. If your claim was chosen, you are now the PI (congrats).\n\nWhat’s the new question?\n\nDoes it fall under the same challenge of statistics, or a new one?\n\nWhat measurement would you need to investigate the question?\n\nEvaluate the validity and reliability of this measurement.\nHow would you get the sample?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#evaluate-a-study-design",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Evaluate a study design",
-    "text": "Evaluate a study design\nSend your PI to a new group for study design peer review.\n\nThe PI explains the original claim and the follow up study to the reviewers.\nThe reviewers ask clarifying questions until they understand:\n\nThe context of the new study.\nWhich challenge of statistics is being investigated.\nHow the study design addresses validity, reliability, and potential sampling issues."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#sampling-distribution",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Sampling distribution",
-    "text": "Sampling distribution\nYou’ve all drawn samples and estimated the total weight of the bag.\nNow, let’s see the sampling distribution - the distribution of your estimates based on your samples."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#whats-our-inference",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "What’s our inference?",
-    "text": "What’s our inference?\nTurn to the student next to you. Based on the sampling distribution, what do you think is the total weight of the bag?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#discussion",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#discussion",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Discussion",
-    "text": "Discussion\n\nAs a class, were we too low or too high?\n\nBy how much?\n\nHow would we design a representative sampling strategy?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
-    "href": "course-materials/lecture-slides/week1_wednesday.html#preparing-for-week-2",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Preparing for week 2",
-    "text": "Preparing for week 2\nTopic: Foundations of inference\n\nComplete the readings and pre-recorded lectures.\n\n\nHomework 1 will be released tomorrow.\nStart thinking about your final project!\n\nWhat question do you want to investigate?\nWhat data are relevant?\nAn exploratory analysis is due at the end of week 2."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#todays-agenda",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Today’s agenda",
-    "text": "Today’s agenda\n\nDiscuss final project deliverable\nP-values, two ways\nConfidence intervals, two ways"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#exploratory-data-analysis",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Exploratory data analysis",
-    "text": "Exploratory data analysis\n\nIts purpose is to get you started early and give you feedback while your ideas are still taking shape. You are not committing to a question or dataset."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Check in with your peers",
-    "text": "Check in with your peers\nClose your laptops and pull out a sheet of paper. Take 3 minutes to write down:\n\n\nYour question\n\nIf you have one, paraphrase it\nIf you don’t, brainstorm one possible question\n\n\nYour dataset\n\nIf you’ve picked one, what is it and where is it from?\nIf you haven’t, what kind of data would help your question?\n\n\nA challenge you’ve encountered\n\nFraming a question?\nFinding data?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#check-in-with-your-peers-1",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Check in with your peers",
-    "text": "Check in with your peers\nForm pairs. In turns, share your question, data, and challenge.\nTake 10 minutes to provide each other with feedback. For example:\n\nIs the scope of the question feasible? If you had to narrow in on one part, what would it be?\nHow valid are the measurements in the data for the question? What tradeoffs are there between validity and sample size?"
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#permutation-test-vs-normal-approximation",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Permutation test vs normal approximation",
-    "text": "Permutation test vs normal approximation\nYou are welcome to work in groups of 2-3 for this activity.\nConnect to Workbench and clone the repo https://github.com/eds-222-stats-f26/eds-222-inference (I’ll put the link on Slack).\nComplete the activity in p-values.qmd.\nWe’ll use 30 minutes for this.\nWhen you’re done, call your instructor over before continuing."
-  },
-  {
-    "objectID": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
-    "href": "course-materials/lecture-slides/week2_wednesday.html#bootstrapping-vs-normal-approximation",
-    "title": "EDS 222: Statistics for Environmental Data Science",
-    "section": "Bootstrapping vs normal approximation",
-    "text": "Bootstrapping vs normal approximation\nContinue working in the same groups and the same repo.\nComplete the activity in confidence-interval.qmd.\nWe’ll use 30 minutes for this."
-  },
-  {
-    "objectID": "course-materials/pre-class/week1_statistical_claims.html",
-    "href": "course-materials/pre-class/week1_statistical_claims.html",
-    "title": "Week 1 Wednesday pre-class",
-    "section": "",
-    "text": "So far this week, you’ve learned about:\nThe three challenges of statistics\nMeasurements and data\nIn class on Wednesday, we’ll discuss these concepts in the context of statistical claims on topics you’re interested in."
-  },
-  {
-    "objectID": "course-materials/pre-class/week1_statistical_claims.html#instructions",
-    "href": "course-materials/pre-class/week1_statistical_claims.html#instructions",
-    "title": "Week 1 Wednesday pre-class",
-    "section": "Instructions",
-    "text": "Instructions\nBefore class, find a statistical claim. Search the areas of environmental science you’re passionate and knowledgeable about. This could be in a news article, a YouTube video, a documentary, etc. It’s important that you find a claim that is presented as having statistical support.\nRespond to the prompts in this Google Form about your claim."
-  },
-  {
-    "objectID": "course-materials/pre-class/week1_statistical_claims.html#example",
-    "href": "course-materials/pre-class/week1_statistical_claims.html#example",
-    "title": "Week 1 Wednesday pre-class",
-    "section": "Example",
-    "text": "Example\nDescribe the claim\nCorals growing near islands with healthy seabird colonies grow more than twice as fast as corals near islands where invasive rats have wiped out the seabirds.\nWhere did you find it?\nAudubon Magazine The Remarkable Healing Power of Seabird Poop for Climate-Stressed Coral Reefs\nWhat challenge of statistics does it fall under?\nGeneralize from treatment to control. The “treatment” is the presence of invasive rats (which extirpate seabirds), the “control” is islands without rats.\nPick the most salient variable in the data. In what ways does it accurately represent what its meant to, and in what ways might it be different? (I.e., assess its validity.)\nCoral growth rate. This was measured using the area of corals from photographs1. The claim about growth rate is really more about mass or volume, however area is a reasonably valid proxy because previous research has established area and mass are highly correlated.\nContinuing with the same variable, what are the limitations on its reliability?\nEstimates of area from photographs are sensitive to the angle of the photo and the judgement of the researcher who traces the photo. Although those factors can affect reliability, the study used photos from divers, which are more reliable than photos taken by aircraft or satellites.\nContinuing with the same variable, how was the sample collected? Were there obstacles to selecting a representative sample?\nThe sample came from twelve islands in the Chagos Archipelago (six had rats, six didn’t). There is potential selection bias because this was an observational study, so the researchers couldn’t randomize which islands got rats and which didn’t. Also, the study only looked at one species of coral. It’s possible other corals are more or less affected by seabird abundance."
-  },
-  {
-    "objectID": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
-    "href": "course-materials/pre-class/week1_statistical_claims.html#footnotes",
-    "title": "Week 1 Wednesday pre-class",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nThis information isn’t directly in the magazine article, but I’m familiar with the methods. This is why it’s important to pick a statistical claim in a scientific field you’re knowledgeable about!↩︎"
-  },
-  {
-    "objectID": "course-materials/week10.html",
-    "href": "course-materials/week10.html",
-    "title": "Statistics in action!",
-    "section": "",
-    "text": "Under construction"
-  },
-  {
-    "objectID": "course-materials/week3.html",
-    "href": "course-materials/week3.html",
-    "title": "Linear regression",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model  Lab solutions\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors  Simulating categorical predictors - Solutions\nCategorical predictors  Categorical predictors in R"
-  },
-  {
-    "objectID": "course-materials/week3.html#lecture-materials",
-    "href": "course-materials/week3.html#lecture-materials",
-    "title": "Linear regression",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nIntro to OLS  Review of week 2 and linear equations  Linear regression\nIMS 7  Intro to OLS\n\n\nLab\nSimulate data and fit a regression model  Lab solutions\nSimulating data for OLS\n\n\nLecture 2\nCategorical predictors  American Birds form  American Birds repo  Simulating categorical predictors  Simulating categorical predictors - Solutions\nCategorical predictors  Categorical predictors in R"
-  },
-  {
-    "objectID": "course-materials/week5.html",
-    "href": "course-materials/week5.html",
-    "title": "Linear model inference",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nLinear regression inference  Linear regression inference exercise (Solutions)\nIMS 24  Linear regression inference\n\n\nLab\nConcept maps\nNone\n\n\nLecture 2\nCausal inference  Confounders, colliders, and mediators  Final project DAGs\nIMS 25  Backdoor criterion  Confounders, Colliders, and Mediators  Simulating inferences"
-  },
-  {
-    "objectID": "course-materials/week5.html#lecture-materials",
-    "href": "course-materials/week5.html#lecture-materials",
-    "title": "Linear model inference",
-    "section": "",
-    "text": "Session\nIn-class\nPre-class\n\n\n\n\nLecture 1\nLinear regression inference  Linear regression inference exercise (Solutions)\nIMS 24  Linear regression inference\n\n\nLab\nConcept maps\nNone\n\n\nLecture 2\nCausal inference  Confounders, colliders, and mediators  Final project DAGs\nIMS 25  Backdoor criterion  Confounders, Colliders, and Mediators  Simulating inferences"
-  },
-  {
-    "objectID": "course-materials/week7.html",
-    "href": "course-materials/week7.html",
-    "title": "Logistic regression",
-    "section": "",
-    "text": "Under construction"
-  },
-  {
-    "objectID": "course-materials/week9.html",
-    "href": "course-materials/week9.html",
-    "title": "Spatio-temporal methods",
-    "section": "",
-    "text": "Under construction"
-  },
-  {
-    "objectID": "index.html#course-description",
-    "href": "index.html#course-description",
-    "title": "Statistics for Environmental Data Science",
-    "section": "Course Description",
-    "text": "Course Description\nStatistics is the science of collecting, manipulating, and analyzing empirical data. In this class, we will learn the statistical fundamentals that will enable us to draw conclusions about the environment and its interaction with social and economic systems. We will cover fundamental statistical concepts and tools, and then apply and expand upon those tools to learn some temporal and spatial statistical methods that are particularly helpful in environmental data science. Welcome!\n\nLearning objectives\nThe goal of this course is to enable MEDS students to confidently and competently apply statistical tools to socio-environmental datasets. Essential skills and concepts are:\n\nSummarize data numerically and graphically\nInterpret random variables\nSimulate data to test assumptions\nDescribe models using statistical notation\nDraw DAGs to clarify causal relationships\nQuantify uncertainty to perform inference"
-  },
-  {
-    "objectID": "index.html#teaching-team",
-    "href": "index.html#teaching-team",
-    "title": "Statistics for Environmental Data Science",
-    "section": "Teaching Team",
-    "text": "Teaching Team\n\n\n\nInstructor\n\nMax Czapanskiy\nEmail: maxczap@ucsb.edu\n\nTeaching Assistant\n\nSloane Stephenson\nEmail: gstephenson@ucsb.edu"
   },
   {
     "objectID": "course-materials/pre-class/week2_wednesday.html#learning-objectives",

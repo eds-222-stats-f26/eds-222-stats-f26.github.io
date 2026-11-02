@@ -1,0 +1,362 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 6 Monday"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        </style>
+bibliography: references.bib
+execute:
+  echo: false
+---
+
+# ANOVA
+
+## Today's agenda
+
+- **Describe** questions ANOVA can answer
+- **Compare** models using ANOVA
+- **Apply** ANOVA across scenarios
+
+# Describe questions ANOVA can answer
+
+## Forever chemicals
+
+![**PFAS** (per- and polyfluoroalkyl substances) enter the environment through multiple pathways, but do not break down like most chemicals.](https://www.techtarget.com/rms/xt/features/PFAS_General_part.text_-1024x520_.png)
+
+## Do PFAS affect developing nervous systems?
+
+@albers2024 raised zebrafish embryos in water with one of three PFAS: PFOA, PFOS, or PFHxS.
+
+![Zebrafish (_Danio rerio_) are a model vertebrate for toxicology: they develop fast and their embryos are transparent. Credit: Powers Scientific](https://bcs.mit.edu/sites/default/files/inline-images/zebra-fish-1920-1.png)
+
+## Some effects you can see
+
+![Spine curvature (A) and un- or underinflated swim bladders (B) in 120-hour-old embryos [@albers2024]](images/albers-et-al-fig1.png)
+
+## Some effects you can't
+
+Neurological effects show up in **behavior**.
+
+::: {.incremental}
+
+- At 120 hours, each larva sat in its own well in a dark chamber
+- The lights switched on and off every 3 minutes for 24 minutes, startling the fish
+- A camera tracked each larva 30 times per second
+- Larvae that were dead or had visible deformities were excluded, so a bent spine can't explain slow swimming
+
+:::
+
+::: {.fragment}
+
+One response: total **swim distance** (mm) during the test.
+
+:::
+
+## Swim distance by PFHxS concentration
+
+![Concentrations were measured in the exposure water. Red asterisks: concentrations that differ from the control (more on that later) [@albers2024]](images/albers-et-al-fig3-swim-distance.png){height="450px"}
+
+## The model
+
+Treat concentration as a **categorical** predictor with six levels. The control is the reference level.
+
+::: {style="font-size:0.8em"}
+
+$$
+\begin{aligned}
+\text{distance} = \beta_0 &+ \beta_1 (\text{PFHxS} = 6.4) + \beta_2 (\text{PFHxS} = 8.7) + \beta_3 (\text{PFHxS} = 10.2) \\
+&+ \beta_4 (\text{PFHxS} = 11.5) + \beta_5 (\text{PFHxS} = 14.4) + \varepsilon
+\end{aligned}
+$$
+
+:::
+
+::: {.incremental}
+
+- $\beta_0$: mean swim distance of control fish
+- $\beta_1, \dots, \beta_5$: difference between each concentration and the control
+- Why categorical? The pattern isn't a straight line: a big jump at 6.4 ppm, then roughly flat
+
+:::
+
+## Which coefficient answers the question?
+
+> Does PFHxS concentration affect fish neurology?
+
+::: {.incremental}
+
+- $\beta_1$ only compares 6.4 ppm to the control. $\beta_5$ only compares 14.4 ppm to the control.
+- Each coefficient is **one comparison**. The question is about **all of them at once**:
+  - $H_0$: $\beta_1 = \beta_2 = \beta_3 = \beta_4 = \beta_5 = 0$ (every concentration has the same mean)
+  - $H_A$: at least one $\beta_k \neq 0$
+
+:::
+
+## Why not check all five p-values?
+
+::: {.incremental}
+
+- Each test has a 5% chance of a false positive when there is no effect
+- With five tests, the chance that _at least one_ has p < 0.05 is closer to $1 - 0.95^5 \approx 23\%$
+- Picking whichever level looks best is cherry-picking
+- The five tests also depend on the reference level. Change the reference and you get five different tests of the same model.
+
+:::
+
+::: {.fragment}
+
+We need **one test** for the whole predictor.
+
+:::
+
+## When to use ANOVA
+
+::: {.incremental}
+
+- The response is **continuous** (swim distance in mm)
+- The question is about a **whole predictor**, not one coefficient: "Does concentration matter at all?"
+- That predictor costs **more than one coefficient**, like a categorical variable with 3+ levels (6 levels → 5 dummy variables)
+
+:::
+
+::: {.fragment}
+
+ANOVA asks: is the variance explained by the additional parameters worth the cost?
+
+:::
+
+# Compare models using ANOVA
+
+## One test for the whole predictor
+
+Compare two models:
+
+::: {style="font-size:0.85em"}
+
+| Model | Says | Coefficients |
+|-----|------------|:---:|
+| `distance ~ 1` | Concentration doesn't matter: one mean for all the fish | 1 |
+| `distance ~ pfhxs` | Each concentration has its own mean | 6 |
+
+:::
+
+::: {.incremental}
+
+- The complex model always fits better (lower $RSS$). It spends 5 more coefficients to do it.
+- Does concentration explain **enough** variation to justify spending 5 df?
+
+:::
+
+## Compare the models
+
+<!--
+Source: @albers2024 supplementary ANOVA table, PFHxS swim distance at 120 hpf
+Treatment df 5, SS 70925328.12; residual df 429, RSS 143501153.8
+n = 429 + 6 = 435; RSS_simple = 70925328.12 + 143501153.8 = 214426481.9
+-->
+
+$n = 435$ larvae
+
+::: {style="font-size:0.85em"}
+
+| Model | $p$ | $df = n - p$ | $RSS$ (millions of mm²) |
+|---|:---:|:---:|:---:|
+| `distance ~ 1` | 1 | 434 | 214.43 |
+| `distance ~ pfhxs` | 6 | 429 | 143.50 |
+
+:::
+
+::: {style="font-size:0.8em"}
+
+$$
+\begin{aligned}
+F &= \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})} \\[6pt]
+&= \frac{(214.43 - 143.50) \ / \ (6 - 1)}{143.50 \ / \ (435 - 6)}
+= \frac{14.19}{0.3345}
+\approx 42.4
+\end{aligned}
+$$
+
+:::
+
+## How surprising is F = 42.4?
+
+Under $H_0$, the $F$ statistic follows an F-distribution (rather than normal).
+
+```{r}
+#| label: f-dist-pfhxs
+#| fig-width: 9
+#| fig-height: 4.2
+library(ggplot2)
+
+f_obs <- ((214.43 - 143.50) / 5) / (143.50 / 429)
+p_val <- pf(f_obs, 5, 429, lower.tail = FALSE)
+
+f_curve <- data.frame(x = seq(0, 46, length.out = 2000))
+f_curve$density <- df(f_curve$x, 5, 429)
+
+ggplot(f_curve, aes(x, density)) +
+  geom_area(
+    data = subset(f_curve, x >= f_obs),
+    fill = "firebrick",
+    alpha = 0.6
+  ) +
+  geom_line(linewidth = 1) +
+  geom_vline(xintercept = f_obs, color = "firebrick", linetype = "dashed") +
+  annotate(
+    "label",
+    x = f_obs,
+    y = 0.45,
+    hjust = 1.05,
+    label = sprintf(
+      "F = %.1f\np = %s\n(shaded area is too small to see)",
+      f_obs,
+      format(signif(p_val, 2), scientific = TRUE)
+    )
+  ) +
+  labs(x = "F", y = "Density") +
+  theme_bw(base_size = 16)
+```
+
+## Interpretation
+
+> If the means were not different across groups (i.e., if PFHxS had no effect on swim distance), then the probability of observin an F-statistic as large as 42.4 is extremely small. So we reject $H_0$ and conclude there is evidence that PFHxS affects swim distance.
+
+::: {.fragment}
+
+This means two things:
+
+- At least one group mean differs from at least one other.
+- The variation between groups is large relative to the variation within groups.
+
+:::
+
+## How to compare models with ANOVA
+
+::: {.incremental}
+
+1. State your hypotheses
+
+2. Design your _complex_ and _simpler_ models
+
+3. Calculate the F-statistic using $df$ and $RSS$ to quantify the information-complexity tradeoff
+
+4. Derive your p-value for your F-statistic using the F-distribution or permutation
+
+:::
+
+## State your hypotheses
+
+> Does PFHxS concentration affect zebrafish swim distance?
+
+::: {.incremental}
+
+- $H_0$: $\beta_1 = \beta_2 = \beta_3 = \beta_4 = \beta_5 = 0$
+  - Every concentration has the same mean swim distance as the control
+- $H_A$: at least one $\beta_k \neq 0$
+  - At least one concentration has a different mean
+
+:::
+
+## Design your models
+
+::: {style="font-size:0.85em"}
+
+| Model | Role | Says | $p$ |
+|-----|-----|------------|:---:|
+| `distance ~ 1` | Simpler | One mean for all the fish ($H_0$) | 1 |
+| `distance ~ pfhxs` | Complex | Each concentration has its own mean | 6 |
+
+:::
+
+::: {.incremental}
+
+- The simpler model is the complex model with $\beta_1, \dots, \beta_5$ set to 0, so the models are **nested**
+- They differ by $6 - 1 = 5$ coefficients: exactly the ones $H_0$ says are 0
+
+:::
+
+## Calculate $F$
+
+$n = 435$ larvae
+
+::: {style="font-size:0.85em"}
+
+| Model | $p$ | $df = n - p$ | $RSS$ (millions of mm²) |
+|---|:---:|:---:|:---:|
+| `distance ~ 1` | 1 | 434 | 214.43 |
+| `distance ~ pfhxs` | 6 | 429 | 143.50 |
+
+:::
+
+::: {style="font-size:0.8em"}
+
+$$
+F = \frac{(214.43 - 143.50) \ / \ (6 - 1)}{143.50 \ / \ (435 - 6)}
+= \frac{14.19}{0.3345}
+\approx 42.4
+$$
+
+:::
+
+::: {.incremental style="font-size:0.85em"}
+
+- **Numerator**: each df spent on concentration removes 14.19 million mm² of unexplained variation
+- **Denominator**: each remaining df holds 0.3345 million mm² of noise
+- Each df spent on concentration buys about 42 times more than a df of noise
+
+:::
+
+## Derive the p-value
+
+::: {.fragment}
+
+**Mathematical model**: The F-statistic follows an F-distribution.
+
+```{r}
+#| label: f-dist-pfhxs-derive
+#| fig-width: 9
+#| fig-height: 2.6
+# Reuses f_curve, f_obs, and p_val from the f-dist-pfhxs chunk
+ggplot(f_curve, aes(x, density)) +
+  geom_area(
+    data = subset(f_curve, x >= f_obs),
+    fill = "firebrick",
+    alpha = 0.6
+  ) +
+  geom_line(linewidth = 1) +
+  geom_vline(xintercept = f_obs, color = "firebrick", linetype = "dashed") +
+  annotate(
+    "label",
+    x = f_obs,
+    y = 0.45,
+    hjust = 1.05,
+    label = sprintf(
+      "F = %.1f, p = %s",
+      f_obs,
+      format(signif(p_val, 2), scientific = TRUE)
+    )
+  ) +
+  labs(x = expression(F[list(5, 429)]), y = "Density") +
+  theme_bw(base_size = 16)
+```
+
+:::
+
+::: {.incremental}
+
+- **Permutation**: shuffle concentration labels across fish, refit both models, and recompute $F$. Repeat many times.
+  - @albers2024 ran 10 million permutations. None gave an $F$ as large as 42.4 (reported $p = 0$).
+- Either way: if PFHxS had no effect, an $F$ this large would almost never happen. **Reject $H_0$.**
+
+:::
+
+# Apply ANOVA across scenarios
+
+## References
