@@ -9,5 +9,5 @@ subtitle: "Week 6 (November 2 - 6)"
 |---------|--------|---------|
 | Lecture 1 | [ANOVA](lecture-slides/week6_monday.qmd) <br/> [ANOVA handout](handouts/week6-monday-anova.qmd) ([Solutions](handouts/week6-monday-anova-solutions.qmd)) | [ANOVA](https://youtu.be/VrZ8uKBEIs8) |
 | Lab | [Urban toads](labs/lab6.qmd) | [How retention ponds manage stormwater runoff](https://www.youtube.com/watch?v=22JlYQkOY24) (Optional) |
-| Lecture 2 | [Model comparison](lecture-slides/week6_wednesday.qmd) <br/> Case studies: [Pacific cod](labs/week6-wednesday-cod.qmd), [Harmful algal blooms](labs/week6-wednesday-habs.qmd), [Oysters](labs/week6-wednesday-oysters.qmd) | [Model comparison](https://youtu.be/jBJaDJTGbxI) |
+| Lecture 2 | Model comparison | [Model comparison](https://youtu.be/jBJaDJTGbxI) |
 : {.hover .bordered tbl-colwidths="[30,30,40]"}
