@@ -1,0 +1,360 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 6 Wednesday: Model comparison"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal .slides section .fragment.highlight-green.visible {
+          color: #15803d;
+        }
+        </style>
+bibliography: references.bib
+execute:
+  echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(18))
+
+cod <- read_csv("../data/pacific-cod-growth.csv") |>
+  mutate(
+    temp = factor(temp),
+    co2 = factor(co2, levels = c("ambient", "high"))
+  )
+crabs <- read_csv("../data/spider-crab-development.csv") |>
+  mutate(temp = factor(temp), co2 = factor(co2))
+oysters <- read_csv("../data/oyster-shell-strength.csv") |>
+  mutate(
+    temp = factor(temp, levels = c("control", "warm")),
+    co2 = factor(co2, levels = c("ambient", "750 ppm", "1000 ppm"))
+  )
+
+# Compare the additive and interactive models and format the result as a subtitle
+f_label <- function(additive, interactive) {
+  comparison <- anova(additive, interactive)
+  p_value <- comparison$`Pr(>F)`[2]
+  sprintf(
+    "F = %.2f, p %s",
+    comparison$F[2],
+    if (p_value < 0.001) "< 0.001" else sprintf("= %.2f", p_value)
+  )
+}
+
+# The same dodged boxplots and jittered points students make in Step 1
+plot_system <- function(
+  data,
+  x,
+  y,
+  shape,
+  title,
+  subtitle,
+  xlab,
+  ylab,
+  legend
+) {
+  ggplot(data, aes({{ x }}, {{ y }}, shape = {{ shape }})) +
+    geom_boxplot(
+      position = position_dodge(width = 0.8),
+      width = 0.6,
+      outlier.shape = NA
+    ) +
+    geom_point(
+      position = position_jitterdodge(jitter.width = 0.5, dodge.width = 0.8),
+      alpha = 0.6
+    ) +
+    labs(
+      x = xlab,
+      y = ylab,
+      shape = legend,
+      title = title,
+      subtitle = subtitle
+    ) +
+    theme(legend.position = "bottom", plot.subtitle = element_text(size = 15))
+}
+```
+
+# Model comparison
+
+## Today's agenda
+
+- **Review** how to compare models with ANOVA (10 min)
+- **Apply** ANOVA to a multiple stressor experiment in groups (35 min)
+- **Teach** your system to a jigsaw group (15 min)
+- **Recap** the F statistic and ANOVA (10 min)
+
+# Review: comparing models with ANOVA
+
+## A warming experiment
+
+Eelgrass shoot growth in tanks across a range of temperatures, at three nutrient levels: low (reference), medium, and high.
+
+::: {style="font-size:0.8em"}
+
+$$
+\begin{align}
+\text{Additive: } \text{growth} &= \beta_0 + \beta_1 \text{temp} + \beta_2 (\text{Medium}) + \beta_3 (\text{High}) + \epsilon \\
+\text{Interactive: } \text{growth} &= \beta_0 + \beta_1 \text{temp} + \beta_2 (\text{Medium}) + \beta_3 (\text{High}) \\
+&\quad + \beta_4 (\text{temp} \times \text{Medium}) + \beta_5 (\text{temp} \times \text{High}) + \epsilon
+\end{align}
+$$
+
+:::
+
+We want to know: does the effect of temperature depend on nutrients?
+
+## What are $H_0$ and $H_A$?
+
+::: {style="font-size:0.7em"}
+
+$$
+\begin{align}
+\text{Additive: } \text{growth} &= \beta_0 + \beta_1 \text{temp} + \beta_2 (\text{Medium}) + \beta_3 (\text{High}) + \epsilon \\
+\text{Interactive: } \text{growth} &= \beta_0 + \beta_1 \text{temp} + \beta_2 (\text{Medium}) + \beta_3 (\text{High}) \\
+&\quad + \beta_4 (\text{temp} \times \text{Medium}) + \beta_5 (\text{temp} \times \text{High}) + \epsilon
+\end{align}
+$$
+
+:::
+
+::: {style="font-size:0.75em"}
+
+**A.** $H_0$: $\beta_1 = \beta_2 = \beta_3 = \beta_4 = \beta_5 = 0$ $\qquad$ $H_A$: at least one $\neq 0$
+
+[**B.** $H_0$: $\beta_4 = \beta_5 = 0$ $\qquad$ $H_A$: at least one of $\beta_4, \beta_5 \neq 0$]{.fragment .highlight-green fragment-index=1}
+
+**C.** $H_0$: $\beta_4 = \beta_5 = 0$ $\qquad$ $H_A$: $\beta_4 \neq 0$ and $\beta_5 \neq 0$
+
+:::
+
+::: {.fragment fragment-index=1 style="font-size:0.75em"}
+
+- $H_0$ sets only the _extra_ coefficients to 0, which gives the additive model.
+- $H_A$ is the opposite of $H_0$, so it only takes _one_ non-zero coefficient (not C).
+- A compares the interactive model to `growth ~ 1`, so it doesn't ask about the interaction.
+
+:::
+
+## Which pair of models is nested?
+
+::: {style="font-size:0.75em"}
+
+**A.** `growth ~ temp` and `growth ~ nutrients`
+
+[**B.** `growth ~ temp + nutrients` and `growth ~ temp * nutrients`]{.fragment .highlight-green fragment-index=1}
+
+**C.** `growth ~ temp + nutrients` and `growth ~ temp * salinity`
+
+**D.** `growth ~ nutrients` and `growth ~ temp + salinity`
+
+:::
+
+::: {.fragment fragment-index=1 style="font-size:0.75em"}
+
+Model A is **nested** in model B if setting some of B's coefficients to 0 gives you A.
+
+- In B, set the interaction coefficients to 0 and you get the additive model.
+- Sharing a predictor isn't enough. In C, no coefficients you could set to 0 turn `temp * salinity` into a model with `nutrients`.
+
+:::
+
+## Which scenario would use ANOVA?
+
+Nutrients has 3 levels. Salinity is continuous.
+
+::: {style="font-size:0.7em"}
+
+**A.** Is temperature or nutrients the better predictor? <br/> `growth ~ temp` vs. `growth ~ nutrients`
+
+**B.** Does salinity matter, accounting for temperature? <br/> `growth ~ temp` vs. `growth ~ temp + salinity`
+
+[**C.** Does the effect of temperature depend on nutrients? <br/> `growth ~ temp + nutrients` vs. `growth ~ temp * nutrients`]{.fragment .highlight-green fragment-index=1}
+
+:::
+
+::: {.fragment fragment-index=1 style="font-size:0.7em"}
+
+- A isn't nested, so ANOVA can't compare the models.
+- B is nested but adds one coefficient, so the p-value for that coefficient is sufficient.
+- C is nested and adds two coefficients. No single p-value covers both.
+
+:::
+
+# Multiple stressors
+
+## Stressors don't arrive one at a time
+
+The ocean is warming _and_ acidifying. An experiment on one stressor can't tell us what happens when they combine.
+
+::: {.incremental}
+
+- **Additive**: each stressor has its own effect, and the combined effect is their sum
+- **Interactive**: the effect of one stressor is _amplified_ or _reduced_ by the other
+- Which one is it? That's a comparison of nested models.
+
+:::
+
+## Three experiments
+
+::: {style="font-size:0.8em"}
+
+| System | Stressors | Response | Reference |
+|-----|-----|-----|---|
+| [Pacific cod larvae](../labs/week6-wednesday-cod.qmd) | Temperature × CO2 | Growth rate in dry mass | @slesinger2024 |
+| [Spider crab larvae (_Hyas araneus_)](../labs/week6-wednesday-crabs.qmd) | Temperature × CO2 | Larval development time | @walther2010 |
+| [Pacific oysters](../labs/week6-wednesday-oysters.qmd) | Temperature × CO2 | Shell strength | @lemasson2021 |
+
+:::
+
+All real data, all factorial experiments: every level of one stressor is crossed with every level of the other.
+
+## Round 1: one system (35 min)
+
+Form groups of 3-4. Each group takes one system and opens its page.
+
+::: {style="font-size:0.75em"}
+
+1. Visualize the data
+2. Decide on the simpler and complex models
+3. Fit both models
+4. Compare the models using ANOVA
+5. Interpret
+
+:::
+
+::: {.fragment style="font-size:0.85em"}
+
+Everyone in your group needs to be able to explain your results. You'll present them without your group.
+
+:::
+
+## Round 2: jigsaw (15 min)
+
+Form new groups with at least one person from each system.
+
+::: {.incremental style="font-size:0.9em"}
+
+- Take **3 minutes** per system: the system, the models, your plot, and F, p, and your interpretation
+- As a group, discuss:
+  - How much did the evidence for interaction vary across scenarios?
+  - If you did a follow-up study and did not find a significant interaction between temperature and CO2, would you decide to use the additive or interactive model?
+
+:::
+
+# Recap
+
+## Three systems, three answers
+
+```{r}
+#| label: three-systems
+#| fig-width: 13
+#| fig-height: 5.5
+#| fig-align: center
+
+cod_f <- f_label(
+  lm(growth ~ temp + co2, cod),
+  lm(growth ~ temp * co2, cod)
+)
+crabs_f <- f_label(
+  lm(dev_time ~ temp + co2, crabs),
+  lm(dev_time ~ temp * co2, crabs)
+)
+oysters_f <- f_label(
+  lm(shell_strength ~ co2 + temp, oysters),
+  lm(shell_strength ~ co2 * temp, oysters)
+)
+
+patchwork::wrap_plots(
+  plot_system(
+    cod,
+    temp,
+    growth,
+    co2,
+    "Pacific cod",
+    cod_f,
+    "Temperature (°C)",
+    "Growth (%/day)",
+    "CO2"
+  ),
+  plot_system(
+    crabs,
+    temp,
+    dev_time,
+    co2,
+    "Spider crab",
+    crabs_f,
+    "Temperature (°C)",
+    "Zoea II development time (days)",
+    "CO2 (ppm)"
+  ),
+  plot_system(
+    oysters,
+    co2,
+    shell_strength,
+    temp,
+    "Pacific oysters",
+    oysters_f,
+    "CO2 treatment",
+    "Shell strength (N)",
+    "Temperature"
+  )
+)
+```
+
+Each model comparison is additive vs. interactive.
+
+## What's the F statistic?
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+$$
+
+::: {.incremental style="font-size:0.85em"}
+
+- **Numerator**: the unexplained variation removed per coefficient added
+- **Denominator**: the unexplained variation left per residual degree of freedom
+- $F$ asks: are the new coefficients worth what they cost?
+- $F \approx 1$ is about what we'd expect if the new coefficients explained only noise. Cod had $F = 0.27$; spider crab had $F = 61.67$.
+
+:::
+
+## When do we use ANOVA?
+
+To compare two models when:
+
+::: {.incremental}
+
+- The response is **continuous**
+- The models are **nested**: setting some coefficients in the complex model to 0 gives the simpler model
+- They differ by **more than one coefficient**
+
+:::
+
+::: {.fragment}
+
+Today, each interaction cost 2 or 4 coefficients. With one, use the p-value for that coefficient instead.
+
+:::
+
+## How do we interpret the results?
+
+The p-value is the probability of an F at least this large _if the extra coefficients were all 0_.
+
+::: {.incremental style="font-size:0.8em"}
+
+- **p < 0.05** (spider crab): reject $H_0$. We have evidence that at least one extra coefficient isn't 0. The effect of CO2 depends on temperature.
+- **p > 0.05** (oysters): fail to reject at $\alpha = 0.05$. A future study with a larger sample size could resolve the question one way or the other
+- **p >> 0.05** (cod): fail to reject $H_0$. These results do not provide evidence that the effect of temperature depends on CO2.
+
+:::
+
+## References

@@ -1,0 +1,176 @@
+---
+title: "Multiple stressors: Pacific cod"
+subtitle: "Week 6 Wednesday case study"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: week6-wednesday-cod.qmd
+execute:
+  eval: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Overview
+
+Pacific cod (*Gadus macrocephalus*) support major fisheries in the Gulf of Alaska and the Bering Sea, where the ocean is warming and acidifying at the same time. Larvae are a vulnerable life stage, and small changes in growth can affect how many survive. If warming and acidification compound each other, then testing one at a time won't predict what happens when they arrive together.
+
+Slesinger et al. (2024) reared cod larvae in a factorial experiment crossing three temperatures with two CO2 levels. There were 4 tanks per treatment, 24 tanks in total. Today's question:
+
+> Does the effect of temperature on larval growth depend on CO2?
+
+You'll work through five steps with your group, then present your results to students who studied a different system. Fill in each `____`, and answer the questions as you go.
+
+## The data
+
+-   **tank**: tank ID. The tank is the replicate.
+-   **temp**: temperature treatment: 3, 6, or 10 °C
+-   **co2**: CO2 treatment: ambient or high (about 1500 μatm)
+-   **growth**: growth rate in dry mass from 0 to 11 days post-hatch (%/day)
+
+```{r}
+#| message: false
+
+cod <- read_csv("/courses/EDS222/data/pacific-cod-growth.csv") |>
+  # Convert temp and co2 to factors
+  mutate(
+    ____,
+    ____
+  )
+```
+
+## Step 1: Visualize the data
+
+Here we have two categorical predictors (`temp` and `co2`) and a continuous response (`growth`). One way to visualize a continuous response across two categories is to combine *dodging* and *jittering*. Here's how to do that with the `penguins` data frame.
+
+```{r}
+palmerpenguins::penguins |>
+  drop_na(sex) |>
+  ggplot(aes(x = species, y = body_mass_g, shape = sex)) +
+  geom_boxplot(
+    # "dodge" the boxplots so they appear side-by-side
+    position = position_dodge(width = 0.8),
+    width = 0.6,
+    # avoid plotting outliers twice (the points already show them)
+    outlier.shape = NA
+  ) +
+  geom_point(
+    # "jitter" the points left to right within categories, "dodge" them so the categories appear side-by-side
+    position = position_jitterdodge(jitter.width = 0.5, dodge.width = 0.8),
+    alpha = 0.6
+  ) +
+  labs(x = "Species", y = "Body mass (g)", shape = "Sex")
+```
+
+Plot the cod data below, using the same dodge and jitter technique.
+
+```{r}
+ggplot(____) +
+  geom_boxplot(____) +
+  geom_point(____) +
+  labs(x = "Temperature (°C)", y = "Growth (%/day)", shape = "CO2")
+```
+
+Based on this visualization:
+
+Does `temp` appear to have an effect on `growth`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+Does `co2` appear to have an effect on `growth`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+Does `co2` appear to have an effect on the relationship between `temp` and `growth`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+## Step 2: Decide on your models
+
+The question is whether the effect of temperature depends on CO2. Which model says it doesn't? Which model says it does? Those are your simpler and complex models. Fill in the formulas, and work out $p$, the number of coefficients each model estimates, including the intercept.
+
+| Model   | R formula | $p$ |
+|---------|-----------|:---:|
+| Simpler |           |     |
+| Complex |           |     |
+
+::: callout-tip
+Each categorical predictor gets one coefficient for each non-reference level. An interaction gets one coefficient for each *combination* of non-reference levels. You can check your counts in Step 3 with `coef()`.
+:::
+
+Write your hypotheses.
+
+$H_0$:
+
+$H_A$:
+
+## Step 3: Fit both models
+
+```{r}
+simpler_lm <- lm(____, cod)
+complex_lm <- lm(____, cod)
+
+coef(simpler_lm)
+coef(complex_lm)
+```
+
+## Step 4: Compare the models with ANOVA
+
+```{r}
+anova(____, ____)
+```
+
+Recall the F statistic:
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+$$
+
+Find each piece in your table, and check that you get the same F as R.
+
+```{r}
+rss_simple <- ____
+rss_complex <- ____
+p_simple <- ____
+p_complex <- ____
+n <- ____
+
+((rss_simple - rss_complex) / (p_complex - p_simple)) /
+  (rss_complex / (n - p_complex))
+```
+
+In your own words, what does this F statistic say about the interaction?
+
+**Answer**:
+
+## Step 5: Interpret
+
+Complete the sentences, using your F statistic and p-value and $\alpha = 0.05$:
+
+> If there were no interaction between temperature and CO2, we'd see an F at least as large as \_\_\_\_ in \_\_\_\_ of samples. So we \[reject / fail to reject\] $H_0$. We \[have / don't have\] evidence that the effect of temperature on larval growth depends on CO2.
+
+**Answer**:
+
+## Prepare for the jigsaw
+
+You'll have **3 minutes** to teach this system to students who haven't seen it. Everyone in your group should be ready to present:
+
+1.  **The system**: what organism, which two stressors, and what response?
+2.  **The models**: your simpler and complex models, and how many coefficients the interaction costs
+3.  **The plot**: your Step 1 figure
+4.  **The result**: F, its degrees of freedom, the p-value, and your interpretation in one sentence about the system
+
+## References
+
+Slesinger, E., Mundorf, S., Laurel, B. J., & Hurst, T. P. (2024). The combined effects of ocean warming and ocean acidification on Pacific cod (*Gadus macrocephalus*) early life stages. *Marine Biology*, 171(6), 121. <https://doi.org/10.1007/s00227-024-04439-w>
+
+Data: Slesinger, E., Mundorf, S., Laurel, B. J., & Hurst, T. P. (2024). Seawater carbonate chemistry and mortality, growth, and condition of Pacific cod (*Gadus macrocephalus*) at early life stages \[Dataset\]. PANGAEA. <https://doi.org/10.1594/PANGAEA.971545>, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Growth rates calculated from the archived tank mean dry masses.

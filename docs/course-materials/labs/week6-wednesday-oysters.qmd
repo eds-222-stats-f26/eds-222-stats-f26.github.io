@@ -1,0 +1,181 @@
+---
+title: "Multiple stressors: Oysters"
+subtitle: "Week 6 Wednesday case study"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: week6-wednesday-oysters.qmd
+execute:
+  eval: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Overview
+
+Oyster reefs provide habitat, food, and income, and their shells are a first line of defense against predators such as crabs. Ocean acidification can make it harder for molluscs to build shells, and warming can add further stress. If the two stressors interact, then a warmer ocean could change how much acidification weakens a shell.
+
+Lemasson and Knights (2021) exposed Pacific oysters (*Magallana gigas*) to two temperatures crossed with three atmospheric CO2 levels, then measured the force needed to break each shell. We have 46 oysters, with 6-8 per treatment. Today's question:
+
+> Does the effect of CO2 on shell strength depend on temperature?
+
+You'll work through five steps with your group, then present your results to students who studied a different system. Fill in each `____`, and answer the questions as you go.
+
+## The data
+
+-   **oyster**: oyster number. Numbering restarts within each treatment.
+-   **temp**: temperature treatment: control (16.8 °C) or warm (20 °C)
+-   **co2**: atmospheric CO2 treatment: ambient, 750 ppm, or 1000 ppm
+-   **shell_strength**: force needed to break the shell (newtons, N)
+
+::: callout-note
+The archived data don't record which aquarium each oyster came from, so we treat each oyster as an independent replicate. If oysters in the same aquarium are more alike than oysters in different aquaria, this analysis is overconfident.
+:::
+
+```{r}
+#| message: false
+
+oysters <- read_csv("/courses/EDS222/data/oyster-shell-strength.csv") |>
+  # Convert temp and co2 from character to factor
+  mutate(
+    ____,
+    # Put the levels of co2 in ascending order
+    co2 = factor(co2, levels = c(____))
+  )
+```
+
+## Step 1: Visualize the data
+
+Here we have two categorical predictors (`co2` and `temp`) and a continuous response (`shell_strength`). One way to visualize a continuous response across two categories is to combine *dodging* and *jittering*. Here's how to do that with the `penguins` data frame.
+
+```{r}
+palmerpenguins::penguins |>
+  drop_na(sex) |>
+  ggplot(aes(x = species, y = body_mass_g, shape = sex)) +
+  geom_boxplot(
+    # "dodge" the boxplots so they appear side-by-side
+    position = position_dodge(width = 0.8),
+    width = 0.6,
+    # avoid plotting outliers twice (the points already show them)
+    outlier.shape = NA
+  ) +
+  geom_point(
+    # "jitter" the points left to right within categories, "dodge" them so the categories appear side-by-side
+    position = position_jitterdodge(jitter.width = 0.5, dodge.width = 0.8),
+    alpha = 0.6
+  ) +
+  labs(x = "Species", y = "Body mass (g)", shape = "Sex")
+```
+
+Plot the oyster data below, using the same dodge and jitter technique.
+
+```{r}
+ggplot(____) +
+  geom_boxplot(____) +
+  geom_point(____) +
+  labs(x = "CO2 treatment", y = "Shell strength (N)", shape = "Temperature")
+```
+
+Based on this visualization:
+
+Does `co2` appear to have an effect on `shell_strength`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+Does `temp` appear to have an effect on `shell_strength`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+Does `temp` appear to have an effect on the relationship between `co2` and `shell_strength`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+## Step 2: Decide on your models
+
+The question is whether the effect of CO2 depends on temperature. Which model says it doesn't? Which model says it does? Those are your simpler and complex models. Fill in the formulas, and work out $p$, the number of coefficients each model estimates, including the intercept.
+
+| Model   | R formula | $p$ |
+|---------|-----------|:---:|
+| Simpler |           |     |
+| Complex |           |     |
+
+::: callout-tip
+Each categorical predictor gets one coefficient for each non-reference level. An interaction gets one coefficient for each *combination* of non-reference levels. You can check your counts in Step 3 with `coef()`.
+:::
+
+Write your hypotheses.
+
+$H_0$:
+
+$H_A$:
+
+## Step 3: Fit both models
+
+```{r}
+simpler_lm <- lm(____, oysters)
+complex_lm <- lm(____, oysters)
+
+coef(simpler_lm)
+coef(complex_lm)
+```
+
+## Step 4: Compare the models with ANOVA
+
+```{r}
+anova(____, ____)
+```
+
+Recall the F statistic:
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+$$
+
+Find each piece in your table, and check that you get the same F as R.
+
+```{r}
+rss_simple <- ____
+rss_complex <- ____
+p_simple <- ____
+p_complex <- ____
+n <- ____
+
+((rss_simple - rss_complex) / (p_complex - p_simple)) /
+  (rss_complex / (n - p_complex))
+```
+
+In your own words, what does this F statistic say about the interaction?
+
+**Answer**:
+
+## Step 5: Interpret
+
+Complete the sentences, using your F statistic and p-value and $\alpha = 0.05$:
+
+> If there were no interaction between CO2 and temperature, we'd see an F at least as large as \_\_\_\_ in \_\_\_\_ of samples. So we \[reject / fail to reject\] $H_0$. We \[have / don't have\] evidence that the effect of CO2 on shell strength depends on temperature.
+
+**Answer**:
+
+## Prepare for the jigsaw
+
+You'll have **3 minutes** to teach this system to students who haven't seen it. Everyone in your group should be ready to present:
+
+1.  **The system**: what organism, which two stressors, and what response?
+2.  **The models**: your simpler and complex models, and how many coefficients the interaction costs
+3.  **The plot**: your Step 1 figure
+4.  **The result**: F, its degrees of freedom, the p-value, and your interpretation in one sentence about the system
+
+## References
+
+Lemasson, A. J., & Knights, A. M. (2021). Differential responses in anti-predation traits of the native oyster *Ostrea edulis* and invasive *Magallana gigas* to ocean acidification and warming. *Marine Ecology Progress Series*, 665, 87-102. <https://doi.org/10.3354/meps13687>
+
+Data: Lemasson, A. J., & Knights, A. M. (2021). Seawater carbonate chemistry and fitness and morphology of native oyster *Ostrea edulis* and invasive *Magallana gigas* \[Dataset\]. PANGAEA. <https://doi.org/10.1594/PANGAEA.950894>, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

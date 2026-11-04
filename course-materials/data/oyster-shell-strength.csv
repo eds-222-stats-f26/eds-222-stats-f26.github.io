@@ -1,0 +1,47 @@
+oyster,temp,co2,shell_strength
+1,control,ambient,559.794
+2,control,ambient,727.781
+3,control,ambient,287.098
+4,control,ambient,916.311
+5,control,ambient,834.118
+6,control,ambient,390.765
+7,control,ambient,326.493
+8,control,ambient,486.552
+9,control,750 ppm,312.986
+10,control,750 ppm,434.896
+11,control,750 ppm,653.677
+12,control,750 ppm,330.33
+13,control,750 ppm,226.895
+14,control,750 ppm,355.484
+15,control,750 ppm,403.665
+16,control,750 ppm,187.991
+17,control,1000 ppm,321.146
+18,control,1000 ppm,234.055
+19,control,1000 ppm,431.622
+20,control,1000 ppm,250.048
+21,control,1000 ppm,360.502
+22,control,1000 ppm,551.898
+23,control,1000 ppm,432.61
+24,control,1000 ppm,345.78
+25,warm,ambient,292.037
+26,warm,ambient,284.14
+27,warm,ambient,444.602
+28,warm,ambient,506.913
+29,warm,ambient,286.44
+30,warm,ambient,346.807
+31,warm,ambient,477.195
+32,warm,ambient,707.938
+33,warm,750 ppm,272.92
+34,warm,750 ppm,398.198
+35,warm,750 ppm,594.483
+36,warm,750 ppm,374.665
+37,warm,750 ppm,468.601
+38,warm,750 ppm,676.079
+39,warm,750 ppm,431.967
+40,warm,750 ppm,357.311
+41,warm,1000 ppm,290.859
+42,warm,1000 ppm,609.539
+43,warm,1000 ppm,575.559
+44,warm,1000 ppm,617.607
+45,warm,1000 ppm,459.7
+46,warm,1000 ppm,159.937

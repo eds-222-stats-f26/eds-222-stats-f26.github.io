@@ -1,0 +1,179 @@
+---
+title: "Multiple stressors: Spider crabs"
+subtitle: "Week 6 Wednesday case study"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: week6-wednesday-crabs.qmd
+execute:
+  eval: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Overview
+
+The spider crab *Hyas araneus* lives in the eastern North Atlantic from the southern North Sea to sub-Arctic waters around Svalbard. Its larvae pass through several stages in the water column before settling on the bottom, and a longer larval period can leave them exposed for longer. If warming and acidification interact, then a CO2 effect measured at one temperature won't tell us what happens at another.
+
+Walther et al. (2010) reared larvae from Svalbard in a factorial experiment crossing three temperatures with three CO2 levels. We have 108 development times, 12 per treatment. Today's question:
+
+> Does the effect of CO2 on larval development time depend on temperature?
+
+You'll work through five steps with your group, then present your results to students who studied a different system. Fill in each `____`, and answer the questions as you go.
+
+## The data
+
+-   **temp**: temperature treatment: 3, 9, or 15 °C
+-   **co2**: CO2 treatment: 380 ppm (present day), 710 ppm (projected by 2100), or 3000 ppm (projected by 2300 and beyond)
+-   **dev_time**: time spent in the second larval stage, zoea II (days)
+
+```{r}
+#| message: false
+
+crabs <- read_csv("/courses/EDS222/data/spider-crab-development.csv") |>
+  # Convert temp and co2 from numeric to factor
+  mutate(
+    ____,
+    ____
+  )
+```
+
+## Step 1: Visualize the data
+
+Here we have two categorical predictors (`temp` and `co2`) and a continuous response (`dev_time`). One way to visualize a continuous response across two categories is to combine *dodging* and *jittering*. Here's how to do that with the `penguins` data frame.
+
+```{r}
+palmerpenguins::penguins |>
+  drop_na(sex) |>
+  ggplot(aes(x = species, y = body_mass_g, shape = sex)) +
+  geom_boxplot(
+    # "dodge" the boxplots so they appear side-by-side
+    position = position_dodge(width = 0.8),
+    width = 0.6,
+    # avoid plotting outliers twice (the points already show them)
+    outlier.shape = NA
+  ) +
+  geom_point(
+    # "jitter" the points left to right within categories, "dodge" them so the categories appear side-by-side
+    position = position_jitterdodge(jitter.width = 0.5, dodge.width = 0.8),
+    alpha = 0.6
+  ) +
+  labs(x = "Species", y = "Body mass (g)", shape = "Sex")
+```
+
+Plot the crab data below, using the same dodge and jitter technique.
+
+```{r}
+ggplot(____) +
+  geom_boxplot(____) +
+  geom_point(____) +
+  labs(
+    x = "Temperature (°C)",
+    y = "Zoea II development time (days)",
+    shape = "CO2 (ppm)"
+  )
+```
+
+Based on this visualization:
+
+Does `temp` appear to have an effect on `dev_time`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+Does `co2` appear to have an effect on `dev_time`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+Does `temp` appear to have an effect on the relationship between `co2` and `dev_time`? What pattern in the visualization suggests that?
+
+**Answer**:
+
+## Step 2: Decide on your models
+
+The question is whether the effect of CO2 depends on temperature. Which model says it doesn't? Which model says it does? Those are your simpler and complex models. Fill in the formulas, and work out $p$, the number of coefficients each model estimates, including the intercept.
+
+| Model   | R formula | $p$ |
+|---------|-----------|:---:|
+| Simpler |           |     |
+| Complex |           |     |
+
+::: callout-tip
+Each categorical predictor gets one coefficient for each non-reference level. An interaction gets one coefficient for each *combination* of non-reference levels. You can check your counts in Step 3 with `coef()`.
+:::
+
+Write your hypotheses.
+
+$H_0$:
+
+$H_A$:
+
+## Step 3: Fit both models
+
+```{r}
+simpler_lm <- lm(____, crabs)
+complex_lm <- lm(____, crabs)
+
+coef(simpler_lm)
+coef(complex_lm)
+```
+
+## Step 4: Compare the models with ANOVA
+
+```{r}
+anova(____, ____)
+```
+
+Recall the F statistic:
+
+$$
+F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
+$$
+
+Find each piece in your table, and check that you get the same F as R.
+
+```{r}
+rss_simple <- ____
+rss_complex <- ____
+p_simple <- ____
+p_complex <- ____
+n <- ____
+
+((rss_simple - rss_complex) / (p_complex - p_simple)) /
+  (rss_complex / (n - p_complex))
+```
+
+In your own words, what does this F statistic say about the interaction?
+
+**Answer**:
+
+## Step 5: Interpret
+
+Complete the sentences, using your F statistic and p-value and $\alpha = 0.05$:
+
+> If there were no interaction between CO2 and temperature, we'd see an F at least as large as \_\_\_\_ in \_\_\_\_ of samples. So we \[reject / fail to reject\] $H_0$. We \[have / don't have\] evidence that the effect of CO2 on larval development time depends on temperature.
+
+**Answer**:
+
+## Prepare for the jigsaw
+
+You'll have **3 minutes** to teach this system to students who haven't seen it. Everyone in your group should be ready to present:
+
+1.  **The system**: what organism, which two stressors, and what response?
+2.  **The models**: your simpler and complex models, and how many coefficients the interaction costs
+3.  **The plot**: your Step 1 figure
+4.  **The result**: F, its degrees of freedom, the p-value, and your interpretation in one sentence about the system
+
+## References
+
+Walther, K., Anger, K., & Pörtner, H. O. (2010). Effects of ocean acidification and warming on the larval development of the spider crab *Hyas araneus* from different latitudes (54° vs. 79° N). *Marine Ecology Progress Series*, 417, 159-170. <https://doi.org/10.3354/meps08807>
+
+Data: Walther, K., Anger, K., & Pörtner, H. O. (2010). Spider crab *Hyas araneus* larval dry weight, C/N ratio and developmental time during experiments from different latitudes (54° vs 79°N) \[Dataset\]. PANGAEA. <https://doi.org/10.1594/PANGAEA.752281>, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
