@@ -1,0 +1,386 @@
+---
+title: "Lab 7: The color of drinking water"
+subtitle: "Logistic regression with multiple predictors"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: lab7.qmd
+execute:
+  eval: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Overview
+
+The Safe Drinking Water Act (SDWA) sets health standards for public water systems in the US. Are violations of those standards distributed equally across communities? Switzer and Teodoro (2017) found that the answer depends on both class _and_ race: the relationship between poverty and violations was stronger in communities with more Hispanic residents.
+
+Each row is one public water system in one year.
+
+- **pwsid**: public water system ID
+- **pwsname**: public water system name
+- **pctpov**: percent of households below the poverty line
+- **pcthisp**: percent of residents who are Hispanic
+- **violation**: whether the system had a health-based SDWA violation (`TRUE`/`FALSE`)
+
+Today you'll build up to Switzer and Teodoro's model in three steps. Each step follows the same recipe: visualize, fit, predict.
+
+1. Class only: `violation ~ pctpov`
+2. Class and race: `violation ~ pctpov + pcthisp`
+3. Class, race, and their interaction: `violation ~ pctpov * pcthisp`
+
+```{r}
+#| message: false
+
+# The CSV file is in /courses/EDS222/data
+drinking_water <- read_csv(____) |>
+  select(pwsid, pwsname, pctpov, pcthisp, violation)
+```
+
+## Part 1: Class
+
+### Visualize
+
+With a binary response, it's hard to see a trend in the raw data. Instead, we'll group water systems into bins of `pctpov` and calculate the proportion with a violation in each bin.
+
+::: {.callout-tip}
+
+`cut()` converts a continuous variable into bins. The `breaks` argument sets the edges of the bins. By default, the lowest edge is excluded from the first bin, so a value of exactly 0 would become `NA`. Set `include.lowest = TRUE` to include it.
+
+:::
+
+Create a new column, `pctpov_bin`, with 10-point bins of `pctpov` (0-10, 10-20, ..., 90-100).
+
+```{r}
+bin_breaks <- seq(from = ____, to = ____, by = ____)
+drinking_water <- drinking_water |>
+  mutate(
+    pctpov_bin = cut(pctpov, breaks = bin_breaks, include.lowest = TRUE)
+  )
+```
+
+What proportion of water systems had a violation in each poverty bin?
+
+```{r}
+pov_summary <- drinking_water |>
+  summarize(
+    pctpov = ____, # average pctpov in the bin
+    prop_violation = ____,
+    .by = pctpov_bin
+  )
+pov_summary
+```
+
+Plot the raw data (jittered) with the binned proportions on top.
+
+::: {.callout-tip}
+
+There are over 50,000 rows! Use a small `alpha` so the points don't become a solid block.
+
+:::
+
+```{r}
+ggplot(drinking_water, aes(x = ____, y = ____)) +
+  geom_point(
+    position = position_jitter(height = ____),
+    shape = 21,
+    alpha = ____
+  ) +
+  geom_point(
+    aes(y = ____),
+    data = ____,
+    size = 3,
+    color = "cornflowerblue"
+  ) +
+  labs(x = "% below poverty", y = "Violation")
+```
+
+Describe the relationship between poverty and violations.
+
+**Answer**:
+
+### Fit
+
+Our model in statistical notation is:
+
+$$
+\begin{aligned}
+\text{Violation} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 \text{PctPov}
+\end{aligned}
+$$
+
+```{r}
+pov_glm <- glm(____, family = ____, data = drinking_water)
+summary(pov_glm)
+```
+
+Interpret the `pctpov` coefficient in a sentence. Is it significantly different from 0?
+
+**Answer**:
+
+### Predict
+
+Create a prediction grid covering the range of `pctpov`, then use `predict()` to get the probability of a violation.
+
+::: {.callout-tip}
+
+`expand_grid()` creates a data frame with every combination of the values you give it. With one predictor, it works just like `tibble()`. With more than one, it saves you from typing out every combination by hand. For example:
+
+``` r
+expand_grid(x = c(1, 2), y = c("a", "b", "c"))
+#> # A tibble: 6 × 2
+#>       x y
+#>   <dbl> <chr>
+#> 1     1 a
+#> 2     1 b
+#> 3     1 c
+#> 4     2 a
+#> 5     2 b
+#> 6     2 c
+```
+
+You'll need this in Parts 2 and 3, when the prediction grid has two predictors.
+
+:::
+
+```{r}
+pov_grid <- expand_grid(
+  pctpov = ____
+)
+pov_grid$p_violation <- predict(
+  ____, # the model
+  newdata = ____, # the prediction grid
+  type = ____ # set to "response" so you get p and not logit(p)
+)
+```
+
+Overlay the predictions on your figure from above.
+
+```{r}
+ggplot(drinking_water, aes(x = ____, y = ____)) +
+  geom_point(
+    position = position_jitter(height = ____),
+    shape = 21,
+    alpha = ____
+  ) +
+  geom_point(
+    aes(y = ____),
+    data = ____,
+    size = 3,
+    color = "cornflowerblue"
+  ) +
+  geom_line(
+    aes(y = ____),
+    data = ____,
+    linewidth = 2,
+    color = "firebrick"
+  ) +
+  labs(x = "% below poverty", y = "Violation")
+```
+
+What is the predicted probability of a violation when 5% of households are below the poverty line? When 50% are?
+
+```{r}
+# Hint: filter your predictions
+```
+
+**Answer**:
+
+## Part 2: Class and race
+
+Now we move from single to multiple regression: we'll add `pcthisp` as a second predictor, so each coefficient describes the effect of one variable while holding the other constant.
+
+### Visualize
+
+Now we have two predictors. One way to visualize them both: put `pctpov` on the x-axis and use color for `pcthisp`. Ten bins of `pcthisp` would be too many colors, so bin `pcthisp` more coarsely.
+
+Create a new column, `pcthisp_bin`, with four bins: 0-10, 10-25, 25-50, and 50-100.
+
+::: {.callout-tip}
+
+Bins don't have to be the same width! Most water systems serve communities with few Hispanic residents, so narrower bins at the low end keep the bins from being too lopsided.
+
+:::
+
+```{r}
+pcthisp_breaks <- c(_____)
+drinking_water <- drinking_water |>
+  mutate(
+    pcthisp_bin = cut(pcthisp, breaks = pcthisp_breaks, include.lowest = TRUE)
+  )
+```
+
+What proportion of water systems had a violation in each combination of poverty and Hispanic bins?
+
+```{r}
+pov_hisp_summary <- drinking_water |>
+  summarize(
+    pctpov = ____,
+    pcthisp = ____,
+    prop_violation = ____,
+    n = n(),
+    .by = c(____, ____)
+  )
+```
+
+```{r}
+ggplot(pov_hisp_summary, aes(x = ____, y = ____, color = ____)) +
+  geom_point(aes(size = n)) +
+  geom_line() +
+  scale_color_viridis_d("% Hispanic") +
+  labs(x = "% below poverty", y = "Proportion with violation")
+```
+
+Does the relationship between poverty and violations look the same for every level of `pcthisp`?
+
+**Answer**:
+
+### Fit
+
+$$
+\begin{aligned}
+\text{Violation} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 \text{PctPov} + \beta_2 \text{PctHisp}
+\end{aligned}
+$$
+
+```{r}
+additive_glm <- glm(____, family = ____, data = drinking_water)
+summary(additive_glm)
+```
+
+Interpret the `pctpov` and `pcthisp` coefficients in a sentence each.
+
+**Answer**:
+
+### Predict
+
+Now the prediction grid needs combinations of _both_ predictors. That's why we use `expand_grid()`: it creates every combination of the values you give it.
+
+```{r}
+additive_grid <- expand_grid(
+  pctpov = ____, # from 0 - 100
+  pcthisp = ____ # pick four values, each one near the midpoint of `pcthisp_bin`
+) |>
+  mutate(
+    pcthisp_bin = cut(pcthisp, breaks = pcthisp_breaks, include.lowest = TRUE)
+  )
+additive_grid$p_violation <- predict(
+  ____,
+  newdata = ____,
+  type = ____
+)
+```
+
+Plot the predictions with `pctpov` on the x-axis and `pcthisp` as color. Add your binned proportions from above.
+
+```{r}
+ggplot(
+  ____, # Start with the prediction grid
+  aes(x = ____, y = ____, color = ____)
+) +
+  geom_line(linewidth = 1.5) +
+  # Then add the summarized data
+  geom_point(aes(y = ____), data = ____) +
+  scale_color_viridis_d("% Hispanic") +
+  labs(x = "% below poverty", y = "P(violation)")
+```
+
+The additive model has no interaction term. So why aren't the lines parallel?
+
+To find out, use `predict()` with `type = "link"` to get the predictions on the link scale (log odds) instead of the response scale (probability). Then plot the log odds the same way you plotted the probabilities, without the binned proportions.
+
+```{r}
+additive_grid$logodds_violation <- predict(
+  ____,
+  newdata = ____,
+  type = ____
+)
+
+ggplot(
+  ____,
+  aes(x = ____, y = ____, color = ____)
+) +
+  geom_line(linewidth = 1.5) +
+  scale_color_viridis_d("% Hispanic") +
+  labs(x = "% below poverty", y = "logit(P(violation))")
+```
+
+**Answer**:
+
+Does the additive model capture the patterns you saw in the binned proportions?
+
+**Answer**:
+
+## Part 3: Class, race, and their interaction
+
+### Visualize
+
+Look back at your figure of binned proportions from Part 2. If there were an interaction between class and race, what would it look like in that figure?
+
+**Answer**:
+
+### Fit
+
+$$
+\begin{aligned}
+\text{Violation} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 \text{PctPov} + \beta_2 \text{PctHisp} + \beta_3 \text{PctPov} \times \text{PctHisp}
+\end{aligned}
+$$
+
+```{r}
+interaction_glm <- glm(____, family = ____, data = drinking_water)
+summary(interaction_glm)
+```
+
+Is the interaction coefficient significantly different from 0? What does its sign mean?
+
+**Answer**:
+
+### Predict
+
+```{r}
+interaction_grid <- expand_grid(
+  pctpov = ____,
+  pcthisp = ____
+) |>
+  mutate(
+    pcthisp_bin = cut(pcthisp, breaks = pcthisp_breaks, include.lowest = TRUE)
+  )
+interaction_grid$p_violation <- predict(
+  ____,
+  newdata = ____,
+  type = ____
+)
+```
+
+```{r}
+ggplot(____, aes(x = ____, y = ____, color = ____)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(aes(y = ____), data = pov_hisp_summary) +
+  scale_color_viridis_d("% Hispanic") +
+  labs(x = "% below poverty", y = "P(violation)")
+```
+
+Compare the predicted probability of a violation in a water system where 50% of households are below the poverty line and 0% of residents are Hispanic vs. one where 50% are below the poverty line and 75% are Hispanic. How do the additive and interaction models differ?
+
+```{r}
+
+```
+
+**Answer**:
+
+## References
+
+Switzer, D., & Teodoro, M. P. (2017). The color of drinking water: Class, race, ethnicity, and Safe Drinking Water Act compliance. _Journal AWWA_, 109(9), 40–45. <https://doi.org/10.5942/jawwa.2017.109.0128>
