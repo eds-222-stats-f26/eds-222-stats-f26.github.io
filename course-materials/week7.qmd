@@ -3,4 +3,11 @@ title: "Logistic regression"
 subtitle: "Week 7 (November 9 - 13)"
 ---
 
-**_Under construction_**
+## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Class Materials {#lecture-materials}
+
+| Session | In-class | Pre-class |
+|---------|--------|---------|
+| Lecture 1 | Logistic regression | IMS 9 <br/> [Logistic regression](https://youtu.be/IlfpV10jXt8) <br/> [Logistic regression example](https://youtu.be/HVWnaWay5-s) <br/> [Logistic regression in R](https://youtu.be/oMS8ABg4lmY) <br/> [Live coding week 7 Monday](labs/week7_monday.qmd) ([Solutions](labs/week7_monday_solutions.qmd)) |
+| Lab | Multiple Logistic Regression | [The Color of Drinking Water](https://mannyteodoro.com/wp-content/uploads/2014/03/SwitzerTeodoro-JAWWA-2017-Color-of-Drinking-Water.pdf) |
+| Lecture 2 | _No class (Veterans Day)_ | IMS 26 |
+: {.hover .bordered tbl-colwidths="[30,30,40]"}

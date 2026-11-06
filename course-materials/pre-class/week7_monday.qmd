@@ -1,0 +1,574 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 7 Monday: Logistic Regression"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+# Simulate coral bleaching
+N <- 24
+peak_sst <- rnorm(N, mean = 30, sd = 1.5)
+beta_0 <- -90
+beta_1 <- 3
+logit_pbleach <- beta_0 + beta_1 * peak_sst
+pbleach <- plogis(logit_pbleach)
+bleach <- rbinom(N, 1, pbleach)
+reefs <- tibble(peak_sst, bleach)
+
+bleach_lm <- lm(bleach ~ peak_sst, reefs)
+bleach_lm_pred <- tibble(
+  peak_sst = seq(min(reefs$peak_sst), max(reefs$peak_sst), length.out = 100)
+)
+bleach_lm_pred$bleach <- predict(bleach_lm, newdata = bleach_lm_pred)
+bleach_lm_b0 <- signif(coef(bleach_lm)[["(Intercept)"]], 2)
+bleach_lm_b1 <- signif(coef(bleach_lm)[["peak_sst"]], 2)
+
+# Little brown bat detections
+bats <- read_csv("data/5bat_count_data-21682.csv") |>
+  filter(Species == "Myotis lucifugus")
+bat_summary <- bats |>
+  summarize(p_detected = mean(detected), .by = Year)
+
+bat_glm <- glm(detected ~ Year, family = binomial(link = "logit"), data = bats)
+bat_glm_pred <- tibble(
+  Year = seq(min(bats$Year), max(bats$Year), length.out = 100)
+)
+bat_glm_pred$logitp_detected <- predict(
+  bat_glm,
+  newdata = bat_glm_pred,
+  type = "link"
+)
+bat_glm_pred$p_detected <- predict(
+  bat_glm,
+  newdata = bat_glm_pred,
+  type = "response"
+)
+
+bat_glm_points <- tibble(
+  Year = c(
+    min(bats$Year),
+    -coef(bat_glm)[["(Intercept)"]] / coef(bat_glm)[["Year"]],
+    max(bats$Year)
+  )
+)
+bat_glm_points$logitp_detected <- predict(
+  bat_glm,
+  newdata = bat_glm_points,
+  type = "link"
+)
+bat_glm_points$p_detected <- predict(
+  bat_glm,
+  newdata = bat_glm_points,
+  type = "response"
+)
+
+bat_b0 <- signif(coef(bat_glm)[["(Intercept)"]], 4)
+bat_b1 <- signif(coef(bat_glm)[["Year"]], 4)
+bat_term <- \(year) signif(abs(bat_b1) * year, 4)
+bat_logit <- \(year) signif(bat_b0 - bat_term(year), 4)
+bat_p <- \(year) signif(plogis(bat_logit(year)), 2)
+```
+
+# Logistic regression
+
+## Learning objectives
+
+- **Explain** why a linear model doesn't work for a binary outcome
+- **Convert** probabilities to log odds
+- **Interpret** the coefficients of a logistic regression
+
+# Binary outcomes
+
+## Does heat stress make corals bleach?
+
+Peak sea surface temperature and bleaching at `r N` reefs (simulated data).
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+
+ggplot(reefs, aes(peak_sst, bleach)) +
+  geom_point(shape = 21, size = 3) +
+  scale_y_continuous(breaks = c(0, 1)) +
+  labs(x = "Peak SST (°C)", y = "Bleached")
+```
+
+## Fit a linear model
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+
+ggplot(reefs, aes(peak_sst, bleach)) +
+  geom_point(shape = 21, size = 3) +
+  geom_line(data = bleach_lm_pred, color = "cornflowerblue", linewidth = 1.5) +
+  labs(x = "Peak SST (°C)", y = "Bleached")
+```
+
+## The problems
+
+::: {.incremental}
+
+1. Bleaching is binary (0 or 1), but the predictions are continuous
+   - Solution: treat the prediction as the _probability_ of bleaching
+2. The predictions can be less than 0 or more than 1
+   - "When peak SST is 32°C, the probability of bleaching is `r round(predict(bleach_lm, tibble(peak_sst = 32)), 1)`." That doesn't make any sense!
+
+:::
+
+::: {.fragment}
+
+How do we keep our predictions between 0 and 1?
+
+:::
+
+# Introducing the log odds
+
+## Different ranges
+
+Our linear model, $\beta_0 + \beta_1 x$, can take on _any value_. Its range is $(-\infty, \infty)$.
+
+Probabilities are limited. Their range is $[0, 1]$.
+
+We need a function that converts values from $[0, 1]$ to $(-\infty, \infty)$.
+
+## From probabilities to odds
+
+The _odds_ are the ratio $\frac{p}{1 - p}$: the probability of success relative to failure.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-align: center
+
+ggplot() +
+  stat_function(fun = \(x) x / (1 - x), n = 1e4) +
+  xlim(0, 0.999) +
+  labs(x = "Probability", y = "Odds")
+```
+
+Probabilities live in $[0, 1]$. Odds live in $[0, \infty)$. We're halfway there!
+
+## From odds to log odds
+
+The _log odds_ convert probabilities from $[0, 1]$ to $(-\infty, \infty)$. We call this function the _logit_:
+
+$$
+\text{logit}(p) = \log\left(\frac{p}{1 - p}\right)
+$$
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-align: center
+
+ggplot() +
+  stat_function(fun = \(x) log(x / (1 - x)), n = 1e4) +
+  xlim(0.001, 0.999) +
+  labs(x = "Probability", y = "Log odds")
+```
+
+# Regressing probabilities
+
+## Without the log odds
+
+$$
+\begin{aligned}
+\text{Bleaching} &\sim \text{Bernoulli}(p) \\
+p &= \beta_0 + \beta_1 \text{PeakSST}
+\end{aligned}
+$$
+
+Let $\beta_0 = `r bleach_lm_b0`, \beta_1 = `r bleach_lm_b1`$
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-align: center
+
+ggplot(reefs, aes(peak_sst, bleach)) +
+  geom_point(shape = 21, size = 3) +
+  geom_line(data = bleach_lm_pred, color = "cornflowerblue", linewidth = 1.5) +
+  labs(x = "Peak SST (°C)", y = "Bleached")
+```
+
+## What the model means
+
+$\text{Bleaching}$ is a $\text{Bernoulli}$ random variable. It "succeeds" with probability $p$. E.g., for a sample of 10 reefs with $p = 0.3$, we would expect $10 \times 0.3 = 3$ reefs to bleach.
+
+The probability of bleaching, $p$, changes with $\text{PeakSST}$.
+
+```{r}
+tibble(peak_sst = c(27, 29, 31, 33)) |>
+  mutate(p = predict(bleach_lm, newdata = pick(everything()))) |>
+  knitr::kable(col.names = c("Peak SST (°C)", "$p$"), digits = 2)
+```
+
+::: {.fragment}
+
+Uh oh! Probabilities outside $[0, 1]$ are meaningless.
+
+:::
+
+## Use the log odds, AKA the _logit_
+
+$$
+\begin{aligned}
+\text{Bleaching} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 \text{PeakSST}
+\end{aligned}
+$$
+
+Let $\beta_0 = `r beta_0`, \beta_1 = `r beta_1`$
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-align: center
+
+ggplot(reefs, aes(peak_sst, bleach)) +
+  geom_point(shape = 21, size = 3) +
+  geom_function(
+    fun = \(x) plogis(beta_0 + beta_1 * x),
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  labs(x = "Peak SST (°C)", y = "Bleached")
+```
+
+## A nifty little trick
+
+Check that out! Instead of saying $p$ changes linearly with $\text{PeakSST}$, we say $\text{logit}(p)$ does.
+
+The predictions now stay between 0 and 1.
+
+## Logistic vs linear regression
+
+::: {.columns}
+
+::: {.column}
+
+**Linear:** a line, with normally distributed residuals around it
+
+$$
+\begin{aligned}
+y &= \beta_0 + \beta_1 x + \epsilon \\
+\epsilon &\sim \text{Normal}(0, \sigma)
+\end{aligned}
+$$
+
+:::
+
+::: {.column}
+
+**Logistic:** a binary outcome. The "line" is now a probability and it's curved.
+
+$$
+\begin{aligned}
+y &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 x
+\end{aligned}
+$$
+
+:::
+
+:::
+
+# An example
+
+## Little brown bats and white-nose syndrome
+
+
+::: {.columns}
+
+::: {.column}
+
+![NPS Photo / von Linden](https://www.nps.gov/articles/000/images/wns-vonLinden.jpg?maxwidth=650&autorotate=false&quality=78&format=webp)
+
+:::
+
+::: {.column style="font-size: 0.8em"}
+
+Johnson et al. (2021) surveyed `r n_distinct(bats$Site)` sites in the Monongahela National Forest (`r min(bats$Year)` - `r max(bats$Year)`) for little brown bats. 
+
+White-nose syndrome has been documented in West Virginia since 2009.
+
+If the infection is harming little brown bat populations, the probability of detecting a bat should decline.
+
+:::
+
+:::
+
+## The data
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+
+ggplot(bats, aes(x = Year, y = detected)) +
+  geom_point(
+    position = position_jitter(height = 0.1, width = 0.2),
+    shape = 21,
+    alpha = 0.5
+  ) +
+  geom_line(
+    aes(y = p_detected),
+    data = bat_summary,
+    color = "cornflowerblue",
+    linewidth = 2
+  ) +
+  scale_y_continuous("Detected", breaks = c(0, 0.5, 1))
+```
+
+## The model
+
+$$
+\begin{aligned}
+\text{Detected} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 \text{Year}
+\end{aligned}
+$$
+
+## Fit the model
+
+```{r}
+#| class-output: small-output
+
+summary(bat_glm)
+```
+
+## Interpreting the coefficients
+
+$$
+\begin{aligned}
+\text{Detected} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= `r bat_b0` - `r abs(bat_b1)` \text{Year}
+\end{aligned}
+$$
+
+The _log odds_ decrease by `r abs(bat_b1)` year^-1^.
+
+Not terribly intuitive. Let's convert to probabilities.
+
+## From log odds to probabilities {.smaller}
+
+::: {.columns}
+
+::: {.column}
+
+In 2003:
+
+| [$\text{logit}(p) = `r bat_b0` - `r abs(bat_b1)` \text{Year}$]{.fragment}
+| [$\text{logit}(p) = `r bat_b0` - `r abs(bat_b1)` \times 2003$]{.fragment}
+| [$\text{logit}(p) = `r bat_b0` - `r bat_term(2003)`$]{.fragment}
+| [$\text{logit}(p) = `r bat_logit(2003)`$]{.fragment}
+| [$\hphantom{\text{logit}()}p = `r bat_p(2003)`$]{.fragment}
+
+::: {.fragment}
+
+There was an `r bat_p(2003) * 100`% chance of detecting a little brown bat at a site in 2003.
+
+:::
+
+:::
+
+::: {.column}
+
+In 2019:
+
+| [$\text{logit}(p) = `r bat_b0` - `r abs(bat_b1)` \text{Year}$]{.fragment}
+| [$\text{logit}(p) = `r bat_b0` - `r abs(bat_b1)` \times 2019$]{.fragment}
+| [$\text{logit}(p) = `r bat_b0` - `r bat_term(2019)`$]{.fragment}
+| [$\text{logit}(p) = `r bat_logit(2019)`$]{.fragment}
+| [$\hphantom{\text{logit}()}p = `r bat_p(2019)`$]{.fragment}
+
+::: {.fragment}
+
+There was a `r bat_p(2019) * 100`% chance of detecting a little brown bat at a site in 2019.
+
+:::
+
+:::
+
+:::
+
+::: {.fragment}
+
+That tiny coefficient (`r abs(bat_b1)`) represents a _huge_ decline over the study period!
+
+:::
+
+## Visualize the prediction
+
+$$
+\begin{aligned}
+\text{Detected} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= `r bat_b0` - `r abs(bat_b1)` \text{Year}
+\end{aligned}
+$$
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+
+ggplot(bat_glm_pred, aes(x = Year, y = logitp_detected)) +
+  geom_line(color = "cornflowerblue", linewidth = 2) +
+  geom_point(
+    data = bat_glm_points,
+    shape = 21,
+    fill = "white",
+    size = 4,
+    stroke = 1.5
+  ) +
+  geom_label(
+    aes(label = c(bat_logit(2003), 0, bat_logit(2019))),
+    data = bat_glm_points,
+    hjust = c(0, 0, 1),
+    vjust = c(0, 0, 1),
+    nudge_x = c(0.5, 0.5, -0.5),
+    size = 6
+  ) +
+  scale_y_continuous(expand = expansion(mult = 0.15)) +
+  labs(y = "logit(p)")
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+
+ggplot(bats, aes(x = Year, y = detected)) +
+  geom_point(
+    position = position_jitter(height = 0.1, width = 0.2),
+    shape = 21,
+    alpha = 0.5
+  ) +
+  geom_line(
+    aes(y = p_detected),
+    data = bat_glm_pred,
+    color = "cornflowerblue",
+    linewidth = 2
+  ) +
+  geom_point(
+    aes(y = p_detected),
+    data = bat_glm_points,
+    shape = 21,
+    fill = "white",
+    size = 4,
+    stroke = 1.5
+  ) +
+  geom_label(
+    aes(y = p_detected, label = c(bat_p(2003), 0.5, bat_p(2019))),
+    data = bat_glm_points,
+    hjust = c(0, 0, 1),
+    vjust = c(0, 0, 1),
+    nudge_x = c(0.5, 0.5, -0.5),
+    size = 6
+  ) +
+  scale_y_continuous("Detected", breaks = c(0, 0.5, 1))
+```
+
+:::
+
+:::
+
+# Recap
+
+## Logistic regression, visualized
+
+::: {.columns}
+
+::: {.column}
+
+$$
+\begin{aligned}
+\text{Detected} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 \text{Year}
+\end{aligned}
+$$
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+
+ggplot(bats, aes(x = Year, y = detected)) +
+  geom_point(
+    position = position_jitter(height = 0.1, width = 0.2),
+    shape = 21,
+    alpha = 0.5
+  ) +
+  geom_line(
+    aes(y = p_detected),
+    data = bat_glm_pred,
+    color = "cornflowerblue",
+    linewidth = 2
+  ) +
+  scale_y_continuous("Detected", breaks = c(0, 0.5, 1))
+```
+
+:::
+
+:::
+
+## Key points
+
+::: {.fragment}
+
+**How do we model binary responses?**
+
+As a Bernoulli variable, where $p$ varies with the predictor.
+
+:::
+
+::: {.fragment}
+
+**Why do we need the logit?**
+
+It links the linear equation (any value) to valid probabilities (0 to 1).
+
+:::
+
+::: {.fragment}
+
+**How do we interpret logistic regression coefficients?**
+
+They're not intuitive, so visualize the model predictions.
+
+:::
+
+## References
+
+Johnson, C., Brown, D. J., Sanders, C., & Stihler, C. W. (2021). Long-term changes in occurrence, relative abundance, and reproductive fitness of bat species in relation to arrival of White-nose Syndrome in West Virginia, USA. _Ecology and Evolution_, 11(18), 12453–12467. <https://doi.org/10.1002/ece3.7991>
+
+Roseblock, M. (2023). Modeling Changes in Probability of Presence of Myotis lucifugus Due to White Nose Syndrome: An Introduction to Logistic Regression in R. _QUBES Educational Resources_. <https://doi.org/10.25334/HGYA-ZB07> (CC BY-SA 4.0)

@@ -1,0 +1,136 @@
+---
+title: Logistic Regression in R
+execute: 
+  eval: false
+---
+
+```{r}
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+Has the probability of detecting a little brown bat declined since white-nose syndrome reached West Virginia in 2009? We'll use survey data from the Monongahela National Forest (Johnson et al. 2021).
+
+1. Visualize the data
+2. Fit the model
+3. Interpret the coefficients
+4. Convert log odds to probabilities
+5. Visualize the predictions
+
+## Visualize the data
+
+Each row is one survey of one site in one year. `detected` is 1 if any bats of that species were counted, 0 otherwise.
+
+```{r}
+bats <- read_csv("/courses/EDS222/data/5bat_count_data-21682.csv") |>
+  # Keep only little brown bats
+  filter(Species == ____)
+```
+
+What proportion of sites had detections each year?
+
+```{r}
+bats |>
+  summarize(____ = ____, .by = ____)
+```
+
+Visualize the response. With a binary response, _jitter_ the points so they don't overlap. Add the annual proportion as a line.
+
+```{r}
+ggplot(bats, aes(x = ____, y = ____)) +
+  geom_point(
+    position = ____,
+    shape = 21,
+    alpha = 0.5
+  ) +
+  geom_line(
+    aes(y = ____),
+    data = ____,
+    linewidth = 2,
+    color = "cornflowerblue"
+  ) +
+  labs(y = "Detected")
+```
+
+## Fit the model
+
+Our model in statistical notation is:
+
+$$
+\begin{aligned}
+\text{Detected} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 \text{Year}
+\end{aligned}
+$$
+
+Use `glm()` to fit a logistic regression. The formula works like `lm()`, but there are two differences.
+
+1. We have to specify the _distribution_ of the response. For binary outcomes, use the `binomial` family.
+2. We have to say which function _links_ the linear equation to the expected outcome. This is where you specify the logit function.
+
+```{r}
+bat_glm <- glm(____, family = ____, data = bats)
+```
+
+## Interpret the coefficients
+
+```{r}
+summary(bat_glm)
+```
+
+Each year, the _log odds_ of detecting a little brown bat change by ____.
+
+Let's convert to probabilities.
+
+## Convert log odds to probabilities
+
+First, create a _prediction grid_, which is the combination of predictor variables we want to estimate $p$ for. In this case, we only have the one predictor.
+
+```{r}
+bat_pred_grid <- tibble(
+  Year = ____
+)
+```
+
+Next, use the `predict()` function to the get the probability of detection estimated by the model.
+
+```{r}
+bat_pred_grid$p_detected <- predict(
+  _____,
+  type = _____,
+  newdata = _____
+)
+```
+
+## Visualize the predictions
+
+Overlay the predicted probabilities on the raw data
+```{r}
+ggplot(_____, aes(x = _____, y = _____)) +
+  geom_point(
+    position = position_jitter(height = 0.1, width = 0.2),
+    shape = 21,
+    alpha = 0.5
+  ) +
+  geom_line(
+    aes(y = ____),
+    data = ____,
+    color = "cornflowerblue",
+    linewidth = 2
+  ) +
+  labs(y = "Detected")
+```
+
+# Recap
+
+- Visualize binary outcome data two ways: raw data with `geom_point()` (jittered) and binned summaries with `geom_line()` (summarize first)
+- Fit a logistic model using `glm()`
+  - Set the `family` to `binomial()`
+  - Set the `link` to `"logit"`
+- Visualize model predictions by:
+  1. Create a prediction grid, covering the range of your predictor(s)
+  2. Use `predict()` to get the predicted probabilities
+    - Set `newdata` to your prediction grid (or you'll get predictions for your raw data)
+    - Set `type` to `"response"` (or you'll get the log odds)
+  3. Overlay the predicted probabilities on the raw data

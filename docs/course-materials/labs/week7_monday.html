@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>EDS 222: Statistics for Environmental Data Science – Multiple stressors: Harmful algal blooms</title>
+<title>EDS 222: Statistics for Environmental Data Science – Logistic Regression in R</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -248,8 +248,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-page-left">
-      <h1 class="title">Multiple stressors: Harmful algal blooms</h1>
-            <p class="subtitle lead">Week 6 Wednesday case study - Solutions</p>
+      <h1 class="title">Logistic Regression in R</h1>
                       </div>
   </div>
     
@@ -270,17 +269,14 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">The data</a></li>
-  <li><a href="#step-1-visualize-the-data" id="toc-step-1-visualize-the-data" class="nav-link" data-scroll-target="#step-1-visualize-the-data">Step 1: Visualize the data</a></li>
-  <li><a href="#step-2-decide-on-your-models" id="toc-step-2-decide-on-your-models" class="nav-link" data-scroll-target="#step-2-decide-on-your-models">Step 2: Decide on your models</a></li>
-  <li><a href="#step-3-fit-both-models" id="toc-step-3-fit-both-models" class="nav-link" data-scroll-target="#step-3-fit-both-models">Step 3: Fit both models</a></li>
-  <li><a href="#step-4-compare-the-models-with-anova" id="toc-step-4-compare-the-models-with-anova" class="nav-link" data-scroll-target="#step-4-compare-the-models-with-anova">Step 4: Compare the models with ANOVA</a></li>
-  <li><a href="#step-5-interpret" id="toc-step-5-interpret" class="nav-link" data-scroll-target="#step-5-interpret">Step 5: Interpret</a></li>
-  <li><a href="#prepare-for-the-jigsaw" id="toc-prepare-for-the-jigsaw" class="nav-link" data-scroll-target="#prepare-for-the-jigsaw">Prepare for the jigsaw</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  <li><a href="#visualize-the-data" id="toc-visualize-the-data" class="nav-link active" data-scroll-target="#visualize-the-data">Visualize the data</a></li>
+  <li><a href="#fit-the-model" id="toc-fit-the-model" class="nav-link" data-scroll-target="#fit-the-model">Fit the model</a></li>
+  <li><a href="#interpret-the-coefficients" id="toc-interpret-the-coefficients" class="nav-link" data-scroll-target="#interpret-the-coefficients">Interpret the coefficients</a></li>
+  <li><a href="#convert-log-odds-to-probabilities" id="toc-convert-log-odds-to-probabilities" class="nav-link" data-scroll-target="#convert-log-odds-to-probabilities">Convert log odds to probabilities</a></li>
+  <li><a href="#visualize-the-predictions" id="toc-visualize-the-predictions" class="nav-link" data-scroll-target="#visualize-the-predictions">Visualize the predictions</a></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap">Recap</a></li>
   </ul>
-<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="week6-wednesday-habs-solutions.qmd"><i class="bi bi-link-45deg"></i>Download Source</a></li></ul></div></nav>
+</nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
@@ -289,209 +285,133 @@ window.Quarto = {
 
 
 
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>Blooms of the toxic dinoflagellate <em>Karenia selliformis</em> have caused mass mortality of marine fauna in Patagonia, Chile. Coastal waters there vary widely in temperature and pH with the seasons, and climate change is expected to shift both. If the two stressors interact, then knowing how <em>K. selliformis</em> responds to pH at one temperature won’t tell us how it responds at another.</p>
-<p>Vellojin et al.&nbsp;(2023) grew a Patagonian strain of <em>K. selliformis</em> in a factorial experiment crossing two temperatures with five pH levels. There were 3 replicate cultures per treatment, 30 cultures in total. Today’s question:</p>
-<blockquote class="blockquote">
-<p>Does the effect of pH on maximum bloom density depend on temperature?</p>
-</blockquote>
-<p>You’ll work through five steps with your group, then present your results to students who studied a different system. Fill in each <code>____</code>, and answer the questions as you go.</p>
-</section>
-<section id="the-data" class="level2">
-<h2 class="anchored" data-anchor-id="the-data">The data</h2>
-<ul>
-<li><strong>temp</strong>: temperature treatment: 12 or 17 °C</li>
-<li><strong>ph</strong>: pH treatment: 7.01, 7.41, 7.71, 8.1, or 9</li>
-<li><strong>replicate</strong>: replicate culture within the treatment (1-3)</li>
-<li><strong>max_density</strong>: maximum cell density reached in the culture (cells/mL)</li>
-</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>karenia <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"../data/karenia-density.csv"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert temp and ph from numeric to factor</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">temp =</span> <span class="fu">factor</span>(temp),</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ph =</span> <span class="fu">factor</span>(ph)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">222</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_bw</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
-<section id="step-1-visualize-the-data" class="level2">
-<h2 class="anchored" data-anchor-id="step-1-visualize-the-data">Step 1: Visualize the data</h2>
-<p>Here we have two categorical predictors (<code>ph</code> and <code>temp</code>) and a continuous response (<code>max_density</code>). One way to visualize a continuous response across two categories is to combine <em>dodging</em> and <em>jittering</em>. Here’s how to do that with the <code>penguins</code> data frame.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>palmerpenguins<span class="sc">::</span>penguins <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(sex) <span class="sc">|&gt;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> species, <span class="at">y =</span> body_mass_g, <span class="at">shape =</span> sex)) <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># "dodge" the boxplots so they appear side-by-side</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="at">width =</span> <span class="fl">0.8</span>),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fl">0.6</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># avoid plotting outliers twice (the points already show them)</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">outlier.shape =</span> <span class="cn">NA</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># "jitter" the points left to right within categories, "dodge" them so the categories appear side-by-side</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="fl">0.5</span>, <span class="at">dodge.width =</span> <span class="fl">0.8</span>),</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Species"</span>, <span class="at">y =</span> <span class="st">"Body mass (g)"</span>, <span class="at">shape =</span> <span class="st">"Sex"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="week6-wednesday-habs-solutions_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Plot the <em>Karenia</em> data below, using the same dodge and jitter technique.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(karenia, <span class="fu">aes</span>(<span class="at">x =</span> ph, <span class="at">y =</span> max_density, <span class="at">shape =</span> temp)) <span class="sc">+</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="at">width =</span> <span class="fl">0.8</span>),</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="fl">0.6</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">outlier.shape =</span> <span class="cn">NA</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="fl">0.5</span>, <span class="at">dodge.width =</span> <span class="fl">0.8</span>),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"pH"</span>, <span class="at">y =</span> <span class="st">"Maximum density (cells/mL)"</span>, <span class="at">shape =</span> <span class="st">"Temperature (°C)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="week6-wednesday-habs-solutions_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Based on this visualization:</p>
-<p>Does <code>ph</code> appear to have an effect on <code>max_density</code>? What pattern in the visualization suggests that?</p>
-<p><strong>Answer</strong>: Yes, but the pattern differs by temperature. At 12 °C, density stays high from pH 7.01 to 8.1, then crashes at pH 9. At 17 °C, density jumps around across pH, with no crash at pH 9.</p>
-<p>Does <code>temp</code> appear to have an effect on <code>max_density</code>? What pattern in the visualization suggests that?</p>
-<p><strong>Answer</strong>: Yes. From pH 7.01 to 8.1, the 12 °C boxes sit well above the 17 °C boxes. At pH 9 the order flips.</p>
-<p>Does <code>temp</code> appear to have an effect on the relationship between <code>ph</code> and <code>max_density</code>? What pattern in the visualization suggests that?</p>
-<p><strong>Answer</strong>: Yes. The gap between temperatures changes size across pH and even reverses: going from 12 to 17 °C lowers mean density by about 8,600 cells/mL at pH 7.01, but raises it by about 3,200 cells/mL at pH 9.</p>
-</section>
-<section id="step-2-decide-on-your-models" class="level2">
-<h2 class="anchored" data-anchor-id="step-2-decide-on-your-models">Step 2: Decide on your models</h2>
-<p>The question is whether the effect of pH depends on temperature. Which model says it doesn’t? Which model says it does? Those are your simpler and complex models. Fill in the formulas, and work out <span class="math inline">\(p\)</span>, the number of coefficients each model estimates, including the intercept.</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Model</th>
-<th>R formula</th>
-<th style="text-align: center;"><span class="math inline">\(p\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Simpler</td>
-<td><code>max_density ~ ph + temp</code></td>
-<td style="text-align: center;">6</td>
-</tr>
-<tr class="even">
-<td>Complex</td>
-<td><code>max_density ~ ph * temp</code></td>
-<td style="text-align: center;">10</td>
-</tr>
-</tbody>
-</table>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Tip
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Each categorical predictor gets one coefficient for each non-reference level. An interaction gets one coefficient for each <em>combination</em> of non-reference levels. You can check your counts in Step 3 with <code>coef()</code>.</p>
-</div>
-</div>
-<p>Write your hypotheses.</p>
-<p><span class="math inline">\(H_0\)</span>: The effect of pH on maximum density is the same at both temperatures.</p>
-<p><span class="math inline">\(H_A\)</span>: The effect of pH on maximum density depends on temperature.</p>
-</section>
-<section id="step-3-fit-both-models" class="level2">
-<h2 class="anchored" data-anchor-id="step-3-fit-both-models">Step 3: Fit both models</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>simpler_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(max_density <span class="sc">~</span> ph <span class="sc">+</span> temp, karenia)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>complex_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(max_density <span class="sc">~</span> ph <span class="sc">*</span> temp, karenia)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(simpler_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>(Intercept)      ph7.41      ph7.71       ph8.1         ph9      temp17 
-  10840.767    2403.333   -1106.167    1311.667   -4211.667   -5281.533 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(complex_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  (Intercept)        ph7.41        ph7.71         ph8.1           ph9 
-  12486.66667      33.33333    -989.00000    1223.33333  -10100.00000 
-       temp17 ph7.41:temp17 ph7.71:temp17  ph8.1:temp17    ph9:temp17 
-  -8573.33333    4740.00000    -234.33333     176.66667   11776.66667 </code></pre>
-</div>
-</div>
-</section>
-<section id="step-4-compare-the-models-with-anova" class="level2">
-<h2 class="anchored" data-anchor-id="step-4-compare-the-models-with-anova">Step 4: Compare the models with ANOVA</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(simpler_lm, complex_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Analysis of Variance Table
-
-Model 1: max_density ~ ph + temp
-Model 2: max_density ~ ph * temp
-  Res.Df       RSS Df Sum of Sq      F    Pr(&gt;F)    
-1     24 203151181                                  
-2     20  42555384  4 160595797 18.869 1.449e-06 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
-</div>
-</div>
-<p>Recall the F statistic:</p>
-<p><span class="math display">\[
-F = \frac{(RSS_{simple} - RSS_{complex}) \ / \ (p_{complex} - p_{simple})}{RSS_{complex} \ / \ (n - p_{complex})}
-\]</span></p>
-<p>Find each piece in your table, and check that you get the same F as R.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>rss_simple <span class="ot">&lt;-</span> <span class="dv">203151181</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>rss_complex <span class="ot">&lt;-</span> <span class="dv">42555384</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>p_simple <span class="ot">&lt;-</span> <span class="dv">6</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>p_complex <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">30</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>((rss_simple <span class="sc">-</span> rss_complex) <span class="sc">/</span> (p_complex <span class="sc">-</span> p_simple)) <span class="sc">/</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  (rss_complex <span class="sc">/</span> (n <span class="sc">-</span> p_complex))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 18.86903</code></pre>
-</div>
-</div>
-<p>In your own words, what does this F statistic say about the interaction?</p>
-<p><strong>Answer</strong>: <span class="math inline">\(F_{4, 20} = 18.87\)</span>. Each coefficient spent on the interaction removes about 19 times more unexplained variation than a residual degree of freedom holds.</p>
-</section>
-<section id="step-5-interpret" class="level2">
-<h2 class="anchored" data-anchor-id="step-5-interpret">Step 5: Interpret</h2>
-<p>Complete the sentences, using your F statistic and p-value and <span class="math inline">\(\alpha = 0.05\)</span>:</p>
-<blockquote class="blockquote">
-<p>If there were no interaction between pH and temperature, we’d see an F at least as large as ____ in ____ of samples. So we [reject / fail to reject] <span class="math inline">\(H_0\)</span>. We [have / don’t have] evidence that the effect of pH on maximum density depends on temperature.</p>
-</blockquote>
-<p><strong>Answer</strong>: If there were no interaction between pH and temperature, we’d see an F at least as large as 18.87 in about 0.0001% of samples (<span class="math inline">\(F_{4,20} = 18.87\)</span>, <span class="math inline">\(p \approx 1.4 \times 10^{-6}\)</span>). So we reject <span class="math inline">\(H_0\)</span>. We have evidence that the effect of pH on maximum density depends on temperature.</p>
-</section>
-<section id="prepare-for-the-jigsaw" class="level2">
-<h2 class="anchored" data-anchor-id="prepare-for-the-jigsaw">Prepare for the jigsaw</h2>
-<p>You’ll have <strong>3 minutes</strong> to teach this system to students who haven’t seen it. Everyone in your group should be ready to present:</p>
+<p>Has the probability of detecting a little brown bat declined since white-nose syndrome reached West Virginia in 2009? We’ll use survey data from the Monongahela National Forest (Johnson et al.&nbsp;2021).</p>
 <ol type="1">
-<li><strong>The system</strong>: what organism, which two stressors, and what response?</li>
-<li><strong>The models</strong>: your simpler and complex models, and how many coefficients the interaction costs</li>
-<li><strong>The plot</strong>: your Step 1 figure</li>
-<li><strong>The result</strong>: F, its degrees of freedom, the p-value, and your interpretation in one sentence about the system</li>
+<li>Visualize the data</li>
+<li>Fit the model</li>
+<li>Interpret the coefficients</li>
+<li>Convert log odds to probabilities</li>
+<li>Visualize the predictions</li>
 </ol>
+<section id="visualize-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="visualize-the-data">Visualize the data</h2>
+<p>Each row is one survey of one site in one year. <code>detected</code> is 1 if any bats of that species were counted, 0 otherwise.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>bats <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"/courses/EDS222/data/5bat_count_data-21682.csv"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Keep only little brown bats</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Species <span class="sc">==</span> ____)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>What proportion of sites had detections each year?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>bats <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">____ =</span> ____, <span class="at">.by =</span> ____)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Visualize the response. With a binary response, <em>jitter</em> the points so they don’t overlap. Add the annual proportion as a line.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(<span class="at">x =</span> ____, <span class="at">y =</span> ____)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> ____,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape =</span> <span class="dv">21</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">y =</span> ____),</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> ____,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"cornflowerblue"</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Detected"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="references" class="level2">
-<h2 class="anchored" data-anchor-id="references">References</h2>
-<p>Vellojin, J. P., Mardones, J. I., Vargas, V., Leal, P. P., Corredor-Acosta, A., &amp; Iriarte, J. L. (2023). Potential effects of climate change on the growth response of the toxic dinoflagellate <em>Karenia selliformis</em> from Patagonian waters of Chile. <em>Progress in Oceanography</em>, 211, 102956. <a href="https://doi.org/10.1016/j.pocean.2022.102956" class="uri">https://doi.org/10.1016/j.pocean.2022.102956</a></p>
-<p>Data: Vellojin, J. P., Mardones, J. I., Vargas, V., Leal, P. P., Corredor-Acosta, A., &amp; Iriarte, J. L. (2023). Seawater carbonate chemistry and the growth response of the toxic dinoflagellate <em>Karenia selliformis</em> from Patagonian waters of Chile [Dataset]. PANGAEA. <a href="https://doi.org/10.1594/PANGAEA.960040" class="uri">https://doi.org/10.1594/PANGAEA.960040</a>, licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+<section id="fit-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="fit-the-model">Fit the model</h2>
+<p>Our model in statistical notation is:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{Detected} &amp;\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &amp;= \beta_0 + \beta_1 \text{Year}
+\end{aligned}
+\]</span></p>
+<p>Use <code>glm()</code> to fit a logistic regression. The formula works like <code>lm()</code>, but there are two differences.</p>
+<ol type="1">
+<li>We have to specify the <em>distribution</em> of the response. For binary outcomes, use the <code>binomial</code> family.</li>
+<li>We have to say which function <em>links</em> the linear equation to the expected outcome. This is where you specify the logit function.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>bat_glm <span class="ot">&lt;-</span> <span class="fu">glm</span>(____, <span class="at">family =</span> ____, <span class="at">data =</span> bats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="interpret-the-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="interpret-the-coefficients">Interpret the coefficients</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(bat_glm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Each year, the <em>log odds</em> of detecting a little brown bat change by ____.</p>
+<p>Let’s convert to probabilities.</p>
+</section>
+<section id="convert-log-odds-to-probabilities" class="level2">
+<h2 class="anchored" data-anchor-id="convert-log-odds-to-probabilities">Convert log odds to probabilities</h2>
+<p>First, create a <em>prediction grid</em>, which is the combination of predictor variables we want to estimate <span class="math inline">\(p\)</span> for. In this case, we only have the one predictor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>bat_pred_grid <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Year =</span> ____</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, use the <code>predict()</code> function to the get the probability of detection estimated by the model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>bat_pred_grid<span class="sc">$</span>p_detected <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  _____,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> _____,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> _____</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="visualize-the-predictions" class="level2">
+<h2 class="anchored" data-anchor-id="visualize-the-predictions">Visualize the predictions</h2>
+<p>Overlay the predicted probabilities on the raw data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(_____, <span class="fu">aes</span>(<span class="at">x =</span> _____, <span class="at">y =</span> _____)) <span class="sc">+</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">height =</span> <span class="fl">0.1</span>, <span class="at">width =</span> <span class="fl">0.2</span>),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">shape =</span> <span class="dv">21</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.5</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">y =</span> ____),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> ____,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"cornflowerblue"</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="dv">2</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Detected"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="recap" class="level1">
+<h1>Recap</h1>
+<ul>
+<li>Visualize binary outcome data two ways: raw data with <code>geom_point()</code> (jittered) and binned summaries with <code>geom_line()</code> (summarize first)</li>
+<li>Fit a logistic model using <code>glm()</code>
+<ul>
+<li>Set the <code>family</code> to <code>binomial()</code></li>
+<li>Set the <code>link</code> to <code>"logit"</code></li>
+</ul></li>
+<li>Visualize model predictions by:
+<ol type="1">
+<li>Create a prediction grid, covering the range of your predictor(s)</li>
+<li>Use <code>predict()</code> to get the predicted probabilities</li>
+</ol>
+<ul>
+<li>Set <code>newdata</code> to your prediction grid (or you’ll get predictions for your raw data)</li>
+<li>Set <code>type</code> to <code>"response"</code> (or you’ll get the log odds)</li>
+</ul>
+<ol start="3" type="1">
+<li>Overlay the predicted probabilities on the raw data</li>
+</ol></li>
+</ul>
 
 
 </section>
