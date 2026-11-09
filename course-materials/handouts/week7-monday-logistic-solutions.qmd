@@ -1,0 +1,343 @@
+---
+format:
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    papersize: letter
+    fontsize: 10pt
+    linestretch: 1.05
+    mainfont: Lora
+    monofont: Roboto Mono
+    monofontoptions:
+      - Scale=0.9
+    geometry:
+      - top=0.75in
+      - bottom=0.6in
+      - left=0.95in
+      - right=0.95in
+    pagestyle: empty
+    number-sections: false
+    include-in-header:
+      text: |
+        \usepackage{titlesec}
+        \usepackage{array}
+        \usepackage{booktabs}
+        \usepackage{enumitem}
+        \usepackage{unicode-math}
+        \setmathfont{latinmodern-math.otf}
+        \setmathfont[range={up/{latin,Latin,num}}]{Lora}
+        \setmathfont[range={it/{latin,Latin}}]{Lora Italic}
+        \setlength{\parindent}{0pt}
+        \setlength{\parskip}{5pt}
+        \titleformat{\section}{\normalfont\fontsize{15}{18}\selectfont}{}{0pt}{}
+        \titlespacing*{\section}{0pt}{0pt}{6pt}
+        \titleformat{\subsection}{\normalfont\fontsize{12}{15}\selectfont}{}{0pt}{}
+        \titlespacing*{\subsection}{0pt}{10pt}{2pt}
+        \setlist[itemize]{label=\textbullet, leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \setlist[enumerate]{leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \newcommand{\doctitle}[1]{{\fontsize{21}{25}\selectfont #1}\par\vspace{8pt}}
+        \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+        \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+params:
+  key: true
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: ""
+    fig.align: center
+    fig.pos: "H"
+    dev: cairo_pdf
+---
+
+```{r}
+#| label: setup
+library(ggplot2)
+
+key <- isTRUE(params$key)
+
+# ---- Plot style (matches the other handouts) ----
+theme_set(
+  theme_bw(base_size = 11) +
+    theme(
+      panel.grid.minor = element_line(linewidth = 0.2),
+      plot.margin = margin(4, 6, 2, 4)
+    )
+)
+
+# ---- Data ----
+# After class, save the Google Form responses as data/field-goals.csv with
+# columns dist_cm (number) and success (0 or 1), then re-render the key. Until
+# then, the key uses simulated data.
+fg_file <- "../data/field-goals.csv"
+simulated <- !file.exists(fg_file)
+if (simulated) {
+  set.seed(722)
+  n <- 36
+  dist_cm <- sample(10:50, n, replace = TRUE)
+  field_goals <- data.frame(
+    dist_cm = dist_cm,
+    success = rbinom(n, 1, plogis(3.2 - 0.1 * dist_cm))
+  )
+} else {
+  field_goals <- read.csv(fg_file)
+}
+
+fg_glm <- glm(
+  success ~ dist_cm,
+  family = binomial(link = "logit"),
+  data = field_goals
+)
+b0 <- coef(fg_glm)[["(Intercept)"]]
+b1 <- coef(fg_glm)[["dist_cm"]]
+
+dists <- seq(10, 50, by = 10)
+logits <- b0 + b1 * dists
+ps <- plogis(logits)
+curve_grid <- data.frame(dist_cm = seq(10, 50, length.out = 101))
+curve_grid$logit <- b0 + b1 * curve_grid$dist_cm
+curve_grid$p <- plogis(curve_grid$logit)
+table_points <- data.frame(dist_cm = dists, logit = logits, p = ps)
+
+# ---- Helpers ----
+fmt <- function(x, digits = 2) formatC(x, format = "f", digits = digits)
+
+# A blank to fill in, or the answer in the key
+fill <- function(x, width = "1.6cm") {
+  if (key) as.character(x) else paste0("\\mbox{\\rule{", width, "}{0.4pt}}")
+}
+
+blank_lines <- function(n) {
+  if (!key) cat(rep("\\vspace{0.3in}\n\n", n), sep = "")
+}
+answer <- function(...) if (key) cat(..., sep = "")
+
+# Centered LaTeX table. header and each row are character vectors of cells.
+latex_table <- function(header, rows, align) {
+  row_tex <- vapply(rows, \(r) paste(r, collapse = " & "), character(1))
+  cat(
+    "\\begin{center}",
+    "\\renewcommand{\\arraystretch}{1.8}",
+    paste0("\\begin{tabular}{", align, "}"),
+    "\\toprule",
+    paste(paste(header, collapse = " & "), "\\\\"),
+    "\\midrule",
+    paste(row_tex, "\\\\"),
+    "\\bottomrule",
+    "\\end{tabular}",
+    "\\end{center}",
+    sep = "\n"
+  )
+  cat("\n\n")
+}
+
+# Empty axes spanning the distances in the activity, with a grid to draw on
+dist_axes <- function(ylab, ylim, ybreaks, ylabels = ybreaks) {
+  ggplot(data.frame(dist_cm = c(10, 50), y = ylim), aes(dist_cm, y)) +
+    geom_blank() +
+    scale_x_continuous(
+      "Distance (cm)",
+      limits = c(8, 52),
+      breaks = dists,
+      minor_breaks = seq(10, 50, by = 5)
+    ) +
+    scale_y_continuous(ylab, limits = ylim, breaks = ybreaks, labels = ylabels)
+}
+
+# Raw data: jittered 0s and 1s
+data_layer <- function(alpha = 1) {
+  geom_point(
+    aes(dist_cm, success),
+    data = field_goals,
+    inherit.aes = FALSE,
+    shape = 21,
+    size = 2,
+    alpha = alpha,
+    position = position_jitter(width = 0, height = 0.04, seed = 1)
+  )
+}
+
+# The five distances from the table, as open circles
+table_layer <- function(y) {
+  geom_point(
+    aes(dist_cm, .data[[y]]),
+    data = table_points,
+    inherit.aes = FALSE,
+    shape = 21,
+    fill = "white",
+    size = 2.5,
+    stroke = 1
+  )
+}
+
+# Range for the log odds axis: the key fits the fitted line, students label it
+logit_lim <- range(c(-1, 1, pretty(logits)))
+```
+
+\doctitle{Field goals and logistic regression`r if (key) " (answer key)" else ""`}
+
+Does the chance of kicking a paper field goal depend on distance? Each of you kicked once from a random distance between 10 and 50 cm and recorded whether you made it. Now we'll model the class's data.
+
+```{r}
+#| results: asis
+if (key && simulated) {
+  cat(
+    "\\textit{Placeholder: this key uses simulated data. Save the class's",
+    "responses as data/field-goals.csv and re-render.}\n\n"
+  )
+}
+```
+
+\vspace{2pt}\hrule\vspace{6pt}
+
+$$
+\text{logit}(p) = \log\left(\frac{p}{1 - p}\right)
+\qquad\qquad
+p = \frac{1}{1 + e^{-\text{logit}(p)}}
+$$
+
+- $p$: probability of success, between 0 and 1
+- $\text{logit}(p)$: the log odds of success, any value from $-\infty$ to $\infty$
+- Left: from probability to log odds. Right: from log odds back to probability.
+
+\vspace{2pt}\hrule
+
+# 1. Draw the data
+
+Sketch the class's data. Each kick is one point: its distance on the x-axis, and 0 (missed) or 1 (made it) on the y-axis.
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.4
+#| out-width: "70%"
+p <- dist_axes("Success", c(-0.1, 1.1), c(0, 1))
+if (key) {
+  p <- p + data_layer()
+}
+p
+```
+
+# 2. Write the model
+
+Write the model in statistical notation. What's the distribution of the response? What links $p$ to the linear equation?
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$$\n\\begin{aligned}\n",
+  "\\text{success} &\\sim \\text{Bernoulli}(p) \\\\\n",
+  "\\text{logit}(p) &= \\beta_0 + \\beta_1 \\text{dist\\_cm}\n",
+  "\\end{aligned}\n$$\n\n"
+)
+```
+
+# 3. Write down the coefficients
+
+We'll fit the model in R.
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```r
+fg_glm <- glm(success ~ dist_cm, family = binomial(link = "logit"), data = field_goals)
+coef(fg_glm)
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+latex_table(
+  c("Term", "Coefficient", "Estimate"),
+  list(
+    c("\\texttt{(Intercept)}", "$\\beta_0$", fill(fmt(b0, 3))),
+    c("\\texttt{dist\\_cm}", "$\\beta_1$", fill(fmt(b1, 3)))
+  ),
+  "llc"
+)
+```
+
+\newpage
+
+# 4. Draw the linear part
+
+Draw $\text{logit}(p) = \beta_0 + \beta_1 \text{dist\_cm}$. It's a straight line, so you only need two points. Label the y-axis first.
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.6
+#| out-width: "70%"
+if (key) {
+  dist_axes("logit(p)", logit_lim, pretty(logit_lim)) +
+    geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50") +
+    geom_line(aes(dist_cm, logit), data = curve_grid, linewidth = 1) +
+    table_layer("logit")
+} else {
+  # Blank tick labels with room to the left to write them in
+  dist_axes("logit(p)", c(-3, 3), -3:3, rep("", 7)) +
+    theme(
+      axis.ticks.length.y = unit(4, "pt"),
+      axis.text.y = element_text(margin = margin(r = 28))
+    )
+}
+```
+
+# 5. Calculate $p$
+
+For each distance, calculate the log odds from your coefficients. Then convert the log odds to a probability.
+
+```{r}
+#| results: asis
+rows <- lapply(seq_along(dists), \(i) {
+  c(dists[i], fill(fmt(logits[i]), "2.2cm"), fill(fmt(ps[i]), "2.2cm"))
+})
+latex_table(
+  c(
+    "Distance (cm)",
+    "$\\text{logit}(p) = \\beta_0 + \\beta_1 \\times \\text{distance}$",
+    "$p = \\frac{1}{1 + e^{-\\text{logit}(p)}}$"
+  ),
+  rows,
+  "ccc"
+)
+```
+
+```{r}
+#| results: asis
+cat(
+  "How much does $\\text{logit}(p)$ change between each row? ",
+  fill(fmt(10 * b1), "2.2cm"),
+  "\n\nHow much does $p$ change between each row? ",
+  if (key) {
+    paste(fmt(diff(ps)), collapse = ", ")
+  } else {
+    "\\mbox{\\rule{5cm}{0.4pt}}"
+  },
+  "\n\n",
+  sep = ""
+)
+```
+
+# 6. Draw the probabilities
+
+Plot your five values of $p$, then connect them with a smooth curve. Add the data from Part 1.
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.6
+#| out-width: "70%"
+p <- dist_axes("p (probability of success)", c(-0.1, 1.1), seq(0, 1, 0.25))
+if (key) {
+  p <- p +
+    data_layer(alpha = 0.4) +
+    geom_line(aes(dist_cm, p), data = curve_grid, linewidth = 1) +
+    table_layer("p")
+}
+p
+```

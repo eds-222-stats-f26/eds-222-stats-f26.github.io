@@ -1,0 +1,368 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 7 Monday: Logistic regression"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal .slides section .fragment.highlight-green.visible {
+          color: #15803d;
+        }
+        </style>
+execute:
+  echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+# Little brown bat detections (same data as the pre-class videos)
+bats <- read_csv("../pre-class/data/5bat_count_data-21682.csv") |>
+  filter(Species == "Myotis lucifugus")
+bats_by_year <- bats |>
+  summarize(p_detected = mean(detected), .by = Year)
+
+bat_glm <- glm(detected ~ Year, family = binomial(link = "logit"), data = bats)
+bat_pred_grid <- tibble(Year = seq(2003, 2019, length.out = 101))
+bat_pred_grid$p_detected <- predict(
+  bat_glm,
+  type = "response",
+  newdata = bat_pred_grid
+)
+
+bat_b0 <- signif(coef(bat_glm)[["(Intercept)"]], 4)
+bat_b1 <- signif(coef(bat_glm)[["Year"]], 4)
+bat_p <- \(year) {
+  signif(predict(bat_glm, tibble(Year = year), type = "response"), 2)
+}
+
+# Jittered raw data with a binned summary, as in the live coding
+bat_plot <- ggplot(bats, aes(x = Year, y = detected)) +
+  geom_point(
+    position = position_jitter(height = 0.1, width = 0.2, seed = 1),
+    shape = 21,
+    alpha = 0.5
+  ) +
+  scale_y_continuous("Detected", breaks = c(0, 0.5, 1))
+```
+
+# Logistic regression
+
+## Today's agenda
+
+- **Review** logistic regression (10 min)
+- **Recap** the white-nose syndrome example (15 min)
+- **Kick** field goals and model them (35 min)
+- **Recap** (10 min)
+
+# Review
+
+## Which response calls for logistic regression?
+
+::: {style="font-size:0.8em"}
+
+**A.** Soil lead (ppm) at a property
+
+[**B.** Whether soil lead at a property exceeds the EPA threshold]{.fragment .highlight-green fragment-index=1}
+
+**C.** Number of properties in a neighborhood with soil lead above the EPA threshold
+
+:::
+
+::: {.fragment fragment-index=1 style="font-size:0.75em"}
+
+- Logistic regression is for **binary** responses: yes/no, 0/1, success/failure.
+- A is continuous, so use linear regression.
+- C is a count. It's built from binary outcomes, but it isn't one itself. (More on counts later.)
+
+:::
+
+## True or false?
+
+> Logistic regression is necessary when there's a binary **predictor** variable.
+
+::: {.fragment}
+
+**False**
+
+:::
+
+::: {.fragment style="font-size:0.75em"}
+
+- The kind of model depends on the **response**, not the predictors.
+- A binary predictor is a categorical variable with two levels. It becomes a dummy variable (0 or 1) in a linear regression, like we did in weeks 4-6.
+
+:::
+
+## Which is a valid logistic regression?
+
+::: {style="font-size:0.75em"}
+
+[**A.** $\quad \text{Bleached} \sim \text{Bernoulli}(p) \qquad \text{logit}(p) = \beta_0 + \beta_1 \text{PeakSST}$]{.fragment .highlight-green fragment-index=1}
+
+**B.** $\quad \text{Bleached} \sim \text{Bernoulli}(p) \qquad p = \text{logit}(\beta_0 + \beta_1 \text{PeakSST})$
+
+**C.** $\quad \text{Bleached} \sim \text{Bernoulli}(\text{logit}(p)) \qquad p = \beta_0 + \beta_1 \text{PeakSST}$
+
+:::
+
+::: {.fragment fragment-index=1 style="font-size:0.7em"}
+
+- The logit turns a **probability** into log odds, so it goes on $p$.
+- B applies the logit to the linear part, which can be any value. The logit of 3 or -2 doesn't exist.
+- C makes $p$ a straight line, which can go below 0 or above 1. Bernoulli also needs a probability, not log odds.
+
+:::
+
+## Why do we need the logit link?
+
+::: {style="font-size:0.8em"}
+
+**A.** It transforms the response variable
+
+**B.** It makes the residuals normally distributed
+
+[**C.** It transforms $(0, 1)$ to $(-\infty, \infty)$]{.fragment .highlight-green fragment-index=1}
+
+:::
+
+::: {.fragment fragment-index=1 style="font-size:0.75em"}
+
+- **Not A**: it transforms $p$, the _probability_ of the response. The responses are all 0s and 1s, and $\text{logit}(0)$ and $\text{logit}(1)$ are $-\infty$ and $\infty$.
+- **Not B**: the Bernoulli distribution describes how the 0s and 1s vary. No normal distribution is involved.
+- **C**: the linear part, $\beta_0 + \beta_1 x$, can be any number. The logit connects it to a valid probability.
+
+:::
+
+# White-nose syndrome
+
+## Has the little brown bat declined?
+
+White-nose syndrome reached West Virginia in 2009. Each point is one survey of one site in one year.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+
+bat_plot
+```
+
+## Has the little brown bat declined?
+
+The line is the proportion of sites with detections each year.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+
+bat_plot +
+  geom_line(
+    aes(y = p_detected),
+    data = bats_by_year,
+    color = "cornflowerblue",
+    linewidth = 2
+  )
+```
+
+## Write the model
+
+::: {.incremental style="font-size:0.85em"}
+
+- What's the response? Is it continuous or binary?
+  - **Detected**: binary. 1 if any little brown bats were counted.
+- What distribution describes a binary response?
+  - **Bernoulli**, with probability of success $p$.
+- What do we want to change with Year?
+  - $p$, the probability of detection.
+- How do we link $p$ to a linear equation?
+  - The **logit**.
+
+:::
+
+## Write the model
+
+$$
+\begin{aligned}
+\text{Detected} &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 \text{Year}
+\end{aligned}
+$$
+
+::: {.fragment style="font-size:0.75em"}
+
+- Line 1: each survey is a 0 or 1, and the chance of a 1 is $p$.
+- Line 2: the log odds of $p$ change linearly with Year.
+
+:::
+
+## Fit the model
+
+```{r}
+#| echo: true
+#| eval: false
+
+bat_glm <- glm(
+  detected ~ Year,
+  family = binomial(link = "logit"),
+  data = bats
+)
+summary(bat_glm)
+```
+
+::: {.fragment}
+
+```{r}
+#| class-output: small-output
+
+summary(bat_glm)$coefficients
+```
+
+:::
+
+::: {.fragment style="font-size:0.75em"}
+
+$$
+\text{logit}(p) = `r bat_b0` - `r abs(bat_b1)` \text{Year}
+$$
+
+Each year, the log odds of detection fall by `r abs(bat_b1)`. In probabilities: `r bat_p(2003)` in 2003 and `r bat_p(2019)` in 2019.
+
+:::
+
+## Visualize the model
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+
+bat_plot +
+  geom_line(
+    aes(y = p_detected),
+    data = bat_pred_grid,
+    color = "cornflowerblue",
+    linewidth = 2
+  )
+```
+
+The model's predicted probability of detection, on top of the raw data.
+
+# Field goal!
+
+## Your turn to collect the data
+
+Does the chance of kicking a field goal depend on distance?
+
+::: {.incremental style="font-size:0.85em"}
+
+1. **Fold** a paper football (next slide)
+2. **Generate** a random distance between 10 and 50 cm: `sample(10:50, 1)` in R
+3. **Kick**: your partner makes goal posts with their hands at the edge of the table. Flick the football from your distance. It's good if it goes between the posts.
+4. **Record** your distance and whether you made it on the [Google Form](https://forms.gle/rwjyWQL2MhRDGvP89)
+
+:::
+
+## Fold a paper football
+
+![](images/paper-football.png)
+
+## Kick a field goal
+
+::: {.incremental style="font-size:0.85em"}
+
+1. **Form pairs**
+2. **Generate random distances** between 10 and 50 cm: `sample(10:50, 1)` in R
+3. **Take turns kicking**: one partner makes goal posts with their hands, the other flicks the football from their distance
+4. **Submit your results** on the Google Form (link on Slack)
+
+:::
+
+## On your handout
+
+::: {style="font-size:0.8em"}
+
+1. **Draw** the data
+2. **Write** the model in statistical notation
+3. We'll fit the model in R. **Write down** the coefficients.
+4. **Draw** $\text{logit}(p)$ vs. distance (the linear part)
+5. **Calculate** $p$ for distances of 10, 20, 30, 40, and 50 cm
+6. **Draw** $p$ vs. distance
+
+:::
+
+## Fit the model
+
+```{r}
+#| echo: true
+#| eval: false
+
+sheet_url <- "https://docs.google.com/spreadsheets/d/1mxNglhoIY9Kdlnmm0PCk3b8cP_l_27CTTBf2Fyek7bI/export?format=csv"
+field_goals <- read_csv(sheet_url) |>
+  # Column C is distance, column D is whether the kick was good
+  select(dist_cm = 3, made_it = 4) |>
+  mutate(success = as.integer(made_it == "Yes"))
+
+fg_glm <- glm(
+  success ~ dist_cm,
+  family = binomial(link = "logit"),
+  data = field_goals
+)
+coef(fg_glm)
+```
+
+# Recap
+
+## Key points
+
+::: {.fragment}
+
+**How do we model a binary response?**
+
+As a Bernoulli variable, where the probability of success, $p$, changes with the predictors.
+
+:::
+
+::: {.fragment}
+
+**What does the logit do?**
+
+It connects $p$, which is between 0 and 1, to a linear equation, which can be any value. It transforms $p$, not the 0s and 1s.
+
+:::
+
+::: {.fragment}
+
+**How do we interpret the coefficients?**
+
+They're in log odds. Convert to probabilities at a few predictor values, then plot the predictions.
+
+:::
+
+## One more look at your handout
+
+Compare your $p$ at 10 and 20 cm with your $p$ at 30 and 40 cm.
+
+::: {.incremental style="font-size:0.85em"}
+
+- Each step adds the same 10 cm, and logit(p) changes by the same amount ($10 \beta_1$) each time.
+- Does $p$ change by the same amount each time?
+- A straight line on the log odds scale is an S-curve on the probability scale. A step in distance changes $p$ the most near $p = 0.5$ and the least near 0 or 1.
+
+:::
+
+## References
+
+Johnson, C., Brown, D. J., Sanders, C., & Stihler, C. W. (2021). Long-term changes in occurrence, relative abundance, and reproductive fitness of bat species in relation to arrival of White-nose Syndrome in West Virginia, USA. _Ecology and Evolution_, 11(18), 12453–12467. <https://doi.org/10.1002/ece3.7991>
+
+Roseblock, M. (2023). Modeling Changes in Probability of Presence of Myotis lucifugus Due to White Nose Syndrome: An Introduction to Logistic Regression in R. _QUBES Educational Resources_. <https://doi.org/10.25334/HGYA-ZB07> (CC BY-SA 4.0)
