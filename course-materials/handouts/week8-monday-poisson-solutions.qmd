@@ -1,0 +1,363 @@
+---
+format:
+  pdf:
+    pdf-engine: xelatex
+    documentclass: article
+    papersize: letter
+    fontsize: 10pt
+    linestretch: 1.05
+    mainfont: Lora
+    monofont: Roboto Mono
+    monofontoptions:
+      - Scale=0.9
+    geometry:
+      - top=0.75in
+      - bottom=0.6in
+      - left=0.95in
+      - right=0.95in
+    pagestyle: empty
+    number-sections: false
+    include-in-header:
+      text: |
+        \usepackage{titlesec}
+        \usepackage{array}
+        \usepackage{booktabs}
+        \usepackage{enumitem}
+        \usepackage{unicode-math}
+        \setmathfont{latinmodern-math.otf}
+        \setmathfont[range={up/{latin,Latin,num}}]{Lora}
+        \setmathfont[range={it/{latin,Latin}}]{Lora Italic}
+        \setlength{\parindent}{0pt}
+        \setlength{\parskip}{5pt}
+        \titleformat{\section}{\normalfont\fontsize{15}{18}\selectfont}{}{0pt}{}
+        \titlespacing*{\section}{0pt}{0pt}{6pt}
+        \titleformat{\subsection}{\normalfont\fontsize{12}{15}\selectfont}{}{0pt}{}
+        \titlespacing*{\subsection}{0pt}{10pt}{2pt}
+        \setlist[itemize]{label=\textbullet, leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \setlist[enumerate]{leftmargin=0.35in, itemsep=2pt, topsep=2pt}
+        \newcommand{\doctitle}[1]{{\fontsize{21}{25}\selectfont #1}\par\vspace{8pt}}
+        \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+        \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+params:
+  key: true
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    comment: ""
+    fig.align: center
+    fig.pos: "H"
+    dev: cairo_pdf
+---
+
+```{r}
+#| label: setup
+library(ggplot2)
+
+key <- isTRUE(params$key)
+
+# ---- Plot style (matches the other handouts) ----
+theme_set(
+  theme_bw(base_size = 11) +
+    theme(
+      panel.grid.minor = element_line(linewidth = 0.2),
+      plot.margin = margin(4, 6, 2, 4)
+    )
+)
+
+# ---- Data ----
+# Exotic bee richness in Ann Arbor-area gardens (Fitch et al. 2019, via
+# Giacomangeli 2023 on QUBES)
+bees <- read.csv("../data/exotic-bees.csv")
+bees$impervious <- 100 * bees$NLCD500m
+
+bee_glm <- glm(
+  exotic.richness ~ impervious,
+  family = poisson(link = "log"),
+  data = bees
+)
+b0 <- coef(bee_glm)[["(Intercept)"]]
+b1 <- coef(bee_glm)[["impervious"]]
+
+xs <- seq(0, 100, by = 20)
+log_lambdas <- b0 + b1 * xs
+lambdas <- exp(log_lambdas)
+curve_grid <- data.frame(impervious = seq(0, 100, length.out = 101))
+curve_grid$log_lambda <- b0 + b1 * curve_grid$impervious
+curve_grid$lambda <- exp(curve_grid$log_lambda)
+table_points <- data.frame(
+  impervious = xs,
+  log_lambda = log_lambdas,
+  lambda = lambdas
+)
+
+# Mean and variance within bins of impervious surface (the Poisson assumption
+# is about the variance for a given value of the predictor)
+bees$imp_bin <- cut(bees$impervious, c(0, 25, 50, 100), include.lowest = TRUE)
+bin_stats <- do.call(
+  rbind,
+  lapply(split(bees$exotic.richness, bees$imp_bin), \(y) {
+    data.frame(n = length(y), mean = mean(y), var = var(y))
+  })
+)
+bin_labels <- c("0--25\\%", "25--50\\%", "50--100\\%")
+
+# ---- Helpers ----
+fmt <- function(x, digits = 2) formatC(x, format = "f", digits = digits)
+
+# A blank to fill in, or the answer in the key
+fill <- function(x, width = "1.6cm") {
+  if (key) as.character(x) else paste0("\\mbox{\\rule{", width, "}{0.4pt}}")
+}
+
+blank_lines <- function(n) {
+  if (!key) cat(rep("\\vspace{0.3in}\n\n", n), sep = "")
+}
+answer <- function(...) if (key) cat(..., sep = "")
+
+# Centered LaTeX table. header and each row are character vectors of cells.
+latex_table <- function(header, rows, align) {
+  row_tex <- vapply(rows, \(r) paste(r, collapse = " & "), character(1))
+  cat(
+    "\\begin{center}",
+    "\\renewcommand{\\arraystretch}{1.8}",
+    paste0("\\begin{tabular}{", align, "}"),
+    "\\toprule",
+    paste(paste(header, collapse = " & "), "\\\\"),
+    "\\midrule",
+    paste(row_tex, "\\\\"),
+    "\\bottomrule",
+    "\\end{tabular}",
+    "\\end{center}",
+    sep = "\n"
+  )
+  cat("\n\n")
+}
+
+# Empty axes spanning 0-100% impervious surface, with a grid to draw on
+imp_axes <- function(ylab, ylim, ybreaks, ylabels = ybreaks) {
+  ggplot(data.frame(impervious = c(0, 100), y = ylim), aes(impervious, y)) +
+    geom_blank() +
+    scale_x_continuous(
+      "% impervious surface (500 m)",
+      limits = c(-3, 103),
+      breaks = xs,
+      minor_breaks = seq(0, 100, by = 10)
+    ) +
+    scale_y_continuous(ylab, limits = ylim, breaks = ybreaks, labels = ylabels)
+}
+
+# The six values from the table, as open circles
+table_layer <- function(y) {
+  geom_point(
+    aes(impervious, .data[[y]]),
+    data = table_points,
+    inherit.aes = FALSE,
+    shape = 21,
+    fill = "white",
+    size = 2.5,
+    stroke = 1
+  )
+}
+
+data_layer <- geom_point(
+  aes(impervious, exotic.richness),
+  data = bees,
+  inherit.aes = FALSE,
+  shape = 21,
+  size = 2,
+  alpha = 0.6,
+  position = position_jitter(width = 0, height = 0.12, seed = 1)
+)
+```
+
+\doctitle{Exotic bees and Poisson regression`r if (key) " (answer key)" else ""`}
+
+Does urbanization favor exotic bees? Fitch et al. (2019) surveyed bees at `r nrow(bees)` gardens and natural areas around Ann Arbor, Michigan. Each point is one site: the percent of the land within 500 m covered by impervious surfaces (roads, roofs, parking lots), and the number of exotic bee species found there (exotic species richness).
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.6
+#| out-width: "72%"
+imp_axes("Exotic species", c(0, 8.5), 0:8) + data_layer
+```
+
+\vspace{2pt}\hrule\vspace{6pt}
+
+$$
+\log(\lambda) = \text{the natural log of } \lambda
+\qquad\qquad
+\lambda = e^{\log(\lambda)}
+$$
+
+- $\lambda$: the expected (mean) count, greater than 0
+- $\log(\lambda)$: any value from $-\infty$ to $\infty$
+
+\vspace{2pt}\hrule
+
+# 1. Write the model
+
+Write the model in statistical notation. What's the distribution of the response? What links $\lambda$ to the linear equation?
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "$$\n\\begin{aligned}\n",
+  "\\text{ExoticRichness} &\\sim \\text{Poisson}(\\lambda) \\\\\n",
+  "\\log(\\lambda) &= \\beta_0 + \\beta_1 \\text{PctImpervious}\n",
+  "\\end{aligned}\n$$\n\n"
+)
+```
+
+\newpage
+
+# 2. Draw the linear part
+
+We fit the model in R:
+
+```{=latex}
+\begingroup\footnotesize
+```
+
+```r
+bee_glm <- glm(exotic.richness ~ impervious, family = poisson(link = "log"), data = bees)
+```
+
+```{=latex}
+\endgroup
+```
+
+```{r}
+#| results: asis
+latex_table(
+  c("Term", "Coefficient", "Estimate"),
+  list(
+    c("\\texttt{(Intercept)}", "$\\beta_0$", fmt(b0, 3)),
+    c("\\texttt{impervious}", "$\\beta_1$", fmt(b1, 4))
+  ),
+  "llc"
+)
+```
+
+Draw $\log(\lambda) = \beta_0 + \beta_1 \text{PctImpervious}$. It's a straight line, so you only need two points.
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.4
+#| out-width: "70%"
+p <- imp_axes("log(λ)", c(0, 2), seq(0, 2, by = 0.5))
+if (key) {
+  p <- p +
+    geom_line(aes(impervious, log_lambda), data = curve_grid, linewidth = 1) +
+    table_layer("log_lambda")
+}
+p
+```
+
+# 3. Calculate $\lambda$
+
+For each value of impervious surface, calculate $\log(\lambda)$ from the coefficients. Then convert it to the expected number of exotic species, $\lambda$.
+
+```{r}
+#| results: asis
+rows <- lapply(seq_along(xs), \(i) {
+  c(xs[i], fill(fmt(log_lambdas[i]), "2.2cm"), fill(fmt(lambdas[i]), "2.2cm"))
+})
+latex_table(
+  c(
+    "\\% impervious",
+    "$\\log(\\lambda) = \\beta_0 + \\beta_1 \\times \\text{impervious}$",
+    "$\\lambda = e^{\\log(\\lambda)}$"
+  ),
+  rows,
+  "ccc"
+)
+```
+
+```{r}
+#| results: asis
+ratio <- exp(20 * b1)
+cat(
+  "How much does $\\log(\\lambda)$ change between each row? ",
+  fill(fmt(20 * b1), "2.2cm"),
+  "\n\nDivide each $\\lambda$ by the one above it. What do you get? ",
+  fill(paste0(fmt(ratio), " every time ($e^{20\\beta_1}$)"), "2.2cm"),
+  "\n\nIn words, what happens to the expected number of exotic species for every 20 points of impervious surface? ",
+  if (key) {
+    paste0(
+      "It's multiplied by ",
+      fmt(ratio),
+      ", a ",
+      round(100 * (ratio - 1)),
+      "\\% increase. ",
+      "Adding a constant on the log scale is multiplying by a constant on the ",
+      "count scale."
+    )
+  } else {
+    "\n\n\\vspace{0.25in}"
+  },
+  "\n\n",
+  sep = ""
+)
+```
+
+\newpage
+
+# 4. Draw $\lambda$
+
+Plot your six values of $\lambda$ on top of the data, then connect them with a smooth curve.
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 2.6
+#| out-width: "70%"
+p <- imp_axes("Exotic species", c(0, 8.5), 0:8) + data_layer
+if (key) {
+  p <- p +
+    geom_line(aes(impervious, lambda), data = curve_grid, linewidth = 1) +
+    table_layer("lambda")
+}
+p
+```
+
+# 5. Is a Poisson a good fit?
+
+A Poisson distribution's variance equals its mean. That's about a \textit{given} value of the predictor, so we compare sites with similar impervious surface.
+
+```{r}
+#| results: asis
+latex_table(
+  c("\\% impervious", "Sites", "Mean exotic species", "Variance"),
+  lapply(seq_len(nrow(bin_stats)), \(i) {
+    c(
+      bin_labels[i],
+      bin_stats$n[i],
+      fmt(bin_stats$mean[i]),
+      fmt(bin_stats$var[i])
+    )
+  }),
+  "cccc"
+)
+```
+
+Is the Poisson a reasonable model for these data? Explain using the table.
+
+```{r}
+#| results: asis
+blank_lines(3)
+answer(
+  "Yes, reasonably. Within bins of impervious surface, the variance is close ",
+  "to the mean in the low and high bins. The middle bin's variance is higher, ",
+  "but it has only ",
+  bin_stats$n[2],
+  " sites, so its variance is noisy. ",
+  "Keep this check in mind for the drinking water violations.\n\n"
+)
+```
+
+\vfill
+
+\footnotesize Data: Fitch, G., et al. (2019). Does urbanization favour exotic bee species? Implications for the conservation of native bees in cities. _Biology Letters_, 15, 20190574. Adapted from Giacomangeli, G. (2023). Does Urbanization Favor Exotic Species? _QUBES Educational Resources_ (CC BY-SA 4.0).

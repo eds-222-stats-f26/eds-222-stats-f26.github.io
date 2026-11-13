@@ -1,0 +1,578 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 8 Monday: Poisson regression"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal .slides section .fragment.highlight-green.visible {
+          color: #15803d;
+        }
+        .reveal table {
+          font-size: 0.7em;
+        }
+        .reveal table code {
+          white-space: nowrap;
+          font-size: 0.9em;
+        }
+        </style>
+execute:
+  echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+pct <- \(x) paste0(round(100 * x), "%")
+
+# ---- Lab 7: drinking water ----
+pcthisp_breaks <- c(0, 10, 25, 50, 100)
+drinking_water <- read_csv("../data/drinking_water.csv") |>
+  select(pwsid, pctpov, pcthisp, health, violation) |>
+  mutate(
+    pctpov_bin = cut(pctpov, seq(0, 100, by = 10), include.lowest = TRUE),
+    pcthisp_bin = cut(pcthisp, pcthisp_breaks, include.lowest = TRUE)
+  )
+
+pov_hisp_summary <- drinking_water |>
+  summarize(
+    pctpov = mean(pctpov),
+    prop_violation = mean(violation),
+    mean_health = mean(health),
+    var_health = var(health),
+    n = n(),
+    .by = c(pctpov_bin, pcthisp_bin)
+  ) |>
+  filter(n >= 50)
+
+additive_glm <- glm(
+  violation ~ pctpov + pcthisp,
+  family = binomial(link = "logit"),
+  data = drinking_water
+)
+interaction_glm <- glm(
+  violation ~ pctpov * pcthisp,
+  family = binomial(link = "logit"),
+  data = drinking_water
+)
+
+lab7_grid <- expand_grid(
+  pctpov = seq(0, 70, by = 1),
+  pcthisp = c(5, 17.5, 37.5, 75)
+) |>
+  mutate(pcthisp_bin = cut(pcthisp, pcthisp_breaks, include.lowest = TRUE))
+lab7_grid$additive_link <- predict(additive_glm, lab7_grid, type = "link")
+lab7_grid$additive_p <- predict(additive_glm, lab7_grid, type = "response")
+lab7_grid$interaction_p <- predict(
+  interaction_glm,
+  lab7_grid,
+  type = "response"
+)
+
+int_b <- coef(interaction_glm)
+int_slope <- \(hisp) int_b[["pctpov"]] + int_b[["pctpov:pcthisp"]] * hisp
+
+comparison <- expand_grid(pctpov = 50, pcthisp = c(0, 75))
+comparison$additive <- predict(additive_glm, comparison, type = "response")
+comparison$interaction <- predict(
+  interaction_glm,
+  comparison,
+  type = "response"
+)
+
+hisp_scale <- scale_color_viridis_d("% Hispanic")
+lab7_axes <- labs(x = "% below poverty", y = "P(violation)")
+
+# ---- Exotic bees ----
+bees <- read_csv("../data/exotic-bees.csv") |>
+  mutate(impervious = 100 * NLCD500m)
+
+# ---- Overdispersion ----
+pov_summary <- drinking_water |>
+  summarize(
+    mean_health = mean(health),
+    var_health = var(health),
+    n = n(),
+    .by = pctpov_bin
+  ) |>
+  filter(n >= 10)
+health_pois <- glm(
+  health ~ pctpov * pcthisp,
+  family = poisson(link = "log"),
+  data = drinking_water
+)
+count_freqs <- tibble(count = 0:5) |>
+  mutate(
+    Observed = map_dbl(count, \(k) mean(drinking_water$health == k)),
+    Poisson = map_dbl(count, \(k) mean(dpois(k, fitted(health_pois))))
+  )
+```
+
+# Poisson regression
+
+## Today's agenda
+
+- **Recap** lab 7: the interaction (15 min)
+- **Introduce** Poisson regression (15 min)
+- **Calculate** exotic bee richness by hand (15 min)
+- **Count** drinking water violations (25 min)
+- **Discuss** overdispersion (10 min)
+
+# Lab 7 recap
+
+## Does poverty affect every community the same way?
+
+Proportion of water systems with a health-based violation, binned by poverty and % Hispanic.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+
+ggplot(
+  pov_hisp_summary,
+  aes(pctpov, prop_violation, color = pcthisp_bin)
+) +
+  geom_point(aes(size = n)) +
+  geom_line() +
+  hisp_scale +
+  scale_size_area(guide = "none") +
+  labs(x = "% below poverty", y = "Proportion with violation")
+```
+
+::: {.fragment style="font-size:0.75em"}
+
+The slope is steepest in majority-Hispanic communities. That's what an interaction looks like.
+
+:::
+
+## The additive model
+
+$$
+\text{logit}(p) = \beta_0 + \beta_1 \text{PctPov} + \beta_2 \text{PctHisp}
+$$
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+ggplot(lab7_grid, aes(pctpov, additive_p, color = pcthisp_bin)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(aes(y = prop_violation), data = pov_hisp_summary) +
+  hisp_scale +
+  lab7_axes
+```
+
+::: {.fragment style="font-size:0.75em"}
+
+No interaction term. So why aren't the lines parallel?
+
+:::
+
+## Parallel on the link scale
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+ggplot(lab7_grid, aes(pctpov, additive_link, color = pcthisp_bin)) +
+  geom_line(linewidth = 1.5) +
+  hisp_scale +
+  labs(x = "% below poverty", y = "logit(P(violation))")
+```
+
+::: {.fragment style="font-size:0.75em"}
+
+The model is additive in **log odds**. The inverse logit is nonlinear, so the same change in log odds moves $p$ more when $p$ is closer to 0.5.
+
+:::
+
+## The interaction model
+
+$$
+\text{logit}(p) = \beta_0 + \beta_1 \text{PctPov} + \beta_2 \text{PctHisp} + \beta_3 \text{PctPov} \times \text{PctHisp}
+$$
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+ggplot(lab7_grid, aes(pctpov, interaction_p, color = pcthisp_bin)) +
+  geom_line(linewidth = 1.5) +
+  geom_point(aes(y = prop_violation), data = pov_hisp_summary) +
+  hisp_scale +
+  lab7_axes
+```
+
+## What's the slope for poverty?
+
+::: {style="font-size:0.85em"}
+
+Rearrange the linear part to group the PctPov terms:
+
+$$
+\text{logit}(p) = \beta_0 + \beta_2 \text{PctHisp} + (\beta_1 + \beta_3 \text{PctHisp}) \text{PctPov}
+$$
+
+:::
+
+::: {.fragment}
+
+| % Hispanic | Slope for poverty (log odds per point) |
+|-----------:|:---------------------------------------|
+| 0  | $\beta_1 =$ `r fmt(int_slope(0), 3)` |
+| 75 | $\beta_1 + 75 \beta_3 =$ `r fmt(int_slope(75), 3)` |
+
+:::
+
+::: {.fragment}
+
+- $\beta_3$ is positive and significant: poverty matters more as % Hispanic increases.
+
+:::
+
+## Why does it matter?
+
+Predicted probability of a violation in a community where 50% of households are below the poverty line:
+
+| % Hispanic | Additive | Interaction |
+|-----------:|:--------:|:-----------:|
+| 0  | `r pct(comparison$additive[1])` | `r pct(comparison$interaction[1])` |
+| 75 | `r pct(comparison$additive[2])` | `r pct(comparison$interaction[2])` |
+
+::: {.fragment}
+
+The additive model forces poverty to have the same effect everywhere, so it understates the risk faced by poor, majority-Hispanic communities.
+
+:::
+
+# From "whether" to "how many"
+
+## Does urbanization favor exotic bees?
+
+Fitch et al. (2019) counted the **number of exotic bee species** at `r nrow(bees)` gardens and natural areas around Ann Arbor, Michigan.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+ggplot(bees, aes(impervious, exotic.richness)) +
+  geom_point(
+    #position = position_jitter(height = 0.1, width = 0, seed = 1),
+    shape = 21,
+    size = 3
+  ) +
+  scale_y_continuous(breaks = 0:8) +
+  labs(
+    x = "% impervious surface within 500 m",
+    y = "Exotic bee species"
+  )
+```
+
+::: {.fragment style="font-size:0.75em"}
+
+Counts are whole numbers, never negative, with no upper limit. Neither a normal nor a Bernoulli distribution fits.
+
+:::
+
+## What is a Poisson variable?
+
+The number of events in a fixed amount of time or space. One parameter: $\lambda$, the **mean** (also the variance).
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4
+#| fig-align: center
+
+expand_grid(lambda = c(0.5, 2, 5), k = 0:12) |>
+  mutate(
+    prob = dpois(k, lambda),
+    lambda = factor(paste("λ =", lambda), levels = paste("λ =", c(0.5, 2, 5)))
+  ) |>
+  ggplot(aes(k, prob)) +
+  geom_col(fill = "cornflowerblue") +
+  facet_wrap(~lambda) +
+  scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+  labs(x = "Count", y = "Probability")
+```
+
+::: {.fragment style="font-size:0.75em"}
+
+Small $\lambda$: mostly zeros. Larger $\lambda$: more spread out, and closer to symmetric.
+
+:::
+
+## Which response is a Poisson variable?
+
+::: {style="font-size:0.8em"}
+
+**A.** Whether a water system had a violation this year
+
+[**B.** The number of violations at a water system this year]{.fragment .highlight-green fragment-index=1}
+
+**C.** The concentration of nitrate in a water sample (mg/L)
+
+:::
+
+::: {.fragment fragment-index=1 style="font-size:0.75em"}
+
+- A is binary: Bernoulli, logistic regression.
+- B is a count with no fixed upper limit: Poisson.
+- C is continuous: it can be 2.37 mg/L. Counts can't.
+
+:::
+
+## Logistic vs. Poisson regression
+
+| | Logistic | Poisson |
+|:--|:--|:--|
+| Response | 0 or 1 | 0, 1, 2, ... |
+| Distribution | $\text{Bernoulli}(p)$ | $\text{Poisson}(\lambda)$ |
+| Parameter | $p$, between 0 and 1 | $\lambda$, greater than 0 |
+| Link | $\text{logit}(p) = \log\left(\frac{p}{1-p}\right)$ | $\log(\lambda)$ |
+| Inverse link | $p = \frac{1}{1 + e^{-\text{logit}(p)}}$ | $\lambda = e^{\log(\lambda)}$ |
+| `family` in R | `binomial(link = "logit")` | `poisson(link = "log")` |
+
+::: {.fragment style="font-size:0.75em"}
+
+Both are **generalized linear models**: pick a distribution for the response, then link its parameter to a linear equation. Only the family and the link change.
+
+:::
+
+## Why the log link?
+
+::: {.incremental style="font-size:0.85em"}
+
+- $\lambda$ has to be positive. A straight line can go below 0.
+- $\log$ turns $(0, \infty)$ into $(-\infty, \infty)$, just like logit turns $(0, 1)$ into $(-\infty, \infty)$.
+- Adding on the log scale means **multiplying** on the count scale:
+
+:::
+
+::: {.fragment style="font-size:0.85em"}
+
+$$
+\lambda = e^{\beta_0 + \beta_1 x} = e^{\beta_0} \times \left(e^{\beta_1}\right)^x
+$$
+
+:::
+
+::: {.fragment style="font-size:0.75em"}
+
+Each 1-unit increase in $x$ multiplies the expected count by $e^{\beta_1}$. If $\beta_1 = -0.5$, then $e^{-0.5} = 0.61$, and the expected count falls 39% per unit.
+
+:::
+
+## Write the model
+
+$$
+\begin{aligned}
+\text{ExoticRichness} &\sim \text{Poisson}(\lambda) \\
+\log(\lambda) &= \beta_0 + \beta_1 \text{PctImpervious}
+\end{aligned}
+$$
+
+
+
+::: {.fragment style="font-size:0.75em"}
+
+Line 1: the number of exotic species at each site is Poisson, with mean $\lambda$. 
+
+Line 2: the log of $\lambda$ changes linearly with impervious surface.
+
+:::
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+#| eval: false
+
+bee_glm <- glm(
+  exotic.richness ~ impervious,
+  family = poisson(link = "log"),
+  data = bees
+)
+```
+
+:::
+
+## On your handout
+
+::: {style="font-size:0.8em"}
+
+Exotic bee species richness vs. impervious surface.
+
+1. **Write** the model in statistical notation
+2. **Draw** $\log(\lambda)$ vs. % impervious surface (the linear part)
+3. **Calculate** $\lambda$ for 0, 20, 40, 60, 80, and 100% impervious surface
+4. **Draw** $\lambda$ on top of the data
+5. **Check** whether a Poisson is a good fit: mean and variance
+
+:::
+
+## One more look at your handout
+
+::: {.incremental style="font-size:0.85em"}
+
+- Each 20-point step changes $\log(\lambda)$ by the same amount ($20\beta_1$).
+- On the count scale, each step **multiplies** $\lambda$ by the same amount ($e^{20\beta_1}$).
+- The Poisson fits these data well: the variance and mean are similar. Will that be true for drinking water violations?
+
+:::
+
+# Counting violations
+
+## Lab 7 again, with counts
+
+The `health` column is the **number** of health-based violations each water system had that year.
+
+::: {style="font-size:0.85em"}
+
+- Lab 7: did a system have _any_ violations? `violation ~ ...`, binomial
+- Today: _how many_ violations did it have? `health ~ ...`, Poisson
+
+:::
+
+::: {.fragment style="font-size:0.85em"}
+
+Open [Poisson regression in R](../labs/week8_monday.qmd) and work through it with a partner. Same recipe: visualize, fit, predict.
+
+:::
+
+# Overdispersion
+
+## The Poisson's strong assumption
+
+Variance **equals** mean, _for a given value of the predictor_. Check within bins of poverty:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.8
+#| fig-align: center
+
+axis_lims <- c(0.1, 5)
+ggplot(pov_summary, aes(mean_health, var_health)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  geom_point(aes(size = n), color = "cornflowerblue") +
+  annotate(
+    "text",
+    x = 1,
+    y = 0.6,
+    label = "variance = mean",
+    size = 6,
+    hjust = 0
+  ) +
+  scale_size_area(guide = "none") +
+  scale_x_log10(limits = axis_lims) +
+  scale_y_log10(limits = axis_lims) +
+  labs(
+    x = "Mean violations in bin (log scale)",
+    y = "Variance in bin (log scale)"
+  )
+```
+
+::: {.fragment style="font-size:0.75em"}
+
+In every bin, the variance is bigger than the mean (typically about `r round(median(pov_summary$var_health / pov_summary$mean_health))` times bigger). This is **overdispersion**: the counts vary more than a Poisson can explain. Most systems have zero violations, and a few have many.
+
+:::
+
+::: {.notes}
+
+Why not just compare the overall mean and variance? Because the assumption is conditional: Var(Y | x) = E(Y | x). The overall variance also includes variation in λ across systems with different predictors, so it would overstate overdispersion (here, about 6x overall vs. about 4.5x within bins).
+
+:::
+
+## Too few zeros, too few big counts
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+count_freqs |>
+  pivot_longer(-count, names_to = "source", values_to = "freq") |>
+  ggplot(aes(count, freq, fill = source)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(NULL, values = c("grey40", "cornflowerblue")) +
+  labs(x = "Health-based violations", y = "Proportion of systems")
+```
+
+::: {.fragment style="font-size:0.75em"}
+
+Observed zeros: `r pct(count_freqs$Observed[1])`. Poisson predicts `r pct(count_freqs$Poisson[1])`. The Poisson spreads the counts too evenly.
+
+:::
+
+## What to do 
+
+If you're modeling counts in your final project (or capstone, or after graduation...) and you find overdispersion:
+
+::: {.incremental}
+
+- Use a _negative binomial_ response instead of Poisson.
+
+- Negative binomial variables are also counts, but they can be more dispersed (spread out) than Poisson.
+
+- We can discuss the details if you need them this quarter!
+
+:::
+
+# Recap
+
+## Key points
+
+::: {.fragment style="font-size:0.8em"}
+
+**What's a generalized linear model?**
+
+Pick a distribution for the response. Link its parameter to a linear equation.
+
+:::
+
+::: {.fragment style="font-size:0.8em"}
+
+**How do we model counts?**
+
+As a Poisson variable, where the log of the mean, $\log(\lambda)$, changes linearly with the predictors.
+
+:::
+
+::: {.fragment style="font-size:0.8em"}
+
+**How do we interpret the coefficients?**
+
+On the log scale, they add. On the count scale, $e^{\beta}$ multiplies the expected count.
+
+:::
+
+::: {.fragment style="font-size:0.8em"}
+
+**How do we check a Poisson model?**
+
+Within bins of the predictors, compare the variance to the mean. If the variance is bigger, the counts are overdispersed.
+
+:::
+
+## References
+
+Fitch, G., Wilson, C. J., Glaum, P., Vaidya, C., Simao, M.-C., & Jamieson, M. A. (2019). Does urbanization favour exotic bee species? Implications for the conservation of native bees in cities. _Biology Letters_, 15(12), 20190574. <https://doi.org/10.1098/rsbl.2019.0574>
+
+Giacomangeli, G. (2023). Does Urbanization Favor Exotic Species? _QUBES Educational Resources_. <https://doi.org/10.25334/KG7P-AD07> (CC BY-SA 4.0)
+
+Switzer, D., & Teodoro, M. P. (2017). The color of drinking water: Class, race, ethnicity, and Safe Drinking Water Act compliance. _Journal AWWA_, 109(9), 40–45. <https://doi.org/10.5942/jawwa.2017.109.0128>

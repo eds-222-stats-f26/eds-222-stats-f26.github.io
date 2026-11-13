@@ -1,0 +1,157 @@
+---
+title: "Poisson regression in R (solutions)"
+subtitle: "Counting drinking water violations"
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: week8_monday_solutions.qmd
+execute:
+  eval: true
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| echo: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+## Overview
+
+In lab 7, you modeled _whether_ a public water system had a health-based Safe Drinking Water Act violation. Today you'll model _how many_ violations it had. The `health` column counts them.
+
+- **pwsid**: public water system ID
+- **pctpov**: percent of households below the poverty line
+- **health**: number of health-based SDWA violations that year
+
+Same recipe as lab 7: visualize, fit, predict. Only the family and the link change.
+
+```{r}
+#| message: false
+
+# This path works on the course website - replace it with the Workbench path when rendering
+drinking_water <- read_csv("../data/drinking_water.csv") |>
+  select(pwsid, pctpov, health)
+```
+
+## Part 1: Class
+
+### Visualize
+
+What does the response look like? Make a bar chart of `health`.
+
+```{r}
+ggplot(drinking_water, aes(x = health)) +
+  geom_bar() +
+  # A small number of districts have many violations; drop them for a clearer
+  # picture
+  xlim(NA, 10) +
+  labs(x = "Health-based violations", y = "Number of water systems")
+```
+
+With a count response, the raw data are hard to read, so we'll bin `pctpov` again and calculate the **mean** number of violations in each bin.
+
+```{r}
+pov_summary <- drinking_water |>
+  mutate(
+    pctpov_bin = cut(
+      pctpov,
+      breaks = seq(0, 100, by = 10),
+      include.lowest = TRUE
+    )
+  ) |>
+  summarize(
+    pctpov = mean(pctpov),
+    mean_health = mean(health),
+    var_health = var(health), # we'll use this in Part 2
+    n = n(),
+    .by = pctpov_bin
+  )
+
+ggplot(pov_summary, aes(x = pctpov, y = mean_health)) +
+  geom_point(aes(size = n), color = "cornflowerblue") +
+  labs(x = "% below poverty", y = "Mean violations")
+```
+
+### Fit
+
+Our model in statistical notation is:
+
+$$
+\begin{aligned}
+\text{Violations} &\sim \text{Poisson}(\lambda) \\
+\log(\lambda) &= \beta_0 + \beta_1 \text{PctPov}
+\end{aligned}
+$$
+
+```{r}
+pov_glm <- glm(
+  health ~ pctpov,
+  family = poisson(link = "log"),
+  data = drinking_water
+)
+summary(pov_glm)
+```
+
+The coefficients are on the log scale. Exponentiate them to get the effect on the expected count.
+
+```{r}
+exp(coef(pov_glm))
+```
+
+### Predict
+
+```{r}
+pov_grid <- expand_grid(
+  pctpov = seq(0, 70, by = 1)
+)
+pov_grid$mean_health <- predict(
+  pov_glm,
+  newdata = pov_grid,
+  type = "response"
+)
+
+ggplot(pov_summary, aes(x = pctpov, y = mean_health)) +
+  geom_point(aes(size = n), color = "cornflowerblue") +
+  geom_line(data = pov_grid, linewidth = 1.5, color = "firebrick") +
+  labs(x = "% below poverty", y = "Mean violations")
+```
+
+How many violations does the model expect when 5% of households are below the poverty line? When 50% are?
+
+```{r}
+predict(
+  pov_glm,
+  newdata = tibble(pctpov = c(5, 50)),
+  type = "response"
+)
+```
+
+**Answer**: About 0.14 violations per year at 5% poverty and 0.37 at 50%. That's about 2.5 times as many. (Check: $e^{45 \beta_1} = 1.021^{45} \approx 2.5$.)
+
+## Part 2: Check the Poisson assumption
+
+A Poisson variable's variance equals its mean. But that's the mean _for a given value of the predictor_, $\lambda$, not the mean of the whole dataset. Systems with different poverty levels have different $\lambda$s, so the overall variance would mix those differences in.
+
+Instead, use the bins from Part 1. Within a bin, poverty is roughly constant. Plot the variance in each bin against its mean, and add a line where variance = mean.
+
+```{r}
+ggplot(pov_summary, aes(x = mean_health, y = var_health)) +
+  geom_point(aes(size = n)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  labs(x = "Mean violations in bin", y = "Variance in bin")
+```
+
+How does the variance compare to the mean? Does the Poisson assumption hold?
+
+**Answer**: Every bin with more than a handful of systems is well above the dashed line, with variance 3 to 9 times the mean. (The bins above 70% poverty have 5 or fewer systems each, too few to say much.) The counts are overdispersed.
+
+We'll talk about why this matters at the end of class.
+
+## References
+
+Switzer, D., & Teodoro, M. P. (2017). The color of drinking water: Class, race, ethnicity, and Safe Drinking Water Act compliance. _Journal AWWA_, 109(9), 40–45. <https://doi.org/10.5942/jawwa.2017.109.0128>

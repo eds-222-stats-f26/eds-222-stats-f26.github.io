@@ -1,0 +1,579 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 8 Monday: Poisson Regression"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal .eq-columns .math {
+          font-size: 92% !important;
+        }
+        .reveal table {
+          font-size: 0.7em;
+        }
+        .reveal table code {
+          white-space: nowrap;
+          font-size: 0.9em;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+
+# Exotic bees (Fitch et al. 2019)
+bees <- read_csv("../data/exotic-bees.csv") |>
+  mutate(impervious = 100 * NLCD500m)
+
+bee_glm <- glm(
+  exotic.richness ~ impervious,
+  family = poisson(link = "log"),
+  data = bees
+)
+
+# A linear model, for comparison
+bee_lm <- lm(exotic.richness ~ impervious, data = bees)
+bee_lm_pred <- tibble(impervious = seq(0, 100, length.out = 101)) |>
+  mutate(fit = predict(bee_lm, pick(impervious)))
+
+bee_b0 <- signif(coef(bee_glm)[["(Intercept)"]], 3)
+bee_b1 <- signif(coef(bee_glm)[["impervious"]], 3)
+bee_term <- \(x) signif(bee_b1 * x, 3)
+bee_log <- \(x) signif(bee_b0 + bee_term(x), 3)
+bee_lambda <- \(x) fmt(exp(bee_log(x)))
+bee_mult <- \(x) signif(exp(bee_b1 * x), 4)
+
+bee_pred <- tibble(impervious = seq(0, 100, length.out = 101))
+bee_pred$log_lambda <- predict(bee_glm, bee_pred, type = "link")
+bee_pred$lambda <- predict(bee_glm, bee_pred, type = "response")
+bee_points <- tibble(impervious = c(0, 100)) |>
+  mutate(
+    log_lambda = bee_log(impervious),
+    lambda = exp(log_lambda),
+    lambda_label = bee_lambda(impervious)
+  )
+
+bee_plot <- ggplot(bees, aes(impervious, exotic.richness)) +
+  geom_point(
+    position = position_jitter(height = 0.1, width = 0, seed = 1),
+    shape = 21,
+    size = 3
+  ) +
+  scale_y_continuous(breaks = 0:8) +
+  labs(x = "% impervious surface (500 m)", y = "Exotic bee species")
+```
+
+# Poisson regression
+
+## Learning objectives
+
+- **Describe** a Poisson random variable
+- **Explain** why we model the _log_ of the expected count
+- **Interpret** the coefficients of a Poisson regression
+- **Compare** Poisson and logistic regression
+
+# Exotic bees
+
+## Does urbanization favor exotic bees?
+
+::: {.columns}
+
+::: {.column}
+
+![The European honeybee, an exotic species in North America](images/honeybee.jpeg)
+
+:::
+
+::: {.column style="font-size: 0.8em"}
+
+Fitch et al. (2019) surveyed bees at `r nrow(bees)` gardens and natural areas around Ann Arbor, Michigan.
+
+Cities are hubs of international trade, where exotic bees arrive, and many exotic bees nest in cavities that buildings provide.
+
+If urbanization favors exotic bees, sites with more impervious surface (roads, roofs, parking lots) should have more exotic species.
+
+:::
+
+:::
+
+## The data
+
+Each point is one site. The response is **exotic species richness**: the number of exotic bee species found there.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-align: center
+
+bee_plot
+```
+
+## Fit a linear model
+
+The line is a linear regression.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+bee_plot +
+  geom_line(
+    aes(y = fit),
+    data = bee_lm_pred,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  scale_y_continuous(breaks = seq(0, 8, by = 2))
+```
+
+## The problems
+
+::: {.incremental}
+
+1. Counts are whole numbers: 0, 1, 2, ... But the predictions are continuous.
+   - Solution: treat the prediction as the _expected_ (average) count
+2. Counts can't be negative. But the linear model allows them.
+3. Linear regression assumes the spread is the same everywhere. But counts spread out more as they get bigger.
+
+:::
+
+::: {.fragment}
+
+We need a distribution made for counts.
+
+:::
+
+# Poisson random variables
+
+## Counting events
+
+A **Poisson** random variable is the number of events in a fixed amount of time or space.
+
+::: {.incremental}
+
+- Exotic bee species at a garden
+- Birds seen during a 10-minute point count
+- Drinking water violations in a year
+- Hurricanes making landfall in a season
+
+:::
+
+::: {.fragment}
+
+It has one parameter, $\lambda$ ("lambda"), the expected count. $\lambda$ can be any positive number, even though the counts are whole numbers.
+
+:::
+
+## The Poisson distribution
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4
+#| fig-align: center
+
+expand_grid(lambda = c(0.5, 2, 5), k = 0:12) |>
+  mutate(
+    prob = dpois(k, lambda),
+    lambda = factor(paste("λ =", lambda), levels = paste("λ =", c(0.5, 2, 5)))
+  ) |>
+  ggplot(aes(k, prob)) +
+  geom_col(fill = "cornflowerblue") +
+  facet_wrap(~lambda) +
+  scale_x_continuous(breaks = seq(0, 12, by = 2)) +
+  labs(x = "Count", y = "Probability")
+```
+
+Small $\lambda$: mostly zeros, skewed right. Larger $\lambda$: more spread out, more symmetric.
+
+## Two useful facts
+
+::: {.incremental}
+
+1. The **variance equals the mean**: $\text{Var}(Y) = E(Y) = \lambda$. As the expected count goes up, so does the spread.
+2. The **chance of a zero** is $P(Y = 0) = e^{-\lambda}$.
+
+:::
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+y <- rpois(10000, lambda = 2)
+c(
+  mean = mean(y),
+  variance = var(y),
+  prop_zero = mean(y == 0),
+  exp_neg2 = exp(-2)
+)
+```
+
+:::
+
+# Regressing counts
+
+## Different ranges
+
+Our linear model, $\beta_0 + \beta_1 x$, can take on _any value_. Its range is $(-\infty, \infty)$.
+
+Expected counts are limited. $\lambda$'s range is $(0, \infty)$.
+
+We need a function that converts values from $(0, \infty)$ to $(-\infty, \infty)$.
+
+## The log
+
+The natural log does exactly that.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+ggplot() +
+  stat_function(fun = log, n = 1e4) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+  xlim(0.005, 10) +
+  labs(x = "λ (expected count)", y = "log(λ)")
+```
+
+Counts near 0 become large negative numbers. Big counts become positive numbers. We call log the **link** function.
+
+## The model
+
+$$
+\begin{aligned}
+\text{ExoticRichness} &\sim \text{Poisson}(\lambda) \\
+\log(\lambda) &= \beta_0 + \beta_1 \text{PctImpervious}
+\end{aligned}
+$$
+
+::: {.fragment}
+
+In R, the only changes from logistic regression are the family and the link:
+
+```{r}
+#| echo: true
+#| eval: false
+
+bee_glm <- glm(
+  exotic.richness ~ impervious,
+  family = poisson(link = "log"),
+  data = bees
+)
+```
+
+:::
+
+## Adding becomes multiplying
+
+Undo the log by exponentiating both sides:
+
+$$
+\begin{aligned}
+log(\lambda) &= \beta_0 + \beta_1 x \\
+\lambda &= e^{\beta_0 + \beta_1 x} \\
+\lambda &= e^{\beta_0} \times \left(e^{\beta_1}\right)^x
+\end{aligned}
+$$
+
+::: {.incremental}
+
+- $e^{\beta_0}$ is the expected count when $x = 0$
+- Each 1-unit increase in $x$ **multiplies** the expected count by $e^{\beta_1}$
+
+:::
+
+## Fit the model
+
+```{r}
+#| class-output: small-output
+
+summary(bee_glm)
+```
+
+## Interpreting the coefficients
+
+$$
+\log(\lambda) = `r bee_b0` + `r bee_b1` \times \text{PctImpervious}
+$$
+
+::: {.incremental}
+
+- The _log_ of the expected number of exotic species increases by `r bee_b1` per percentage point of impervious surface.
+- Not terribly intuitive. Exponentiate: $e^{`r bee_b1`} = `r bee_mult(1)`$. Each percentage point multiplies the expected count by `r bee_mult(1)`, a `r round(100 * (bee_mult(1) - 1), 2)`% increase.
+- Over 5 points: $e^{5 \times `r bee_b1`} = `r bee_mult(5)`$, a `r round(100 * (bee_mult(5) - 1), 1)`% increase.
+
+:::
+
+## From log counts to counts {.smaller}
+
+::: {.columns .eq-columns}
+
+::: {.column width="50%"}
+
+At 0% impervious surface:
+
+| [$\log(\lambda) = `r bee_b0` + `r bee_b1` \times \text{PctImpervious}$]{.fragment}
+| [$\log(\lambda) = `r bee_b0` + `r bee_b1` \times 0$]{.fragment}
+| [$\log(\lambda) = `r bee_log(0)`$]{.fragment}
+| [$\hphantom{\log()}\lambda = e^{`r bee_log(0)`} = `r bee_lambda(0)`$]{.fragment}
+
+::: {.fragment}
+
+We expect about `r fmt(as.numeric(bee_lambda(0)), 1)` exotic species at a site with no impervious surface.
+
+:::
+
+:::
+
+::: {.column width="50%"}
+
+At 100% impervious surface:
+
+| [$\log(\lambda) = `r bee_b0` + `r bee_b1` \times \text{PctImpervious}$]{.fragment}
+| [$\log(\lambda) = `r bee_b0` + `r bee_b1` \times 100$]{.fragment}
+| [$\log(\lambda) = `r bee_b0` + `r bee_term(100)`$]{.fragment}
+| [$\log(\lambda) = `r bee_log(100)`$]{.fragment}
+| [$\hphantom{\log()}\lambda = e^{`r bee_log(100)`} = `r bee_lambda(100)`$]{.fragment}
+
+::: {.fragment}
+
+We expect about `r fmt(as.numeric(bee_lambda(100)), 1)` exotic species at a fully paved site.
+
+:::
+
+:::
+
+:::
+
+## Visualize the prediction
+
+$$
+\log(\lambda) = `r bee_b0` + `r bee_b1` \times \text{PctImpervious}
+$$
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 4.3
+
+ggplot(bee_pred, aes(impervious, log_lambda)) +
+  geom_line(color = "cornflowerblue", linewidth = 2) +
+  geom_point(
+    data = bee_points,
+    shape = 21,
+    fill = "white",
+    size = 4,
+    stroke = 1.5
+  ) +
+  geom_label(
+    aes(label = log_lambda),
+    data = bee_points,
+    hjust = c(0, 1),
+    vjust = c(0, 1),
+    nudge_x = c(3, -3),
+    size = 6
+  ) +
+  labs(x = "% impervious", y = "log(λ)")
+```
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 4.3
+
+bee_plot +
+  geom_line(
+    aes(y = lambda),
+    data = bee_pred,
+    color = "cornflowerblue",
+    linewidth = 2
+  ) +
+  geom_point(
+    aes(y = lambda),
+    data = bee_points,
+    shape = 21,
+    fill = "white",
+    size = 4,
+    stroke = 1.5
+  ) +
+  geom_label(
+    aes(y = lambda, label = lambda_label),
+    data = bee_points,
+    hjust = c(0, 1),
+    vjust = c(1, 0),
+    nudge_x = c(3, -3),
+    size = 6
+  ) +
+  labs(x = "% impervious")
+```
+
+:::
+
+:::
+
+A straight line on the log scale is an exponential curve on the count scale.
+
+## Live coding
+
+Now let's do it in R. Open [Poisson regression in R](../labs/week8_monday_live.qmd) and follow along.
+
+1. Visualize the data
+2. Fit the model
+3. Interpret the coefficients
+4. Convert log counts to counts
+5. Visualize the predictions
+
+# Poisson vs. logistic regression
+
+## Same recipe, different ingredients
+
+::: {.columns}
+
+::: {.column}
+
+**Logistic:** a binary outcome
+
+$$
+\begin{aligned}
+y &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 x
+\end{aligned}
+$$
+
+:::
+
+::: {.column}
+
+**Poisson:** a count outcome
+
+$$
+\begin{aligned}
+y &\sim \text{Poisson}(\lambda) \\
+\log(\lambda) &= \beta_0 + \beta_1 x
+\end{aligned}
+$$
+
+:::
+
+:::
+
+::: {.fragment}
+
+Both are **generalized linear models** (GLMs):
+
+1. Choose a distribution for the response
+2. Link its parameter to a linear equation
+
+:::
+
+## Side by side
+
+| | Logistic | Poisson |
+|:--|:--|:--|
+| Response | 0 or 1 | 0, 1, 2, ... |
+| Distribution | $\text{Bernoulli}(p)$ | $\text{Poisson}(\lambda)$ |
+| Parameter | $p$, between 0 and 1 | $\lambda$, greater than 0 |
+| Link | $\text{logit}(p) = \log\left(\frac{p}{1-p}\right)$ | $\log(\lambda)$ |
+| Inverse link | $p = \frac{1}{1 + e^{-\text{logit}(p)}}$ | $\lambda = e^{\log(\lambda)}$ |
+| $\beta_1$ is the change in... | log odds | log expected count |
+| `family` in R | `binomial(link = "logit")` | `poisson(link = "log")` |
+
+## What stays the same
+
+::: {.incremental}
+
+- Fit with `glm()`, choosing the `family`
+- Coefficients are on the **link** scale, so they're hard to interpret directly
+- Use `predict(..., type = "response")` to get predictions on the scale of the data ($p$ or $\lambda$)
+- Visualize the predictions on top of the raw data
+
+:::
+
+# Recap
+
+## Poisson regression, visualized
+
+$$
+\begin{aligned}
+\text{ExoticRichness} &\sim \text{Poisson}(\lambda) \\
+\log(\lambda) &= \beta_0 + \beta_1 \text{PctImpervious}
+\end{aligned}
+$$
+
+```{r}
+#| fig-width: 8
+#| fig-height: 3.5
+#| fig-align: center
+
+bee_plot +
+  geom_line(
+    aes(y = lambda),
+    data = bee_pred,
+    color = "cornflowerblue",
+    linewidth = 2
+  ) +
+  labs(x = "% impervious")
+```
+
+## Key points {.smaller}
+
+::: {.fragment}
+
+**How do we model counts?**
+
+As a Poisson variable, where the expected count, $\lambda$, varies with the predictor.
+
+:::
+
+::: {.fragment}
+
+**Why do we need the log?**
+
+It links the linear equation (any value) to valid expected counts (greater than 0).
+
+:::
+
+::: {.fragment}
+
+**How do we interpret Poisson regression coefficients?**
+
+$e^{\beta_1}$ multiplies the expected count for each unit of the predictor. Or visualize the predictions.
+
+:::
+
+::: {.fragment}
+
+**How is it different from logistic regression?**
+
+Only the distribution (Poisson vs. Bernoulli) and the link (log vs. logit).
+
+:::
+
+## References
+
+Fitch, G., Wilson, C. J., Glaum, P., Vaidya, C., Simao, M.-C., & Jamieson, M. A. (2019). Does urbanization favour exotic bee species? Implications for the conservation of native bees in cities. _Biology Letters_, 15(12), 20190574. <https://doi.org/10.1098/rsbl.2019.0574>
+
+Giacomangeli, G. (2023). Does Urbanization Favor Exotic Species? _QUBES Educational Resources_. <https://doi.org/10.25334/KG7P-AD07> (CC BY-SA 4.0). Honeybee photo from the same resource.

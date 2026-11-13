@@ -3,4 +3,11 @@ title: "Generalized linear models"
 subtitle: "Week 8 (November 16 - 20)"
 ---
 
-**_Under construction_**
+## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Class Materials {#lecture-materials}
+
+| Session | In-class | Pre-class |
+|---------|--------|---------|
+| Lecture 1 | [Poisson regression](lecture-slides/week8_monday.qmd) <br/> [Exotic bees handout](handouts/week8-monday-poisson.qmd) <br/> [Poisson regression in R](labs/week8_monday.qmd) | [Poisson regression](https://youtu.be/TIsXwpSwpVU) <br/> [Poisson regression in R](https://youtu.be/FUdIkHx5_Co) ([Live coding template](labs/week8_monday_live.qmd)) <br/> [Poisson vs logistic](https://youtu.be/fCzrOqzlVRQ) |
+| Lab | Practice midterm solutions | [Practice Midterm 1](midterms/midterm-a.pdf) <br/> [Practice Midterm 2](midterms/midterm-b.pdf) |
+| Lecture 2 | **Midterm** | |
+: {.hover .bordered tbl-colwidths="[30,30,40]"}

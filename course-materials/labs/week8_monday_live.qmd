@@ -1,0 +1,150 @@
+---
+title: Poisson Regression in R
+execute:
+  eval: false
+format:
+  html:
+    other-links:
+      - text: Download Source
+        href: week8_monday_live.qmd
+---
+
+```{r}
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw())
+```
+
+Does urbanization favor exotic bees? We'll use bee surveys from gardens and natural areas around Ann Arbor, Michigan (Fitch et al. 2019).
+
+1. Visualize the data
+2. Fit the model
+3. Interpret the coefficients
+4. Convert log counts to counts
+5. Visualize the predictions
+
+## Visualize the data
+
+Each row is one site. `exotic.richness` is the number of exotic bee species found there. `NLCD500m` is the proportion of land within 500 m covered by impervious surfaces (roads, roofs, parking lots).
+
+```{r}
+bees <- read_csv(____) |>
+  # Convert the proportion to a percent
+  mutate(impervious = ____)
+```
+
+What does the response look like? Since these are discrete counts, use a bar plot.
+
+```{r}
+ggplot(bees, aes(x = ____)) +
+  ____() +
+  labs(x = "Exotic bee species", y = "Number of sites")
+```
+
+Plot exotic species richness against impervious surface. With whole-number counts, a little vertical jitter keeps points from overlapping.
+
+```{r}
+ggplot(bees, aes(x = ____, y = ____)) +
+  geom_point(
+    position = position_jitter(height = ____, width = 0),
+    shape = 21,
+    size = 2
+  ) +
+  labs(x = "% impervious surface", y = "Exotic bee species")
+```
+
+## Fit the model
+
+Our model in statistical notation is:
+
+$$
+\begin{aligned}
+\text{ExoticRichness} &\sim \text{Poisson}(\lambda) \\
+\log(\lambda) &= \beta_0 + \beta_1 \text{PctImpervious}
+\end{aligned}
+$$
+
+Use `glm()` to fit a Poisson regression. Compared to logistic regression, two things change:
+
+1. The _distribution_ of the response. For counts, use the `poisson` family.
+2. The _link_ function. For the Poisson, use the log.
+
+```{r}
+bee_glm <- glm(____, family = ____, data = bees)
+```
+
+## Interpret the coefficients
+
+```{r}
+summary(bee_glm)
+```
+
+Each percentage point of impervious surface changes the _log_ of the expected number of exotic species by ____.
+
+Exponentiate the coefficients to put them on the count scale.
+
+```{r}
+____(coef(bee_glm))
+```
+
+Each percentage point of impervious surface _multiplies_ the expected number of exotic species by ____. 
+
+## Convert log counts to counts
+
+First, create a _prediction grid_ covering the range of the predictor.
+
+```{r}
+bee_pred_grid <- tibble(
+  impervious = ____
+)
+```
+
+Next, use `predict()` to get the expected number of exotic species, $\lambda$. `type = "response"` gives $\lambda$; `type = "link"` would give $\log(\lambda)$.
+
+```{r}
+bee_pred_grid$lambda <- predict(
+  ____,
+  type = ____,
+  newdata = ____
+)
+```
+
+## Visualize the predictions
+
+Overlay the expected counts on the raw data.
+
+```{r}
+ggplot(____, aes(x = ____, y = ____)) +
+  geom_point(
+    position = position_jitter(height = 0.1, width = 0),
+    shape = 21,
+    size = 2
+  ) +
+  geom_line(
+    aes(y = ____),
+    data = ____,
+    color = "cornflowerblue",
+    linewidth = 2
+  ) +
+  labs(x = "% impervious surface", y = "Exotic bee species")
+```
+
+# Recap
+
+- Visualize count data with `geom_bar()` (the distribution) and `geom_point()` (vs. the predictor, with a little vertical jitter)
+- Fit a Poisson model using `glm()`
+  - Set the `family` to `poisson()`
+  - Set the `link` to `"log"`
+- Interpret coefficients with `exp()`: each unit of the predictor multiplies the expected count by $e^{\beta_1}$
+- Visualize model predictions by:
+  1. Create a prediction grid, covering the range of your predictor(s)
+  2. Use `predict()` to get the expected counts
+    - Set `newdata` to your prediction grid (or you'll get predictions for your raw data)
+    - Set `type` to `"response"` (or you'll get the log of the expected count)
+  3. Overlay the expected counts on the raw data
+
+## References
+
+Fitch, G., Wilson, C. J., Glaum, P., Vaidya, C., Simao, M.-C., & Jamieson, M. A. (2019). Does urbanization favour exotic bee species? Implications for the conservation of native bees in cities. _Biology Letters_, 15(12), 20190574. <https://doi.org/10.1098/rsbl.2019.0574>
+
+Giacomangeli, G. (2023). Does Urbanization Favor Exotic Species? _QUBES Educational Resources_. <https://doi.org/10.25334/KG7P-AD07> (CC BY-SA 4.0)
