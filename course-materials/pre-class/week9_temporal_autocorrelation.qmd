@@ -1,0 +1,360 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 9: Temporal autocorrelation"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal table {
+          font-size: 0.7em;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(nlme)
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+fmt_p <- \(p) if (p < 0.001) "< 0.001" else fmt(p, 3)
+
+# Lake Huron annual mean water level (ft), 1875-1972. Built into R.
+huron <- tibble(year = 1875:1972, level = as.numeric(LakeHuron))
+n_years <- nrow(huron)
+
+huron_lm <- lm(level ~ year, huron)
+huron <- huron |>
+  mutate(
+    fit = fitted(huron_lm),
+    resid = resid(huron_lm),
+    resid_lag1 = lag(resid)
+  )
+
+lm_slope <- coef(summary(huron_lm))["year", ]
+rho1 <- cor(huron$resid, huron$resid_lag1, use = "complete.obs")
+n_eff <- n_years * (1 - rho1) / (1 + rho1)
+
+ljung <- Box.test(huron$resid, lag = 10, type = "Ljung-Box")
+
+huron_gls <- gls(level ~ year, huron, correlation = corAR1(form = ~year))
+gls_slope <- summary(huron_gls)$tTable["year", ]
+gls_phi <- coef(huron_gls$modelStruct$corStruct, unconstrained = FALSE)[["Phi"]]
+
+# ACF as a tidy data frame
+acf_df <- function(x, lag_max = 15) {
+  a <- acf(x, lag.max = lag_max, plot = FALSE)
+  tibble(lag = drop(a$lag), acf = drop(a$acf)) |>
+    filter(lag > 0)
+}
+acf_plot <- function(x, title = NULL, lag_max = 15) {
+  bound <- 1.96 / sqrt(length(x))
+  ggplot(acf_df(x, lag_max), aes(lag, acf)) +
+    geom_hline(yintercept = 0) +
+    geom_hline(yintercept = c(-bound, bound), linetype = "dashed", color = "cornflowerblue") +
+    geom_segment(aes(xend = lag, yend = 0), linewidth = 1.5) +
+    scale_y_continuous(limits = c(-0.5, 1)) +
+    labs(x = "Lag (years)", y = "Autocorrelation", title = title)
+}
+
+# Simulation: a response with a strong trend but independent residuals
+sim <- tibble(
+  year = 1:80,
+  temp = 10 + 0.08 * year + rnorm(80, sd = 0.6)
+)
+sim_lm <- lm(temp ~ year, sim)
+```
+
+# Temporal autocorrelation
+
+## Learning objectives
+
+- **Define** temporal autocorrelation
+- **Detect** it with residual plots, lag plots, ACFs, and a formal test
+- **Explain** why it matters for inference
+- **Explain** why we check the _residuals_, not the response
+
+## Lake Huron water levels
+
+Annual mean water level of Lake Huron, `r min(huron$year)`–`r max(huron$year)` (`r n_years` years).
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+huron_plot <- ggplot(huron, aes(year, level)) +
+  geom_line(color = "grey50") +
+  geom_point(shape = 21, size = 2.5) +
+  labs(x = "Year", y = "Water level (ft)")
+huron_plot
+```
+
+Is the lake level declining?
+
+## Fit a linear regression
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-align: center
+
+huron_plot +
+  geom_line(aes(y = fit), color = "cornflowerblue", linewidth = 1.5)
+```
+
+$\hat\beta_1 = `r fmt(lm_slope[["Estimate"]], 4)`$ ft/year, SE = `r fmt(lm_slope[["Std. Error"]], 4)`, p < 0.001.
+
+Very significant! But can we trust it?
+
+## Look at the residuals over time
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+ggplot(huron, aes(year, resid)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_line(color = "grey50") +
+  geom_point(aes(fill = resid > 0), shape = 21, size = 2.5) +
+  scale_fill_manual(values = c("firebrick", "cornflowerblue"), guide = "none") +
+  labs(x = "Year", y = "Residual (ft)")
+```
+
+Long runs above the line, then long runs below. A high-water year is usually followed by another high-water year.
+
+# What is temporal autocorrelation?
+
+## Definition
+
+**Temporal autocorrelation**: observations close together in time are more similar than observations far apart.
+
+::: {.incremental}
+
+- "Auto" = self: a variable correlated with itself, shifted in time
+- The shift is called the **lag**. Lag 1 = this year vs. last year
+- Positive autocorrelation (the common case): highs follow highs, lows follow lows
+- Environmental examples: water levels, air temperature, population sizes, streamflow, pollutant concentrations
+
+:::
+
+## Lag plot
+
+Plot each residual against the previous year's residual.
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+#| fig-align: center
+#| warning: false
+
+ggplot(huron, aes(resid_lag1, resid)) +
+  geom_hline(yintercept = 0, color = "grey70") +
+  geom_vline(xintercept = 0, color = "grey70") +
+  geom_point(shape = 21, size = 3) +
+  coord_equal() +
+  labs(x = "Residual, year t - 1", y = "Residual, year t")
+```
+
+Correlation at lag 1: $r_1 =$ `r fmt(rho1)`. Strong!
+
+## The autocorrelation function (ACF)
+
+Repeat for lag 1, 2, 3, ... and plot all the correlations.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+acf_plot(huron$resid)
+```
+
+Dashed lines: $\pm 1.96 / \sqrt{n}$, the range expected for independent residuals. Autocorrelation fades over about 3–4 years.
+
+## Formal tests
+
+::: {.incremental}
+
+- **Ljung-Box test** (built into R)
+  - $H_0$: the residuals are independent up to lag $h$
+  - Lake Huron, $h$ = 10: $\chi^2$ = `r fmt(ljung$statistic, 1)`, p < 0.001
+- **Durbin-Watson test** (`lmtest::dwtest()`): tests lag 1 only
+- A test complements the plots, it doesn't replace them
+
+:::
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+#| eval: false
+
+huron_lm <- lm(level ~ year, huron)
+acf(resid(huron_lm))
+Box.test(resid(huron_lm), lag = 10, type = "Ljung-Box")
+```
+
+:::
+
+# Why do we care?
+
+## Independence is an assumption
+
+Regression assumes the residuals are **independent**: knowing one tells you nothing about another.
+
+::: {.incremental}
+
+- With autocorrelation, each new year is partly a repeat of last year
+- So `r n_years` years contain _less information_ than `r n_years` independent observations
+- A rough **effective sample size**: $n_{\text{eff}} \approx n \frac{1 - r_1}{1 + r_1} = `r n_years` \times \frac{1 - `r fmt(rho1)`}{1 + `r fmt(rho1)`} \approx `r round(n_eff)`$
+- The model doesn't know this. It acts like it has `r n_years` independent years
+
+:::
+
+## Overconfident inference
+
+Fit the model again, this time letting each residual depend on the previous year's (an AR(1) model).
+
+| Model | $\hat\beta_1$ (ft/yr) | SE | p-value |
+|:--|--:|--:|--:|
+| `lm()`: independent residuals | `r fmt(lm_slope[["Estimate"]], 4)` | `r fmt(lm_slope[["Std. Error"]], 4)` | `r fmt_p(lm_slope[["Pr(>|t|)"]])` |
+| `gls()`: AR(1) residuals | `r fmt(gls_slope[["Value"]], 4)` | `r fmt(gls_slope[["Std.Error"]], 4)` | `r fmt_p(gls_slope[["p-value"]])` |
+
+::: {.incremental}
+
+- The estimate barely changes
+- The SE is `r fmt(gls_slope[["Std.Error"]] / lm_slope[["Std. Error"]], 1)` times bigger
+- The "very significant" decline is no longer distinguishable from long, slow wandering
+- Positive autocorrelation makes SEs too small and p-values too small: false positives
+
+:::
+
+# Residuals, not the response
+
+## A response can be autocorrelated for a good reason
+
+Simulated stream temperature: a warming trend plus _independent_ year-to-year noise.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4
+#| fig-align: center
+
+ggplot(sim, aes(year, temp)) +
+  geom_line(color = "grey50") +
+  geom_point(shape = 21, size = 2) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "cornflowerblue") +
+  labs(x = "Year", y = "Temperature (°C)")
+```
+
+Warm years follow warm years because _both_ are late in the record.
+
+## Response vs. residuals
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4.5
+#| fig-align: center
+
+bound <- 1.96 / sqrt(nrow(sim))
+bind_rows(
+  mutate(acf_df(sim$temp), which = "ACF of the response"),
+  mutate(acf_df(resid(sim_lm)), which = "ACF of the residuals")
+) |>
+  ggplot(aes(lag, acf)) +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-bound, bound), linetype = "dashed", color = "cornflowerblue") +
+  geom_segment(aes(xend = lag, yend = 0), linewidth = 1.5) +
+  facet_wrap(~which) +
+  scale_y_continuous(limits = c(-0.5, 1)) +
+  labs(x = "Lag (years)", y = "Autocorrelation")
+```
+
+The response is strongly autocorrelated. The residuals are not. **This model is fine.**
+
+## Why residuals?
+
+::: {.incremental}
+
+- The assumption is about the **errors**: what's left _after_ accounting for the predictors
+- If a predictor (a trend, temperature, precipitation) explains the pattern over time, the leftovers can be independent
+- Autocorrelated _residuals_ mean something time-structured is missing from the model
+- So always fit the model first, then check the residuals
+
+:::
+
+## What can you do about it?
+
+::: {.incremental}
+
+1. **Add predictors** that explain the temporal pattern (e.g., precipitation for lake levels)
+2. **Model the correlation** directly, e.g., generalized least squares with an AR(1) structure:
+
+:::
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(nlme)
+gls(level ~ year, data = huron, correlation = corAR1(form = ~ year))
+```
+
+:::
+
+::: {.incremental}
+
+3. Mixed models (`glmmTMB`, `mgcv`) with autocorrelation structures, for GLMs
+4. Time series models (e.g., ARIMA) when forecasting is the goal
+
+:::
+
+# Recap
+
+## Key points {.smaller}
+
+::: {.fragment}
+
+**What is temporal autocorrelation?**
+
+Observations close in time are more similar than those far apart.
+
+:::
+
+::: {.fragment}
+
+**How do we detect it?**
+
+Plot residuals over time, a lag plot, and the ACF. Test with Ljung-Box (`Box.test()`) or Durbin-Watson.
+
+:::
+
+::: {.fragment}
+
+**Why does it matter?**
+
+Autocorrelated data contain less information than $n$ suggests. SEs and p-values are too small.
+
+:::
+
+::: {.fragment}
+
+**Why the residuals?**
+
+The independence assumption is about the errors. A response can be autocorrelated because of the predictors, and that's fine.
+
+:::

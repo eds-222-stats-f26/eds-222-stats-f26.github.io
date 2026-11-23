@@ -3,4 +3,11 @@ title: "Spatio-temporal methods"
 subtitle: "Week 9 (November 23 - 27)"
 ---
 
-**_Under construction_**
+## {{< fa person-chalkboard title="a person pointing at a chalkboard" >}} Class Materials {#lecture-materials}
+
+| Session | In-class | Pre-class |
+|---------|--------|---------|
+| Lecture 1 | Expanding the GLM toolbox <br/> [Negative binomial regression](https://youtu.be/ImB89YZt7U0) <br/> [Beta regression](https://youtu.be/Uymq1Y5KoYA) <br/> [Gamma regression](https://youtu.be/uFbQvLtPIMI) | _None_ |
+| Lab | No Lab | |
+| Lecture 2 | Spatial and temporal regression | _None_ |
+: {.hover .bordered tbl-colwidths="[30,30,40]"}

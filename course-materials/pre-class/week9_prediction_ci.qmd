@@ -1,0 +1,427 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 9: Confidence intervals for predictions"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal table {
+          font-size: 0.7em;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+
+# Exotic bees (Fitch et al. 2019), same model as Week 8
+bees <- read_csv("../data/exotic-bees.csv") |>
+  mutate(impervious = 100 * NLCD500m)
+
+bee_glm <- glm(
+  exotic.richness ~ impervious,
+  family = poisson(link = "log"),
+  data = bees
+)
+
+bee_plot <- ggplot(bees, aes(impervious, exotic.richness)) +
+  geom_point(
+    position = position_jitter(height = 0.1, width = 0, seed = 1),
+    shape = 21,
+    size = 3
+  ) +
+  scale_y_continuous(breaks = 0:8) +
+  labs(x = "% impervious surface (500 m)", y = "Exotic bee species")
+
+newdat <- tibble(impervious = seq(0, 100, length.out = 101))
+
+# Bootstrap the fitted curve
+n_boot <- 1000
+boot_curves <- map(seq_len(n_boot), \(i) {
+  boot_bees <- slice_sample(bees, prop = 1, replace = TRUE)
+  boot_glm <- glm(exotic.richness ~ impervious, poisson, boot_bees)
+  newdat |>
+    mutate(
+      lambda = predict(boot_glm, newdat, type = "response"),
+      boot = i
+    )
+}) |>
+  list_rbind()
+
+boot_50 <- filter(boot_curves, impervious == 50)
+boot_ci_50 <- quantile(boot_50$lambda, c(0.025, 0.975))
+
+# Mathematical model: SE on the link scale, then back-transform
+link_pred <- predict(bee_glm, newdat, type = "link", se.fit = TRUE)
+bee_pred <- newdat |>
+  mutate(
+    fit_link = link_pred$fit,
+    se_link = link_pred$se.fit,
+    lo_link = fit_link - 1.96 * se_link,
+    hi_link = fit_link + 1.96 * se_link,
+    lambda = exp(fit_link),
+    lo = exp(lo_link),
+    hi = exp(hi_link)
+  )
+pred_50 <- filter(bee_pred, impervious == 50)
+
+# Prediction interval: parameter uncertainty (bootstrap) + Poisson noise
+boot_pi <- boot_curves |>
+  mutate(y_new = rpois(n(), lambda)) |>
+  summarize(
+    pi_lo = quantile(y_new, 0.025),
+    pi_hi = quantile(y_new, 0.975),
+    .by = impervious
+  )
+pi_50 <- filter(boot_pi, impervious == 50)
+```
+
+# Confidence intervals for predictions
+
+## Learning objectives
+
+- **Explain** why a predicted value, $\hat y$, has uncertainty
+- **Construct** a confidence interval for $\hat y$ from a GLM
+- **Distinguish** confidence intervals from prediction intervals
+
+## Revisit: exotic bees
+
+Last week we modeled exotic bee species richness at `r nrow(bees)` sites around Ann Arbor, Michigan.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+bee_plot +
+  geom_line(aes(y = lambda), data = bee_pred, color = "cornflowerblue", linewidth = 2)
+```
+
+How confident are we in that blue line?
+
+## $\hat y$ is an estimate
+
+We've built confidence intervals for **coefficients** like $\beta_1$.
+
+::: {.incremental}
+
+- The fitted line is built from $\hat\beta_0$ and $\hat\beta_1$
+- Both are estimates with sampling variation
+- So every point on the line, $\hat y$, is an estimate too
+- A new sample of sites would give a (slightly) different line
+
+:::
+
+::: {.fragment}
+
+**Question**: What's the range of values that we're confident contains the _expected_ number of exotic species at a site with 50% impervious surface?
+
+:::
+
+# Bootstrapping the line
+
+## Resample, refit, repeat
+
+Each line is a Poisson regression fit to a bootstrap resample of the sites.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+bee_plot +
+  geom_line(
+    aes(y = lambda, group = boot),
+    data = filter(boot_curves, boot <= 100),
+    color = "cornflowerblue",
+    alpha = 0.15
+  )
+```
+
+The lines agree most in the middle and spread out at the edges.
+
+## Sampling distribution of $\hat y$
+
+Pull out each bootstrap's prediction at 50% impervious surface.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-align: center
+
+ggplot(boot_50, aes(lambda)) +
+  geom_histogram(bins = 30, fill = "cornflowerblue", color = "white") +
+  geom_vline(xintercept = boot_ci_50, linetype = "dashed", linewidth = 1) +
+  labs(x = "Expected exotic species at 50% impervious", y = "Bootstrap count")
+```
+
+95% CI: `r fmt(boot_ci_50[1])` to `r fmt(boot_ci_50[2])` species.
+
+## Do it at every $x$
+
+Repeat for every value of the predictor and connect the intervals. That makes a **confidence band**.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+boot_band <- boot_curves |>
+  summarize(
+    lo = quantile(lambda, 0.025),
+    hi = quantile(lambda, 0.975),
+    .by = impervious
+  )
+
+bee_plot +
+  geom_ribbon(
+    aes(x = impervious, ymin = lo, ymax = hi),
+    data = boot_band,
+    inherit.aes = FALSE,
+    fill = "cornflowerblue",
+    alpha = 0.3
+  ) +
+  geom_line(aes(y = lambda), data = bee_pred, color = "cornflowerblue", linewidth = 2)
+```
+
+# Using a mathematical model
+
+## The standard error of $\hat y$
+
+As with $\hat\beta_1$, R estimates a **standard error** for each prediction.
+
+::: {.incremental}
+
+- In a GLM, $\hat y$ is approximately normal _on the link scale_ (here, $\log \lambda$)
+- So build the interval on the link scale: $\widehat{\log \lambda} \pm 1.96 \times SE$
+- Then apply the inverse link ($e^x$) to both ends
+
+:::
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+#| eval: false
+
+pred <- predict(bee_glm, newdata, type = "link", se.fit = TRUE)
+lo <- exp(pred$fit - 1.96 * pred$se.fit)
+hi <- exp(pred$fit + 1.96 * pred$se.fit)
+```
+
+:::
+
+## Step by step at 50% impervious
+
+::: {.columns}
+
+::: {.column}
+
+Link scale ($\log \lambda$)
+
+| [$\widehat{\log\lambda} = `r fmt(pred_50$fit_link, 3)`$]{.fragment}
+| [$SE = `r fmt(pred_50$se_link, 3)`$]{.fragment}
+| [$`r fmt(pred_50$fit_link, 3)` \pm 1.96 \times `r fmt(pred_50$se_link, 3)`$]{.fragment}
+| [$(`r fmt(pred_50$lo_link, 3)`, `r fmt(pred_50$hi_link, 3)`)$]{.fragment}
+
+:::
+
+::: {.column}
+
+Response scale ($\lambda$)
+
+| [$\hat\lambda = e^{`r fmt(pred_50$fit_link, 3)`} = `r fmt(pred_50$lambda)`$]{.fragment}
+| [$(e^{`r fmt(pred_50$lo_link, 3)`}, e^{`r fmt(pred_50$hi_link, 3)`})$]{.fragment}
+| [$(`r fmt(pred_50$lo)`, `r fmt(pred_50$hi)`)$]{.fragment}
+
+:::
+
+:::
+
+::: {.fragment}
+
+Compare to the bootstrap: (`r fmt(boot_ci_50[1])`, `r fmt(boot_ci_50[2])`).
+
+:::
+
+## Why not the response scale?
+
+::: {.columns}
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 4.5
+
+ggplot(bee_pred, aes(impervious)) +
+  geom_ribbon(aes(ymin = lo_link, ymax = hi_link), fill = "cornflowerblue", alpha = 0.3) +
+  geom_line(aes(y = fit_link), color = "cornflowerblue", linewidth = 2) +
+  labs(x = "% impervious", y = "log(λ)", title = "Link scale")
+```
+
+Symmetric: $\pm$ the same amount
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig-width: 6
+#| fig-height: 4.5
+
+ggplot(bee_pred, aes(impervious)) +
+  geom_ribbon(aes(ymin = lo, ymax = hi), fill = "cornflowerblue", alpha = 0.3) +
+  geom_line(aes(y = lambda), color = "cornflowerblue", linewidth = 2) +
+  labs(x = "% impervious", y = "λ", title = "Response scale")
+```
+
+Asymmetric, and always above 0
+
+:::
+
+:::
+
+## Why not the response scale?
+
+::: {.incremental}
+
+- On the link scale, the sampling distribution is close to normal, so $\pm 1.96 \times SE$ works
+- On the response scale it's skewed, so a symmetric interval is wrong, and can even dip below 0 (or above 1 for logistic regression)
+- Back-transforming the endpoints keeps the interval in a valid range
+- This recipe works for every GLM: just swap in the inverse link
+  - Logistic: `plogis(fit ± 1.96 * se.fit)`
+
+:::
+
+## The band is narrowest in the middle
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+bee_plot +
+  geom_ribbon(
+    aes(x = impervious, ymin = lo, ymax = hi),
+    data = bee_pred,
+    inherit.aes = FALSE,
+    fill = "cornflowerblue",
+    alpha = 0.3
+  ) +
+  geom_line(aes(y = lambda), data = bee_pred, color = "cornflowerblue", linewidth = 2) +
+  geom_vline(xintercept = mean(bees$impervious), linetype = "dashed")
+```
+
+We know the most near the average predictor value (dashed line), where the data are densest. Uncertainty grows as we approach the edges, and beyond them (extrapolation).
+
+# Confidence vs. prediction intervals
+
+## Most points fall outside the band!
+
+That's not a mistake. The confidence band is for the **expected value**, $\lambda$, not for individual sites.
+
+::: {.incremental}
+
+- **Confidence interval**: where the _average_ count is, for sites with this much impervious surface
+  - Uncertainty from estimating $\beta_0$ and $\beta_1$
+- **Prediction interval**: where a _new site's_ count will be
+  - Uncertainty from estimating $\beta_0$ and $\beta_1$
+  - _Plus_ the Poisson randomness of individual sites
+
+:::
+
+## Prediction intervals are wider
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+bee_plot +
+  geom_ribbon(
+    aes(x = impervious, ymin = pi_lo, ymax = pi_hi),
+    data = boot_pi,
+    inherit.aes = FALSE,
+    fill = "grey60",
+    alpha = 0.3
+  ) +
+  geom_ribbon(
+    aes(x = impervious, ymin = lo, ymax = hi),
+    data = bee_pred,
+    inherit.aes = FALSE,
+    fill = "cornflowerblue",
+    alpha = 0.4
+  ) +
+  geom_line(aes(y = lambda), data = bee_pred, color = "cornflowerblue", linewidth = 2)
+```
+
+At 50% impervious: the expected count is between `r fmt(pred_50$lo, 1)` and `r fmt(pred_50$hi, 1)` (blue), but a new site could have anywhere from `r pi_50$pi_lo` to `r pi_50$pi_hi` species (grey).
+
+## Which one do you want?
+
+| Question | Interval |
+|:--|:--|
+| How many exotic species does a typical 50% impervious site have? | Confidence |
+| Is the effect of urbanization clear across the range of the data? | Confidence |
+| How many exotic species will we find at the next site we survey? | Prediction |
+| What's a plausible worst case for a single site? | Prediction |
+
+::: {.fragment}
+
+For linear regression, `predict(model, newdata, interval = "confidence")` or `interval = "prediction"` does both. For GLMs, prediction intervals take more work (e.g., simulation, as we did here).
+
+:::
+
+# Recap
+
+## Key points {.smaller}
+
+::: {.fragment}
+
+**Why does $\hat y$ have uncertainty?**
+
+It's built from estimated coefficients, which vary from sample to sample.
+
+:::
+
+::: {.fragment}
+
+**How do we get a confidence interval for $\hat y$ from a GLM?**
+
+`predict(..., type = "link", se.fit = TRUE)`, then $\text{fit} \pm 1.96 \times SE$ on the link scale, then apply the inverse link to both ends. Or bootstrap.
+
+:::
+
+::: {.fragment}
+
+**Where is the interval narrowest?**
+
+Near the middle of the data. It widens toward (and past) the edges.
+
+:::
+
+::: {.fragment}
+
+**Confidence or prediction interval?**
+
+Confidence for the _expected_ value; prediction for a _new observation_. Prediction intervals are always wider.
+
+:::
+
+## References
+
+Fitch, G., Wilson, C. J., Glaum, P., Vaidya, C., Simao, M.-C., & Jamieson, M. A. (2019). Does urbanization favour exotic bee species? Implications for the conservation of native bees in cities. _Biology Letters_, 15(12), 20190574. <https://doi.org/10.1098/rsbl.2019.0574>

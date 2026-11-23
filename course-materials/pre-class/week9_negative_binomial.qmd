@@ -1,0 +1,384 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 9: Negative binomial regression"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal table {
+          font-size: 0.7em;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(MASS)
+select <- dplyr::select
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+fmt_p <- \(p) if (p < 0.001) "< 0.001" else fmt(p, 3)
+
+# Exotic bees (Fitch et al. 2019). This time, the number of exotic
+# individuals (abundance), not the number of exotic species (richness).
+bees <- read_csv("../data/exotic-bees.csv") |>
+  mutate(impervious = 100 * NLCD500m)
+
+abund_plot <- ggplot(bees, aes(impervious, exotic.abund)) +
+  geom_point(shape = 21, size = 3) +
+  labs(x = "% impervious surface (500 m)", y = "Exotic bees caught")
+
+pois_glm <- glm(exotic.abund ~ impervious, family = poisson, data = bees)
+nb_glm <- glm.nb(exotic.abund ~ impervious, data = bees)
+
+dispersion <- sum(residuals(pois_glm, type = "pearson")^2) /
+  df.residual(pois_glm)
+theta <- nb_glm$theta
+
+coef_tbl <- function(m) {
+  s <- coef(summary(m))["impervious", ]
+  c(est = s[[1]], se = s[[2]], p = s[[4]])
+}
+pois_coef <- coef_tbl(pois_glm)
+nb_coef <- coef_tbl(nb_glm)
+
+# Predictions with confidence bands (link scale, then back-transform)
+newdat <- tibble(impervious = seq(0, 100, length.out = 101))
+band <- function(m, label) {
+  p <- predict(m, newdat, type = "link", se.fit = TRUE)
+  newdat |>
+    mutate(
+      model = label,
+      mu = exp(p$fit),
+      lo = exp(p$fit - 1.96 * p$se.fit),
+      hi = exp(p$fit + 1.96 * p$se.fit)
+    )
+}
+bands <- bind_rows(
+  band(pois_glm, "Poisson"),
+  band(nb_glm, "Negative binomial")
+) |>
+  mutate(model = fct_inorder(model))
+
+# Variance vs. mean in groups of similar impervious surface
+mv <- bees |>
+  mutate(group = ntile(impervious, 5)) |>
+  summarize(
+    mean = mean(exotic.abund),
+    var = var(exotic.abund),
+    .by = group
+  )
+```
+
+# Negative binomial regression
+
+## Learning objectives
+
+- **Identify** overdispersion in count data
+- **Explain** why overdispersion matters for inference
+- **Fit** and **interpret** a negative binomial regression
+
+## Exotic bees, again
+
+Last week: the number of exotic _species_ at each site. Now: the number of exotic _individuals_ caught.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+abund_plot
+```
+
+Still counts, so let's try Poisson regression.
+
+## Poisson's strict assumption
+
+Remember: for a Poisson random variable, the **variance equals the mean**.
+
+$$
+\text{Var}(y) = E(y) = \lambda
+$$
+
+::: {.incremental}
+
+- If the expected count is 5, the variance must be 5 (SD $\approx$ 2.2)
+- One parameter controls both center and spread
+- Real counts are often more variable than that: **overdispersion**
+
+:::
+
+## Is the variance bigger than the mean?
+
+Split the sites into five groups by impervious surface and compare.
+
+```{r}
+#| fig-width: 7
+#| fig-height: 4.5
+#| fig-align: center
+
+ggplot(mv, aes(mean, var)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  geom_point(size = 4, color = "firebrick") +
+  annotate(
+    "text",
+    x = 17.5,
+    y = 60,
+    label = "Poisson:\nvariance = mean",
+    hjust = 1,
+    size = 6
+  ) +
+  scale_y_continuous(limits = c(0, NA)) +
+  labs(x = "Mean count", y = "Variance of counts")
+```
+
+The variance is _far_ above the dashed line.
+
+## Measuring overdispersion
+
+The **dispersion statistic** compares the spread of the residuals to what Poisson expects.
+
+$$
+\hat\phi = \frac{\sum (\text{Residuals})^2}{n - k}
+$$
+
+::: {.incremental}
+
+- $\hat\phi \approx 1$: consistent with Poisson
+- $\hat\phi > 1$: overdispersed
+- For the exotic bee model, $\hat\phi =$ `r fmt(dispersion, 1)`
+
+:::
+
+## Why it matters
+
+Poisson regression _assumes_ the variance equals the mean. When the data are more variable, the model thinks it knows more than it does.
+
+::: {.incremental}
+
+- Standard errors are **too small**
+- Confidence intervals are **too narrow**
+- p-values are **too small**: false positives
+
+:::
+
+::: {.fragment}
+
+We need a count distribution with a separate parameter for the spread.
+
+:::
+
+# The negative binomial distribution
+
+## Two parameters
+
+A **negative binomial** random variable is a count (0, 1, 2, ...) with mean $\mu$ and an extra **shape parameter** $\theta$.
+
+$$
+\text{Var}(y) = \mu + \frac{\mu^2}{\theta}
+$$
+
+::: {.incremental}
+
+- Large $\theta$: the extra term vanishes, and it's basically Poisson
+- Small $\theta$: much more variable than Poisson
+
+:::
+
+## Same mean, different spread
+
+All three distributions have a mean of 8.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4.5
+#| fig-align: center
+
+bind_rows(
+  tibble(k = 0:30, prob = dpois(k, 8), dist = "Poisson"),
+  tibble(k = 0:30, prob = dnbinom(k, mu = 8, size = 5), dist = "NB, θ = 5"),
+  tibble(k = 0:30, prob = dnbinom(k, mu = 8, size = 1), dist = "NB, θ = 1")
+) |>
+  mutate(dist = fct_inorder(dist)) |>
+  ggplot(aes(k, prob)) +
+  geom_col(fill = "cornflowerblue") +
+  facet_wrap(~dist) +
+  labs(x = "Count", y = "Probability")
+```
+
+Smaller $\theta$: more zeros _and_ more large counts.
+
+# Negative binomial regression
+
+## The model
+
+Same recipe as Poisson regression. Only the distribution changes.
+
+::: {.columns}
+
+::: {.column}
+
+**Poisson**
+
+$$
+\begin{aligned}
+y &\sim \text{Poisson}(\lambda) \\
+\log(\lambda) &= \beta_0 + \beta_1 x
+\end{aligned}
+$$
+
+:::
+
+::: {.column}
+
+**Negative binomial**
+
+$$
+\begin{aligned}
+y &\sim \text{NegBin}(\mu, \theta) \\
+\log(\mu) &= \beta_0 + \beta_1 x
+\end{aligned}
+$$
+
+:::
+
+:::
+
+::: {.fragment}
+
+R estimates $\theta$ alongside the coefficients. Use `glm.nb()` from the **MASS** package.
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(MASS)
+nb_glm <- glm.nb(exotic.abund ~ impervious, data = bees)
+```
+
+:::
+
+## Compare the coefficients
+
+| Model | $\hat\beta_1$ | SE | p-value |
+|:--|--:|--:|--:|
+| Poisson | `r fmt(pois_coef[["est"]], 4)` | `r fmt(pois_coef[["se"]], 4)` | `r fmt_p(pois_coef[["p"]])` |
+| Negative binomial | `r fmt(nb_coef[["est"]], 4)` | `r fmt(nb_coef[["se"]], 4)` | `r fmt_p(nb_coef[["p"]])` |
+
+::: {.incremental}
+
+- The estimates are similar
+- The negative binomial SE is `r fmt(nb_coef[["se"]] / pois_coef[["se"]], 1)` times bigger
+- The p-value is still small. The relationship is real, but Poisson overstated our certainty
+- $\hat\theta =$ `r fmt(theta)`: lots of extra variation
+
+:::
+
+## Interpret the coefficients
+
+Same as Poisson: coefficients are on the log scale, so $e^{\beta_1}$ is a multiplier.
+
+::: {.incremental}
+
+- $e^{\hat\beta_1} = e^{`r fmt(nb_coef[["est"]], 4)`} = `r fmt(exp(nb_coef[["est"]]), 3)`$
+- Each additional percentage point of impervious surface multiplies the expected exotic bee count by `r fmt(exp(nb_coef[["est"]]), 3)`
+- Over 10 points: $e^{10 \hat\beta_1} = `r fmt(exp(10 * nb_coef[["est"]]), 2)`$, about `r round(100 * (exp(10 * nb_coef[["est"]]) - 1))`% more exotic bees
+
+:::
+
+## Visualize the predictions
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+#| fig-align: center
+
+abund_plot +
+  geom_ribbon(
+    aes(x = impervious, ymin = lo, ymax = hi),
+    data = bands,
+    inherit.aes = FALSE,
+    fill = "cornflowerblue",
+    alpha = 0.3
+  ) +
+  geom_line(
+    aes(y = mu),
+    data = bands,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  facet_wrap(~model)
+```
+
+Similar curves. The negative binomial is honest about the uncertainty.
+
+## When to use it
+
+::: {.incremental}
+
+- Your response is a count, **and**
+- The dispersion statistic from a Poisson model is well above 1 (a rough rule: above 1.5 or so)
+
+:::
+
+## The GLM toolbox
+
+| Response | Distribution | Typical link | R |
+|:--|:--|:--|:--|
+| Continuous, any value | Normal | identity | `lm()` |
+| 0 or 1 | Bernoulli | logit | `glm(family = binomial)` |
+| Count | Poisson | log | `glm(family = poisson)` |
+| Overdispersed count | Negative binomial | log | `MASS::glm.nb()` |
+| Positive, continuous | Gamma | log | `glm(family = Gamma(link = "log"))` |
+| Proportion in (0, 1) | Beta | logit | `betareg::betareg()` |
+
+# Recap
+
+## Key points {.smaller}
+
+::: {.fragment}
+
+**What is overdispersion?**
+
+Counts that vary more than Poisson allows (variance > mean). Check with $\hat\phi = \sum residual^2 / (n - k)$.
+
+:::
+
+::: {.fragment}
+
+**Why does it matter?**
+
+Poisson regression underestimates SEs, so CIs are too narrow and p-values too small.
+
+:::
+
+::: {.fragment}
+
+**How does negative binomial regression fix it?**
+
+It adds a shape parameter, $\theta$: $\text{Var}(y) = \mu + \mu^2 / \theta$.
+
+:::
+
+::: {.fragment}
+
+**How do we fit and interpret it?**
+
+`MASS::glm.nb()`. Same log link as Poisson, so $e^{\beta_1}$ multiplies the expected count.
+
+:::
+
+## References
+
+Fitch, G., Wilson, C. J., Glaum, P., Vaidya, C., Simao, M.-C., & Jamieson, M. A. (2019). Does urbanization favour exotic bee species? Implications for the conservation of native bees in cities. _Biology Letters_, 15(12), 20190574. <https://doi.org/10.1098/rsbl.2019.0574>

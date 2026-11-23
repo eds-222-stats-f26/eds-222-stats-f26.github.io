@@ -1,0 +1,383 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 9: Beta regression"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal table {
+          font-size: 0.65em;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(betareg)
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+
+# Simulated: tree canopy cover in urban neighborhoods vs. median household
+# income (the "luxury effect")
+n_hoods <- 80
+beta_0 <- -2.6
+beta_1 <- 0.018
+phi <- 15
+canopy <- tibble(
+  income = runif(n_hoods, 20, 200),
+  mu = plogis(beta_0 + beta_1 * income),
+  cover = rbeta(n_hoods, mu * phi, (1 - mu) * phi)
+)
+
+canopy_plot <- ggplot(canopy, aes(income, cover)) +
+  geom_point(shape = 21, size = 3) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
+  labs(x = "Median household income ($1000s)", y = "Tree canopy cover")
+
+canopy_lm <- lm(cover ~ income, canopy)
+canopy_beta <- betareg(cover ~ income, data = canopy)
+
+b_coef <- coef(canopy_beta)
+b0 <- b_coef[["(Intercept)"]]
+b1 <- b_coef[["income"]]
+b_phi <- b_coef[["(phi)"]]
+
+newdat <- tibble(income = seq(0, 300, length.out = 200))
+lm_pred <- newdat |>
+  mutate(fit = predict(canopy_lm, newdat))
+
+# Confidence band on the logit scale, then back-transform
+X <- model.matrix(~income, newdat)
+V <- vcov(canopy_beta)[1:2, 1:2]
+beta_pred <- newdat |>
+  mutate(
+    fit_link = drop(X %*% b_coef[1:2]),
+    se_link = sqrt(rowSums((X %*% V) * X)),
+    mu = plogis(fit_link),
+    lo = plogis(fit_link - 1.96 * se_link),
+    hi = plogis(fit_link + 1.96 * se_link)
+  ) |>
+  filter(between(income, 20, 200))
+
+odds_mult <- exp(b1)
+```
+
+# Beta regression
+
+## Learning objectives
+
+- **Recognize** responses that are continuous proportions
+- **Describe** the beta distribution
+- **Fit** and **interpret** a beta regression
+
+## Proportions that aren't counts
+
+Some environmental responses are fractions between 0 and 1, but not "$k$ successes out of $n$ trials":
+
+::: {.incremental}
+
+- Percent tree canopy cover in a neighborhood
+- Fraction of a lake's surface covered by an algal bloom
+- Percent of a reef that's live coral
+- Soil moisture as a fraction of saturation
+- Proportion of a home range that's protected land
+
+:::
+
+::: {.fragment}
+
+There's no "successes," so logistic (binomial) regression doesn't fit.
+
+:::
+
+## Example: the luxury effect
+
+Wealthier neighborhoods often have more tree cover. Here are `r n_hoods` (simulated) urban neighborhoods.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+canopy_plot
+```
+
+## Try a linear model
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+ggplot(canopy, aes(income, cover)) +
+  geom_point(shape = 21, size = 3) +
+  geom_line(
+    aes(y = fit),
+    data = lm_pred,
+    color = "firebrick",
+    linewidth = 1.5
+  ) +
+  geom_hline(yintercept = c(0, 1), linetype = "dashed") +
+  scale_y_continuous(
+    labels = scales::percent,
+    breaks = seq(-0.25, 1.25, by = 0.25)
+  ) +
+  labs(x = "Median household income ($1000s)", y = "Tree canopy cover")
+```
+
+## The problems
+
+::: {.incremental}
+
+1. Predictions escape the 0 to 1 range (extend the line a little and you get negative tree cover)
+2. Near 0 or 1, there's no room to vary, so the spread shrinks. Linear regression assumes a constant spread
+3. Proportions are often skewed near the boundaries
+
+:::
+
+::: {.fragment}
+
+We need a distribution that lives between 0 and 1.
+
+:::
+
+# The beta distribution
+
+## Bounded between 0 and 1
+
+::: {style="font-size:0.7em"}
+A **beta** random variable is continuous, strictly between 0 and 1. Parameterize it by its mean $\mu$ and a **precision** $\phi$.
+:::
+
+::: {.columns}
+
+::: {.column width="45%"}
+
+```{r}
+#| fig-width: 5
+#| fig-height: 6
+#| fig-align: center
+
+expand_grid(
+  mu = c(0.2, 0.5, 0.8),
+  phi = c(5, 30),
+  y = seq(0.001, 0.999, length.out = 300)
+) |>
+  mutate(
+    density = dbeta(y, mu * phi, (1 - mu) * phi),
+    mu = paste("μ =", mu),
+    phi = factor(paste("φ =", phi), levels = paste("φ =", c(5, 30)))
+  ) |>
+  ggplot(aes(y, density, color = phi)) +
+  geom_line(linewidth = 1.5) +
+  facet_wrap(~mu, ncol = 1) +
+  scale_color_manual(values = c("firebrick", "cornflowerblue")) +
+  scale_x_continuous(breaks = c(0, 0.5, 1)) +
+  labs(x = "y", y = "Density", color = NULL) +
+  theme(
+    axis.text.y = element_blank(),
+    legend.position = "top",
+    legend.margin = margin(0, 0, 0, 0),
+    legend.box.spacing = unit(0, "pt"),
+    plot.margin = margin(2, 5, 2, 5)
+  )
+```
+
+:::
+
+::: {.column width="55%"}
+
+::: {.incremental}
+
+- The variance is largest at $\mu = 0.5$ and shrinks toward 0 and 1, just like real proportions
+- Larger precision $\phi$ means less spread around the mean
+- Near the boundaries, it's skewed away from the edge
+
+:::
+
+:::
+
+:::
+
+# Beta regression
+
+## The model
+
+Same recipe as logistic regression, but with a beta distribution.
+
+::: {.columns}
+
+::: {.column}
+
+**Logistic**
+
+$$
+\begin{aligned}
+y &\sim \text{Bernoulli}(p) \\
+\text{logit}(p) &= \beta_0 + \beta_1 x
+\end{aligned}
+$$
+
+:::
+
+::: {.column}
+
+**Beta**
+
+$$
+\begin{aligned}
+y &\sim \text{Beta}(\mu, \phi) \\
+\text{logit}(\mu) &= \beta_0 + \beta_1 x
+\end{aligned}
+$$
+
+:::
+
+:::
+
+::: {.fragment}
+
+Beta regression isn't built into `glm()`. Use the **betareg** package.
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(betareg)
+canopy_beta <- betareg(cover ~ income, data = canopy)
+```
+
+The response must be a proportion (0.35), not a percentage (35).
+
+:::
+
+## Fit the model
+
+::: {style="font-size:0.75em"}
+
+```{r}
+#| class-output: small-output
+#| echo: true
+
+summary(canopy_beta)$coefficients
+```
+
+:::
+
+::: {.incremental}
+
+- `$mean`: the coefficients for $\text{logit}(\mu)$
+- `$precision`: the estimate of $\phi$ (= `r fmt(b_phi, 1)`)
+- Income is in units of \$1000
+
+:::
+
+## Interpret the coefficients
+
+Same as logistic regression: $e^{\beta_1}$ multiplies the **odds**, here $\frac{\mu}{1 - \mu}$.
+
+::: {.incremental}
+
+- $e^{\hat\beta_1} = e^{`r fmt(b1, 4)`} = `r fmt(odds_mult, 4)`$
+- Each additional \$1000 in median income multiplies the odds of canopy cover by `r fmt(odds_mult, 3)`
+- Odds are hard to think about! Use predictions instead:
+  - $40,000: $\hat\mu = `r fmt(plogis(b0 + b1 * 40), 2)`$
+  - $150,000: $\hat\mu = `r fmt(plogis(b0 + b1 * 150), 2)`$
+
+:::
+
+## Visualize the predictions
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+canopy_plot +
+  geom_line(
+    aes(y = mu),
+    data = beta_pred,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  )
+```
+
+`predict(canopy_beta, newdata, type = "response")` returns $\hat\mu$ on the proportion scale.
+
+## Watch out for exact 0s and 1s
+
+The beta distribution is _strictly_ between 0 and 1. A neighborhood with 0% canopy breaks `betareg()`.
+
+::: {.incremental}
+
+- A few 0s or 1s: squeeze the data slightly, $y^* = \frac{y(n - 1) + 0.5}{n}$ (Smithson & Verkuilen 2006)
+- Many 0s or 1s: a **zero-one-inflated beta** model (e.g., in **glmmTMB**)
+- If you actually have successes ($k$ out of $n$), use logistic regression instead
+
+:::
+
+## The GLM toolbox
+
+| Response | Distribution | Typical link | R |
+|:--|:--|:--|:--|
+| Continuous, any value | Normal | identity | `lm()` |
+| 0 or 1 | Bernoulli | logit | `glm(family = binomial)` |
+| Count | Poisson | log | `glm(family = poisson)` |
+| Overdispersed count | Negative binomial | log | `MASS::glm.nb()` |
+| Positive, continuous | Gamma | log | `glm(family = Gamma(link = "log"))` |
+| Proportion in (0, 1) | Beta | logit | `betareg::betareg()` |
+
+# Recap
+
+## Key points {.smaller}
+
+::: {.fragment}
+
+**When do we need beta regression?**
+
+The response is a continuous proportion strictly between 0 and 1, not a count of successes.
+
+:::
+
+::: {.fragment}
+
+**What's special about the beta distribution?**
+
+It's bounded by 0 and 1, and its variance, $\mu(1 - \mu) / (1 + \phi)$, shrinks near the edges.
+
+:::
+
+::: {.fragment}
+
+**How do we fit it?**
+
+`betareg::betareg(y ~ x)`. Logit link for the mean, plus a precision parameter $\phi$.
+
+:::
+
+::: {.fragment}
+
+**How do we interpret it?**
+
+Like logistic regression: $e^{\beta_1}$ multiplies the odds. Predictions are easier to communicate.
+
+:::
+
+## References
+
+Ferrari, S., & Cribari-Neto, F. (2004). Beta regression for modelling rates and proportions. _Journal of Applied Statistics_, 31(7), 799–815. <https://doi.org/10.1080/0266476042000214501>
+
+Schwarz, K., Fragkias, M., Boone, C. G., Zhou, W., McHale, M., Grove, J. M., et al. (2015). Trees grow on money: Urban tree canopy cover and environmental justice. _PLOS ONE_, 10(4), e0122051. <https://doi.org/10.1371/journal.pone.0122051>
+
+Smithson, M., & Verkuilen, J. (2006). A better lemon squeezer? Maximum-likelihood regression with beta-distributed dependent variables. _Psychological Methods_, 11(1), 54–71. <https://doi.org/10.1037/1082-989X.11.1.54>

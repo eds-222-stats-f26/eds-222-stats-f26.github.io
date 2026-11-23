@@ -1,0 +1,382 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 9: Spatial autocorrelation"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal table {
+          font-size: 0.7em;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(geosphere)
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+# Smallest possible permutation p-value with 999 shuffles is 0.001
+fmt_perm <- \(p) if (p <= 0.001) "≤ 0.001" else fmt(p, 3)
+
+# Approximate location of the former Exide facility (2700 S Indiana St, Vernon)
+exide_lon <- -118.1923
+exide_lat <- 34.0058
+
+# One row per property: mean yard soil lead, plus property covariates
+properties <- read_csv("data/exide-soil-cores.csv") |>
+  filter(location_code == "YD") |>
+  summarize(
+    pb_ppm = mean(pb_ppm),
+    longitude = mean(longitude),
+    latitude = mean(latitude),
+    .by = property_id
+  ) |>
+  left_join(read_csv("data/exide-property-covariates.csv"), by = "property_id") |>
+  drop_na(year_built) |>
+  mutate(
+    distance_mi = distGeo(cbind(longitude, latitude), c(exide_lon, exide_lat)) / 1609.34,
+    # km east and north of Exide, for mapping
+    x_km = (longitude - exide_lon) * cos(exide_lat * pi / 180) * 111.32,
+    y_km = (latitude - exide_lat) * 110.57,
+    freeway_km = dist_to_freeway_m / 1000
+  )
+n_props <- nrow(properties)
+
+# Neighbors: properties within 500 m of each other
+neighbor_m <- 500
+D <- distm(cbind(properties$longitude, properties$latitude))
+W <- (D < neighbor_m) * 1
+diag(W) <- 0
+mean_neighbors <- mean(rowSums(W))
+
+morans_i <- function(x, W) {
+  z <- x - mean(x)
+  length(x) / sum(W) * sum(W * outer(z, z)) / sum(z^2)
+}
+moran_perm <- function(x, W, reps = 999) {
+  obs <- morans_i(x, W)
+  null <- replicate(reps, morans_i(sample(x), W))
+  list(I = obs, null = null, p = (sum(null >= obs) + 1) / (reps + 1))
+}
+
+m_dist <- glm(pb_ppm ~ distance_mi, family = Gamma(link = "log"), data = properties)
+m_age <- update(m_dist, . ~ . + year_built)
+m_fwy <- update(m_age, . ~ . + freeway_km)
+
+properties <- properties |>
+  mutate(
+    r_dist = residuals(m_dist, type = "pearson"),
+    r_age = residuals(m_age, type = "pearson"),
+    r_fwy = residuals(m_fwy, type = "pearson")
+  )
+
+mi_resp <- moran_perm(log(properties$pb_ppm), W)
+mi_dist <- moran_perm(properties$r_dist, W)
+mi_age <- moran_perm(properties$r_age, W)
+mi_fwy <- moran_perm(properties$r_fwy, W)
+mi_built <- morans_i(properties$year_built, W)
+
+map_base <- function() {
+  ggplot(properties, aes(x_km, y_km)) +
+    annotate("point", x = 0, y = 0, shape = 8, size = 6, stroke = 1.5) +
+    annotate("text", x = 0, y = -0.35, label = "Exide", size = 6) +
+    coord_equal() +
+    labs(x = "km east of Exide", y = "km north of Exide")
+}
+
+resid_map <- function(r, title = NULL) {
+  map_base() +
+    geom_point(aes(fill = {{ r }}), shape = 21, size = 3) +
+    scale_fill_gradient2(
+      low = "firebrick", mid = "white", high = "cornflowerblue",
+      limits = c(-1, 1), oob = scales::squish
+    ) +
+    labs(fill = "Residual", title = title)
+}
+
+perm_plot <- function(mi) {
+  ggplot(tibble(I = mi$null), aes(I)) +
+    geom_histogram(bins = 30, fill = "grey70", color = "white") +
+    geom_vline(xintercept = mi$I, color = "firebrick", linewidth = 1.5) +
+    labs(x = "Moran's I under the null (shuffled)", y = "Count")
+}
+```
+
+# Spatial autocorrelation
+
+## Learning objectives
+
+- **Define** spatial autocorrelation
+- **Measure** it with Moran's I and **test** it with permutation
+- **Explain** why it matters for inference
+- **Explain** why we check the _residuals_, not the response
+
+## Tobler's first law of geography
+
+> "Everything is related to everything else, but near things are more related than distant things."
+>
+> -- Waldo Tobler (1970)
+
+::: {.incremental}
+
+- **Spatial autocorrelation**: observations close together in space are more similar than observations far apart
+- It's the spatial version of temporal autocorrelation
+- Environmental data are almost always spatially autocorrelated: soils, air quality, species, temperature, income
+
+:::
+
+## Revisit: soil lead near Exide
+
+Mean yard soil lead at `r n_props` properties tested around the former Exide plant.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5.5
+#| fig-align: center
+
+map_base() +
+  geom_point(aes(fill = pb_ppm), shape = 21, size = 3) +
+  scale_fill_viridis_c(trans = "log10", option = "magma") +
+  labs(fill = "Pb (ppm)")
+```
+
+## Model lead by distance from Exide
+
+$$
+\begin{aligned}
+\text{Pb} &\sim \text{Gamma}(\mu, \text{shape}) \\
+\log(\mu) &= \beta_0 + \beta_1 \text{Distance}
+\end{aligned}
+$$
+
+A gamma regression, since lead is positive, skewed, and more variable where it's higher.
+
+::: {.fragment}
+
+The model assumes the residuals are **independent**. Knowing one property's residual tells us nothing about its neighbors'.
+
+:::
+
+## Map the residuals
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5.5
+#| fig-align: center
+
+resid_map(r_dist)
+```
+
+Blue (more lead than predicted) and red (less) cluster together. Neighbors have similar residuals.
+
+# Measuring spatial autocorrelation
+
+## Who is a neighbor?
+
+First, decide which pairs of locations are "close."
+
+::: {.incremental}
+
+- Here: two properties are **neighbors** if they're within `r neighbor_m` m of each other
+- On average, each property has `r round(mean_neighbors)` neighbors
+- Other choices: the $k$ nearest locations, shared borders (for polygons), or weights that decline with distance
+- This choice matters. Base it on the scale of the process (e.g., how far does lead dust travel?)
+
+:::
+
+## Moran's I
+
+Do neighbors tend to be on the same side of the mean?
+
+$$
+I = \frac{n}{\sum_{ij} w_{ij}} \frac{\sum_{ij} w_{ij} (x_i - \bar x)(x_j - \bar x)}{\sum_i (x_i - \bar x)^2}
+$$
+
+::: {.incremental}
+
+- $w_{ij}$ = 1 if $i$ and $j$ are neighbors, 0 otherwise
+- $(x_i - \bar x)(x_j - \bar x)$ is positive when both neighbors are above the mean, or both below
+- Works like a correlation, between each location and its neighbors
+  - $I > 0$: neighbors are similar (clustered)
+  - $I \approx 0$: no spatial pattern
+  - $I < 0$: neighbors are dissimilar (checkerboard)
+
+:::
+
+## Is it more than chance?
+
+Use a **permutation test**, just like Week 5!
+
+::: {.incremental}
+
+- $H_0$: residuals are randomly arranged in space
+- Simulate $H_0$: **shuffle** the residuals among the locations, breaking any spatial pattern
+- Recalculate Moran's I. Repeat 999 times
+- p-value: how often a shuffle gives an $I$ as large as the observed one
+
+:::
+
+## Permutation results
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+perm_plot(mi_dist)
+```
+
+Observed $I$ = `r fmt(mi_dist$I, 3)` (red line), far beyond every shuffle. p `r fmt_perm(mi_dist$p)`.
+
+## In R
+
+The **spdep** package does this with spatial objects. The logic is the same as our shuffle.
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(spdep)
+coords <- cbind(properties$longitude, properties$latitude)
+nb <- dnearneigh(coords, d1 = 0, d2 = 0.5, longlat = TRUE)  # within 0.5 km
+lw <- nb2listw(nb, style = "B")
+moran.mc(residuals(m_dist, type = "pearson"), lw, nsim = 999)
+```
+
+A **correlogram** (Moran's I at increasing distances) or a **variogram** shows how far the autocorrelation reaches.
+
+# Why do we care?
+
+## Same problem as in time
+
+::: {.incremental}
+
+- Neighboring properties carry overlapping information
+- So `r n_props` properties are worth fewer than `r n_props` independent observations
+- The model doesn't know that: SEs too small, p-values too small
+- Clustered residuals also signal a **missing predictor** with a spatial pattern. If it's correlated with distance, the distance coefficient may be biased
+
+:::
+
+::: {.fragment}
+
+What spatially structured factors might affect soil lead, besides distance from Exide?
+
+:::
+
+# Residuals, not the response
+
+## Add predictors
+
+::: {.incremental}
+
+- **Home age**: older homes had leaded paint, and older homes cluster in older neighborhoods
+- **Distance to a freeway**: decades of leaded gasoline exhaust along freeway corridors
+
+:::
+
+::: {.fragment}
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4.5
+#| fig-align: center
+
+properties |>
+  select(x_km, y_km, `Distance only` = r_dist, `+ age` = r_age, `+ age + freeway` = r_fwy) |>
+  pivot_longer(-c(x_km, y_km), names_to = "model", values_to = "r") |>
+  mutate(model = fct_inorder(model)) |>
+  ggplot(aes(x_km, y_km)) +
+  geom_point(aes(fill = r), shape = 21, size = 2) +
+  scale_fill_gradient2(
+    low = "firebrick", mid = "white", high = "cornflowerblue",
+    limits = c(-1, 1), oob = scales::squish
+  ) +
+  facet_wrap(~model) +
+  coord_equal() +
+  labs(x = "km east of Exide", y = "km north of Exide", fill = "Residual")
+```
+
+:::
+
+## Moran's I, response vs. residuals
+
+| What we test | Moran's I | p-value |
+|:--|--:|--:|
+| The response: log(Pb) | `r fmt(mi_resp$I, 3)` | `r fmt_perm(mi_resp$p)` |
+| Residuals: distance only | `r fmt(mi_dist$I, 3)` | `r fmt_perm(mi_dist$p)` |
+| Residuals: + home age | `r fmt(mi_age$I, 3)` | `r fmt_perm(mi_age$p)` |
+| Residuals: + home age + freeway | `r fmt(mi_fwy$I, 3)` | `r fmt_perm(mi_fwy$p)` |
+
+::: {.incremental}
+
+- Soil lead itself is _still_ spatially clustered. That's fine!
+- The clustering is explained by predictors that are themselves spatial
+- Once they're in the model, the residuals show no spatial pattern
+- The independence assumption is about the **residuals**
+
+:::
+
+## What can you do about it?
+
+::: {.incremental}
+
+1. **Add predictors** that explain the spatial pattern (as we just did)
+2. **Model the correlation**, e.g., generalized least squares with a spatial correlation structure: `nlme::gls(..., correlation = corExp(form = ~ x + y))`
+3. **Spatial random effects** in a mixed model (`glmmTMB`, `mgcv`, `INLA`)
+4. **Spatial regression** models (the `spatialreg` package)
+5. Or design around it: space your samples farther apart than the autocorrelation range
+
+:::
+
+# Recap
+
+## Key points {.smaller}
+
+::: {.fragment}
+
+**What is spatial autocorrelation?**
+
+Observations close in space are more similar than those far apart (Tobler's first law).
+
+:::
+
+::: {.fragment}
+
+**How do we detect it?**
+
+Map the residuals. Define neighbors, calculate Moran's I, and test with permutation (`spdep::moran.mc()`).
+
+:::
+
+::: {.fragment}
+
+**Why does it matter?**
+
+Neighbors share information, so SEs and p-values are too small. It also hints at missing spatial predictors.
+
+:::
+
+::: {.fragment}
+
+**Why the residuals?**
+
+A response can be clustered because its predictors are clustered. The assumption is that the _errors_ are independent.
+
+:::
+
+## References
+
+Tobler, W. R. (1970). A computer movie simulating urban growth in the Detroit region. _Economic Geography_, 46(sup1), 234–240. <https://doi.org/10.2307/143141>

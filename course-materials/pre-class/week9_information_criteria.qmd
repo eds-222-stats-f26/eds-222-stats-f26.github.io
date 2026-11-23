@@ -1,0 +1,371 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 9: Comparing GLMs with information criteria"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal table {
+          font-size: 0.7em;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(MASS)
+select <- dplyr::select
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+
+# Exotic bee abundance (Fitch et al. 2019)
+bees <- read_csv("../data/exotic-bees.csv") |>
+  mutate(
+    imp_500m = 100 * NLCD500m,
+    imp_1km = 100 * NLCD1km,
+    imp_1.5km = 100 * NLCD1.5km,
+    imp_2km = 100 * NLCD2km,
+    year = factor(Year)
+  )
+n_sites <- nrow(bees)
+
+models <- list(
+  `Poisson, 500 m` = glm(exotic.abund ~ imp_500m, family = poisson, data = bees),
+  `NB, intercept only` = glm.nb(exotic.abund ~ 1, data = bees),
+  `NB, 500 m` = glm.nb(exotic.abund ~ imp_500m, data = bees),
+  `NB, 1 km` = glm.nb(exotic.abund ~ imp_1km, data = bees),
+  `NB, 1.5 km` = glm.nb(exotic.abund ~ imp_1.5km, data = bees),
+  `NB, 2 km` = glm.nb(exotic.abund ~ imp_2km, data = bees),
+  `NB, 500 m + year` = glm.nb(exotic.abund ~ imp_500m + year, data = bees)
+)
+
+ic <- imap(models, \(m, name) {
+  ll <- logLik(m)
+  k <- attr(ll, "df")
+  tibble(
+    model = name,
+    k = k,
+    loglik = as.numeric(ll),
+    AIC = AIC(m),
+    AICc = AIC + 2 * k * (k + 1) / (n_sites - k - 1),
+    BIC = BIC(m)
+  )
+}) |>
+  list_rbind()
+
+ic_tbl <- function(rows, criterion = "AIC") {
+  ic |>
+    filter(model %in% rows) |>
+    mutate(delta = .data[[criterion]] - min(.data[[criterion]])) |>
+    arrange(delta)
+}
+
+get_ic <- function(name, col = "AIC") ic[[col]][ic$model == name]
+
+# Likelihood illustration: two candidate lines for the 500 m NB model
+nb500 <- models$`NB, 500 m`
+theta500 <- nb500$theta
+```
+
+# Information criteria
+
+## Learning objectives
+
+- **Explain** what a likelihood measures
+- **Calculate** and **interpret** AIC
+- **Compare** models that F-tests can't
+- **Recognize** the rules for valid comparisons
+
+## At what scale does urbanization matter?
+
+Fitch et al. measured impervious surface in circles of four sizes around each site: 500 m, 1 km, 1.5 km, and 2 km.
+
+::: {.incremental}
+
+- Which buffer best predicts exotic bee abundance?
+- And should we use Poisson or negative binomial?
+- These models aren't **nested**: no model is a special case of another
+- The F-test from Week 6 only compares nested models. We need another tool
+
+:::
+
+# Likelihood
+
+## How well does a model explain the data?
+
+For linear regression, we measured fit with the residual sum of squares. GLMs use the **likelihood**.
+
+::: {.incremental}
+
+- The **likelihood** is the probability of observing our data, if the model were true
+- GLMs choose the coefficients that make the data most probable: **maximum likelihood**
+- Likelihoods are tiny numbers, so we use the **log-likelihood**, $\log L$
+- Higher (less negative) $\log L$ = better fit
+
+:::
+
+## Log-likelihood, site by site
+
+Each site contributes the log of the probability the model assigns to its count.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4.5
+#| fig-align: center
+
+site <- bees |>
+  mutate(mu = fitted(nb500)) |>
+  slice(which.min(abs(imp_500m - 50) + abs(exotic.abund - 10)))
+
+tibble(k = 0:40) |>
+  mutate(
+    prob = dnbinom(k, mu = site$mu, size = theta500),
+    observed = k == site$exotic.abund
+  ) |>
+  ggplot(aes(k, prob, fill = observed)) +
+  geom_col() +
+  scale_fill_manual(values = c("grey70", "cornflowerblue"), guide = "none") +
+  labs(
+    x = "Exotic bees caught",
+    y = "Probability",
+    title = sprintf(
+      "Site with %.0f%% impervious: model expects %.1f, observed %d",
+      site$imp_500m, site$mu, site$exotic.abund
+    )
+  )
+```
+
+This site contributes $\log(`r fmt(dnbinom(site$exotic.abund, mu = site$mu, size = theta500), 3)`) = `r fmt(log(dnbinom(site$exotic.abund, mu = site$mu, size = theta500)), 2)`$. Add them up across all `r n_sites` sites to get $\log L$ = `r fmt(get_ic("NB, 500 m", "loglik"), 1)`.
+
+## The catch
+
+::: {.incremental}
+
+- Adding parameters _always_ increases (or at least never decreases) the log-likelihood
+- Even if the new predictor is pure noise
+- So "highest log-likelihood wins" would always choose the most complex model: **overfitting**
+- We need to **penalize** complexity
+
+:::
+
+# AIC
+
+## Akaike Information Criterion
+
+$$
+\text{AIC} = 2k - 2 \log L
+$$
+
+::: {.incremental}
+
+- $k$ = number of estimated parameters (including $\theta$, $\sigma$, etc.)
+- $-2 \log L$ rewards fit
+- $2k$ penalizes complexity
+- **Lower AIC is better**
+- Estimates how well the model would predict _new_ data
+
+:::
+
+## Poisson vs. negative binomial
+
+```{r}
+ic_tbl(c("Poisson, 500 m", "NB, 500 m")) |>
+  transmute(
+    Model = model,
+    k,
+    `log L` = fmt(loglik, 1),
+    AIC = fmt(AIC, 1),
+    `ΔAIC` = fmt(delta, 1)
+  ) |>
+  knitr::kable(align = "lrrrr")
+```
+
+::: {.incremental}
+
+- The negative binomial uses one more parameter ($\theta$), costing 2 AIC points
+- But its log-likelihood is `r fmt(get_ic("NB, 500 m", "loglik") - get_ic("Poisson, 500 m", "loglik"), 1)` higher
+- $\Delta \text{AIC}$ = difference from the best model. Here, `r fmt(get_ic("Poisson, 500 m") - get_ic("NB, 500 m"), 0)`: overwhelming support for the negative binomial
+
+:::
+
+## Interpreting $\Delta$AIC
+
+AIC values have no meaning on their own. Only _differences_ between models fit to the same data matter.
+
+| $\Delta$AIC | Support for the model (relative to the best) |
+|:--|:--|
+| 0 – 2 | Substantial: about as good as the best |
+| 4 – 7 | Considerably less |
+| > 10 | Essentially none |
+
+::: {.fragment}
+
+Rule of thumb from Burnham & Anderson (2002). These are guidelines, not significance thresholds.
+
+:::
+
+## Which buffer size?
+
+```{r}
+ic_tbl(c("NB, intercept only", "NB, 500 m", "NB, 1 km", "NB, 1.5 km", "NB, 2 km")) |>
+  transmute(
+    Model = model,
+    k,
+    `log L` = fmt(loglik, 1),
+    AIC = fmt(AIC, 1),
+    `ΔAIC` = fmt(delta, 1)
+  ) |>
+  knitr::kable(align = "lrrrr")
+```
+
+::: {.incremental}
+
+- 500 m and 1 km are essentially tied ($\Delta$AIC < 2)
+- Larger buffers have less support. Any buffer beats no predictor
+- Interpretation: exotic bees respond to urbanization at a local scale
+
+:::
+
+## Adding a predictor
+
+Sites were surveyed in two different years. Does accounting for year help?
+
+```{r}
+ic_tbl(c("NB, 500 m", "NB, 500 m + year")) |>
+  transmute(
+    Model = model,
+    k,
+    `log L` = fmt(loglik, 1),
+    AIC = fmt(AIC, 1),
+    `ΔAIC` = fmt(delta, 1)
+  ) |>
+  knitr::kable(align = "lrrrr")
+```
+
+::: {.fragment}
+
+One more parameter (+2 penalty) but `r fmt(get_ic("NB, 500 m + year", "loglik") - get_ic("NB, 500 m", "loglik"), 1)` more log-likelihood. Year earns its place.
+
+:::
+
+## In R
+
+```{r}
+#| echo: true
+#| class-output: small-output
+
+nb_500m <- glm.nb(exotic.abund ~ imp_500m, data = bees)
+nb_1km <- glm.nb(exotic.abund ~ imp_1km, data = bees)
+nb_year <- glm.nb(exotic.abund ~ imp_500m + year, data = bees)
+AIC(nb_500m, nb_1km, nb_year)
+```
+
+# Other criteria
+
+## AICc and BIC
+
+::: {.incremental}
+
+- **AICc** corrects AIC for small samples. Use it when $n / k$ is less than about 40
+  - $\text{AICc} = \text{AIC} + \frac{2k(k+1)}{n - k - 1}$
+  - With only `r n_sites` sites, AICc is the better choice here
+- **BIC** penalizes complexity more heavily as $n$ grows
+  - $\text{BIC} = k \log(n) - 2 \log L$
+  - Tends to pick simpler models than AIC
+
+:::
+
+## Do they agree?
+
+```{r}
+ic |>
+  mutate(across(c(AIC, AICc, BIC), \(x) x - min(x))) |>
+  arrange(AICc) |>
+  transmute(
+    Model = model,
+    k,
+    `ΔAIC` = fmt(AIC, 1),
+    `ΔAICc` = fmt(AICc, 1),
+    `ΔBIC` = fmt(BIC, 1)
+  ) |>
+  knitr::kable(align = "lrrrr")
+```
+
+Here, the ranking is the same either way. When criteria disagree, it's a sign the evidence is weak.
+
+# Rules for comparing
+
+## Valid comparisons
+
+::: {.incremental}
+
+1. **Same response data.** Exactly the same rows. Watch out: `NA`s in one predictor silently drop rows from that model only
+2. **Same response scale.** You can't compare `lm(log(y) ~ x)` with `glm(y ~ x, family = Gamma)` using R's default output
+3. **A real likelihood.** Quasi-families (e.g., `quasipoisson`) don't have one, so no AIC
+4. Different families (Poisson vs. negative binomial) and non-nested predictors are fine
+
+:::
+
+## What AIC can't tell you
+
+::: {.incremental}
+
+- AIC is _relative_. The best of a bad set is still bad. Always check residuals
+- No p-values: $\Delta$AIC is evidence, not a hypothesis test
+- A low AIC doesn't make a predictor causal
+- Don't fit dozens of models and keep the winner. Choose candidate models based on scientific hypotheses (e.g., "bees respond at a local vs. landscape scale")
+
+:::
+
+# Recap
+
+## Key points {.smaller}
+
+::: {.fragment}
+
+**What does the likelihood measure?**
+
+The probability of the observed data under the model. Higher $\log L$ = better fit.
+
+:::
+
+::: {.fragment}
+
+**What is AIC?**
+
+$2k - 2\log L$: fit, penalized for the number of parameters. Lower is better; only differences matter.
+
+:::
+
+::: {.fragment}
+
+**What can AIC compare that F-tests can't?**
+
+Non-nested models, like different predictors or different families.
+
+:::
+
+::: {.fragment}
+
+**What are the rules?**
+
+Same data, same response scale, real likelihood. Use AICc for small samples. AIC ranks models; it doesn't validate them.
+
+:::
+
+## References
+
+Burnham, K. P., & Anderson, D. R. (2002). _Model Selection and Multimodel Inference: A Practical Information-Theoretic Approach_ (2nd ed.). Springer.
+
+Fitch, G., Wilson, C. J., Glaum, P., Vaidya, C., Simao, M.-C., & Jamieson, M. A. (2019). Does urbanization favour exotic bee species? Implications for the conservation of native bees in cities. _Biology Letters_, 15(12), 20190574. <https://doi.org/10.1098/rsbl.2019.0574>

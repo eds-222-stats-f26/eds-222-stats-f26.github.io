@@ -1,0 +1,351 @@
+---
+title: "EDS 222: Statistics for Environmental Data Science"
+subtitle: "Week 9: Gamma regression"
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <style>
+        .reveal pre.small-output code {
+          font-size: 80%;
+        }
+        .reveal table {
+          font-size: 0.7em;
+        }
+        </style>
+execute:
+    echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(geosphere)
+set.seed(222)
+theme_set(theme_bw(22))
+
+fmt <- \(x, digits = 2) formatC(x, format = "f", digits = digits)
+
+# Same data as Week 5: soil lead north of the former Exide facility
+exide_lon <- -118.1923
+exide_lat <- 34.0058
+
+soil_cores <- read_csv("data/exide-soil-cores.csv") |>
+  filter(location_code == "YD", pb_ppm <= 5e3) |>
+  mutate(
+    distance_ft = distGeo(cbind(longitude, latitude), c(exide_lon, exide_lat)) *
+      3.28,
+    distance_mi = distance_ft / 5280,
+    bearing_deg = bearing(c(exide_lon, exide_lat), cbind(longitude, latitude))
+  ) |>
+  drop_na()
+
+step_out <- read_csv("data/step-out.csv") |>
+  mutate(distance_mi = distance_ft / 5280)
+
+soil <- bind_rows(
+  `soil core` = transmute(
+    filter(soil_cores, between(bearing_deg, 0, 30)),
+    property_id,
+    distance_mi,
+    pb_ppm
+  ),
+  `step out` = select(step_out, property_id, distance_mi, pb_ppm),
+  .id = "source"
+) |>
+  drop_na()
+
+soil_plot <- ggplot(soil, aes(distance_mi, pb_ppm)) +
+  geom_point(shape = 21, alpha = 0.25) +
+  labs(x = "Distance (mi)", y = "Soil Pb (ppm)")
+
+soil_lm <- lm(pb_ppm ~ distance_mi, soil)
+soil_gamma <- glm(
+  pb_ppm ~ distance_mi,
+  family = Gamma(link = "log"),
+  data = soil
+)
+
+g_b0 <- coef(soil_gamma)[["(Intercept)"]]
+g_b1 <- coef(soil_gamma)[["distance_mi"]]
+g_shape <- 1 / summary(soil_gamma)$dispersion
+
+newdat <- tibble(
+  distance_mi = seq(
+    min(soil$distance_mi),
+    max(soil$distance_mi),
+    length.out = 100
+  )
+)
+g_pred <- predict(soil_gamma, newdat, type = "link", se.fit = TRUE)
+pred <- newdat |>
+  mutate(
+    lm_fit = predict(soil_lm, newdat),
+    mu = exp(g_pred$fit),
+    lo = exp(g_pred$fit - 1.96 * g_pred$se.fit),
+    hi = exp(g_pred$fit + 1.96 * g_pred$se.fit)
+  )
+
+# Mean and SD in distance bins
+bins <- soil |>
+  mutate(bin = ntile(distance_mi, 8)) |>
+  summarize(
+    distance_mi = mean(distance_mi),
+    mean = mean(pb_ppm),
+    sd = sd(pb_ppm),
+    .by = bin
+  )
+```
+
+# Gamma regression
+
+## Learning objectives
+
+- **Recognize** when a response is positive, continuous, and gets more variable as it gets bigger
+- **Describe** the gamma distribution
+- **Fit** and **interpret** a gamma regression
+
+## Revisit: soil lead near Exide
+
+In Week 5 we fit a linear regression to soil lead north of Exide.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+soil_plot +
+  geom_line(
+    aes(y = lm_fit),
+    data = pred,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  )
+```
+
+And we noticed a problem...
+
+## The spread isn't constant
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+soil |>
+  mutate(residual = resid(soil_lm)) |>
+  ggplot(aes(distance_mi, residual)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_point(shape = 21, alpha = 0.25) +
+  labs(x = "Distance (mi)", y = "Residual (ppm)")
+```
+
+Close to Exide, the residuals are spread out. Far away, they're tight. Linear regression assumes one $\sigma$ for all distances.
+
+## This pattern is everywhere
+
+Positive, continuous measurements often get more variable as they get bigger:
+
+::: {.incremental}
+
+- Pollutant concentrations
+- Rainfall totals
+- Body mass, tree biomass
+- Time until an event (e.g., larval development time)
+- Costs, incomes
+
+:::
+
+::: {.fragment}
+
+And they're usually **right-skewed**: many small values, a few very large ones.
+
+:::
+
+# The gamma distribution
+
+## Positive and skewed
+
+A **gamma** random variable is continuous and always greater than 0. Parameterize it by its mean $\mu$ and a **shape** parameter $\alpha$.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 4
+#| fig-align: center
+
+expand_grid(shape = c(1, 3, 10), x = seq(0.01, 600, length.out = 400)) |>
+  mutate(
+    density = dgamma(x, shape = shape, rate = shape / 200),
+    shape = factor(
+      paste("α =", shape),
+      levels = paste("α =", c(1, 3, 10))
+    )
+  ) |>
+  ggplot(aes(x, density)) +
+  geom_line(color = "cornflowerblue", linewidth = 1.5) +
+  geom_vline(xintercept = 200, linetype = "dashed") +
+  facet_wrap(~shape) +
+  labs(x = "y", y = "Density") +
+  theme(axis.text.y = element_blank())
+```
+
+All three have a mean of 200 (dashed line). Smaller $\alpha$: more skewed and more spread out.
+
+## The key fact
+
+$$
+SD(y) = \frac{\mu}{\sqrt{\alpha}}
+$$
+
+::: {.incremental}
+
+- The SD is proportional to the mean. Exactly the pattern in the soil lead data!
+- Compare: Normal has constant SD; Poisson has $SD = \sqrt{\mu}$
+
+:::
+
+# Gamma regression
+
+## The model
+
+$$
+\begin{aligned}
+\text{Pb} &\sim \text{Gamma}(\mu, \alpha) \\
+\log(\mu) &= \beta_0 + \beta_1 \text{Distance}
+\end{aligned}
+$$
+
+::: {.incremental}
+
+- Same GLM recipe: choose a distribution, link its mean to a linear equation
+- The log link keeps $\mu$ positive and makes coefficients multiplicative
+
+:::
+
+::: {.fragment}
+
+```{r}
+#| echo: true
+#| eval: false
+
+soil_gamma <- glm(
+  pb_ppm ~ distance_mi,
+  family = Gamma(link = "log"),
+  data = soil
+)
+```
+
+:::
+
+## Fit the model
+
+::: {style="font-size:0.8em"}
+
+```{r}
+#| class-output: small-output
+#| echo: true
+
+coef(summary(soil_gamma))
+summary(soil_gamma)$dispersion
+```
+
+:::
+
+::: {.incremental}
+
+- $\hat\beta_1 = `r fmt(g_b1, 3)`$ on the log scale
+- $e^{\hat\beta_1} = `r fmt(exp(g_b1), 3)`$: each additional mile from Exide multiplies expected soil lead by `r fmt(exp(g_b1), 2)`
+- That's about `r round(100 * (1 - exp(g_b1)))`% less lead per mile
+- $\hat\alpha$ = 1 / dispersion = `r fmt(g_shape, 2)`: quite skewed
+
+:::
+
+## Visualize the predictions
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-align: center
+
+soil_plot +
+  geom_line(
+    aes(y = mu),
+    data = pred,
+    color = "cornflowerblue",
+    linewidth = 1.5
+  ) +
+  geom_line(
+    aes(y = lm_fit),
+    data = pred,
+    color = "firebrick",
+    linetype = "dashed",
+    linewidth = 1
+  )
+```
+
+Gamma (blue) vs. linear (red dashed). The gamma curve decays exponentially and never goes negative.
+
+## When to use it
+
+::: {.incremental}
+
+- The response is **continuous** and **strictly positive** (no zeros!)
+- It's right-skewed
+- The spread grows with the mean
+
+:::
+
+::: {.fragment}
+
+If your data have exact zeros (e.g., days with no rain), gamma won't work. Look into **Tweedie** or **hurdle** models.
+
+:::
+
+## The GLM toolbox
+
+| Response | Distribution | Typical link | R |
+|:--|:--|:--|:--|
+| Continuous, any value | Normal | identity | `lm()` |
+| 0 or 1 | Bernoulli | logit | `glm(family = binomial)` |
+| Count | Poisson | log | `glm(family = poisson)` |
+| Overdispersed count | Negative binomial | log | `MASS::glm.nb()` |
+| Positive, continuous | Gamma | log | `glm(family = Gamma(link = "log"))` |
+| Proportion in (0, 1) | Beta | logit | `betareg::betareg()` |
+
+# Recap
+
+## Key points {.smaller}
+
+::: {.fragment}
+
+**When do we need gamma regression?**
+
+Positive, continuous, right-skewed responses whose spread grows with the mean.
+
+:::
+
+::: {.fragment}
+
+**What's special about the gamma distribution?**
+
+$SD = \mu / \sqrt{\alpha}$: the spread is proportional to the mean.
+
+:::
+
+::: {.fragment}
+
+**How do we fit it?**
+
+`glm(y ~ x, family = Gamma(link = "log"))`. 
+
+:::
+
+::: {.fragment}
+
+**How do we interpret it?**
+
+Like Poisson: $e^{\beta_1}$ multiplies the expected value for each unit of $x$.
+
+:::
