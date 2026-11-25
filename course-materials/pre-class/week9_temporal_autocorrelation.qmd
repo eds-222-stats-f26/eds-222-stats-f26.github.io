@@ -61,7 +61,11 @@ acf_plot <- function(x, title = NULL, lag_max = 15) {
   bound <- 1.96 / sqrt(length(x))
   ggplot(acf_df(x, lag_max), aes(lag, acf)) +
     geom_hline(yintercept = 0) +
-    geom_hline(yintercept = c(-bound, bound), linetype = "dashed", color = "cornflowerblue") +
+    geom_hline(
+      yintercept = c(-bound, bound),
+      linetype = "dashed",
+      color = "cornflowerblue"
+    ) +
     geom_segment(aes(xend = lag, yend = 0), linewidth = 1.5) +
     scale_y_continuous(limits = c(-0.5, 1)) +
     labs(x = "Lag (years)", y = "Autocorrelation", title = title)
@@ -80,9 +84,8 @@ sim_lm <- lm(temp ~ year, sim)
 ## Learning objectives
 
 - **Define** temporal autocorrelation
-- **Detect** it with residual plots, lag plots, ACFs, and a formal test
+- **Detect** it with residual plots and ACFs
 - **Explain** why it matters for inference
-- **Explain** why we check the _residuals_, not the response
 
 ## Lake Huron water levels
 
@@ -183,31 +186,6 @@ acf_plot(huron$resid)
 
 Dashed lines: $\pm 1.96 / \sqrt{n}$, the range expected for independent residuals. Autocorrelation fades over about 3–4 years.
 
-## Formal tests
-
-::: {.incremental}
-
-- **Ljung-Box test** (built into R)
-  - $H_0$: the residuals are independent up to lag $h$
-  - Lake Huron, $h$ = 10: $\chi^2$ = `r fmt(ljung$statistic, 1)`, p < 0.001
-- **Durbin-Watson test** (`lmtest::dwtest()`): tests lag 1 only
-- A test complements the plots, it doesn't replace them
-
-:::
-
-::: {.fragment}
-
-```{r}
-#| echo: true
-#| eval: false
-
-huron_lm <- lm(level ~ year, huron)
-acf(resid(huron_lm))
-Box.test(resid(huron_lm), lag = 10, type = "Ljung-Box")
-```
-
-:::
-
 # Why do we care?
 
 ## Independence is an assumption
@@ -219,7 +197,6 @@ Regression assumes the residuals are **independent**: knowing one tells you noth
 - With autocorrelation, each new year is partly a repeat of last year
 - So `r n_years` years contain _less information_ than `r n_years` independent observations
 - A rough **effective sample size**: $n_{\text{eff}} \approx n \frac{1 - r_1}{1 + r_1} = `r n_years` \times \frac{1 - `r fmt(rho1)`}{1 + `r fmt(rho1)`} \approx `r round(n_eff)`$
-- The model doesn't know this. It acts like it has `r n_years` independent years
 
 :::
 
@@ -234,10 +211,8 @@ Fit the model again, this time letting each residual depend on the previous year
 
 ::: {.incremental}
 
-- The estimate barely changes
 - The SE is `r fmt(gls_slope[["Std.Error"]] / lm_slope[["Std. Error"]], 1)` times bigger
 - The "very significant" decline is no longer distinguishable from long, slow wandering
-- Positive autocorrelation makes SEs too small and p-values too small: false positives
 
 :::
 
@@ -255,7 +230,12 @@ Simulated stream temperature: a warming trend plus _independent_ year-to-year no
 ggplot(sim, aes(year, temp)) +
   geom_line(color = "grey50") +
   geom_point(shape = 21, size = 2) +
-  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "cornflowerblue") +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    color = "cornflowerblue"
+  ) +
   labs(x = "Year", y = "Temperature (°C)")
 ```
 
@@ -275,7 +255,11 @@ bind_rows(
 ) |>
   ggplot(aes(lag, acf)) +
   geom_hline(yintercept = 0) +
-  geom_hline(yintercept = c(-bound, bound), linetype = "dashed", color = "cornflowerblue") +
+  geom_hline(
+    yintercept = c(-bound, bound),
+    linetype = "dashed",
+    color = "cornflowerblue"
+  ) +
   geom_segment(aes(xend = lag, yend = 0), linewidth = 1.5) +
   facet_wrap(~which) +
   scale_y_continuous(limits = c(-0.5, 1)) +
@@ -300,26 +284,8 @@ The response is strongly autocorrelated. The residuals are not. **This model is 
 ::: {.incremental}
 
 1. **Add predictors** that explain the temporal pattern (e.g., precipitation for lake levels)
-2. **Model the correlation** directly, e.g., generalized least squares with an AR(1) structure:
-
-:::
-
-::: {.fragment}
-
-```{r}
-#| echo: true
-#| eval: false
-
-library(nlme)
-gls(level ~ year, data = huron, correlation = corAR1(form = ~ year))
-```
-
-:::
-
-::: {.incremental}
-
-3. Mixed models (`glmmTMB`, `mgcv`) with autocorrelation structures, for GLMs
-4. Time series models (e.g., ARIMA) when forecasting is the goal
+2. **Use a time-series model** (beyond this course)
+3. **Design around it:** space your samples farther apart in time than the autocorrelation range
 
 :::
 
@@ -339,7 +305,7 @@ Observations close in time are more similar than those far apart.
 
 **How do we detect it?**
 
-Plot residuals over time, a lag plot, and the ACF. Test with Ljung-Box (`Box.test()`) or Durbin-Watson.
+Plot residuals over time, a lag plot, and the ACF. 
 
 :::
 

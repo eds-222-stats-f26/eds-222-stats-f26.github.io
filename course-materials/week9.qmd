@@ -9,5 +9,5 @@ subtitle: "Week 9 (November 23 - 27)"
 |---------|--------|---------|
 | Lecture 1 | Expanding the GLM toolbox <br/> [Negative binomial regression](https://youtu.be/ImB89YZt7U0) <br/> [Beta regression](https://youtu.be/Uymq1Y5KoYA) <br/> [Gamma regression](https://youtu.be/uFbQvLtPIMI) | _None_ |
 | Lab | No Lab | |
-| Lecture 2 | Spatial and temporal regression | _None_ |
+| Lecture 2 | Spatial and temporal regression <br/> [Temporal autocorrelation](https://youtu.be/7YpH0fXfYCk) <br/> [Spatial autocorrelation](https://youtu.be/sDe0QbPLPMA) | _None_ |
 : {.hover .bordered tbl-colwidths="[30,30,40]"}

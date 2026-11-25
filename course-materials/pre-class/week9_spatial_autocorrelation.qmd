@@ -43,10 +43,14 @@ properties <- read_csv("data/exide-soil-cores.csv") |>
     latitude = mean(latitude),
     .by = property_id
   ) |>
-  left_join(read_csv("data/exide-property-covariates.csv"), by = "property_id") |>
+  left_join(
+    read_csv("data/exide-property-covariates.csv"),
+    by = "property_id"
+  ) |>
   drop_na(year_built) |>
   mutate(
-    distance_mi = distGeo(cbind(longitude, latitude), c(exide_lon, exide_lat)) / 1609.34,
+    distance_mi = distGeo(cbind(longitude, latitude), c(exide_lon, exide_lat)) /
+      1609.34,
     # km east and north of Exide, for mapping
     x_km = (longitude - exide_lon) * cos(exide_lat * pi / 180) * 111.32,
     y_km = (latitude - exide_lat) * 110.57,
@@ -71,7 +75,11 @@ moran_perm <- function(x, W, reps = 999) {
   list(I = obs, null = null, p = (sum(null >= obs) + 1) / (reps + 1))
 }
 
-m_dist <- glm(pb_ppm ~ distance_mi, family = Gamma(link = "log"), data = properties)
+m_dist <- glm(
+  pb_ppm ~ distance_mi,
+  family = Gamma(link = "log"),
+  data = properties
+)
 m_age <- update(m_dist, . ~ . + year_built)
 m_fwy <- update(m_age, . ~ . + freeway_km)
 
@@ -100,8 +108,11 @@ resid_map <- function(r, title = NULL) {
   map_base() +
     geom_point(aes(fill = {{ r }}), shape = 21, size = 3) +
     scale_fill_gradient2(
-      low = "firebrick", mid = "white", high = "cornflowerblue",
-      limits = c(-1, 1), oob = scales::squish
+      low = "firebrick",
+      mid = "white",
+      high = "cornflowerblue",
+      limits = c(-1, 1),
+      oob = scales::squish
     ) +
     labs(fill = "Residual", title = title)
 }
@@ -209,9 +220,6 @@ $$
 - $w_{ij}$ = 1 if $i$ and $j$ are neighbors, 0 otherwise
 - $(x_i - \bar x)(x_j - \bar x)$ is positive when both neighbors are above the mean, or both below
 - Works like a correlation, between each location and its neighbors
-  - $I > 0$: neighbors are similar (clustered)
-  - $I \approx 0$: no spatial pattern
-  - $I < 0$: neighbors are dissimilar (checkerboard)
 
 :::
 
@@ -239,23 +247,6 @@ perm_plot(mi_dist)
 ```
 
 Observed $I$ = `r fmt(mi_dist$I, 3)` (red line), far beyond every shuffle. p `r fmt_perm(mi_dist$p)`.
-
-## In R
-
-The **spdep** package does this with spatial objects. The logic is the same as our shuffle.
-
-```{r}
-#| echo: true
-#| eval: false
-
-library(spdep)
-coords <- cbind(properties$longitude, properties$latitude)
-nb <- dnearneigh(coords, d1 = 0, d2 = 0.5, longlat = TRUE)  # within 0.5 km
-lw <- nb2listw(nb, style = "B")
-moran.mc(residuals(m_dist, type = "pearson"), lw, nsim = 999)
-```
-
-A **correlogram** (Moran's I at increasing distances) or a **variogram** shows how far the autocorrelation reaches.
 
 # Why do we care?
 
@@ -295,14 +286,23 @@ What spatially structured factors might affect soil lead, besides distance from 
 #| fig-align: center
 
 properties |>
-  select(x_km, y_km, `Distance only` = r_dist, `+ age` = r_age, `+ age + freeway` = r_fwy) |>
+  select(
+    x_km,
+    y_km,
+    `Distance only` = r_dist,
+    `+ age` = r_age,
+    `+ age + freeway` = r_fwy
+  ) |>
   pivot_longer(-c(x_km, y_km), names_to = "model", values_to = "r") |>
   mutate(model = fct_inorder(model)) |>
   ggplot(aes(x_km, y_km)) +
   geom_point(aes(fill = r), shape = 21, size = 2) +
   scale_fill_gradient2(
-    low = "firebrick", mid = "white", high = "cornflowerblue",
-    limits = c(-1, 1), oob = scales::squish
+    low = "firebrick",
+    mid = "white",
+    high = "cornflowerblue",
+    limits = c(-1, 1),
+    oob = scales::squish
   ) +
   facet_wrap(~model) +
   coord_equal() +
@@ -334,10 +334,8 @@ properties |>
 ::: {.incremental}
 
 1. **Add predictors** that explain the spatial pattern (as we just did)
-2. **Model the correlation**, e.g., generalized least squares with a spatial correlation structure: `nlme::gls(..., correlation = corExp(form = ~ x + y))`
-3. **Spatial random effects** in a mixed model (`glmmTMB`, `mgcv`, `INLA`)
-4. **Spatial regression** models (the `spatialreg` package)
-5. Or design around it: space your samples farther apart than the autocorrelation range
+2. **Use a spatial model** (beyond this course)
+3. **Design around it:** space your samples farther apart than the autocorrelation range
 
 :::
 
@@ -357,7 +355,7 @@ Observations close in space are more similar than those far apart (Tobler's firs
 
 **How do we detect it?**
 
-Map the residuals. Define neighbors, calculate Moran's I, and test with permutation (`spdep::moran.mc()`).
+Map the residuals. Define neighbors, calculate Moran's I, and test with permutation.
 
 :::
 
